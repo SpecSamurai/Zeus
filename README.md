@@ -1,1 +1,4 @@
 # Zeus
+
+Ideas:
+- AI
