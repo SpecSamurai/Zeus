@@ -1,4 +1,1 @@
-# Zeus
-
-Ideas:
-- AI
+# Zeus - Game Engine
