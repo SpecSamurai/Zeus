@@ -1,0 +1,87 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "detail": "Build Solution",
+            "command": "dotnet",
+            "isBuildCommand": true,
+            "type": "process",
+            "icon": {
+                "id": "extensions",
+                "color": "terminal.ansiYellow"
+            },
+            "args": [
+                "build",
+                "${workspaceFolder}",
+                "/property:GenerateFullPaths=true"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "test",
+            "detail": "Test Solution",
+            "command": "dotnet",
+            "isTestCommand": true,
+            "type": "process",
+            "icon": {
+                "id": "beaker",
+                "color": "terminal.ansiMagenta"
+            },
+            "dependsOn": [
+                "build"
+            ],
+            "args": [
+                "test",
+                "${workspaceFolder}",
+                "/property:GenerateFullPaths=true"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "editor",
+            "detail": "Run Editor",
+            "command": "dotnet",
+            "type": "process",
+            "icon": {
+                "id": "run",
+                "color": "terminal.ansiGreen"
+            },
+            "dependsOn": [
+                "test"
+            ],
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/src/Editor/Editor.csproj",
+                "/property:GenerateFullPaths=true"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
