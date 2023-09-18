@@ -1,0 +1,17 @@
+{
+  "$id": "1",
+  "Name": "<name>",
+  "Path": "<path>",
+  "Scenes": {
+    "$id": "2",
+    "$values": [
+      {
+        "$id": "3",
+        "Name": "Default",
+        "Project": {
+          "$ref": "1"
+        }
+      }
+    ]
+  }
+}
