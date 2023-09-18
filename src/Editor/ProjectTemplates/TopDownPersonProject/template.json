@@ -1,0 +1,10 @@
+{
+  "Name": "Top-Down Project",
+  "ProjectFile": "project.zeus",
+  "IconFile": "Icon.png",
+  "ScreenshotFile": "Screenshot.png",
+  "Folders": [
+    "Content",
+    "GameCode"
+  ]
+}
