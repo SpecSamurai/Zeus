@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+			 xmlns:vm="using:Editor.ViewModels.ProjectBrowser"
+			 x:DataType="vm:ProjectBrowserWindowViewModel"
+             x:Class="Editor.Views.ProjectBrowser.OpenProjectView">
+	<Design.DataContext>
+		<vm:ProjectBrowserWindowViewModel/>
+	</Design.DataContext>
+	
+	<StackPanel Orientation="Vertical" Spacing="25">
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+			<ListBox ItemsSource="{Binding Projects}" x:Name="projectsListBox" SelectedItem="{Binding SelectedProject}" SelectedIndex="0" Width="195" Height="250">
+				<ListBox.ItemTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal">
+							<Image Source="{Binding Icon}" Width="30" Height="30"/>
+							<Label Content="{Binding Name}" VerticalContentAlignment="Center"/>
+						</StackPanel>
+					</DataTemplate>
+				</ListBox.ItemTemplate>
+			</ListBox>
+			<Image Source="{Binding Path=SelectedItem.(vm:CreatedProjectViewModel).Screenshot, ElementName=projectsListBox}" Width="400" Height="250"/>
+		</StackPanel>
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+			<Button Content="Open" Command="{Binding OpenProjectCommand}" IsEnabled="{Binding IsValid}" HorizontalContentAlignment="Center" Width="75" IsDefault="True"/>
+			<Button Content="Exit" Command="{Binding ExitProjectCommand}" HorizontalContentAlignment="Center" Width="75" IsCancel="True"/>
+		</StackPanel>
+	</StackPanel>
+</UserControl>
