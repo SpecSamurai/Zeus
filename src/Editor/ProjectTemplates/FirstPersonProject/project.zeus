@@ -7,11 +7,14 @@
     "$values": [
       {
         "$id": "3",
-        "Name": "Default",
+        "Name": "Scene 1",
         "Project": {
           "$ref": "1"
         }
       }
     ]
+  },
+  "ActiveScene": {
+    "$ref": "3"
   }
 }
