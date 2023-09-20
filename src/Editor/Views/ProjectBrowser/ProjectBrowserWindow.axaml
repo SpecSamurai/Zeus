@@ -1,0 +1,42 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+		xmlns:views="clr-namespace:Editor.Views.ProjectBrowser"
+        x:Class="Editor.Views.ProjectBrowser.ProjectBrowserWindow"
+		xmlns:vm="using:Editor.ViewModels.ProjectBrowser"
+		x:DataType="vm:ProjectBrowserWindowViewModel"
+		SizeToContent="WidthAndHeight"
+		CanResize="False"
+		WindowStartupLocation="CenterScreen"
+        Title="Project Browser">
+	<Design.DataContext>
+		<vm:ProjectBrowserWindowViewModel/>
+	</Design.DataContext>
+	
+	<Grid Margin="20">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="auto"/>
+			<RowDefinition Height="auto"/>
+		</Grid.RowDefinitions>
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0" Margin="20">
+			<UniformGrid Columns="2">
+				<RadioButton
+					x:Name="openProjectButton"
+					Content="Open Project"
+					IsChecked="True"
+					Theme="{StaticResource {x:Type ToggleButton}}"/>
+				<RadioButton
+					x:Name="createProjectButton"
+					Content="Create Project"
+					IsChecked="False"
+					Theme="{StaticResource {x:Type ToggleButton}}"/>
+			</UniformGrid>
+		</StackPanel>
+		<StackPanel x:Name="browserContent" Orientation="Horizontal" Grid.Row="1">
+			<views:CreateProjectView IsVisible="{Binding #createProjectButton.IsChecked}"/>
+			<views:OpenProjectView IsVisible="{Binding #openProjectButton.IsChecked}"/>
+		</StackPanel>
+	</Grid>
+</Window>
