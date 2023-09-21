@@ -1,6 +1,5 @@
 {
   "Name": "Top-Down Project",
-  "ProjectFile": "project.zeus",
   "Folders": [
     "Content",
     "GameCode"
