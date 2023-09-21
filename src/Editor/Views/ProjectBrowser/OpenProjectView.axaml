@@ -9,7 +9,7 @@
 	<Design.DataContext>
 		<vm:ProjectBrowserWindowViewModel/>
 	</Design.DataContext>
-	
+
 	<StackPanel Orientation="Vertical" Spacing="25">
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
 			<ListBox ItemsSource="{Binding Projects}" x:Name="projectsListBox" SelectedItem="{Binding SelectedProject}" SelectedIndex="0" Width="195" Height="250">
@@ -25,7 +25,7 @@
 			<Image Source="{Binding Path=SelectedItem.(vm:CreatedProjectViewModel).Screenshot, ElementName=projectsListBox}" Width="400" Height="250"/>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
-			<Button Content="Open" Command="{Binding OpenProjectCommand}" IsEnabled="{Binding IsValid}" HorizontalContentAlignment="Center" Width="75" IsDefault="True"/>
+			<Button Content="Open" Command="{Binding OpenProjectCommand}" IsEnabled="{Binding SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}" HorizontalContentAlignment="Center" Width="75" IsDefault="True"/>
 			<Button Content="Exit" Command="{Binding ExitProjectCommand}" HorizontalContentAlignment="Center" Width="75" IsCancel="True"/>
 		</StackPanel>
 	</StackPanel>
