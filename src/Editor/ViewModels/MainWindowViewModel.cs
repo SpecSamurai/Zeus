@@ -7,14 +7,16 @@ namespace Editor.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public MainWindowViewModel()
+    private readonly ProjectBrowserWindowViewModel _projectBrowserWindowViewModel;
+
+    public MainWindowViewModel(ProjectBrowserWindowViewModel projectBrowserWindowViewModel)
     {
+        _projectBrowserWindowViewModel = projectBrowserWindowViewModel;
         ShowProjectBrowserDialog = new Interaction<ProjectBrowserWindowViewModel, ProjectViewModel?>();
 
         OpenDialogCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            var model = new ProjectBrowserWindowViewModel();
-            Project = await ShowProjectBrowserDialog.Handle(model);
+            Project = await ShowProjectBrowserDialog.Handle(_projectBrowserWindowViewModel);
         });
     }
 
