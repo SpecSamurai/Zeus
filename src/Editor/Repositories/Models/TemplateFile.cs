@@ -1,4 +1,4 @@
-﻿namespace Editor.Models.Projects;
+﻿namespace Editor.Repositories.Models;
 
 public class TemplateFile
 {
