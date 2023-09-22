@@ -3,17 +3,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		xmlns:views="clr-namespace:Editor.Views"
+		xmlns:editors="clr-namespace:Editor.Views.Editors"
         xmlns:vm="using:Editor.ViewModels"
-        x:Class="Editor.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-		CanResize="False"
+        x:Class="Editor.Views.MainWindow"
 		WindowStartupLocation="CenterScreen"
         Title="Zeus Editor">
 
-	<Design.DataContext>
-		<vm:MainWindowViewModel/>
-	</Design.DataContext>
-
-	<Button Content="Open" Command="{Binding OpenDialogCommand}"/>
+	<DockPanel>
+		<views:TopLevelMenuView DockPanel.Dock="Top"/>
+		<editors:WorldEditorView DockPanel.Dock="Bottom"/>
+	</DockPanel>
 
 </Window>

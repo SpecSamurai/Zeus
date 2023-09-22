@@ -1,5 +1,6 @@
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
+using Editor.Extensions;
 using Editor.ViewModels;
 using Editor.ViewModels.ProjectBrowser;
 using Editor.Views.ProjectBrowser;
@@ -15,6 +16,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         InitializeComponent();
         this.WhenActivated(action => action(ViewModel!.ShowProjectBrowserDialog.RegisterHandler(ShowProjectBrowserDialogAsync)));
         Loaded += ShowProjectBrowserDialogOnLoaded;
+
+        this.SetDesignDataContext<MainWindowViewModel>();
     }
 
     private async Task ShowProjectBrowserDialogAsync(InteractionContext<ProjectBrowserWindowViewModel, ProjectViewModel?> interaction)
