@@ -1,4 +1,5 @@
 using Avalonia.ReactiveUI;
+using Editor.Extensions;
 using Editor.ViewModels.ProjectBrowser;
 using ReactiveUI;
 
@@ -12,5 +13,7 @@ public partial class ProjectBrowserWindow : ReactiveWindow<ProjectBrowserWindowV
         this.WhenActivated(action => action(ViewModel!.CreateProjectCommand.Subscribe(Close)));
         this.WhenActivated(action => action(ViewModel!.OpenProjectCommand.Subscribe(Close)));
         this.WhenActivated(action => action(ViewModel!.ExitProjectCommand.Subscribe(_ => Close())));
+
+        this.SetDesignDataContext<ProjectBrowserWindowViewModel>();
     }
 }

@@ -11,9 +11,6 @@
 		CanResize="False"
 		WindowStartupLocation="CenterScreen"
         Title="Project Browser">
-	<Design.DataContext>
-		<vm:ProjectBrowserWindowViewModel/>
-	</Design.DataContext>
 	
 	<Grid Margin="20">
 		<Grid.RowDefinitions>

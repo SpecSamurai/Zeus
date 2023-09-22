@@ -6,9 +6,6 @@
 			 xmlns:vm="using:Editor.ViewModels.ProjectBrowser"
 			 x:DataType="vm:ProjectBrowserWindowViewModel"
              x:Class="Editor.Views.ProjectBrowser.CreateProjectView">
-	<Design.DataContext>
-		<vm:ProjectBrowserWindowViewModel/>
-	</Design.DataContext>
 
 	<StackPanel Orientation="Vertical" VerticalAlignment="Center" Spacing="10">
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
