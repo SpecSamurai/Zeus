@@ -6,14 +6,9 @@
 			 xmlns:vm="using:Editor.ViewModels"
 			 x:DataType="vm:MainWindowViewModel"
              x:Class="Editor.Views.TopLevelMenuView">
-
 	<Menu>
 		<MenuItem Header="File">
 			<MenuItem Header="Open" Command="{Binding OpenDialogCommand}"/>
-		</MenuItem>
-		<MenuItem Header="Edit">
-			<MenuItem Header="Copy"/>
-			<MenuItem Header="Paste"/>
 		</MenuItem>
 	</Menu>
 </UserControl>
