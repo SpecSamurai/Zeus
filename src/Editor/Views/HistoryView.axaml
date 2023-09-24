@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+			 xmlns:vm="using:Editor.ViewModels"
+			 x:DataType="vm:HistoryViewModel"
+             x:Class="Editor.Views.HistoryView">
+
+	<ScrollViewer>
+		<StackPanel>
+			<StackPanel Spacing="5">
+				<ItemsControl ItemsSource="{Binding RedoList}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center" HorizontalAlignment="Left">
+								<PathIcon Data="{StaticResource arrow_redo_regular}" Height="10" Width="10" />
+								<Label Content="{Binding Name}" FontSize="12"/>
+							</StackPanel>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</StackPanel>
+			<StackPanel Spacing="5">
+				<ItemsControl ItemsSource="{Binding UndoList}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center" HorizontalAlignment="Left">
+								<PathIcon Data="{StaticResource arrow_undo_regular}" Height="10" Width="10" />
+								<Label Content="{Binding Name}" FontSize="12"/>
+							</StackPanel>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</StackPanel>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>
