@@ -3,8 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-			 xmlns:vm="using:Editor.ViewModels.ProjectBrowser"
-			 x:DataType="vm:ProjectBrowserWindowViewModel"
+			 xmlns:model="using:Editor.ViewModels.ProjectBrowser"
+			 x:DataType="model:ProjectBrowserWindowViewModel"
              x:Class="Editor.Views.ProjectBrowser.OpenProjectView">
 
 	<StackPanel Orientation="Vertical" Spacing="25">
@@ -19,7 +19,7 @@
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
-			<Image Source="{Binding Path=SelectedItem.(vm:CreatedProjectViewModel).Screenshot, ElementName=projectsListBox}" Width="400" Height="250"/>
+			<Image Source="{Binding Path=SelectedItem.(model:CreatedProjectViewModel).Screenshot, ElementName=projectsListBox}" Width="400" Height="250"/>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
 			<Button Content="Open" Command="{Binding OpenProjectCommand}" IsEnabled="{Binding SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}" HorizontalContentAlignment="Center" Width="75" IsDefault="True"/>
