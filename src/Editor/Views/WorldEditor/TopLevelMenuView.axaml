@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+			 xmlns:model="using:Editor.ViewModels"
+			 x:DataType="model:MainWindowViewModel"
+             x:Class="Editor.Views.WorldEditor.TopLevelMenuView">
+	<Menu Height="20">
+		<MenuItem Header="File">
+			<MenuItem Header="Open" Command="{Binding OpenDialogCommand}"/>
+		</MenuItem>
+		<MenuItem Header="Edit">
+		</MenuItem>
+		<MenuItem Header="Scene">
+		</MenuItem>
+		<MenuItem Header="Game">
+		</MenuItem>
+		<MenuItem Header="Tools">
+		</MenuItem>
+		<MenuItem Header="Window">
+		</MenuItem>
+		<MenuItem Header="Help">
+		</MenuItem>
+	</Menu>
+</UserControl>
