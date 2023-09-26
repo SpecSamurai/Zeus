@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="300"
+			 xmlns:model="using:Editor.ViewModels.WorldEditor"
+			 x:DataType="model:GameEntityViewModel"
+             x:Class="Editor.Views.WorldEditor.PropertiesView">
+	<ScrollViewer>
+		<StackPanel Spacing="10">
+			<Label Content="Properties" Grid.Row="0" FontSize="12" Padding="5,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
+			<Grid RowDefinitions="*,*" Margin="5,0,5,0">
+				<Label Content="General" Grid.Row="0" FontSize="12" Padding="5,0,5,0" Margin="0,0,0,5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
+				<Grid ColumnDefinitions="auto,*" RowDefinitions="*,*" Grid.Row="1">
+					<Label Content="Name" Grid.Column="0" Grid.Row="0"/>
+					<TextBox Text="{Binding Name}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+					<Label Content="Enabled" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center"/>
+					<CheckBox IsChecked="{Binding IsEnabled}" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center"/>
+				</Grid>
+			</Grid>
+			<ItemsControl ItemsSource="{Binding Components}">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<StackPanel Spacing="10" Margin="5,0,5,0"/>
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+			</ItemsControl>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>
