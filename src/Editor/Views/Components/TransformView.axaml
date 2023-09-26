@@ -7,7 +7,7 @@
 			 x:DataType="model:TransformViewModel"
              x:Class="Editor.Views.Components.TransformView">
 	<Grid RowDefinitions="auto,auto">
-		<Label Content="Transform" Grid.Row="0" FontSize="12" Padding="5,0,5,0" Margin="0,0,0,5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
+		<Label Content="Transform" Grid.Row="0" FontSize="12" Padding="5 0" Margin="0,0,0,5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
 		<Grid ColumnDefinitions="auto,*" RowDefinitions="*,*,*" Grid.Row="1" Margin="5">
 			<Label Content="Position" Grid.Column="0" Grid.Row="0"/>
 			<StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="0">

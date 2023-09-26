@@ -7,7 +7,7 @@
 			 x:DataType="model:ScriptViewModel"
              x:Class="Editor.Views.Components.ScriptView">
 	<Grid RowDefinitions="auto,auto">
-		<Label Content="Script" Grid.Row="0" FontSize="12" Padding="5,0,5,0" Margin="0,0,0,5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
+		<Label Content="Script" Grid.Row="0" FontSize="12" Padding="5 0" Margin="0,0,0,5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
 		<Grid ColumnDefinitions="auto,*" RowDefinitions="*" Grid.Row="1" Margin="5">
 			<Label Content="Path" Grid.Column="0" Grid.Row="0"/>
 			<Label Content="{Binding Script}" Grid.Column="1" Grid.Row="0"/>

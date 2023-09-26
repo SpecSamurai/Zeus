@@ -8,9 +8,9 @@
              x:Class="Editor.Views.WorldEditor.PropertiesView">
 	<ScrollViewer>
 		<StackPanel Spacing="10">
-			<Label Content="Properties" Grid.Row="0" FontSize="12" Padding="5,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
-			<Grid RowDefinitions="*,*" Margin="5,0,5,0">
-				<Label Content="General" Grid.Row="0" FontSize="12" Padding="5,0,5,0" Margin="0,0,0,5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
+			<Label Content="Properties" Grid.Row="0" FontSize="12" Padding="5 0" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
+			<Grid RowDefinitions="*,*" Margin="5 0">
+				<Label Content="General" Grid.Row="0" FontSize="12" Padding="5 0" Margin="0 0 0 5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="Gray"/>
 				<Grid ColumnDefinitions="auto,*" RowDefinitions="*,*" Grid.Row="1">
 					<Label Content="Name" Grid.Column="0" Grid.Row="0"/>
 					<TextBox Text="{Binding Name}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
@@ -21,7 +21,7 @@
 			<ItemsControl ItemsSource="{Binding Components}">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
-						<StackPanel Spacing="10" Margin="5,0,5,0"/>
+						<StackPanel Spacing="10" Margin="5 0"/>
 					</ItemsPanelTemplate>
 				</ItemsControl.ItemsPanel>
 			</ItemsControl>
