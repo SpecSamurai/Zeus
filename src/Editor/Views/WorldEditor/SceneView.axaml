@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="200"
+			 xmlns:model="using:Editor.ViewModels.WorldEditor"
+			 x:DataType="model:WorldEditorViewModel"
+             x:Class="Editor.Views.WorldEditor.SceneView">
+	<DockPanel>
+		<StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="1">
+			<Button Command="{Binding Project.AddScene}" Content="Add Scene" VerticalAlignment="Bottom" HorizontalAlignment="Left" Background="Transparent" CornerRadius="10">
+				<PathIcon Data="{StaticResource add_regular}" Width="13" Height="13"/>
+			</Button>
+		</StackPanel>
+		<Rectangle Fill="Gray" DockPanel.Dock="Top" Height="1"/>
+		<ScrollViewer>
+			<TreeView ItemsSource="{Binding Project.Scenes}" SelectedItem="{Binding ActiveGameEntity}">
+				<TreeView.DataTemplates>
+					<TreeDataTemplate x:DataType="model:SceneViewModel" ItemsSource="{Binding GameEntities}">
+						<Border Background="Transparent" VerticalAlignment="Center">
+							<Border.ContextMenu>
+								<ContextMenu>
+									<MenuItem Header="Add Entity" Command="{Binding AddGameEntity}"/>
+								</ContextMenu>
+							</Border.ContextMenu>
+							<Label Content="{Binding Name}" FontSize="12" Padding="0"/>
+						</Border>
+					</TreeDataTemplate>
+					<DataTemplate DataType="model:GameEntityViewModel">
+						<Border Background="Transparent" VerticalAlignment="Center">
+							<Border.ContextMenu>
+								<ContextMenu>
+									<MenuItem Header="Delete" Command="{Binding Scene.RemoveGameEntity}" CommandParameter="{Binding}"/>
+								</ContextMenu>
+							</Border.ContextMenu>
+							<Label Content="{Binding Name}" FontSize="12" Padding="0"/>
+						</Border>
+					</DataTemplate>
+				</TreeView.DataTemplates>
+			</TreeView>
+		</ScrollViewer>
+	</DockPanel>
+</UserControl>
