@@ -17,23 +17,23 @@
 			<TreeView ItemsSource="{Binding Project.Scenes}" SelectedItem="{Binding ActiveGameEntity}">
 				<TreeView.DataTemplates>
 					<TreeDataTemplate x:DataType="model:SceneViewModel" ItemsSource="{Binding GameEntities}">
-						<Border Background="Transparent" VerticalAlignment="Center">
+						<Border Background="Transparent" VerticalAlignment="Stretch" Height="20">
 							<Border.ContextMenu>
 								<ContextMenu>
 									<MenuItem Header="Add Entity" Command="{Binding AddGameEntity}"/>
 								</ContextMenu>
 							</Border.ContextMenu>
-							<Label Content="{Binding Name}" FontSize="12" Padding="0"/>
+							<Label Content="{Binding Name}" FontSize="12" Padding="0" VerticalAlignment="Center"/>
 						</Border>
 					</TreeDataTemplate>
 					<DataTemplate DataType="model:GameEntityViewModel">
-						<Border Background="Transparent" VerticalAlignment="Center">
+						<Border Background="Transparent" VerticalAlignment="Center" Height="20">
 							<Border.ContextMenu>
 								<ContextMenu>
 									<MenuItem Header="Delete" Command="{Binding Scene.RemoveGameEntity}" CommandParameter="{Binding}"/>
 								</ContextMenu>
 							</Border.ContextMenu>
-							<Label Content="{Binding Name}" FontSize="12" Padding="0"/>
+							<Label Content="{Binding Name}" FontSize="12" Padding="0" VerticalAlignment="Center"/>
 						</Border>
 					</DataTemplate>
 				</TreeView.DataTemplates>
