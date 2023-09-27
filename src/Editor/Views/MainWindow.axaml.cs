@@ -3,6 +3,7 @@ using Avalonia.ReactiveUI;
 using Editor.Extensions;
 using Editor.ViewModels;
 using Editor.ViewModels.ProjectBrowser;
+using Editor.ViewModels.WorldEditor;
 using Editor.Views.ProjectBrowser;
 using ReactiveUI;
 using System.Reactive;
