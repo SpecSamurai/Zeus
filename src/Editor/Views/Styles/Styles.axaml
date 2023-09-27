@@ -34,4 +34,15 @@
 	<Style Selector="TreeDataGridColumnHeader">
 		<Setter Property="FontSize" Value="12"/>
 	</Style>
+
+	<Style Selector="DataGrid /template/ DataGridColumnHeadersPresenter#PART_ColumnHeadersPresenter">
+		<Setter Property="Height" Value="20"/>
+	</Style>
+	<Style Selector="DataGridColumnHeader">
+		<Setter Property="MinHeight" Value="0"/>
+	</Style>
+	<Style Selector="DataGridRow /template/ DataGridCellsPresenter#PART_CellsPresenter">
+		<Setter Property="Height" Value="20"/>
+	</Style>
+
 </Styles>
