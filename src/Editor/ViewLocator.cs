@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using Editor.Models.Logging;
 using Editor.ViewModels;
 
 namespace Editor;
@@ -12,6 +13,7 @@ public class ViewLocator : IDataTemplate
             ?? throw new ArgumentNullException(nameof(data));
 
         var type = Type.GetType(name);
+        if (type == null) Logger.LogCrititcal($"{name} view not found.");
 
         return type != null
             ? (Control)Activator.CreateInstance(type)!
