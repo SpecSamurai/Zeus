@@ -19,7 +19,7 @@
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
-			<Image Source="{Binding Path=SelectedItem.(model:TemplateViewModel).Screenshot, ElementName=projectTemplatesListBox}" Width="400" Height="250"/>
+			<Image Source="{Binding Path=((model:TemplateViewModel)SelectedItem).Screenshot, ElementName=projectTemplatesListBox}" Width="400" Height="250"/>
 		</StackPanel>
 		<Grid Margin="5">
 			<Grid.RowDefinitions>

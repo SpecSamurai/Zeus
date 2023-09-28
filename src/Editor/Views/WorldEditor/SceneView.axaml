@@ -8,8 +8,8 @@
              x:Class="Editor.Views.WorldEditor.SceneView">
 	<DockPanel>
 		<StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="1">
-			<Button Command="{Binding Project.AddScene}" Content="Add Scene" VerticalAlignment="Bottom" HorizontalAlignment="Left" Background="Transparent" CornerRadius="10">
-				<PathIcon Data="{StaticResource add_regular}" Width="13" Height="13"/>
+			<Button Command="{Binding Project.AddScene}" VerticalAlignment="Bottom" HorizontalAlignment="Left" Background="Transparent" CornerRadius="10">
+				<PathIcon Data="{StaticResource AddRegular}" Width="13" Height="13"/>
 			</Button>
 		</StackPanel>
 		<Rectangle Fill="Gray" DockPanel.Dock="Top" Height="1"/>

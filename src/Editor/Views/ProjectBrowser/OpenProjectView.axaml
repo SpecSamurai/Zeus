@@ -9,7 +9,7 @@
 
 	<StackPanel Orientation="Vertical" Spacing="25">
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
-			<ListBox ItemsSource="{Binding Projects}" x:Name="projectsListBox" SelectedItem="{Binding SelectedProject}" SelectedIndex="0" Width="195" Height="250">
+			<ListBox ItemsSource="{Binding Projects}" x:Name="ProjectsListBox" SelectedItem="{Binding SelectedProject}" SelectedIndex="0" Width="195" Height="250">
 				<ListBox.ItemTemplate>
 					<DataTemplate>
 						<StackPanel Orientation="Horizontal">
@@ -19,7 +19,7 @@
 					</DataTemplate>
 				</ListBox.ItemTemplate>
 			</ListBox>
-			<Image Source="{Binding Path=SelectedItem.(model:CreatedProjectViewModel).Screenshot, ElementName=projectsListBox}" Width="400" Height="250"/>
+			<Image Source="{Binding Path=((model:TemplateViewModel)SelectedItem).Screenshot, ElementName=ProjectsListBox}" Width="400" Height="250"/>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
 			<Button Content="Open" Command="{Binding OpenProjectCommand}" IsEnabled="{Binding SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}" HorizontalContentAlignment="Center" Width="75" IsDefault="True"/>

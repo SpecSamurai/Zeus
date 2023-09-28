@@ -24,34 +24,34 @@
 	</UserControl.Styles>
 	<StackPanel Orientation="Horizontal" Margin="3" Spacing="4">
 		<Button Command="{Binding }" HotKey="CTRL+S">
-			<PathIcon Data="{StaticResource save_regular}"/>
+			<PathIcon Data="{StaticResource SaveRegular}"/>
 		</Button>
 		<Rectangle VerticalAlignment="Stretch"/>
 		<Button Command="{Binding Project.Undo}" HotKey="CTRL+Z">
-			<PathIcon Data="{StaticResource arrow_undo_regular}"/>
+			<PathIcon Data="{StaticResource ArrowUndoRegular}"/>
 		</Button>
 		<Button Command="{Binding Project.Redo}" HotKey="CTRL+Y">
-			<PathIcon Data="{StaticResource arrow_redo_regular}"/>
+			<PathIcon Data="{StaticResource ArrowRedoRegular}"/>
 		</Button>
 		<Rectangle VerticalAlignment="Stretch"/>
 		<Button Command="{Binding }">
-			<PathIcon Data="{StaticResource arrow_move_regular}"/>
+			<PathIcon Data="{StaticResource ArrowMoveRegular}"/>
 		</Button>
 		<Button Command="{Binding }">
-			<PathIcon Data="{StaticResource arrow_rotate_counterclockwise_regular}"/>
+			<PathIcon Data="{StaticResource ArrowRotateCounterclockwiseRegular}"/>
 		</Button>
 		<Button Command="{Binding }">
-			<PathIcon Data="{StaticResource arrow_maximize_regular}"/>
+			<PathIcon Data="{StaticResource ArrowMaximizeRegular}"/>
 		</Button>
 		<Rectangle VerticalAlignment="Stretch"/>
 		<Button Command="{Binding }">
-			<PathIcon Data="{StaticResource play_regular}"/>
+			<PathIcon Data="{StaticResource PlayRegular}"/>
 		</Button>
 		<Button Command="{Binding }">
-			<PathIcon Data="{StaticResource pause_regular}"/>
+			<PathIcon Data="{StaticResource PauseRegular}"/>
 		</Button>
 		<Button Command="{Binding }">
-			<PathIcon Data="{StaticResource video_play_pause_regular}"/>
+			<PathIcon Data="{StaticResource VideoPlayPauseRegular}"/>
 		</Button>
 	</StackPanel>
 </UserControl>

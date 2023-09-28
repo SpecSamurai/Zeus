@@ -20,20 +20,20 @@
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0" Margin="20">
 			<UniformGrid Columns="2">
 				<RadioButton
-					x:Name="openProjectButton"
+					x:Name="OpenProjectButton"
 					Content="Open Project"
 					IsChecked="True"
 					Theme="{StaticResource {x:Type ToggleButton}}"/>
 				<RadioButton
-					x:Name="createProjectButton"
+					x:Name="CreateProjectButton"
 					Content="Create Project"
 					IsChecked="False"
 					Theme="{StaticResource {x:Type ToggleButton}}"/>
 			</UniformGrid>
 		</StackPanel>
-		<StackPanel x:Name="browserContent" Orientation="Horizontal" Grid.Row="1">
-			<views:CreateProjectView IsVisible="{Binding #createProjectButton.IsChecked}"/>
-			<views:OpenProjectView IsVisible="{Binding #openProjectButton.IsChecked}"/>
+		<StackPanel x:Name="BrowserContent" Orientation="Horizontal" Grid.Row="1">
+			<views:CreateProjectView IsVisible="{Binding #CreateProjectButton.IsChecked}"/>
+			<views:OpenProjectView IsVisible="{Binding #OpenProjectButton.IsChecked}"/>
 		</StackPanel>
 	</Grid>
 </Window>
