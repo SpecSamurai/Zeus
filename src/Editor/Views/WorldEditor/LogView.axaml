@@ -3,56 +3,65 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
-			 xmlns:logging="clr-namespace:Editor.Models.Logging"
+             xmlns:model="using:Editor.ViewModels.WorldEditor"
+             x:DataType="model:LogViewModel"
              x:Class="Editor.Views.WorldEditor.LogView">
-	<DockPanel>
-		<StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="3" Margin="1">
-			<StackPanel.Styles>
-				<Style Selector="PathIcon">
-					<Setter Property="Width" Value="15"/>
-					<Setter Property="Height" Value="15"/>
-				</Style>
-				<Style Selector="ToggleButton">
-					<Setter Property="Padding" Value="5 0"/>
-					<Setter Property="FontSize" Value="12"/>
-				</Style>
-			</StackPanel.Styles>
-			<ToggleButton IsChecked="True">
-				<StackPanel Orientation="Horizontal">
-					<PathIcon Data="{StaticResource error_circle_regular}" Foreground="Red"/>
-					<Label Content="Error"/>
-				</StackPanel>
-			</ToggleButton>
-			<ToggleButton IsChecked="True">
-				<StackPanel Orientation="Horizontal">
-					<PathIcon Data="{StaticResource warning_regular}" Foreground="Yellow"/>
-					<Label Content="Warning"/>
-				</StackPanel>
-			</ToggleButton>
-			<ToggleButton>
-				<StackPanel Orientation="Horizontal">
-					<PathIcon Data="{StaticResource info_regular}" Foreground="LightBlue"/>
-					<Label Content="Info"/>
-				</StackPanel>
-			</ToggleButton>
-			<Button Content="Clear">
-				<PathIcon Data="{StaticResource comment_delete_regular}"/>
-			</Button>
-		</StackPanel>
-		<DataGrid ItemsSource="{Binding Source={x:Static logging:Logger.LogEntries}}" x:DataType="logging:LogEntry"
-				  IsReadOnly="True"
-				  CanUserReorderColumns="False"
-				  CanUserResizeColumns="True"
-				  CanUserSortColumns="False"
-				  GridLinesVisibility="All"
-				  DockPanel.Dock="Bottom">
-			<DataGrid.Columns>
-				<DataGridTextColumn Header="LogLevel"  Binding="{Binding LogLevel}"/>
-				<DataGridTextColumn Header="Message"  Binding="{Binding Message}"/>
-				<DataGridTextColumn Header="File"  Binding="{Binding File}"/>
-				<DataGridTextColumn Header="Caller"  Binding="{Binding Caller}"/>
-				<DataGridTextColumn Header="Line"  Binding="{Binding Line}"/>
-			</DataGrid.Columns>
-		</DataGrid>
-	</DockPanel>
+    <UserControl.DataContext>
+        <model:LogViewModel />
+    </UserControl.DataContext>
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="3" Margin="1">
+            <StackPanel.Styles>
+                <Style Selector="PathIcon">
+                    <Setter Property="Width" Value="15" />
+                    <Setter Property="Height" Value="15" />
+                </Style>
+                <Style Selector="ToggleButton">
+                    <Setter Property="Padding" Value="5 0" />
+                    <Setter Property="FontSize" Value="12" />
+                </Style>
+            </StackPanel.Styles>
+            <ToggleButton IsChecked="True"
+                          Command="{Binding ToggleErrorCommand}"
+                          CommandParameter="{Binding $self.IsChecked}">
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource ErrorCircleRegular}" Foreground="Red" />
+                    <Label Content="Error" />
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton IsChecked="True"
+                          Command="{Binding ToggleWarningCommand}"
+                          CommandParameter="{Binding $self.IsChecked}">
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource WarningRegular}" Foreground="Yellow" />
+                    <Label Content="Warning" />
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton Command="{Binding ToggleInformationCommand}"
+                          CommandParameter="{Binding $self.IsChecked}">
+                <StackPanel Orientation="Horizontal">
+                    <PathIcon Data="{StaticResource InfoRegular}" Foreground="LightBlue" />
+                    <Label Content="Info" />
+                </StackPanel>
+            </ToggleButton>
+            <Button Command="{Binding ClearCommand}">
+                <PathIcon Data="{StaticResource CommentDeleteRegular}" />
+            </Button>
+        </StackPanel>
+        <DataGrid ItemsSource="{Binding LogEntries}"
+                  IsReadOnly="True"
+                  CanUserReorderColumns="False"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="False"
+                  GridLinesVisibility="All"
+                  DockPanel.Dock="Bottom">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="LogLevel" Binding="{Binding LogLevel}" />
+                <DataGridTextColumn Header="Message" Binding="{Binding Message}" />
+                <DataGridTextColumn Header="File" Binding="{Binding File}" />
+                <DataGridTextColumn Header="Caller" Binding="{Binding Caller}" />
+                <DataGridTextColumn Header="Line" Binding="{Binding Line}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
 </UserControl>
