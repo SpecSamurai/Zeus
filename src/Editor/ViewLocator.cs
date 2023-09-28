@@ -9,11 +9,10 @@ public class ViewLocator : IDataTemplate
 {
     public Control Build(object? data)
     {
-        var name = data?.GetType().FullName?.Replace("ViewModel", "View")
-            ?? throw new ArgumentNullException(nameof(data));
+        var name = data?.GetType().FullName?.Replace("ViewModel", "View") ?? throw new ArgumentNullException(nameof(data));
 
         var type = Type.GetType(name);
-        if (type == null) Logger.LogCrititcal($"{name} view not found.");
+        if (type == null) Logger.LogCritical($"{name} view not found.");
 
         return type != null
             ? (Control)Activator.CreateInstance(type)!
