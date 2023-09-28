@@ -7,7 +7,7 @@ using Editor.ViewModels.WorldEditor;
 
 namespace Editor;
 
-internal class ServiceLocator
+internal static class ServiceLocator
 {
     static ServiceLocator()
     {
