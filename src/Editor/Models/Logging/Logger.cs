@@ -1,54 +1,77 @@
-﻿using Avalonia.Threading;
-using System.Collections.ObjectModel;
+﻿using DynamicData;
 using System.Runtime.CompilerServices;
 
 namespace Editor.Models.Logging;
 
 public static class Logger
 {
-    // implement filtering
-    public static ObservableCollection<LogEntry> LogEntries { get; }
+    private static readonly SourceList<LogEntry> SourceList;
 
     static Logger()
     {
-        LogEntries = new ObservableCollection<LogEntry>();
+        SourceList = new();
+        LogEntries = SourceList.AsObservableList();
     }
 
-    public static async void LogDebug(string message, [CallerFilePath] string file = "", [CallerMemberName] string caller = "", [CallerLineNumber] int line = 0)
+    public static IObservableList<LogEntry> LogEntries { get; }
+
+    public static void LogDebug(
+        string message,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string caller = "",
+        [CallerLineNumber] int line = 0)
     {
-        await Log(LogLevel.Debug, message, file, caller, line);
+        Log(LogLevel.Debug, message, file, caller, line);
     }
 
-    public static async void LogInformation(string message, [CallerFilePath] string file = "", [CallerMemberName] string caller = "", [CallerLineNumber] int line = 0)
+    public static void LogInformation(
+        string message,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string caller = "",
+        [CallerLineNumber] int line = 0)
     {
-        await Log(LogLevel.Information, message, file, caller, line);
+        Log(LogLevel.Information, message, file, caller, line);
     }
 
-    public static async void LogWarning(string message, [CallerFilePath] string file = "", [CallerMemberName] string caller = "", [CallerLineNumber] int line = 0)
+    public static void LogWarning(
+        string message,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string caller = "",
+        [CallerLineNumber] int line = 0)
     {
-        await Log(LogLevel.Warning, message, file, caller, line);
+        Log(LogLevel.Warning, message, file, caller, line);
     }
 
-    public static async void LogError(string message, [CallerFilePath] string file = "", [CallerMemberName] string caller = "", [CallerLineNumber] int line = 0)
+    public static void LogError(
+        string message,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string caller = "",
+        [CallerLineNumber] int line = 0)
     {
-        await Log(LogLevel.Error, message, file, caller, line);
+        Log(LogLevel.Error, message, file, caller, line);
     }
 
-    public static async void LogCrititcal(string message, [CallerFilePath] string file = "", [CallerMemberName] string caller = "", [CallerLineNumber] int line = 0)
+    public static void LogCritical(
+        string message,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string caller = "",
+        [CallerLineNumber] int line = 0)
     {
-        await Log(LogLevel.Critical, message, file, caller, line);
+        Log(LogLevel.Critical, message, file, caller, line);
     }
 
-    public static async Task Log(LogLevel logLevel, string message, [CallerFilePath] string file = "", [CallerMemberName] string caller = "", [CallerLineNumber] int line = 0)
+    public static void Log(LogLevel logLevel,
+        string message,
+        [CallerFilePath] string file = "",
+        [CallerMemberName] string caller = "",
+        [CallerLineNumber] int line = 0)
     {
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            LogEntries.Add(new(logLevel, message, file, caller, line));
-        });
+        SourceList.Edit(update =>
+            update.Add(new(logLevel, message, file, caller, line)));
     }
 
-    public static async Task Clear()
+    public static void Clear()
     {
-        await Dispatcher.UIThread.InvokeAsync(LogEntries.Clear);
+        SourceList.Clear();
     }
 }
