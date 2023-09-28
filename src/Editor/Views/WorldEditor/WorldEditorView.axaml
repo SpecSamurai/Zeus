@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:localviews="clr-namespace:Editor.Views.WorldEditor"
+             xmlns:model="using:Editor.ViewModels.WorldEditor"
+             x:DataType="model:WorldEditorViewModel"
+             x:Class="Editor.Views.WorldEditor.WorldEditorView">
+    <UserControl.DataContext>
+        <model:WorldEditorViewModel />
+    </UserControl.DataContext>
+    <DockPanel>
+        <localviews:ToolbarView DockPanel.Dock="Top" />
+        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="4*, auto, *">
+            <Grid Grid.Column="0" RowDefinitions="2*, auto, *">
+                <localviews:ViewportView Grid.Row="0" />
+                <GridSplitter Grid.Row="1" Background="Black" />
+                <TabControl Grid.Row="2" Margin="0" Padding="0">
+                    <TabItem Header="Content">
+                        <Border BorderBrush="Gray" BorderThickness="1">
+                            <localviews:ContentView />
+                        </Border>
+                    </TabItem>
+                    <TabItem Header="Logs">
+                        <Border BorderBrush="Gray" BorderThickness="1">
+                            <localviews:LogView />
+                        </Border>
+                    </TabItem>
+                    <TabItem Header="History">
+                        <Border BorderBrush="Gray" BorderThickness="1">
+                            <localviews:HistoryView DataContext="{Binding Project.UndoRedoViewModel}" />
+                        </Border>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+            <GridSplitter Grid.Column="1" Background="Black" />
+            <Grid Grid.Column="2" RowDefinitions="2*, auto, *">
+                <Border Grid.Row="0" BorderBrush="Gray" BorderThickness="1">
+                    <localviews:SceneView />
+                </Border>
+                <GridSplitter Grid.Row="1" Background="Black" />
+                <Border IsVisible="{Binding ActiveGameEntity, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        Grid.Row="2"
+                        BorderBrush="Gray"
+                        BorderThickness="1">
+                    <localviews:PropertiesView DataContext="{Binding ActiveGameEntity}" />
+                </Border>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</UserControl>
