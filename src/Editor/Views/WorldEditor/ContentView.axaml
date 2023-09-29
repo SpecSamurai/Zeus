@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+             xmlns:model="using:Editor.ViewModels.WorldEditor"
+             x:DataType="model:ContentViewModel"
+             x:Class="Editor.Views.WorldEditor.ContentView">
+    <UserControl.DataContext>
+        <model:ContentViewModel />
+    </UserControl.DataContext>
+    <Grid ColumnDefinitions="*,auto,3*">
+        <TreeView ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedFolder}" Grid.Column="0">
+            <TreeView.ItemTemplate>
+                <TreeDataTemplate ItemsSource="{Binding Folders}">
+                    <Border Background="Transparent" VerticalAlignment="Stretch" Height="20">
+                        <Border.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Add Folder" Command="{Binding }" />
+                            </ContextMenu>
+                        </Border.ContextMenu>
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <PathIcon Data="{StaticResource FolderRegular}" Width="15" Height="15" />
+                            <Label Content="{Binding Name}" FontSize="12" Padding="0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </TreeDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+        <GridSplitter Grid.Column="1" Background="Gray" />
+        <ListBox ItemsSource="{Binding SelectedFolder.Files}" Grid.Column="2" Background="Transparent">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical" Spacing="5">
+                        <PathIcon Data="{StaticResource DocumentRegular}" Height="50" Width="50" />
+                        <Label Content="{Binding Name}" FontSize="12" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>
