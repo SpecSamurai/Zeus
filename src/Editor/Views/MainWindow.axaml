@@ -3,16 +3,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-		xmlns:views="clr-namespace:Editor.Views.WorldEditor"
+        xmlns:views="clr-namespace:Editor.Views.WorldEditor"
         xmlns:model="using:Editor.ViewModels"
         x:DataType="model:MainWindowViewModel"
         x:Class="Editor.Views.MainWindow"
-		WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterScreen"
         Title="Zeus Editor">
-
-	<DockPanel>
-		<views:TopLevelMenuView DockPanel.Dock="Top"/>
-		<views:WorldEditorView DockPanel.Dock="Bottom"/>
-	</DockPanel>
-
+    <DockPanel>
+        <views:TopLevelMenuView DockPanel.Dock="Top" />
+        <views:WorldEditorView DataContext="{Binding WorldEditorViewModel}" DockPanel.Dock="Bottom" />
+    </DockPanel>
 </Window>
