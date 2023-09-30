@@ -3,6 +3,7 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using Editor.Repositories;
 using System.Reactive;
+using Editor.ViewModels.WorldEditor;
 
 namespace Editor.ViewModels.ProjectBrowser;
 
