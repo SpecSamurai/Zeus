@@ -7,9 +7,6 @@
              xmlns:model="using:Editor.ViewModels.WorldEditor"
              x:DataType="model:WorldEditorViewModel"
              x:Class="Editor.Views.WorldEditor.WorldEditorView">
-    <UserControl.DataContext>
-        <model:WorldEditorViewModel />
-    </UserControl.DataContext>
     <DockPanel>
         <localviews:ToolbarView DockPanel.Dock="Top" />
         <Grid DockPanel.Dock="Bottom" ColumnDefinitions="4*, auto, *">
@@ -19,7 +16,7 @@
                 <TabControl Grid.Row="2" Margin="0" Padding="0">
                     <TabItem Header="Content">
                         <Border BorderBrush="Gray" BorderThickness="1">
-                            <localviews:ContentView />
+                            <localviews:ContentView DataContext="{Binding ContentViewModel}" />
                         </Border>
                     </TabItem>
                     <TabItem Header="Logs">
@@ -29,7 +26,7 @@
                     </TabItem>
                     <TabItem Header="History">
                         <Border BorderBrush="Gray" BorderThickness="1">
-                            <localviews:HistoryView DataContext="{Binding Project.UndoRedoViewModel}" />
+                            <localviews:HistoryView DataContext="{Binding ProjectViewModel.UndoRedoViewModel}" />
                         </Border>
                     </TabItem>
                 </TabControl>
