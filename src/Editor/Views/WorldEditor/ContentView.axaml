@@ -6,9 +6,6 @@
              xmlns:model="using:Editor.ViewModels.WorldEditor"
              x:DataType="model:ContentViewModel"
              x:Class="Editor.Views.WorldEditor.ContentView">
-    <UserControl.DataContext>
-        <model:ContentViewModel />
-    </UserControl.DataContext>
     <Grid ColumnDefinitions="*,auto,3*">
         <TreeView ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedFolder}" Grid.Column="0">
             <TreeView.ItemTemplate>

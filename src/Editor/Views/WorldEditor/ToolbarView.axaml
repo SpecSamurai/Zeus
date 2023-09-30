@@ -27,10 +27,10 @@
 			<PathIcon Data="{StaticResource SaveRegular}"/>
 		</Button>
 		<Rectangle VerticalAlignment="Stretch"/>
-		<Button Command="{Binding Project.Undo}" HotKey="CTRL+Z">
+		<Button Command="{Binding ProjectViewModel.Undo}" HotKey="CTRL+Z">
 			<PathIcon Data="{StaticResource ArrowUndoRegular}"/>
 		</Button>
-		<Button Command="{Binding Project.Redo}" HotKey="CTRL+Y">
+		<Button Command="{Binding ProjectViewModel.Redo}" HotKey="CTRL+Y">
 			<PathIcon Data="{StaticResource ArrowRedoRegular}"/>
 		</Button>
 		<Rectangle VerticalAlignment="Stretch"/>

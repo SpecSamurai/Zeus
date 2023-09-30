@@ -8,13 +8,13 @@
              x:Class="Editor.Views.WorldEditor.SceneView">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="1">
-            <Button Command="{Binding Project.AddScene}" VerticalAlignment="Bottom" HorizontalAlignment="Left"
+            <Button Command="{Binding ProjectViewModel.AddScene}" VerticalAlignment="Bottom" HorizontalAlignment="Left"
                     Background="Transparent" CornerRadius="10">
                 <PathIcon Data="{StaticResource AddRegular}" Width="13" Height="13" />
             </Button>
         </StackPanel>
         <Rectangle Fill="Gray" DockPanel.Dock="Top" Height="1" />
-        <TreeView ItemsSource="{Binding Project.Scenes}" SelectedItem="{Binding ActiveGameEntity}">
+        <TreeView ItemsSource="{Binding ProjectViewModel.Scenes}" SelectedItem="{Binding ActiveGameEntity}">
             <TreeView.DataTemplates>
                 <TreeDataTemplate x:DataType="model:SceneViewModel" ItemsSource="{Binding GameEntities}">
                     <Border Background="Transparent" VerticalAlignment="Stretch" Height="20">
