@@ -2,12 +2,15 @@
 using ReactiveUI;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using Editor.Models.Logging;
+using Editor.ViewModels.WorldEditor;
 
 namespace Editor.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
     private readonly ProjectBrowserWindowViewModel _projectBrowserWindowViewModel;
+    private WorldEditorViewModel? _worldEditorViewModel;
 
     public MainWindowViewModel(ProjectBrowserWindowViewModel projectBrowserWindowViewModel)
     {
@@ -16,11 +19,18 @@ public class MainWindowViewModel : ViewModelBase
 
         OpenDialogCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            Project = await ShowProjectBrowserDialog.Handle(_projectBrowserWindowViewModel);
+            var projectViewModel = await ShowProjectBrowserDialog.Handle(_projectBrowserWindowViewModel);
+            if (projectViewModel is not null) WorldEditorViewModel = new(projectViewModel);
+            else Logger.LogCritical("Could not load project file");
         });
     }
 
     public Interaction<ProjectBrowserWindowViewModel, ProjectViewModel?> ShowProjectBrowserDialog { get; }
     public ICommand OpenDialogCommand { get; }
-    public ProjectViewModel? Project { get; set; }
+
+    public WorldEditorViewModel? WorldEditorViewModel
+    {
+        get => _worldEditorViewModel;
+        set => this.RaiseAndSetIfChanged(ref _worldEditorViewModel, value);
+    }
 }
