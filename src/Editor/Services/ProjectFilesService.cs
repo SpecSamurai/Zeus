@@ -3,8 +3,8 @@ using Editor.Models.Projects;
 using Editor.Repositories;
 using Editor.Repositories.Models;
 using Frameworks.Serialization;
-using System.Diagnostics;
 using System.Runtime.Serialization;
+using Editor.Models.Logging;
 
 namespace Editor.Services;
 
@@ -29,7 +29,7 @@ public class ProjectFilesService : IProjectFilesService
         }
         catch (Exception e)
         {
-            Debug.WriteLine(e.Message);
+            Logger.LogError(e.Message);
             throw;
         }
     }
@@ -66,7 +66,7 @@ public class ProjectFilesService : IProjectFilesService
         }
         catch (Exception e)
         {
-            Debug.WriteLine(e.Message);
+            Logger.LogError(e.Message);
             throw;
         }
     }
