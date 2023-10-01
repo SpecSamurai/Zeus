@@ -2,24 +2,24 @@
 
 namespace Editor.Models.History;
 
-public sealed class History
+public static partial class History
 {
-    public History()
+    static History()
     {
         UndoList = new ObservableCollection<IHistoryCommand>();
         RedoList = new ObservableCollection<IHistoryCommand>();
     }
 
-    public ObservableCollection<IHistoryCommand> UndoList { get; }
-    public ObservableCollection<IHistoryCommand> RedoList { get; }
+    public static ObservableCollection<IHistoryCommand> UndoList { get; }
+    public static ObservableCollection<IHistoryCommand> RedoList { get; }
 
-    public void Add(IHistoryCommand command)
+    public static void Add(IHistoryCommand command)
     {
         UndoList.Insert(0, command);
         RedoList.Clear();
     }
 
-    public void Undo()
+    public static void Undo()
     {
         if (UndoList.Any())
         {
@@ -30,7 +30,7 @@ public sealed class History
         }
     }
 
-    public void Redo()
+    public static void Redo()
     {
         if (RedoList.Any())
         {
@@ -41,7 +41,7 @@ public sealed class History
         }
     }
 
-    public void Reset()
+    public static void Reset()
     {
         UndoList.Clear();
         RedoList.Clear();
