@@ -2,7 +2,8 @@
 using Editor.Models.Projects;
 using Editor.Repositories.Models;
 using Frameworks.Serialization;
-using System.Diagnostics;
+using Editor.Models.Logging;
+using Editor.Services;
 
 namespace Editor.Repositories;
 
@@ -16,24 +17,21 @@ public class ProjectFilesRepository : IProjectFilesRepository
         try
         {
             var templatesFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, templatesFolderName);
-            var templateFilePaths = Directory.Exists(templatesFolderPath)
-                ? Directory.GetFiles(templatesFolderPath, templateFileName, SearchOption.AllDirectories)
-                : Array.Empty<string>();
+            var projectTemplates = FileManager.GetFolder(templatesFolderPath);
 
             var output = new List<Template>();
-            foreach (var templateFilePath in templateFilePaths)
+            foreach (var folder in projectTemplates.Folders)
             {
-                var folderPath = Path.GetDirectoryName(templateFilePath);
-                var templateFile = Serializer.FromFile<TemplateFile>(templateFilePath);
+                var templateFile = folder.GetFileContent<TemplateFile>(templateFileName);
 
-                if (folderPath is not null && templateFile is not null)
+                if (templateFile is not null)
                     output.Add(new()
                     {
                         Folders = templateFile.Folders,
                         Name = templateFile.Name,
-                        IconFilePath = Path.Combine(folderPath, ProjectFiles.ProjectIconFileName),
-                        ScreenshotFilePath = Path.Combine(folderPath, ProjectFiles.ProjectScreenshotFileName),
-                        ProjectFilePath = Path.Combine(folderPath, ProjectFiles.ProjectFileName),
+                        IconFilePath = Path.Combine(folder.FullPath, ProjectFiles.ProjectIconFileName),
+                        ScreenshotFilePath = Path.Combine(folder.FullPath, ProjectFiles.ProjectScreenshotFileName),
+                        ProjectFilePath = Path.Combine(folder.FullPath, ProjectFiles.ProjectFileName),
                     });
             }
 
@@ -41,7 +39,7 @@ public class ProjectFilesRepository : IProjectFilesRepository
         }
         catch (Exception e)
         {
-            Debug.WriteLine(e.Message);
+            Logger.LogError(e.Message);
             throw;
         }
     }
@@ -56,7 +54,7 @@ public class ProjectFilesRepository : IProjectFilesRepository
                 "CreatedProjects");
 
             var output = new List<CreatedProject>();
-            if (File.Exists(applicationDataFilePath) && Serializer.FromFile<CreatedProjectsFile>(applicationDataFilePath) is CreatedProjectsFile file)
+            if (File.Exists(applicationDataFilePath) && Serializer.FromFile<CreatedProjectsFile>(applicationDataFilePath) is { } file)
             {
                 var projects = file.Projects.Select(project => new CreatedProject
                 {
@@ -73,7 +71,7 @@ public class ProjectFilesRepository : IProjectFilesRepository
         }
         catch (Exception e)
         {
-            Debug.WriteLine(e.Message);
+            Logger.LogError(e.Message);
             throw;
         }
     }
@@ -104,7 +102,8 @@ public class ProjectFilesRepository : IProjectFilesRepository
         }
         catch (Exception e)
         {
-            Debug.WriteLine(e.Message);
+            Logger.LogError(e.Message);
+            throw;
         }
     }
 }
