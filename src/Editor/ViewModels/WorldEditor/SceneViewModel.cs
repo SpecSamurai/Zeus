@@ -22,6 +22,7 @@ public class SceneViewModel : ViewModelBase
             ge.Components.Add(new TransformViewModel(ge));
             ge.Components.Add(new ScriptViewModel(ge) { Script = "script path" });
             GameEntities.Add(ge);
+
             var newScene = GameEntities.Last();
             History.Add(new HistoryCommand($"Add {newScene.Name}",
                 () => GameEntities.Remove(newScene),
@@ -54,15 +55,18 @@ public class SceneViewModel : ViewModelBase
 
     public string Name { get; set; }
     public ProjectViewModel Project { get; set; }
-    public ObservableCollection<GameEntityViewModel> GameEntities { get; set; } = new ObservableCollection<GameEntityViewModel>();
+
+    public ObservableCollection<GameEntityViewModel> GameEntities { get; set; } =
+        new ObservableCollection<GameEntityViewModel>();
 
     public ICommand AddGameEntity { get; set; }
     public ReactiveCommand<GameEntityViewModel, Unit> RemoveGameEntity { get; set; }
     public ReactiveCommand<GameEntityViewModel, Unit> SelectGameEntity { get; set; }
 
     public bool IsActive => Project.ActiveScene == this;
-    
+
     public GameEntityViewModel _ActiveGameEntity;
+
     public GameEntityViewModel ActiveGameEntity
     {
         get => _ActiveGameEntity;
