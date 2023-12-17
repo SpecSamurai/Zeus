@@ -8,7 +8,7 @@ public static class DesignData
 {
     public static readonly ProjectTileViewModel ProjectTileViewModel = new()
     {
-        Image = new Bitmap(AssetLoader.Open(new Uri("avares://Editor/Assets/DesignTime/Placeholder100x100.png"))),
+        Image = new Bitmap(AssetLoader.Open(new Uri("avares://Editor/Assets/DesignData/Placeholder100x100.png"))),
         Name = nameof(ProjectTileViewModel.Name)
     };
 }
