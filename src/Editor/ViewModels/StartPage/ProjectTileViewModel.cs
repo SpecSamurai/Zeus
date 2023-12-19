@@ -1,6 +1,6 @@
 ﻿using Avalonia.Media.Imaging;
 
-namespace Editor.ViewModels.Projects;
+namespace Editor.ViewModels.StartPage;
 
 public class ProjectTileViewModel : ViewModelBase
 {

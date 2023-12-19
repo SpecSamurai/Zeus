@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls;
 
-namespace Editor.Views.Projects;
+namespace Editor.Views.StartPage;
 
 public partial class ProjectTileView : UserControl
 {
