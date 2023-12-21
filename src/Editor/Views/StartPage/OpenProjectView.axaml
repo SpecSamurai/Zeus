@@ -16,7 +16,7 @@
             <Button Content="New Project" HorizontalAlignment="Right" HorizontalContentAlignment="Center" />
         </Grid>
         <Rectangle Grid.Row="1" Height="1" Fill="Gray" Margin="3,0" />
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Visible" Margin="0, 3">
+        <ScrollViewer Grid.Row="2" Margin="0, 3">
             <ListBox ItemsSource="{Binding Projects}"
                      SelectedItem="{Binding SelectedProject}"
                      Background="Transparent">
