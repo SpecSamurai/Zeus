@@ -4,16 +4,21 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Editor.ViewModels.StartPage"
              xmlns:v="clr-namespace:Editor.Views.StartPage"
-             mc:Ignorable="d" d:DesignWidth="550" d:DesignHeight="445"
+             xmlns:constants="clr-namespace:Editor.Constants"
+             mc:Ignorable="d" d:DesignWidth="330" d:DesignHeight="300"
+             d:DataContext="{x:Static constants:DesignData.OpenProjectViewModel}"
              x:Class="Editor.Views.StartPage.OpenProjectView"
              x:DataType="vm:OpenProjectViewModel">
-    <Design.DataContext>
-        <vm:OpenProjectViewModel />
-    </Design.DataContext>
     <Grid RowDefinitions="auto,auto,*">
         <Grid Grid.Row="0" Margin="5">
             <TextBlock Text="Projects Library" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" />
-            <Button Content="New Project" HorizontalAlignment="Right" HorizontalContentAlignment="Center" />
+            <Button
+                Content="Open"
+                Command="{Binding OpenProjectCommand}"
+                IsEnabled="{Binding SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}"
+                HorizontalAlignment="Right"
+                HorizontalContentAlignment="Center"
+                IsDefault="True" />
         </Grid>
         <Rectangle Grid.Row="1" Height="1" Fill="Gray" Margin="3,0" />
         <ScrollViewer Grid.Row="2" Margin="0, 3">
@@ -27,7 +32,7 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <v:ProjectTileView  />
+                        <v:ProjectTileView />
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
