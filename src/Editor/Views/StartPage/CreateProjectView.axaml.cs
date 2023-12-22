@@ -1,6 +1,5 @@
 ﻿using Avalonia.ReactiveUI;
 using Editor.ViewModels.StartPage;
-using ReactiveUI;
 
 namespace Editor.Views.StartPage;
 
@@ -8,7 +7,6 @@ public partial class CreateProjectView : ReactiveUserControl<CreateProjectViewMo
 {
     public CreateProjectView()
     {
-        this.WhenActivated(disposables => { });
         InitializeComponent();
     }
 }
