@@ -18,10 +18,13 @@
 
     <Window.Styles>
         <Style Selector="RadioButton:checked /template/ ContentPresenter">
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="White" />
         </Style>
-        <Style Selector="RadioButton:unchecked /template/ ContentPresenter">
-            <Setter Property="Foreground" Value="#ff9c9897"/>
+        <Style Selector="RadioButton:checked /template/ ContentPresenter">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style Selector="RadioButton">
+            <Setter Property="Background" Value="Transparent" />
         </Style>
     </Window.Styles>
 
@@ -33,15 +36,13 @@
                              Content="Projects"
                              Command="{Binding OpenProjectsView}"
                              Theme="{StaticResource {x:Type ToggleButton}}"
-                             Width="150"
-                             Background="Transparent">
+                             Width="150">
                 </RadioButton>
                 <RadioButton IsChecked="False"
                              Content="Create Project"
                              Command="{Binding CreateProjectView}"
                              Theme="{StaticResource {x:Type ToggleButton}}"
-                             Width="150"
-                             Background="Transparent"/>
+                             Width="150" />
             </StackPanel>
         </StackPanel>
         <rxui:RoutedViewHost Grid.Column="1" Router="{Binding Router}" Margin="5">
