@@ -23,13 +23,13 @@ public class ActionTypeTest
         //Assert
         Assert.Throws<ArgumentException>(action);
     }
-    
+
     [Fact]
     public void IsSlice_NonSliceActionTypes_False()
     {
         //Arrange
-        ActionType sut = "Te_st"; 
-        
+        ActionType sut = "Te_st";
+
         //Act
         var isSlice = sut.IsSlice;
         var slicePrefix = sut.SlicePrefix;
@@ -38,13 +38,13 @@ public class ActionTypeTest
         Assert.False(isSlice);
         Assert.Empty(slicePrefix);
     }
-    
+
     [Fact]
     public void IsSlice_SliceActionTypes_True()
     {
         //Arrange
-        ActionType sut = "Sli_ce/Test"; 
-        
+        ActionType sut = "Sli_ce/Test";
+
         //Act
         var isSlice = sut.IsSlice;
         var slicePrefix = sut.SlicePrefix;
