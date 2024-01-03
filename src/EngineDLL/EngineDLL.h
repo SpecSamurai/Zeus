@@ -10,11 +10,9 @@
 #define ENGINEDLL_API __declspec(dllimport)
 #endif
 
-// This class is exported from the dll
 class ENGINEDLL_API CEngineDLL {
 public:
 	CEngineDLL(void);
-	// TODO: add your methods here.
 };
 
 extern ENGINEDLL_API int nEngineDLL;
