@@ -9,9 +9,9 @@ public static class Actions
     {
         public const string Slice = nameof(History);
 
-        public static readonly ActionCreator<IHistoryCommand> Add = Store.CreateAction<IHistoryCommand>($"{Slice}/{nameof(Add)}");
+        public static readonly ActionCreator<IHistoryCommand> Push = Store.CreateAction<IHistoryCommand>($"{Slice}/{nameof(Push)}");
         public static readonly ActionCreator Undo = Store.CreateAction($"{Slice}/{nameof(Undo)}");
         public static readonly ActionCreator Redo = Store.CreateAction($"{Slice}/{nameof(Redo)}");
-        public static readonly ActionCreator Reset = Store.CreateAction($"{Slice}/{nameof(Reset)}");
+        public static readonly ActionCreator Clear = Store.CreateAction($"{Slice}/{nameof(Clear)}");
     }
 }
