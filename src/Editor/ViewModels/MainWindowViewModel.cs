@@ -1,31 +1,29 @@
-﻿using Editor.ViewModels.ProjectBrowser;
+﻿using Editor.Models.Logging;
+using Editor.ViewModels.StartPage;
+using Editor.ViewModels.WorldEditor;
 using ReactiveUI;
 using System.Reactive.Linq;
 using System.Windows.Input;
-using Editor.Models.Logging;
-using Editor.ViewModels.WorldEditor;
 
 namespace Editor.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private readonly ProjectBrowserWindowViewModel _projectBrowserWindowViewModel;
     private WorldEditorViewModel? _worldEditorViewModel;
 
-    public MainWindowViewModel(ProjectBrowserWindowViewModel projectBrowserWindowViewModel)
+    public MainWindowViewModel()
     {
-        _projectBrowserWindowViewModel = projectBrowserWindowViewModel;
-        ShowProjectBrowserDialog = new Interaction<ProjectBrowserWindowViewModel, ProjectViewModel?>();
+        ShowProjectBrowserDialog = new Interaction<StartPageViewModel, ProjectViewModel?>();
 
         OpenDialogCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            var projectViewModel = await ShowProjectBrowserDialog.Handle(_projectBrowserWindowViewModel);
+            var projectViewModel = await ShowProjectBrowserDialog.Handle(new());
             if (projectViewModel is not null) WorldEditorViewModel = new(projectViewModel);
             else Logger.LogCritical("Could not load project file");
         });
     }
 
-    public Interaction<ProjectBrowserWindowViewModel, ProjectViewModel?> ShowProjectBrowserDialog { get; }
+    public Interaction<StartPageViewModel, ProjectViewModel?> ShowProjectBrowserDialog { get; }
     public ICommand OpenDialogCommand { get; }
 
     public WorldEditorViewModel? WorldEditorViewModel
