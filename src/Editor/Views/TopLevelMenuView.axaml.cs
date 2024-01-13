@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace Editor.Views.WorldEditor;
+namespace Editor.Views;
 
 public partial class TopLevelMenuView : UserControl
 {

@@ -5,7 +5,7 @@
              mc:Ignorable="d"
 			 xmlns:model="using:Editor.ViewModels"
 			 x:DataType="model:MainWindowViewModel"
-             x:Class="Editor.Views.WorldEditor.TopLevelMenuView">
+             x:Class="Editor.Views.TopLevelMenuView">
 	<Menu Height="20">
 		<MenuItem Header="File">
 			<MenuItem Header="Open" Command="{Binding OpenDialogCommand}"/>
