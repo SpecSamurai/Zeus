@@ -2,15 +2,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:constants="clr-namespace:Editor.Constants"
+        xmlns:v="clr-namespace:Editor.Views"
+        xmlns:worldeditor="clr-namespace:Editor.Views.WorldEditor"
+        xmlns:vm="using:Editor.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        xmlns:views="clr-namespace:Editor.Views.WorldEditor"
-        xmlns:model="using:Editor.ViewModels"
-        x:DataType="model:MainWindowViewModel"
+        d:DataContext="{x:Static constants:DesignData.MainWindowViewModel}"
+        x:DataType="vm:MainWindowViewModel"
         x:Class="Editor.Views.MainWindow"
         WindowStartupLocation="CenterScreen"
-        Title="Zeus Editor">
+        Title="{x:Static constants:Common.EditorTitle}">
     <DockPanel>
-        <views:TopLevelMenuView DockPanel.Dock="Top" />
-        <views:WorldEditorView DataContext="{Binding WorldEditorViewModel}" DockPanel.Dock="Bottom" />
+        <v:TopLevelMenuView DockPanel.Dock="Top" />
+        <worldeditor:WorldEditorView DataContext="{Binding WorldEditorViewModel}" DockPanel.Dock="Bottom" />
     </DockPanel>
 </Window>
