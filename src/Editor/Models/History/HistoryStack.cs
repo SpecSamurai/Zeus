@@ -1,25 +1,25 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 
 namespace Editor.Models.History;
 
-public static partial class History
+public partial class HistoryStack
 {
-    static History()
+    public HistoryStack()
     {
         UndoList = new ObservableCollection<IHistoryCommand>();
         RedoList = new ObservableCollection<IHistoryCommand>();
     }
 
-    public static ObservableCollection<IHistoryCommand> UndoList { get; }
-    public static ObservableCollection<IHistoryCommand> RedoList { get; }
+    public ObservableCollection<IHistoryCommand> UndoList { get; }
+    public ObservableCollection<IHistoryCommand> RedoList { get; }
 
-    public static void Add(IHistoryCommand command)
+    public void Push(IHistoryCommand command)
     {
         UndoList.Insert(0, command);
         RedoList.Clear();
     }
 
-    public static void Undo()
+    public void Undo()
     {
         if (UndoList.Any())
         {
@@ -30,7 +30,7 @@ public static partial class History
         }
     }
 
-    public static void Redo()
+    public void Redo()
     {
         if (RedoList.Any())
         {
@@ -41,7 +41,7 @@ public static partial class History
         }
     }
 
-    public static void Reset()
+    public void Clear()
     {
         UndoList.Clear();
         RedoList.Clear();
