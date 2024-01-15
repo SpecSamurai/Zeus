@@ -2,47 +2,46 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="300"
+             xmlns:constants="clr-namespace:Editor.Constants"
              xmlns:model="using:Editor.ViewModels.WorldEditor"
+             d:DataContext="{x:Static constants:DesignData.HistoryViewModel}"
              x:DataType="model:HistoryViewModel"
              x:Class="Editor.Views.WorldEditor.HistoryView">
-    <UserControl.DataContext>
-        <model:HistoryViewModel />
-    </UserControl.DataContext>
-    <DockPanel>
-        <Button Content="Clear" Command="{Binding ClearHistoryCommand}" DockPanel.Dock="Top" Margin="5" />
-        <Rectangle Height="1" Fill="Gray" DockPanel.Dock="Top" />
-        <ScrollViewer DockPanel.Dock="Bottom" Padding="5" Margin="5">
-            <StackPanel>
-                <StackPanel Spacing="5">
-                    <ItemsControl ItemsSource="{Binding RedoList}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="5"
+	<DockPanel>
+		<Button Content="Clear" Command="{Binding ClearHistoryCommand}" DockPanel.Dock="Top" Margin="5" />
+		<Rectangle Height="1" Fill="Gray" DockPanel.Dock="Top" />
+		<ScrollViewer DockPanel.Dock="Bottom" Padding="5" Margin="5">
+			<StackPanel>
+				<StackPanel Spacing="5">
+					<ItemsControl ItemsSource="{Binding RedoList}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<StackPanel Orientation="Horizontal" Spacing="5"
                                             VerticalAlignment="Center"
                                             HorizontalAlignment="Left">
-                                    <PathIcon Data="{StaticResource ArrowRedoRegular}" Height="10" Width="10" />
-                                    <Label Content="{Binding Name}" FontSize="12" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-                <StackPanel Spacing="5">
-                    <ItemsControl ItemsSource="{Binding UndoList}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="5"
+									<PathIcon Data="{StaticResource ArrowRedoRegular}" Height="10" Width="10" />
+									<Label Content="{Binding Name}" FontSize="12" />
+								</StackPanel>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</StackPanel>
+				<StackPanel Spacing="5">
+					<ItemsControl ItemsSource="{Binding UndoList}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<StackPanel Orientation="Horizontal" Spacing="5"
                                             VerticalAlignment="Center"
                                             HorizontalAlignment="Left">
-                                    <PathIcon Data="{StaticResource ArrowUndoRegular}" Height="10" Width="10" />
-                                    <Label Content="{Binding Name}" FontSize="12" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
-    </DockPanel>
+									<PathIcon Data="{StaticResource ArrowUndoRegular}" Height="10" Width="10" />
+									<Label Content="{Binding Name}" FontSize="12" />
+								</StackPanel>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</ItemsControl>
+				</StackPanel>
+			</StackPanel>
+		</ScrollViewer>
+	</DockPanel>
 </UserControl>
