@@ -9,7 +9,7 @@ public partial class StartPageWindow : ReactiveWindow<StartPageViewModel>
     public StartPageWindow()
     {
         InitializeComponent();
-        this.WhenActivated(action => action(ViewModel!.CreateProjectCommand.Subscribe(Close)));
         this.WhenActivated(action => action(ViewModel!.OpenProjectCommand.Subscribe(Close)));
+        this.WhenActivated(action => action(ViewModel!.CreateProjectCommand.Subscribe(Close)));
     }
 }

@@ -11,10 +11,11 @@
              x:DataType="vm:OpenProjectViewModel">
     <Grid RowDefinitions="auto,auto,*">
         <Grid Grid.Row="0" Margin="5">
-            <TextBlock Text="Projects Library" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBlock Text="Projects Library" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Center" />
             <Button
                 Content="Open"
                 Command="{Binding OpenProjectCommand}"
+                CommandParameter="{Binding SelectedProject}"
                 IsEnabled="{Binding SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}"
                 HorizontalAlignment="Right"
                 HorizontalContentAlignment="Center"

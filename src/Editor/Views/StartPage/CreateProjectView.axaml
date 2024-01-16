@@ -10,10 +10,20 @@
              x:DataType="vm:CreateProjectViewModel"
              x:Class="Editor.Views.StartPage.CreateProjectView">
     <Grid RowDefinitions="auto,auto,*,auto,auto,auto">
-        <TextBlock Grid.Row="0" Text="Select new project template" FontSize="20" Margin="3" />
+        <Grid Grid.Row="0" Margin="5">
+            <TextBlock Text="Select new project template" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <Button
+                Content="Create"
+                Command="{Binding CreateProjectCommand}"
+                CommandParameter="{Binding NewProjectData}"
+                IsEnabled="{Binding IsValid}"
+                HorizontalAlignment="Right"
+                HorizontalContentAlignment="Center"
+                IsDefault="True" />
+        </Grid>
         <Rectangle Grid.Row="1" Height="1" Fill="Gray" Margin="3,0" />
         <ScrollViewer Grid.Row="2" Margin="0, 3">
-            <ListBox ItemsSource="{Binding Projects}"
+            <ListBox ItemsSource="{Binding Templates}"
                      SelectedItem="{Binding SelectedTemplate}"
                      Background="Transparent">
                 <ListBox.ItemsPanel>
@@ -47,22 +57,8 @@
             <Label Content="Path" Grid.Row="2" Grid.Column="0" HorizontalContentAlignment="Center"
                    VerticalContentAlignment="Center" />
             <TextBox Text="{Binding ProjectPath}" Grid.Row="2" Grid.Column="1" />
-            <Button Content="..." Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" />
+            <Button Command="{Binding OpenSelectFolderDialogCommand}" Content="..." Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" />
         </Grid>
-
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
-            <Button Content="Create"
-                    Command="{Binding }"
-                    IsEnabled="{Binding IsValid}"
-                    Width="96"
-                    IsDefault="True"
-                    HorizontalContentAlignment="Center" />
-            <Button Content="Exit"
-                    Command="{Binding }"
-                    Width="96"
-                    IsCancel="True"
-                    HorizontalContentAlignment="Center" />
-        </StackPanel>
         <Label Grid.Row="5" Content="{Binding ErrorMessage}" Foreground="Red" Height="20" FontSize="12" />
     </Grid>
 </UserControl>
