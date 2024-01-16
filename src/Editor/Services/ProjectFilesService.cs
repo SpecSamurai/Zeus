@@ -41,13 +41,13 @@ public class ProjectFilesService : IProjectFilesService
             var gameProjectPath = Path.Combine(projectFolder.RootPath, projectFolder.Name);
             if (!Directory.Exists(gameProjectPath)) Directory.CreateDirectory(gameProjectPath);
 
-            var systemFolderPath = Path.Combine(gameProjectPath, ProjectFiles.SystemFolderName);
+            var systemFolderPath = Path.Combine(gameProjectPath, Projects.SystemFolderName);
 
             var dirInfo = Directory.CreateDirectory(systemFolderPath);
             dirInfo.Attributes |= FileAttributes.Hidden;
 
-            File.Copy(template.IconFilePath, Path.Combine(systemFolderPath, ProjectFiles.ProjectIconFileName));
-            File.Copy(template.ScreenshotFilePath, Path.Combine(systemFolderPath, ProjectFiles.ProjectScreenshotFileName));
+            File.Copy(template.IconFilePath, Path.Combine(systemFolderPath, Projects.ProjectIconFileName));
+            File.Copy(template.ScreenshotFilePath, Path.Combine(systemFolderPath, Projects.ProjectScreenshotFileName));
 
             foreach (var folder in template.Folders)
             {
@@ -56,7 +56,7 @@ public class ProjectFilesService : IProjectFilesService
 
             var projectJson = File.ReadAllText(template.ProjectFilePath);
             projectJson = projectJson.Replace("<name>", projectFolder.Name).Replace("<path>", gameProjectPath.Replace(@"\", @"\\"));
-            var projectPath = Path.GetFullPath(Path.Combine(gameProjectPath, $"{projectFolder.Name}{ProjectFiles.ProjectFileExtension}"));
+            var projectPath = Path.GetFullPath(Path.Combine(gameProjectPath, $"{projectFolder.Name}{Projects.ProjectFileExtension}"));
             File.WriteAllText(projectPath, projectJson);
 
             _projectFilesRepository.UpdateProjectsFile(projectFolder.Name, gameProjectPath);

@@ -29,9 +29,9 @@ public class ProjectFilesRepository : IProjectFilesRepository
                     {
                         Folders = templateFile.Folders,
                         Name = templateFile.Name,
-                        IconFilePath = Path.Combine(folder.FullPath, ProjectFiles.ProjectIconFileName),
-                        ScreenshotFilePath = Path.Combine(folder.FullPath, ProjectFiles.ProjectScreenshotFileName),
-                        ProjectFilePath = Path.Combine(folder.FullPath, ProjectFiles.ProjectFileName),
+                        IconFilePath = Path.Combine(folder.FullPath, Projects.ProjectIconFileName),
+                        ScreenshotFilePath = Path.Combine(folder.FullPath, Projects.ProjectScreenshotFileName),
+                        ProjectFilePath = Path.Combine(folder.FullPath, Projects.ProjectFileName),
                     });
             }
 
@@ -59,9 +59,9 @@ public class ProjectFilesRepository : IProjectFilesRepository
                 var projects = file.Projects.Select(project => new CreatedProject
                 {
                     Name = project.Name,
-                    ProjectFilePath = Path.Combine(project.Path, $"{project.Name}{ProjectFiles.ProjectFileExtension}"),
-                    IconFilePath = Path.Combine(project.Path, ProjectFiles.SystemFolderName, ProjectFiles.ProjectIconFileName),
-                    ScreenshotFilePath = Path.Combine(project.Path, ProjectFiles.SystemFolderName, ProjectFiles.ProjectScreenshotFileName)
+                    ProjectFilePath = Path.Combine(project.Path, $"{project.Name}{Projects.ProjectFileExtension}"),
+                    IconFilePath = Path.Combine(project.Path, Projects.SystemFolderName, Projects.ProjectIconFileName),
+                    ScreenshotFilePath = Path.Combine(project.Path, Projects.SystemFolderName, Projects.ProjectScreenshotFileName)
                 });
 
                 output.AddRange(projects);

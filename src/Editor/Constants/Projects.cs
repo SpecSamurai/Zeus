@@ -1,7 +1,9 @@
 namespace Editor.Constants;
 
-public static class ProjectFiles
+public static class Projects
 {
+    public static readonly string DefaultProjectsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Zeus");
+
     public const string ProjectFileExtension = ".zeus";
 
     public const string SystemFolderName = ".Zeus";
