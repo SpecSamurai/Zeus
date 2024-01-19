@@ -11,4 +11,12 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
+	<ItemGroup>
+		<Content Include="ProjectTemplates\**" CopyToOutputDirectory="Always" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Assets\**" />
+	</ItemGroup>
+
 </Project>
