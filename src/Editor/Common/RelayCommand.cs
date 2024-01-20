@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 
-namespace Zeus;
+namespace Zeus.Common;
 
 public class RelayCommand<T> : ICommand
 {
