@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Editor.Views.StartPage;
+namespace Zeus.Views.StartPage;
 
 public partial class StartPageDialog : Window
 {
