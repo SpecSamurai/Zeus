@@ -24,7 +24,7 @@ public class Project : ViewModelBase
     [DataMember] public string Name { get; private set; } = "New Project";
     [DataMember] public string Path { get; private set; }
 
-    public string FullPath => System.IO.Path.Combine(Path, $"{Name}{Extension}");
+    public string FullPath => System.IO.Path.Combine(Path, Name, $"{Name}{Extension}");
 
     public ReadOnlyObservableCollection<Scene> Scenes { get; private set; }
 
@@ -43,11 +43,12 @@ public class Project : ViewModelBase
 
     public static Project Current => Application.Current.MainWindow.DataContext as Project;
 
-    public ICommand Undo { get; private set; }
-    public ICommand Redo { get; private set; }
+    public ICommand UndoCommand { get; private set; }
+    public ICommand RedoCommand { get; private set; }
+    public ICommand SaveCommand { get; private set; }
 
-    public ICommand AddScene { get; private set; }
-    public ICommand RemoveScene { get; private set; }
+    public ICommand AddSceneCommand { get; private set; }
+    public ICommand RemoveSceneCommand { get; private set; }
 
     public static Project Load(string path)
     {
@@ -87,7 +88,7 @@ public class Project : ViewModelBase
         }
         ActiveScene = Scenes.FirstOrDefault(x => x.IsActive);
 
-        AddScene = new RelayCommand<object>(x =>
+        AddSceneCommand = new RelayCommand<object>(x =>
         {
             AddSceneInternal($"New Scene {_scenes.Count}");
             var newScene = _scenes.Last();
@@ -99,7 +100,7 @@ public class Project : ViewModelBase
                 redo: () => _scenes.Insert(sceneIndex, newScene));
         });
 
-        RemoveScene = new RelayCommand<Scene>(scene =>
+        RemoveSceneCommand = new RelayCommand<Scene>(scene =>
         {
             var index = _scenes.IndexOf(scene);
             RemoveSceneInternal(scene);
@@ -111,7 +112,8 @@ public class Project : ViewModelBase
         },
         scene => !scene.IsActive);
 
-        Undo = new RelayCommand<object>(x => History.Undo());
-        Redo = new RelayCommand<object>(x => History.Redo());
+        UndoCommand = new RelayCommand<object>(x => History.Undo());
+        RedoCommand = new RelayCommand<object>(x => History.Redo());
+        SaveCommand = new RelayCommand<object>(x => Save(this));
     }
 }
