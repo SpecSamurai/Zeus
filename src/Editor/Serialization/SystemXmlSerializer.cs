@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.Serialization;
 
-namespace Zeus.Models.Serialization;
+namespace Zeus.Serialization;
 
 public sealed class SystemXmlSerializer : ISerializer
 {

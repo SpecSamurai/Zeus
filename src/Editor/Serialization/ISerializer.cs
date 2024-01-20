@@ -1,4 +1,4 @@
-﻿namespace Zeus.Models.Serialization;
+﻿namespace Zeus.Serialization;
 
 public interface ISerializer
 {
