@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Editor;
+namespace Zeus;
 
 public partial class App : Application
 {
