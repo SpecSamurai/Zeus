@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.Serialization;
 
-namespace Zeus.ViewModels;
+namespace Zeus.Common;
 
 [DataContract(IsReference = true)]
 public class ViewModelBase : INotifyPropertyChanged
