@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Zeus.Models.History;
+namespace Zeus.History;
 
 public class HistoryCommand : IHistoryCommand
 {

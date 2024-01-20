@@ -1,4 +1,4 @@
-﻿namespace Zeus.Models.History;
+﻿namespace Zeus.History;
 
 public partial class HistoryStack
 {

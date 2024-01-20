@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace Zeus.Models.History;
+namespace Zeus.History;
 
 public partial class HistoryStack
 {
