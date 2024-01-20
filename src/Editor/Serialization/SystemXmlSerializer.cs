@@ -10,7 +10,7 @@ public sealed class SystemXmlSerializer : ISerializer
     {
         try
         {
-            using var fileStream = File.OpenWrite(filePath);
+            using var fileStream = new FileStream(filePath, FileMode.Create);
             var serializer = new DataContractSerializer(typeof(TInput));
             serializer.WriteObject(fileStream, @object);
         }
@@ -24,7 +24,7 @@ public sealed class SystemXmlSerializer : ISerializer
     {
         try
         {
-            using var fileStream = File.OpenRead(filePath);
+            using var fileStream = new FileStream(filePath, FileMode.Open);
             var serializer = new DataContractSerializer(typeof(TOutput));
             return (TOutput)serializer.ReadObject(fileStream);
         }
