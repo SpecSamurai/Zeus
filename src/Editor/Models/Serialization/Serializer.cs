@@ -1,4 +1,4 @@
-﻿namespace Editor.Models.Serialization;
+﻿namespace Zeus.Models.Serialization;
 
 public static class Serializer
 {
