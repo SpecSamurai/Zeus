@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Editor.Constants;
+namespace Zeus.Constants;
 
 public static class FileSystem
 {
