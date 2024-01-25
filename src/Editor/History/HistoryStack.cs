@@ -4,6 +4,7 @@ namespace Zeus.History;
 
 public partial class HistoryStack
 {
+    private bool _enableAdd = true;
     private readonly ObservableCollection<IHistoryCommand> _undoList = new ObservableCollection<IHistoryCommand>();
     private readonly ObservableCollection<IHistoryCommand> _redoList = new ObservableCollection<IHistoryCommand>();
 
@@ -18,8 +19,11 @@ public partial class HistoryStack
 
     public void Push(IHistoryCommand command)
     {
-        _undoList.Add(command);
-        _redoList.Clear();
+        if (_enableAdd)
+        {
+            _undoList.Add(command);
+            _redoList.Clear();
+        }
     }
 
     public void Undo()
@@ -28,8 +32,10 @@ public partial class HistoryStack
         {
             var command = _undoList.Last();
             _undoList.RemoveAt(_undoList.Count - 1);
+            _enableAdd = false;
             command.Undo();
             _redoList.Insert(0, command);
+            _enableAdd = true;
         }
     }
 
@@ -39,7 +45,9 @@ public partial class HistoryStack
         {
             var command = _redoList.First();
             _redoList.RemoveAt(0);
+            _enableAdd = false;
             command.Redo();
+            _enableAdd = true;
             _undoList.Add(command);
         }
     }
