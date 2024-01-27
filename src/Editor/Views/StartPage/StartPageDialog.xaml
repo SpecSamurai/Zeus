@@ -27,8 +27,8 @@
                           Margin="20, 00"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" x:Name="startPageContent" Grid.Row="1">
-            <local:OpenProjectControl/>
-            <local:CreateProjectControl/>
+            <local:OpenProjectControl x:Name="openProjectView"/>
+            <local:CreateProjectControl x:Name="createProjectView"/>
         </StackPanel>
     </Grid>
 </Window>

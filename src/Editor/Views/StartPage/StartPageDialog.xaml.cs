@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Zeus.StartPage;
 
 namespace Zeus.Views.StartPage;
 
@@ -7,6 +8,18 @@ public partial class StartPageDialog : Window
     public StartPageDialog()
     {
         InitializeComponent();
+        Loaded += OnLoaded;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnLoaded;
+        if(OpenProjectViewModel.Projects.Count == 0)
+        {
+            openProjectButton.IsEnabled = false;
+            openProjectView.Visibility = Visibility.Hidden;
+            OnToggleButton_Click(createProjectButton, new());
+        }
     }
 
     private void OnToggleButton_Click(object sender, RoutedEventArgs e)
