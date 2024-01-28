@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
+using Zeus.Logging;
 
 namespace Zeus.Serialization;
 
@@ -17,6 +18,8 @@ public sealed class SystemXmlSerializer : ISerializer
         catch (Exception e)
         {
             Debug.WriteLine(e.Message);
+            Logger.LogError($"Failed to serialize {@object} to {filePath}");
+            throw;
         }
     }
 
@@ -31,7 +34,8 @@ public sealed class SystemXmlSerializer : ISerializer
         catch (Exception e)
         {
             Debug.WriteLine(e.Message);
-            return default;
+            Logger.LogError($"Failed to deserializer {filePath}");
+            throw;
         }
     }
 }
