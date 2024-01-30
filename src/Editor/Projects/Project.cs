@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using Zeus.History;
 using Zeus.Common;
+using Zeus.Logging;
 
 namespace Zeus.Projects;
 
@@ -59,20 +60,21 @@ public class Project : ViewModelBase
     public static void Save(Project project)
     {
         project.ToFile(project.FullPath);
+        Logger.LogInformation($"Project saved to '{project.FullPath}'");
     }
 
     public void Unload()
     {
-
+        History.Clear();
     }
 
-    private void AddSceneInternal(string sceneName)
+    private void AddScene(string sceneName)
     {
         Debug.Assert(!string.IsNullOrWhiteSpace(sceneName));
         _scenes.Add(new(sceneName, this));
     }
 
-    private void RemoveSceneInternal(Scene scene)
+    private void RemoveScene(Scene scene)
     {
         Debug.Assert(_scenes.Contains(scene));
         _scenes.Remove(scene);
@@ -90,25 +92,25 @@ public class Project : ViewModelBase
 
         AddSceneCommand = new RelayCommand<object>(x =>
         {
-            AddSceneInternal($"New Scene {_scenes.Count}");
+            AddScene($"New Scene {_scenes.Count}");
             var newScene = _scenes.Last();
             var sceneIndex = _scenes.Count - 1;
 
             History.Push(
                 $"Add {newScene.Name}",
-                undo: () => RemoveSceneInternal(newScene),
+                undo: () => RemoveScene(newScene),
                 redo: () => _scenes.Insert(sceneIndex, newScene));
         });
 
         RemoveSceneCommand = new RelayCommand<Scene>(scene =>
         {
             var index = _scenes.IndexOf(scene);
-            RemoveSceneInternal(scene);
+            RemoveScene(scene);
 
             History.Push(
                 $"Remove {scene.Name}",
                 undo: () => _scenes.Insert(index, scene),
-                redo: () => RemoveSceneInternal(scene));
+                redo: () => RemoveScene(scene));
         },
         scene => !scene.IsActive);
 
