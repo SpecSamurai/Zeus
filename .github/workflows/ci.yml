@@ -2,6 +2,15 @@
 
 on:
   workflow_dispatch:
+    inputs: 
+      environment:
+        required: true
+        description: Deployment environment.
+        options:
+          - Development
+          - Staging
+          - Production
+  workflow_call:
   push:
     branches: [ "master" ]
   pull_request:
