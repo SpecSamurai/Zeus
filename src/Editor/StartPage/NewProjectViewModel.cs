@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using Zeus.Common;
+using Zeus.Logging;
 
 namespace Zeus.StartPage;
 
@@ -45,6 +46,8 @@ public class NewProjectViewModel : ViewModelBase
         catch (Exception e)
         {
             Debug.WriteLine(e.Message);
+            Logger.LogError("Failed to read project templates");
+            throw;
         }
     }
 
@@ -79,7 +82,8 @@ public class NewProjectViewModel : ViewModelBase
         catch (Exception e)
         {
             Debug.WriteLine(e.Message);
-            return string.Empty;
+            Logger.LogError($"Failed to create {ProjectName}");
+            throw;
         }
     }
 
