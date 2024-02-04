@@ -4,6 +4,7 @@ using Zeus.Serialization;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using Zeus.Logging;
 
 namespace Zeus.StartPage;
 
@@ -25,6 +26,8 @@ public class OpenProjectViewModel
         catch (Exception e)
         {
             Debug.WriteLine(e.Message);
+            Logger.LogError("Failed to read project data");
+            throw;
         }
     }
 
