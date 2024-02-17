@@ -5,8 +5,10 @@ namespace Zeus.History;
 public partial class HistoryStack
 {
     private bool _enableAdd = true;
-    private readonly ObservableCollection<IHistoryCommand> _undoList = new ObservableCollection<IHistoryCommand>();
-    private readonly ObservableCollection<IHistoryCommand> _redoList = new ObservableCollection<IHistoryCommand>();
+    private readonly ObservableCollection<IHistoryCommand> _undoList =
+        new ObservableCollection<IHistoryCommand>();
+    private readonly ObservableCollection<IHistoryCommand> _redoList =
+        new ObservableCollection<IHistoryCommand>();
 
     public HistoryStack()
     {
