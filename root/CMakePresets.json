@@ -1,0 +1,87 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CXX_DEBUG_COMPILE_FLAGS": "-Werror;-Wall;-Wextra;-Wconversion;-pedantic;-pedantic-errors",
+                "CXX_RELEASE_COMPILE_FLAGS": "-Werror;-Wunused-variable"
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "inherits": "default",
+            "binaryDir": "${sourceDir}/build/debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "inherits": "default",
+            "binaryDir": "${sourceDir}/build/release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "test",
+            "displayName": "Test Config",
+            "inherits": "debug",
+            "binaryDir": "${sourceDir}/build/debug/tests"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "configuration": "Debug",
+            "configurePreset": "debug",
+            "cleanFirst": true
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "configuration": "Release",
+            "configurePreset": "release",
+            "cleanFirst": true
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "test",
+            "displayName": "Debug Run all tests",
+            "configuration": "Debug",
+            "configurePreset": "test",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "stopOnFailure": true
+            }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "rebuild",
+            "displayName": "Clean Rebuild",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "debug"
+                },
+                {
+                    "type": "build",
+                    "name": "debug"
+                }
+            ]
+        }
+    ]
+}
