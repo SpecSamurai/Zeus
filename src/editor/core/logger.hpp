@@ -112,9 +112,7 @@ inline void error(const std::format_string<Args...>& message, Args&&... args)
 }
 
 template <typename... Args>
-inline void critical(
-    const std::format_string<Args...>& message,
-    Args&&... args)
+inline void critical(const std::format_string<Args...>& message, Args&&... args)
 {
     log(LogLevel::Critical, message, std::forward<Args>(args)...);
 }
