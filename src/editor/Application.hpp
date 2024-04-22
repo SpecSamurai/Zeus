@@ -1326,7 +1326,6 @@ private:
                 &surface) != VK_SUCCESS)
         {
             critical("Failed to create window surface");
-            assert(false);
             throw std::runtime_error("failed to create window surface!");
         }
     }
