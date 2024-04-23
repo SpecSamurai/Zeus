@@ -1,7 +1,7 @@
 #define GLFW_INCLUDE_VULKAN
 
-#include "../vulkan.utils.hpp"
 #include "logger.hpp"
+#include "vulkan.utils.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -79,6 +79,42 @@ public:
             critical("Failed to create instance");
             assert(false);
         }
+    }
+
+    // Tells Vulkan driver which global extensions and validation layers we want
+    // to
+    // use. Global here means that they apply to the entire program and not a
+    // specific device
+    bool checkValidationLayerSupport(
+        const std::vector<const char*>& validationLayers)
+    {
+        std::uint32_t layerCount{0};
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+        std::vector<VkLayerProperties> availableLayers(layerCount);
+        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+        for (const char* layerName : validationLayers)
+        {
+            bool layerFound{false};
+
+            for (const auto& layerProperties : availableLayers)
+            {
+                if (strcmp(layerName, layerProperties.layerName) == 0)
+                {
+                    debug("{} layer supported", layerProperties.layerName);
+                    layerFound = true;
+                    break;
+                }
+            }
+
+            if (!layerFound)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // get required global extensions
