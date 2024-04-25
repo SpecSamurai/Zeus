@@ -1,4 +1,5 @@
 #include "logger.hpp"
+#include "vulkan_settings.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -29,10 +30,6 @@ struct SwapChainSupportDetails
     VkSurfaceCapabilitiesKHR capabilities;
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> presentModes;
-};
-
-const std::vector<const char*> deviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
 
 class VulkanDevice
@@ -188,8 +185,8 @@ public:
             availableExtensions.data());
 
         std::set<std::string> requiredExtensions(
-            deviceExtensions.begin(),
-            deviceExtensions.end());
+            DEVICE_EXTENSIONS.begin(),
+            DEVICE_EXTENSIONS.end());
 
         for (const auto& extension : availableExtensions)
         {
