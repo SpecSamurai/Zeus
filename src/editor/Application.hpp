@@ -4,9 +4,10 @@
 
 #include "files.hpp"
 #include "graphics/VulkanDevice.cpp"
-#include "graphics/VulkanInstance.cpp"
-#include "graphics/Window.cpp"
-#include "graphics/vulkan.utils.hpp"
+#include "graphics/VulkanInstance.hpp"
+#include "graphics/glfw_utils.hpp"
+#include "graphics/vulkan_settings.hpp"
+#include "graphics/vulkan_utils.hpp"
 #include "logger.hpp"
 
 #include <GLFW/glfw3.h>
@@ -53,28 +54,27 @@ public:
 
         vkDestroyDevice(device, nullptr);
 
-        // Instance
         if (ENABLE_VALIDATION_LAYERS)
         {
-            destroyDebugUtilsMessengerEXT(
-                m_instance.instance,
-                m_instance.debugMessenger,
-                nullptr);
+            destroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
         }
 
-        vkDestroySurfaceKHR(m_instance.instance, surface, nullptr);
-        vkDestroyInstance(m_instance.instance, nullptr);
-        // Instance
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        vkDestroyInstance(instance, nullptr);
 
-        // glfwDestroyWindow(window);
-        // glfwTerminate();
+        trace("Terminating window");
+
+        glfwDestroyWindow(window);
+        glfwTerminate();
     }
 
     void Run(int width, int height, const char* title)
     {
         _title = title;
 
-        window.InitWindow(width, height, title);
+        // window.InitWindow(width, height, title);
+
+        window = createWindow(width, height, title);
 
         InitVulkan();
         MainLoop();
@@ -83,11 +83,10 @@ public:
 private:
     const char* _title;
 
-    Window window;
-    VulkanInstance m_instance;
+    GLFWwindow* window;
 
-    // VkInstance instance{VK_NULL_HANDLE};
-    // VkDebugUtilsMessengerEXT debugMessenger{VK_NULL_HANDLE};
+    VkInstance instance{VK_NULL_HANDLE};
+    VkDebugUtilsMessengerEXT debugMessenger{VK_NULL_HANDLE};
     VkSurfaceKHR surface{VK_NULL_HANDLE};
 
     // VkPhysicalDevice physicalDevice{VK_NULL_HANDLE};
@@ -118,7 +117,7 @@ private:
 private:
     void MainLoop()
     {
-        while (!glfwWindowShouldClose(window.m_handle))
+        while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
             DrawFrame();
@@ -132,12 +131,12 @@ private:
 
     void InitVulkan()
     {
-        // CreateInstance();
-        m_instance.CreateInstance(_title);
-        m_instance.SetupDebugMessenger();
-        // SetupDebugMessenger();
+        CreateInstance(instance, _title);
+        SetupDebugMessenger(instance, debugMessenger);
+        // m_instance.Init(_title);
+
         CreateSurface();
-        physical.PickPhysicalDevice(m_instance.instance, surface);
+        physical.PickPhysicalDevice(instance, surface);
 
         // PickPhysicalDevice();
         CreateLogicaDevice();
@@ -451,6 +450,7 @@ private:
         rasterizer.lineWidth = 1.0f;
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
         rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        // rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
         rasterizer.depthBiasConstantFactor = 0.0f; // Optional
         rasterizer.depthBiasClamp = 0.0f;          // Optional
@@ -945,8 +945,8 @@ private:
         createInfo.pEnabledFeatures = &deviceFeatures;
 
         createInfo.enabledExtensionCount =
-            static_cast<std::uint32_t>(deviceExtensions.size());
-        createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+            static_cast<std::uint32_t>(DEVICE_EXTENSIONS.size());
+        createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
 
         // Previous implementations of Vulkan made a distinction between
         // instance and device specific validation layers, but this is no longer
@@ -957,8 +957,8 @@ private:
         if (ENABLE_VALIDATION_LAYERS)
         {
             createInfo.enabledLayerCount =
-                static_cast<std::uint32_t>(validationLayers.size());
-            createInfo.ppEnabledLayerNames = validationLayers.data();
+                static_cast<std::uint32_t>(VALIDATION_LAYERS.size());
+            createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
         }
         else
         {
@@ -986,19 +986,6 @@ private:
             indices.presentFamily.value(),
             0,
             &presentQueue);
-    }
-
-    void CreateSurface()
-    {
-        if (glfwCreateWindowSurface(
-                m_instance.instance,
-                window.m_handle,
-                nullptr,
-                &surface) != VK_SUCCESS)
-        {
-            critical("Failed to create window surface");
-            throw std::runtime_error("failed to create window surface!");
-        }
     }
 
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(
@@ -1063,7 +1050,7 @@ private:
             int width, height;
             // to query the resolution of the window in pixel before matching it
             // against the minimum and maximum image extent
-            glfwGetFramebufferSize(window.m_handle, &width, &height);
+            glfwGetFramebufferSize(window, &width, &height);
 
             VkExtent2D actualExtent = {
                 static_cast<std::uint32_t>(width),
@@ -1079,6 +1066,16 @@ private:
                 capabilities.maxImageExtent.height);
 
             return actualExtent;
+        }
+    }
+
+    void CreateSurface()
+    {
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) !=
+            VK_SUCCESS)
+        {
+            critical("Failed to create window surface");
+            throw std::runtime_error("failed to create window surface!");
         }
     }
 };
