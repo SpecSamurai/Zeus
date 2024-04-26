@@ -8,16 +8,14 @@ FetchContent_Declare(
     GIT_TAG 3.4
 )
 
-#FetchContent_Declare(
-#    assimp
-#    GIT_REPOSITORY https://github.com/assimp/assimp.git
-#    GIT_TAG v5.3.1
-#)
+FetchContent_Declare(
+	glm
+	GIT_REPOSITORY	https://github.com/g-truc/glm.git
+	GIT_TAG 1.0.1
+)
 
 FetchContent_MakeAvailable(glfw)
-#FetchContent_MakeAvailable(assimp)
-
-#target_compile_options(assimp PUBLIC -Wno-error)
+FetchContent_MakeAvailable(glm)
 
 add_executable(Editor
     main.cpp
@@ -41,7 +39,7 @@ target_include_directories(Editor
 )
 
 target_link_libraries(Editor
-    PRIVATE Engine Vulkan::Vulkan glfw imgui
+    PRIVATE Engine Vulkan::Vulkan glfw imgui glm::glm
 )
 
 target_compile_options(Editor PRIVATE
