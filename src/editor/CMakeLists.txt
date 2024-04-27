@@ -46,11 +46,11 @@ target_compile_options(Editor PRIVATE
     $<$<CONFIG:Debug>:${CXX_DEBUG_COMPILE_FLAGS}>
     $<$<CONFIG:Release>:${CXX_RELEASE_COMPILE_FLAGS}>)
 
-add_custom_command(TARGET Editor POST_BUILD
+add_custom_target(Shaders ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/shaders"
     COMMAND glslc shader.vert -o shader.vert.spv
     COMMAND glslc shader.frag -o shader.frag.spv
     COMMAND mv ./*.spv "${CMAKE_CURRENT_BINARY_DIR}/shaders"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/shaders"
-    COMMENT "Compiling shaders..."
+    COMMENT "Compiling Shaders..."
 )
