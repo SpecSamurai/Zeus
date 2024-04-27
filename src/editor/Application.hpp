@@ -23,6 +23,9 @@
 #include <optional>
 #include <vector>
 
+// TODO: EX https://vulkan-tutorial.com/Vertex_buffers/Staging_buffer
+// TRANSFER QUEUE
+
 namespace Zeus
 {
 struct Vertex
@@ -61,13 +64,13 @@ struct Vertex
 };
 
 const std::vector<Vertex> vertices = {
-    {{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.7f, -0.5f}, {1.0f, 1.0f, 1.0f}},
-    {{-0.2f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
 };
+
+const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0};
 
 class Application
 {
@@ -82,6 +85,9 @@ public:
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 
         vkDestroyRenderPass(device, renderPass, nullptr);
+
+        vkDestroyBuffer(device, indexBuffer, nullptr);
+        vkFreeMemory(device, indexBufferMemory, nullptr);
 
         vkDestroyBuffer(device, vertexBuffer, nullptr);
         vkFreeMemory(device, vertexBufferMemory, nullptr);
@@ -154,8 +160,21 @@ private:
 
     VkCommandPool commandPool;
 
+    // you should allocate multiple
+    // resources like buffers from a single memory allocation, but in fact you
+    // should go a step further. Driver developers recommend that you also store
+    // multiple buffers, like the vertex and index buffer, into a single
+    // VkBuffer and use offsets in commands like vkCmdBindVertexBuffers. The
+    // advantage is that your data is more cache friendly in that case, because
+    // it's closer together. It is even possible to reuse the same chunk of
+    // memory for multiple resources if they are not used during the same render
+    // operations, provided that their data is refreshed, of course. This is
+    // known as aliasing and some Vulkan functions have explicit flags to
+    // specify that you want to do this.
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
+    VkBuffer indexBuffer;
+    VkDeviceMemory indexBufferMemory;
 
     std::vector<VkCommandBuffer> commandBuffers;
 
@@ -211,52 +230,65 @@ private:
         CreateFramebuffers();
         CreateCommandPool();
         createVertexBuffer();
+        createIndexBuffer();
         CreateCommandBuffers();
         CreateSyncObjects();
     }
 
-    void createVertexBuffer()
+    void CreateBuffer(
+        VkDeviceSize size,
+        VkBufferUsageFlags usage,
+        VkMemoryPropertyFlags properties,
+        VkBuffer& buffer,
+        VkDeviceMemory& bufferMemory)
     {
-        // The flags parameter is used to configure sparse buffer memory, which
-        // is not relevant right now. We'll leave it at the default value of 0.
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = sizeof(vertices[0]) * vertices.size();
-        bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        bufferInfo.size = size;
+        bufferInfo.usage = usage;
+
         // Just like the images in the swap chain, buffers can also be owned by
         // a specific queue family or be shared between multiple at the same
         // time. The buffer will only be used from the graphics queue, so we can
         // stick to exclusive access.
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) !=
-            VK_SUCCESS)
+        if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
         {
-            throw std::runtime_error("failed to create vertex buffer!");
+            throw std::runtime_error("failed to create buffer!");
         }
 
         // The buffer has been created, but it doesn't actually have any memory
         // assigned to it yet. The first step of allocating memory for the
         // buffer is to query its memory requirements
         VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+        vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
 
         VkMemoryAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(
-            memRequirements.memoryTypeBits,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        allocInfo.memoryTypeIndex =
+            findMemoryType(memRequirements.memoryTypeBits, properties);
 
-        if (vkAllocateMemory(
-                device,
-                &allocInfo,
-                nullptr,
-                &vertexBufferMemory) != VK_SUCCESS)
+        // It should be noted that in a real world application, you're not
+        // supposed to actually call vkAllocateMemory for every individual
+        // buffer. The maximum number of simultaneous memory allocations is
+        // limited by the maxMemoryAllocationCount physical device limit, which
+        // may be as low as 4096 even on high end hardware like an NVIDIA GTX
+        // 1080. The right way to allocate memory for a large number of objects
+        // at the same time is to create a custom allocator that splits up a
+        // single allocation among many different objects by using the offset
+        // parameters that we've seen in many functions.
+
+        // You can either implement such an allocator yourself, or use the
+        // VulkanMemoryAllocator library provided by the GPUOpen initiative.
+        // However, for this tutorial it's okay to use a separate allocation for
+        // every resource, because we won't come close to hitting any of these
+        // limits for now.
+        if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) !=
+            VK_SUCCESS)
         {
-            throw std::runtime_error(
-                "failed to allocate vertex buffer memory!");
+            throw std::runtime_error("failed to allocate buffer memory!");
         }
 
         // The first three parameters are self-explanatory and the fourth
@@ -264,9 +296,60 @@ private:
         // memory is allocated specifically for this the vertex buffer, the
         // offset is simply 0. If the offset is non-zero, then it is required to
         // be divisible by memRequirements.alignment.
-        vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+        vkBindBufferMemory(device, buffer, bufferMemory, 0);
+    }
+
+    void createIndexBuffer()
+    {
+        VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        CreateBuffer(
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            stagingBuffer,
+            stagingBufferMemory);
 
         void* data;
+        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, indices.data(), (size_t)bufferSize);
+        vkUnmapMemory(device, stagingBufferMemory);
+
+        CreateBuffer(
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            indexBuffer,
+            indexBufferMemory);
+
+        copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+    }
+
+    void createVertexBuffer()
+    {
+        // The flags parameter is used to configure sparse buffer memory, which
+        // is not relevant right now. We'll leave it at the default value of 0.
+
+        VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        CreateBuffer(
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            stagingBuffer,
+            stagingBufferMemory);
+
+        void* data;
+
         // This function allows us to access a region of the specified memory
         // resource defined by an offset and size. The offset and size here are
         // 0 and bufferInfo.size, respectively. It is also possible to specify
@@ -275,7 +358,7 @@ private:
         // available yet in the current API. It must be set to the value 0. The
         // last parameter specifies the output for the pointer to the mapped
         // memory.
-        vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
 
         // You can now simply memcpy the vertex data to the mapped memory and
         // unmap it again using vkUnmapMemory. Unfortunately the driver may not
@@ -297,8 +380,62 @@ private:
         // to the GPU is an operation that happens in the background and the
         // specification simply tells us that it is guaranteed to be complete as
         // of the next call to vkQueueSubmit.
-        memcpy(data, vertices.data(), (size_t)bufferInfo.size);
-        vkUnmapMemory(device, vertexBufferMemory);
+        memcpy(data, vertices.data(), (size_t)bufferSize);
+        vkUnmapMemory(device, stagingBufferMemory);
+
+        // The vertex buffer we have right now works correctly, but the memory
+        // type that allows us to access it from the CPU may not be the most
+        // optimal memory type for the graphics card itself to read from. The
+        // most optimal memory has the VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT flag
+        // and is usually not accessible by the CPU on dedicated graphics cards.
+        CreateBuffer(
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            vertexBuffer,
+            vertexBufferMemory);
+
+        copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+    }
+
+    void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+    {
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandPool = commandPool;
+        allocInfo.commandBufferCount = 1;
+
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+        VkBufferCopy copyRegion{};
+        copyRegion.srcOffset = 0; // Optional
+        copyRegion.dstOffset = 0; // Optional
+        copyRegion.size = size;
+        vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+        vkEndCommandBuffer(commandBuffer);
+
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+
+        vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(graphicsQueue);
+
+        vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
     }
 
     // Graphics cards can offer different types of memory to allocate from. Each
@@ -595,11 +732,24 @@ private:
         VkBuffer vertexBuffers[] = {vertexBuffer};
         VkDeviceSize offsets[] = {0};
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
-        vkCmdDraw(
+        vkCmdBindIndexBuffer(
             commandBuffer,
-            static_cast<uint32_t>(vertices.size()),
+            indexBuffer,
+            0,
+            VK_INDEX_TYPE_UINT16);
+
+        // vkCmdDraw(
+        //     commandBuffer,
+        //     static_cast<uint32_t>(vertices.size()),
+        //     1,
+        //     0,
+        //     0);
+
+        vkCmdDrawIndexed(
+            commandBuffer,
+            static_cast<uint32_t>(indices.size()),
             1,
+            0,
             0,
             0);
 
