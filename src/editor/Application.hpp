@@ -61,8 +61,11 @@ struct Vertex
 };
 
 const std::vector<Vertex> vertices = {
-    {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.7f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+    {{-0.2f, 0.5f}, {0.0f, 1.0f, 0.0f}},
     {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
 };
 
@@ -79,6 +82,9 @@ public:
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 
         vkDestroyRenderPass(device, renderPass, nullptr);
+
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
+        vkFreeMemory(device, vertexBufferMemory, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
@@ -147,6 +153,10 @@ private:
     VkPipeline graphicsPipeline;
 
     VkCommandPool commandPool;
+
+    VkBuffer vertexBuffer;
+    VkDeviceMemory vertexBufferMemory;
+
     std::vector<VkCommandBuffer> commandBuffers;
 
     std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -200,8 +210,141 @@ private:
         CreateGraphicsPipeline();
         CreateFramebuffers();
         CreateCommandPool();
+        createVertexBuffer();
         CreateCommandBuffers();
         CreateSyncObjects();
+    }
+
+    void createVertexBuffer()
+    {
+        // The flags parameter is used to configure sparse buffer memory, which
+        // is not relevant right now. We'll leave it at the default value of 0.
+        VkBufferCreateInfo bufferInfo{};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+        bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        // Just like the images in the swap chain, buffers can also be owned by
+        // a specific queue family or be shared between multiple at the same
+        // time. The buffer will only be used from the graphics queue, so we can
+        // stick to exclusive access.
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) !=
+            VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create vertex buffer!");
+        }
+
+        // The buffer has been created, but it doesn't actually have any memory
+        // assigned to it yet. The first step of allocating memory for the
+        // buffer is to query its memory requirements
+        VkMemoryRequirements memRequirements;
+        vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+
+        VkMemoryAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize = memRequirements.size;
+        allocInfo.memoryTypeIndex = findMemoryType(
+            memRequirements.memoryTypeBits,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+        if (vkAllocateMemory(
+                device,
+                &allocInfo,
+                nullptr,
+                &vertexBufferMemory) != VK_SUCCESS)
+        {
+            throw std::runtime_error(
+                "failed to allocate vertex buffer memory!");
+        }
+
+        // The first three parameters are self-explanatory and the fourth
+        // parameter is the offset within the region of memory. Since this
+        // memory is allocated specifically for this the vertex buffer, the
+        // offset is simply 0. If the offset is non-zero, then it is required to
+        // be divisible by memRequirements.alignment.
+        vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+
+        void* data;
+        // This function allows us to access a region of the specified memory
+        // resource defined by an offset and size. The offset and size here are
+        // 0 and bufferInfo.size, respectively. It is also possible to specify
+        // the special value VK_WHOLE_SIZE to map all of the memory. The second
+        // to last parameter can be used to specify flags, but there aren't any
+        // available yet in the current API. It must be set to the value 0. The
+        // last parameter specifies the output for the pointer to the mapped
+        // memory.
+        vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+
+        // You can now simply memcpy the vertex data to the mapped memory and
+        // unmap it again using vkUnmapMemory. Unfortunately the driver may not
+        // immediately copy the data into the buffer memory, for example because
+        // of caching. It is also possible that writes to the buffer are not
+        // visible in the mapped memory yet. There are two ways to deal with
+        // that problem:
+        // Use a memory heap that is host coherent, indicated with
+        // VK_MEMORY_PROPERTY_HOST_COHERENT_BIT Call vkFlushMappedMemoryRanges
+        // after writing to the mapped memory, and call
+        // vkInvalidateMappedMemoryRanges before reading from the mapped memory
+        // We went for the first approach, which ensures that the mapped memory
+        // always matches the contents of the allocated memory. Do keep in mind
+        // that this may lead to slightly worse performance than explicit
+        // flushing, but we'll see why that doesn't matter
+        // Flushing memory ranges or using a coherent memory heap means that the
+        // driver will be aware of our writes to the buffer, but it doesn't mean
+        // that they are actually visible on the GPU yet. The transfer of data
+        // to the GPU is an operation that happens in the background and the
+        // specification simply tells us that it is guaranteed to be complete as
+        // of the next call to vkQueueSubmit.
+        memcpy(data, vertices.data(), (size_t)bufferInfo.size);
+        vkUnmapMemory(device, vertexBufferMemory);
+    }
+
+    // Graphics cards can offer different types of memory to allocate from. Each
+    // type of memory varies in terms of allowed operations and performance
+    // characteristics. We need to combine the requirements of the buffer and
+    // our own application requirements to find the right type of memory to use.
+    uint32_t findMemoryType(
+        uint32_t typeFilter,
+        VkMemoryPropertyFlags properties)
+    {
+        // The VkPhysicalDeviceMemoryProperties structure has two arrays
+        // memoryTypes and memoryHeaps. Memory heaps are distinct memory
+        // resources like dedicated VRAM and swap space in RAM for when VRAM
+        // runs out. The different types of memory exist within these heaps.
+        // Right now we'll only concern ourselves with the type of memory and
+        // not the heap it comes from, but you can imagine that this can affect
+        // performance.
+        VkPhysicalDeviceMemoryProperties memProperties;
+        vkGetPhysicalDeviceMemoryProperties(
+            physical.physicalDevice,
+            &memProperties);
+
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+        {
+            // The typeFilter parameter will be used to specify the bit field of
+            // memory types that are suitable.That means that we can find the
+            // index of a suitable memory type by simply iterating over them and
+            // checking if the corresponding bit is set to 1.
+            // However, we're not just interested in a memory type that is
+            // suitable for the vertex buffer. We also need to be able to
+            // write our vertex data to that memory. The memoryTypes array
+            // consists of VkMemoryType structs that specify the heap and
+            // properties of each type of memory. The properties define
+            // special features of the memory, like being able to map it so
+            // we can write to it from the CPU. This property is indicated
+            // with VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, but we also need to
+            // use the VK_MEMORY_PROPERTY_HOST_COHERENT_BIT property.
+            if ((typeFilter & (1 << i)) &&
+                (memProperties.memoryTypes[i].propertyFlags & properties) ==
+                    properties)
+            {
+                return i;
+            }
+        }
+
+        throw std::runtime_error("failed to find suitable memory type!");
     }
 
     void cleanupSwapChain()
@@ -449,7 +592,16 @@ private:
         scissor.extent = swapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+        VkBuffer vertexBuffers[] = {vertexBuffer};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        vkCmdDraw(
+            commandBuffer,
+            static_cast<uint32_t>(vertices.size()),
+            1,
+            0,
+            0);
 
         vkCmdEndRenderPass(commandBuffer);
 
@@ -1187,6 +1339,7 @@ private:
     VkPresentModeKHR chooseSwapPresentMode(
         const std::vector<VkPresentModeKHR>& availablePresentModes)
     {
+        // return VK_PRESENT_MODE_IMMEDIATE_KHR;
         for (const auto& availablePresentMode : availablePresentModes)
         {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
