@@ -19,3 +19,12 @@ target_include_directories(imgui
 target_compile_options(imgui PRIVATE
     $<$<CONFIG:Debug>:${CXX_DEBUG_COMPILE_FLAGS}>
     $<$<CONFIG:Release>:${CXX_RELEASE_COMPILE_FLAGS}>)
+
+add_library(stb
+    stb/stb_image.h
+    stb/stb_image.c
+)
+
+target_include_directories(stb
+    INTERFACE stb
+)
