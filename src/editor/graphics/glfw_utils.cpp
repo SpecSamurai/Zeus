@@ -1,6 +1,6 @@
 #include "glfw_utils.hpp"
 
-#include "logger.hpp"
+#include <core/logger.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>

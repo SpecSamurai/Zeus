@@ -5,5 +5,8 @@
 
 namespace Zeus
 {
-GLFWwindow* createWindow(int width, int height, const char* title);
+[[nodiscard]] GLFWwindow* createWindow(
+    int width,
+    int height,
+    const char* title);
 }
