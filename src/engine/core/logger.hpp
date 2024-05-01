@@ -3,6 +3,7 @@
 #include <cassert>
 #include <format>
 #include <iostream>
+#include <source_location>
 #include <sstream>
 #include <utility>
 
@@ -36,13 +37,14 @@ enum class LogLevel
     Info,
     Warning,
     Error,
-    Critical,
+    Fatal,
 };
 
 template <typename... Args>
 inline void log(
     LogLevel logLevel,
     const std::format_string<Args...>& message,
+    const std::source_location location,
     Args&&... args)
 {
     using namespace ANSI;
@@ -68,8 +70,9 @@ inline void log(
     case LogLevel::Error:
         output << ForegroundColors::RED << "[ERROR]";
         break;
-    case LogLevel::Critical:
-        output << BackgroundColors::RED << "[CRITICAL]";
+    case LogLevel::Fatal:
+        output << BackgroundColors::RED << "[FATAL] [" << location.file_name()
+               << "] [LINE:" << location.line() << "]";
         break;
     default:
         assert(false && "Unknown LogLevel");
@@ -84,36 +87,51 @@ inline void log(
 template <typename... Args>
 inline void trace(const std::format_string<Args...>& message, Args&&... args)
 {
-    log(LogLevel::Trace, message, std::forward<Args>(args)...);
+    log(LogLevel::Trace,
+        message,
+        std::source_location::current(),
+        std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 inline void debug(const std::format_string<Args...>& message, Args&&... args)
 {
-    log(LogLevel::Debug, message, std::forward<Args>(args)...);
+    log(LogLevel::Debug,
+        message,
+        std::source_location::current(),
+        std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 inline void info(const std::format_string<Args...>& message, Args&&... args)
 {
-    log(LogLevel::Info, message, std::forward<Args>(args)...);
+    log(LogLevel::Info,
+        message,
+        std::source_location::current(),
+        std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 inline void warning(const std::format_string<Args...>& message, Args&&... args)
 {
-    log(LogLevel::Warning, message, std::forward<Args>(args)...);
+    log(LogLevel::Warning,
+        message,
+        std::source_location::current(),
+        std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 inline void error(const std::format_string<Args...>& message, Args&&... args)
 {
-    log(LogLevel::Error, message, std::forward<Args>(args)...);
+    log(LogLevel::Error,
+        message,
+        std::source_location::current(),
+        std::forward<Args>(args)...);
+}
 }
 
-template <typename... Args>
-inline void critical(const std::format_string<Args...>& message, Args&&... args)
-{
-    log(LogLevel::Critical, message, std::forward<Args>(args)...);
-}
-}
+#define fatal(message, ...)                                                    \
+    log(Zeus::LogLevel::Fatal,                                                 \
+        message,                                                               \
+        std::source_location::current(),                                       \
+        __VA_ARGS__)
