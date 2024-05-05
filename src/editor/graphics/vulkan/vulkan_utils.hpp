@@ -1,6 +1,8 @@
 #pragma once
 
-#include <vulkan/vulkan_core.h>
+#include <core/logger.hpp>
+
+#include <vulkan/vulkan.h>
 
 namespace Zeus
 {
@@ -14,4 +16,6 @@ void destroyDebugUtilsMessengerEXT(
     VkInstance instance,
     VkDebugUtilsMessengerEXT messenger,
     const VkAllocationCallbacks* pAllocator);
+
+const char* vkResultToString(VkResult result);
 };
