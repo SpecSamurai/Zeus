@@ -65,10 +65,9 @@ bool createVkInstance(VkInstance& instance)
     if (result != VK_SUCCESS)
     {
         error("Instance failed to create. {}", vkResultToString(result));
-        return false;
     }
 
-    return true;
+    return result == VK_SUCCESS;
 }
 
 const std::vector<const char*> getRequiredGlobalExtensions()
