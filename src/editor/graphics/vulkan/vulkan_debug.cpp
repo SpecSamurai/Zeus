@@ -30,10 +30,9 @@ bool createVkDebugUtilsMessengerEXT(
     if (result != VK_SUCCESS)
     {
         error("Failed to create debug messenger. {}", vkResultToString(result));
-        return false;
     }
 
-    return true;
+    return result == VK_SUCCESS;
 }
 
 bool areValidationLayerSupported(
