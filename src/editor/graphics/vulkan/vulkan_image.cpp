@@ -4,6 +4,7 @@
 
 #include <core/logger.hpp>
 
+#include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 namespace Zeus
@@ -13,6 +14,7 @@ bool createVkImageView(
     const VkImage& image,
     const VkFormat format,
     const VkImageAspectFlags aspectFlags,
+    uint32_t mipLevels,
     VkImageView& imageView)
 {
     VkImageViewCreateInfo createInfo{
@@ -31,7 +33,7 @@ bool createVkImageView(
             {
                 .aspectMask = aspectFlags,
                 .baseMipLevel = 0,
-                .levelCount = 1,
+                .levelCount = mipLevels,
                 // Usage: Stereograhic 3D application
                 .baseArrayLayer = 0,
                 .layerCount = 1,
