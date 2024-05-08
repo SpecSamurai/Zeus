@@ -17,5 +17,10 @@ void destroyDebugUtilsMessengerEXT(
     VkDebugUtilsMessengerEXT messenger,
     const VkAllocationCallbacks* pAllocator);
 
+void setDebugUtilsObjectNameEXT(
+    VkInstance instance,
+    VkDevice device,
+    const VkDebugUtilsObjectNameInfoEXT* pNameInfo);
+
 const char* vkResultToString(VkResult result);
 };

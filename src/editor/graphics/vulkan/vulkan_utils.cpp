@@ -39,6 +39,20 @@ void destroyDebugUtilsMessengerEXT(
     }
 }
 
+void setDebugUtilsObjectNameEXT(
+    VkInstance instance,
+    VkDevice device,
+    const VkDebugUtilsObjectNameInfoEXT* pNameInfo)
+{
+    auto func = reinterpret_cast<PFN_vkSetDebugUtilsObjectNameEXT>(
+        vkGetInstanceProcAddr(instance, "vkSetDebugUtilsObjectNameEXT"));
+
+    if (func != nullptr)
+    {
+        func(device, pNameInfo);
+    }
+}
+
 // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkResult.html
 const char* vkResultToString(VkResult result)
 {
