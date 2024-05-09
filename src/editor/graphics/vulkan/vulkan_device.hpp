@@ -11,10 +11,13 @@ struct QueueFamilies
 {
     std::optional<std::uint32_t> graphicsFamily;
     std::optional<std::uint32_t> presentFamily;
+    std::optional<std::uint32_t> transferFamily;
+    std::optional<std::uint32_t> computeFamily;
 
     bool isComplete()
     {
-        return graphicsFamily.has_value() && presentFamily.has_value();
+        return graphicsFamily.has_value() && presentFamily.has_value() &&
+               transferFamily.has_value();
     }
 };
 
@@ -32,24 +35,21 @@ struct VulkanDevice
 
     SurfaceDetails surfaceDetails;
     QueueFamilies queueFamilies;
+    VkSampleCountFlagBits msaaSamples;
 
     VkQueue graphicsQueue;
     VkQueue presentQueue;
 };
 
-bool selectVkPhysicalDevice(
+bool createVulkanDevice(
     const VkInstance& instance,
     const VkSurfaceKHR& surface,
-    VkPhysicalDevice& physicalDevice);
+    VulkanDevice& vulkanDevice);
 
 bool createVkDevice(
     const VkPhysicalDevice& physicalDevice,
     const QueueFamilies& queueFamilies,
     VkDevice& device);
-
-bool physicalDeviceMeetsRequirements(
-    const VkPhysicalDevice& device,
-    const VkSurfaceKHR& surface);
 
 bool areDeviceExtensionSupported(
     const VkPhysicalDevice& device,
@@ -62,4 +62,7 @@ const QueueFamilies getQueueFamilies(
 const SurfaceDetails getSurfaceDetails(
     const VkPhysicalDevice& physicalDevice,
     const VkSurfaceKHR& surface);
+
+VkSampleCountFlagBits getMaxUsableSampleCount(
+    const VkPhysicalDevice& physicalDevice);
 }

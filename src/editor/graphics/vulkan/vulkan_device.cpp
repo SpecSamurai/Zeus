@@ -13,10 +13,10 @@
 
 namespace Zeus
 {
-bool selectVkPhysicalDevice(
+bool createVulkanDevice(
     const VkInstance& instance,
     const VkSurfaceKHR& surface,
-    VkPhysicalDevice& physicalDevice)
+    VulkanDevice& vulkanDevice)
 {
     std::uint32_t physicalDeviceCount{0};
     vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
@@ -33,23 +33,64 @@ bool selectVkPhysicalDevice(
         &physicalDeviceCount,
         physicalDevices.data());
 
-    VkPhysicalDevice output{VK_NULL_HANDLE};
-    for (const auto& device : physicalDevices)
+    bool deviceFound{false};
+    for (const auto& physicalDevice : physicalDevices)
     {
-        if (physicalDeviceMeetsRequirements(device, surface))
+        if (!areDeviceExtensionSupported(physicalDevice, DEVICE_EXTENSIONS))
         {
-            output = device;
+            continue;
+        }
+
+        VkPhysicalDeviceProperties deviceProperties;
+        vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
+
+        auto queueFamilies = getQueueFamilies(physicalDevice, surface);
+        auto surfaceDetails = getSurfaceDetails(physicalDevice, surface);
+
+        bool isForSwapchain{
+            !surfaceDetails.formats.empty() &&
+            !surfaceDetails.presentModes.empty()};
+
+        if (queueFamilies.isComplete() && isForSwapchain &&
+            deviceFeatures.samplerAnisotropy)
+        {
+            vulkanDevice.physicalDevice = physicalDevice;
+            vulkanDevice.queueFamilies = queueFamilies;
+            vulkanDevice.surfaceDetails = surfaceDetails;
+            vulkanDevice.msaaSamples = getMaxUsableSampleCount(physicalDevice);
             break;
         }
     }
 
-    if (output == VK_NULL_HANDLE)
+    if (deviceFound)
     {
         error("Failed to find a suitable GPU");
         return false;
     }
 
-    physicalDevice = output;
+    if (!createVkDevice(
+            vulkanDevice.physicalDevice,
+            vulkanDevice.queueFamilies,
+            vulkanDevice.logicalDevice))
+    {
+        return false;
+    }
+
+    vkGetDeviceQueue(
+        vulkanDevice.logicalDevice,
+        vulkanDevice.queueFamilies.graphicsFamily.value(),
+        0,
+        &vulkanDevice.graphicsQueue);
+
+    vkGetDeviceQueue(
+        vulkanDevice.logicalDevice,
+        vulkanDevice.queueFamilies.presentFamily.value(),
+        0,
+        &vulkanDevice.presentQueue);
+
     return true;
 }
 
@@ -58,9 +99,6 @@ bool createVkDevice(
     const QueueFamilies& queueFamilies,
     VkDevice& device)
 {
-    // QueueFamilyIndices indices =
-    //     physical.FindQueueFamilies(physicalDevice, surface);
-
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<std::uint32_t> uniqueQueueFamilies = {
         queueFamilies.graphicsFamily.value(),
@@ -81,6 +119,7 @@ bool createVkDevice(
     }
 
     VkPhysicalDeviceFeatures physicalDeviceFeatures{
+        .sampleRateShading = VK_TRUE,
         .samplerAnisotropy = VK_TRUE,
     };
 
@@ -97,14 +136,8 @@ bool createVkDevice(
         .pEnabledFeatures = &physicalDeviceFeatures,
     };
 
-// Previous implementations of Vulkan made a distinction between
-// instance and device specific validation layers, but this is no longer
-// the case. That means that the enabledLayerCount and
-// ppEnabledLayerNames fields of VkDeviceCreateInfo are ignored by
-// up-to-date implementations. However, it is still a good idea to set
-// them anyway to be compatible with older implementations:
-// Depricated but set to be backwards compatible
 #ifndef NDEBUG
+    // Deprecated but set to be backwards compatibility
     createInfo.enabledLayerCount =
         static_cast<std::uint32_t>(VALIDATION_LAYERS.size());
     createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
@@ -115,67 +148,9 @@ bool createVkDevice(
     if (result != VK_SUCCESS)
     {
         error("Failed to create logical device. {}", vkResultToString(result));
-        return false;
     }
 
-    // vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0,
-    // &graphicsQueue); vkGetDeviceQueue(device, indices.presentFamily.value(),
-    // 0, &presentQueue);
-    return true;
-}
-
-bool physicalDeviceMeetsRequirements(
-    const VkPhysicalDevice& physicalDevice,
-    const VkSurfaceKHR& surface)
-{
-    VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
-
-    VkPhysicalDeviceFeatures deviceFeatures;
-    vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
-
-    // return deviceProperties.deviceType ==
-    //            VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-    //        deviceFeatures.geometryShader;
-    // bool isSuitable = // deviceProperties.deviceType ==
-    //                   //    VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-    //     deviceFeatures.geometryShader;
-    // if (isSuitable)
-    // {
-    //     std::uint32_t major_version =
-    //         VK_VERSION_MAJOR(deviceProperties.apiVersion);
-    //     std::uint32_t minor_version =
-    //         VK_VERSION_MINOR(deviceProperties.apiVersion);
-    //     std::int32_t patch_version =
-    //         VK_VERSION_PATCH(deviceProperties.apiVersion);
-    //     debug("Name: {}", deviceProperties.deviceName);
-    //     debug(
-    //         "Api Version: {}.{}.{}",
-    //         major_version,
-    //         minor_version,
-    //         patch_version);
-    //     // debug("Driver Version: {}", deviceProperties.driverVersion);
-    // }
-
-    bool extensionsSupported{
-        areDeviceExtensionSupported(physicalDevice, DEVICE_EXTENSIONS)};
-    if (!extensionsSupported)
-    {
-        return false;
-    }
-
-    QueueFamilies queueFamilies = getQueueFamilies(physicalDevice, surface);
-    SurfaceDetails surfaceDetails = getSurfaceDetails(physicalDevice, surface);
-
-    bool isForSwapchain{
-        !surfaceDetails.formats.empty() &&
-        !surfaceDetails.presentModes.empty()};
-
-    VkPhysicalDeviceFeatures supportedFeatures{};
-    vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);
-
-    return queueFamilies.isComplete() && extensionsSupported &&
-           isForSwapchain && supportedFeatures.samplerAnisotropy;
+    return result == VK_SUCCESS;
 }
 
 bool areDeviceExtensionSupported(
@@ -219,37 +194,37 @@ const SurfaceDetails getSurfaceDetails(
         surface,
         &details.capabilities);
 
-    std::uint32_t surfaceFormatCount{0};
+    std::uint32_t surfaceFormatsCount{0};
     vkGetPhysicalDeviceSurfaceFormatsKHR(
         physicalDevice,
         surface,
-        &surfaceFormatCount,
+        &surfaceFormatsCount,
         nullptr);
 
-    if (surfaceFormatCount != 0)
+    if (surfaceFormatsCount != 0)
     {
-        details.formats.resize(surfaceFormatCount);
+        details.formats.resize(surfaceFormatsCount);
         vkGetPhysicalDeviceSurfaceFormatsKHR(
             physicalDevice,
             surface,
-            &surfaceFormatCount,
+            &surfaceFormatsCount,
             details.formats.data());
     }
 
-    std::uint32_t presentModeCount{0};
+    std::uint32_t presentModesCount{0};
     vkGetPhysicalDeviceSurfacePresentModesKHR(
         physicalDevice,
         surface,
-        &presentModeCount,
+        &presentModesCount,
         nullptr);
 
-    if (presentModeCount != 0)
+    if (presentModesCount != 0)
     {
-        details.presentModes.resize(presentModeCount);
+        details.presentModes.resize(presentModesCount);
         vkGetPhysicalDeviceSurfacePresentModesKHR(
             physicalDevice,
             surface,
-            &presentModeCount,
+            &presentModesCount,
             details.presentModes.data());
     }
 
@@ -274,22 +249,31 @@ const QueueFamilies getQueueFamilies(
         &queueFamilyCount,
         queueFamilies.data());
 
-    std::uint32_t index{0};
-    for (const auto& queueFamily : queueFamilies)
+    for (std::uint32_t index{0}; index < queueFamilies.size(); ++index)
     {
-        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        if (queueFamilies[index].queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
             output.graphicsFamily = index;
         }
 
-        VkBool32 presentSupport{false};
+        if (queueFamilies[index].queueFlags & VK_QUEUE_TRANSFER_BIT)
+        {
+            output.transferFamily = index;
+        }
+
+        if (queueFamilies[index].queueFlags & VK_QUEUE_COMPUTE_BIT)
+        {
+            output.computeFamily = index;
+        }
+
+        VkBool32 surfaceSupport{false};
         vkGetPhysicalDeviceSurfaceSupportKHR(
             physicalDevice,
             index,
             surface,
-            &presentSupport);
+            &surfaceSupport);
 
-        if (presentSupport)
+        if (surfaceSupport)
         {
             output.presentFamily = index;
         }
@@ -298,51 +282,46 @@ const QueueFamilies getQueueFamilies(
         {
             break;
         }
-
-        ++index;
     }
 
     return output;
 }
-}
 
-// void pickPhysicalDevice() {
-//     ...
-//
-//     // Use an ordered map to automatically sort candidates by increasing
-//     score std::multimap<int, VkPhysicalDevice> candidates;
-//
-//     for (const auto& device : devices) {
-//         int score = rateDeviceSuitability(device);
-//         candidates.insert(std::make_pair(score, device));
-//     }
-//
-//     // Check if the best candidate is suitable at all
-//     if (candidates.rbegin()->first > 0) {
-//         physicalDevice = candidates.rbegin()->second;
-//     } else {
-//         throw std::runtime_error("failed to find a suitable GPU!");
-//     }
-// }
-//
-// int rateDeviceSuitability(VkPhysicalDevice device) {
-//     ...
-//
-//     int score = 0;
-//
-//     // Discrete GPUs have a significant performance advantage
-//     if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-//     {
-//         score += 1000;
-//     }
-//
-//     // Maximum possible size of textures affects graphics quality
-//     score += deviceProperties.limits.maxImageDimension2D;
-//
-//     // Application can't function without geometry shaders
-//     if (!deviceFeatures.geometryShader) {
-//         return 0;
-//     }
-//
-//     return score;
-// }
+VkSampleCountFlagBits getMaxUsableSampleCount(
+    const VkPhysicalDevice& physicalDevice)
+{
+    VkPhysicalDeviceProperties physicalDeviceProperties{};
+    vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+
+    VkSampleCountFlags sampleCountFlags{
+        physicalDeviceProperties.limits.framebufferColorSampleCounts &
+        physicalDeviceProperties.limits.framebufferDepthSampleCounts};
+
+    if (sampleCountFlags & VK_SAMPLE_COUNT_64_BIT)
+    {
+        return VK_SAMPLE_COUNT_64_BIT;
+    }
+    if (sampleCountFlags & VK_SAMPLE_COUNT_32_BIT)
+    {
+        return VK_SAMPLE_COUNT_32_BIT;
+    }
+    if (sampleCountFlags & VK_SAMPLE_COUNT_16_BIT)
+    {
+        return VK_SAMPLE_COUNT_16_BIT;
+    }
+    if (sampleCountFlags & VK_SAMPLE_COUNT_8_BIT)
+    {
+        return VK_SAMPLE_COUNT_8_BIT;
+    }
+    if (sampleCountFlags & VK_SAMPLE_COUNT_4_BIT)
+    {
+        return VK_SAMPLE_COUNT_4_BIT;
+    }
+    if (sampleCountFlags & VK_SAMPLE_COUNT_2_BIT)
+    {
+        return VK_SAMPLE_COUNT_2_BIT;
+    }
+
+    return VK_SAMPLE_COUNT_1_BIT;
+}
+}
