@@ -91,6 +91,18 @@ bool createVulkanDevice(
         0,
         &vulkanDevice.presentQueue);
 
+    vkGetDeviceQueue(
+        vulkanDevice.logicalDevice,
+        vulkanDevice.queueFamilies.transferFamily.value(),
+        0,
+        &vulkanDevice.transferQueue);
+
+    vkGetDeviceQueue(
+        vulkanDevice.logicalDevice,
+        vulkanDevice.queueFamilies.computeFamily.value(),
+        0,
+        &vulkanDevice.computeQueue);
+
     return true;
 }
 

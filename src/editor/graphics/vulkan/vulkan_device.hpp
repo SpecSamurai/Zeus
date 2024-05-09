@@ -39,6 +39,8 @@ struct VulkanDevice
 
     VkQueue graphicsQueue;
     VkQueue presentQueue;
+    VkQueue transferQueue;
+    VkQueue computeQueue;
 };
 
 bool createVulkanDevice(
