@@ -58,7 +58,7 @@ inline void glfwScrollCallback(
     trace("Mouse scroll x:{}, y:{}", xoffset, yoffset);
 }
 
-GLFWwindow* createWindow(int width, int height, const char* title)
+GLFWwindow* createGlfwWindow(int width, int height, const char* title)
 {
 #ifndef NDEBUG
     glfwSetErrorCallback(glfwErrorCallback);
@@ -66,15 +66,17 @@ GLFWwindow* createWindow(int width, int height, const char* title)
 
     if (!glfwInit())
     {
+        error("GLFW initialization failed");
         return nullptr;
     }
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    GLFWwindow* window =
-        glfwCreateWindow(width, height, title, nullptr, nullptr);
+    GLFWwindow* window{
+        glfwCreateWindow(width, height, title, nullptr, nullptr)};
 
     if (!window)
     {
+        error("GLFW Window creation failed");
         glfwTerminate();
         return nullptr;
     }
