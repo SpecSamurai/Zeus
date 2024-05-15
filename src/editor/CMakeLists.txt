@@ -22,24 +22,41 @@ add_executable(Editor
     Application.hpp
     ui/UndoRedoStack.hpp
     ui/IUndoableCommand.hpp
-    core/logger.hpp
     core/files.hpp
     graphics/glfw_utils.hpp
     graphics/glfw_utils.cpp
-    graphics/vulkan_utils.hpp
-    graphics/vulkan_utils.cpp
-    graphics/vulkan_settings.hpp
-    graphics/VulkanInstance.cpp
-    graphics/VulkanInstance.hpp
-    graphics/VulkanDevice.cpp
+    graphics/vulkan/VulkanContext.hpp
+    graphics/vulkan/vulkan_settings.hpp
+    graphics/vulkan/vulkan_utils.hpp
+    graphics/vulkan/vulkan_utils.cpp
+    graphics/vulkan/vulkan_instance.hpp
+    graphics/vulkan/vulkan_instance.cpp
+    graphics/vulkan/vulkan_debug.hpp
+    graphics/vulkan/vulkan_debug.cpp
+    graphics/vulkan/vulkan_sync.hpp
+    graphics/vulkan/vulkan_sync.cpp
+    graphics/vulkan/vulkan_surface.hpp
+    graphics/vulkan/vulkan_surface.cpp
+    graphics/vulkan/vulkan_device.hpp
+    graphics/vulkan/vulkan_device.cpp
+    graphics/vulkan/vulkan_swapchain.hpp
+    graphics/vulkan/vulkan_swapchain.cpp
+    graphics/vulkan/vulkan_image.hpp
+    graphics/vulkan/vulkan_image.cpp
+    graphics/vulkan/vulkan_shader.hpp
+    graphics/vulkan/vulkan_shader.cpp
+    graphics/vulkan/vulkan_pipeline.hpp
+    graphics/vulkan/vulkan_pipeline.cpp
+    graphics/vulkan/vulkan_command_buffer.hpp
+    graphics/vulkan/vulkan_command_buffer.cpp
 )
 
 target_include_directories(Editor
-    PRIVATE core graphics
+    PRIVATE core graphics graphics/vulkan
 )
 
 target_link_libraries(Editor
-    PRIVATE Engine Vulkan::Vulkan glfw imgui glm::glm
+    PRIVATE Engine Vulkan::Vulkan glfw imgui glm::glm stb tiny_obj_loader
 )
 
 target_compile_options(Editor PRIVATE
