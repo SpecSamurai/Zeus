@@ -2,19 +2,14 @@
 
 #include "files.hpp"
 #include "vulkan_shader.hpp"
-
-#include "../Application.hpp"
 #include "vulkan_utils.hpp"
 
 #include <vulkan/vulkan_core.h>
 
 namespace Zeus
 {
-bool CreateGraphicsPipeline(
-    const VkDevice& device,
-    const VkRenderPass& renderPass,
-    const VkDescriptorSetLayout& descriptorSetLayout,
-    const VkSampleCountFlagBits msaaSamples,
+bool createGraphicsVkPipeline(
+    const GraphicsPipelineConfig& config,
     VkPipelineLayout& pipelineLayout,
     VkPipeline& graphicsPipeline)
 {
@@ -22,9 +17,9 @@ bool CreateGraphicsPipeline(
     auto fragShaderCode = readFile("shaders/shader.frag.spv");
 
     VkShaderModule vertShaderModule;
-    createVkShaderModule(device, vertShaderCode, vertShaderModule);
+    createVkShaderModule(config.device, vertShaderCode, vertShaderModule);
     VkShaderModule fragShaderModule;
-    createVkShaderModule(device, fragShaderCode, fragShaderModule);
+    createVkShaderModule(config.device, fragShaderCode, fragShaderModule);
 
     VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -47,16 +42,16 @@ bool CreateGraphicsPipeline(
         fragShaderStageCreateInfo,
     };
 
-    auto bindingDescription = Vertex::getBindingDescription();
-    auto attributeDescriptions = Vertex::getAttributeDescriptions();
+    // auto bindingDescription = Vertex::getBindingDescription();
+    // auto attributeDescriptions = Vertex::getAttributeDescriptions();
 
     VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
         .vertexBindingDescriptionCount = 1,
-        .pVertexBindingDescriptions = &bindingDescription,
+        .pVertexBindingDescriptions = &config.bindingDescription,
         .vertexAttributeDescriptionCount =
-            static_cast<std::uint32_t>(attributeDescriptions.size()),
-        .pVertexAttributeDescriptions = attributeDescriptions.data(),
+            static_cast<std::uint32_t>(config.attributeDescriptions.size()),
+        .pVertexAttributeDescriptions = config.attributeDescriptions.data(),
     };
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo{
@@ -105,7 +100,7 @@ bool CreateGraphicsPipeline(
 
     VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-        .rasterizationSamples = msaaSamples,
+        .rasterizationSamples = config.msaaSamples,
         .sampleShadingEnable = VK_TRUE, // VK_FALSE
         .minSampleShading = .2f, // 1.0f, min fraction for sample shading;
                                  // closer to one is smooth
@@ -162,13 +157,13 @@ bool CreateGraphicsPipeline(
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         .setLayoutCount = 1,
-        .pSetLayouts = &descriptorSetLayout,
+        .pSetLayouts = &config.descriptorSetLayout,
         .pushConstantRangeCount = 0,
         .pPushConstantRanges = nullptr,
     };
 
     VkResult pipelineLayoutResult{ vkCreatePipelineLayout(
-        device,
+        config.device,
         &pipelineLayoutCreateInfo,
         nullptr,
         &pipelineLayout) };
@@ -194,14 +189,14 @@ bool CreateGraphicsPipeline(
         .pColorBlendState = &colorBlendStateCreateInfo,
         .pDynamicState = &dynamicStateCreateInfo,
         .layout = pipelineLayout,
-        .renderPass = renderPass,
+        .renderPass = config.renderPass,
         .subpass = 0,
         .basePipelineHandle = VK_NULL_HANDLE,
         .basePipelineIndex = -1,
     };
 
     VkResult result{ vkCreateGraphicsPipelines(
-        device,
+        config.device,
         VK_NULL_HANDLE,
         1,
         &pipelineInfo,
@@ -216,8 +211,8 @@ bool CreateGraphicsPipeline(
         return false;
     }
 
-    vkDestroyShaderModule(device, fragShaderModule, nullptr);
-    vkDestroyShaderModule(device, vertShaderModule, nullptr);
+    vkDestroyShaderModule(config.device, fragShaderModule, nullptr);
+    vkDestroyShaderModule(config.device, vertShaderModule, nullptr);
 
     return true;
 }
