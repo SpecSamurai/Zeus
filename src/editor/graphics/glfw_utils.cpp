@@ -72,7 +72,8 @@ GLFWwindow* createGlfwWindow(int width, int height, const char* title)
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     GLFWwindow* window{
-        glfwCreateWindow(width, height, title, nullptr, nullptr)};
+        glfwCreateWindow(width, height, title, nullptr, nullptr)
+    };
 
     if (!window)
     {
