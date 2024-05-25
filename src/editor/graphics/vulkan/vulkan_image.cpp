@@ -17,6 +17,20 @@ bool createVkImageView(
     uint32_t mipLevels,
     VkImageView& imageView)
 {
+    // Format of  an image view; it must be compatible with the image’s format
+    // but may not be the same format (that is, it may be a different format but
+    // with the same number of bits per pixel).
+    // components – Mapping of an image components into a vector returned in the
+    // shader by texturing operations. This applies only to read operations
+    // (sampling), but since we are using an image as a color attachment (we are
+    // rendering into an image) we must set the so-called identity mapping (R
+    // component into R, G -> G, and so on) or just use “identity” value
+    // (VK_COMPONENT_SWIZZLE_IDENTITY).
+    // subresourceRange – Describes the set of mipmap levels and array layers
+    // that will be accessible to a view. If our image is mipmapped, we may
+    // specify the specific mipmap level we want to render to (and in case of
+    // render targets we must specify exactly one mipmap level of one array
+    // layer).
     VkImageViewCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .image = image,
@@ -41,7 +55,9 @@ bool createVkImageView(
     };
 
     VkResult result{
-        vkCreateImageView(device, &createInfo, nullptr, &imageView)};
+        vkCreateImageView(device, &createInfo, nullptr, &imageView)
+    };
+
     if (result != VK_SUCCESS)
     {
         error("Failed to create image view. {}", vkResultToString(result));
