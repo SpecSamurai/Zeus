@@ -60,6 +60,17 @@ bool createGraphicsVkPipeline(
         .primitiveRestartEnable = VK_FALSE,
     };
 
+    // specification states that dimensions of the viewport cannot exceed the
+    // dimensions of the attachments that we are rendering into.
+    // When specifying viewport coordinates, remember that the origin is
+    // different than in OpenGL. Here we specify the upper-left corner of the
+    // viewport (not the lower left). Also worth noting is that the minDepth and
+    // maxDepth values must be between 0.0 and 1.0 (inclusive) but maxDepth can
+    // be lower than minDepth. This will cause the depth to be calculated in
+    // “reverse.”
+
+    // x – Left side of the viewport.
+    // y – Upper side of the viewport.
     // VkViewport viewport{};
     // viewport.x = 0.0f;
     // viewport.y = 0.0f;
@@ -78,6 +89,8 @@ bool createGraphicsVkPipeline(
     // viewportState.pViewports = &viewport;
     // viewportState.scissorCount = 1;
     // viewportState.pScissors = &scissor;
+    // We are also allowed to specify more viewports, but then the multiViewport
+    // feature must be also enabled.
     VkPipelineViewportStateCreateInfo viewportStateCreateInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
         .viewportCount = 1,
@@ -143,6 +156,10 @@ bool createGraphicsVkPipeline(
         // .blendConstants[3] = 0.0f,
     };
 
+    // If we specify that a given state is dynamic, parameters in a pipeline
+    // creation info structure that are related to that state are ignored. We
+    // must set the given state using the proper Vulkan commands during
+    // rendering because initial values of such state may be undefined.
     std::vector<VkDynamicState> dynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR,
@@ -191,6 +208,24 @@ bool createGraphicsVkPipeline(
         .layout = pipelineLayout,
         .renderPass = config.renderPass,
         .subpass = 0,
+        // When we are creating a new pipeline, we can inherit some of the
+        // parameters from another one. This means that both pipelines should
+        // have much in common. A good example is shader code. We don’t specify
+        // what fields are the same, but the general message that the pipeline
+        // inherits from another one may substantially accelerate pipeline
+        // creation. But why are there two fields to indicate a “parent”
+        // pipeline? We can’t use them both—only one of them at a time. When we
+        // are using a handle, this means that the “parent” pipeline is already
+        // created and we are deriving from the one we have provided the handle
+        // of. But the pipeline creation function allows us to create many
+        // pipelines at once. Using the second parameter, “parent” pipeline
+        // index, we can create both “parent” and “child” pipelines in the same
+        // call. We just specify an array of graphics pipeline creation info
+        // structures and this array is provided to pipeline creation function.
+        // So the “basePipelineIndex” is the index of pipeline creation info in
+        // this very array. We just have to remember that the “parent” pipeline
+        // must be earlier (must have a smaller index) in this array and it must
+        // be created with the “allow derivatives” flag set.
         .basePipelineHandle = VK_NULL_HANDLE,
         .basePipelineIndex = -1,
     };

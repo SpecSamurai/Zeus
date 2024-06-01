@@ -62,6 +62,10 @@ bool createVkRenderPass(
     colorAttachment.finalLayout =
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+    // When an attachment has a depth format (and potentially also a stencil
+    // component) load and store ops refer only to the depth component. If a
+    // stencil is present, stencil values are treated the way stencil load and
+    // store ops describe. For color attachments, stencil ops are not relevant.
     VkAttachmentDescription depthAttachment{};
     depthAttachment.format = depthFormat;
     depthAttachment.samples = msaaSamples;
@@ -95,7 +99,11 @@ bool createVkRenderPass(
     // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL layout will give us the best
     // performance, as its name implies.
     VkAttachmentReference colorAttachmentRef{};
+    // Index into an attachment_descriptions array of VkRenderPassCreateInfo.
     colorAttachmentRef.attachment = 0;
+    // Requested (required) layout the attachment will use during a given
+    // subpass. The hardware will perform an automatic transition into a
+    // provided layout just before a given subpass.
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkAttachmentReference depthAttachmentRef{};
@@ -124,6 +132,14 @@ bool createVkRenderPass(
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
     subpass.pResolveAttachments = &colorAttachmentResolveRef;
 
+    // In our simple example, we have only one subpass, but we specify two
+    // dependencies. This is because we can (and should) specify dependencies
+    // between render passes (by providing the number of a given subpass) and
+    // operations outside of them (by providing a VK_SUBPASS_EXTERNAL value).
+    // Here we provide one dependency for color attachment between operations
+    // occurring before a render pass and its only subpass. The second
+    // dependency is defined for operations occurring inside a subpass and after
+    // the render pass.
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
