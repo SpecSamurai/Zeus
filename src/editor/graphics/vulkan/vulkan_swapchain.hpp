@@ -8,7 +8,7 @@ namespace Zeus
 {
 struct VulkanSwapchain
 {
-    VkSwapchainKHR handle{VK_NULL_HANDLE};
+    VkSwapchainKHR handle{ VK_NULL_HANDLE };
 
     VkFormat imageFormat;
     VkPresentModeKHR presentMode;
@@ -25,14 +25,6 @@ bool createVulkanSwapchain(
     const VkSurfaceKHR& surface,
     GLFWwindow* window,
     VulkanSwapchain& vulkanSwapchain);
-
-bool createVkSwapchainKHR(
-    SurfaceDetails swapChainSupport,
-    const VkPhysicalDevice& physicalDevice,
-    const VkSurfaceKHR& surface,
-    const VkDevice& device,
-    GLFWwindow* window,
-    VkSwapchainKHR& swapChain);
 
 VkSurfaceFormatKHR selectSurfaceFormat(
     const std::vector<VkSurfaceFormatKHR>& surfaceFormats);
