@@ -41,6 +41,10 @@ add_executable(Editor
     graphics/vulkan/vulkan_device.cpp
     graphics/vulkan/vulkan_swapchain.hpp
     graphics/vulkan/vulkan_swapchain.cpp
+    graphics/vulkan/vulkan_framebuffer.hpp
+    graphics/vulkan/vulkan_framebuffer.cpp
+    graphics/vulkan/vulkan_renderpass.hpp
+    graphics/vulkan/vulkan_renderpass.cpp
     graphics/vulkan/vulkan_image.hpp
     graphics/vulkan/vulkan_image.cpp
     graphics/vulkan/vulkan_shader.hpp
