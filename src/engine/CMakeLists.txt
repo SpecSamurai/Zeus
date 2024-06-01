@@ -1,4 +1,6 @@
 add_library(Engine
+    defines.hpp
+    core/logger.hpp
     memory/memory.cpp
     memory/memory.hpp
     memory/Allocator.cpp
@@ -12,7 +14,7 @@ add_library(Engine
 )
 
 target_include_directories(Engine
-    INTERFACE memory
+    INTERFACE .
 )
 
 target_compile_options(Engine PRIVATE
