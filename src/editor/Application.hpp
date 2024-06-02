@@ -1,19 +1,17 @@
 #pragma once
 
 #include "VulkanContext.hpp"
+#include "vulkan_command_buffer.hpp"
+#include "vulkan_framebuffer.hpp"
+#include "vulkan_renderpass.hpp"
 #include "vulkan_sync.hpp"
 #define GLFW_INCLUDE_VULKAN
 
-#include "glfw_utils.hpp"
-#include "vulkan_debug.hpp"
 #include "vulkan_device.hpp"
 #include "vulkan_image.hpp"
-#include "vulkan_instance.hpp"
 #include "vulkan_pipeline.hpp"
 #include "vulkan_settings.hpp"
-#include "vulkan_surface.hpp"
 #include "vulkan_swapchain.hpp"
-#include "vulkan_utils.hpp"
 
 #include <core/logger.hpp>
 
@@ -40,6 +38,15 @@
 // TODO: EX https://vulkan-tutorial.com/Vertex_buffers/Staging_buffer
 // TRANSFER QUEUE
 
+// We should record and submit the command buffer as late as possible to
+// minimize input lag and acquire as recent input data as possible. We will
+// record the command buffer just before it is submitted to the queue. But a
+// single command buffer isn’t enough. We should not record the same command
+// buffer until the graphics card finishes processing it after it was submitted.
+// This moment is signaled through a fence. But waiting on a fence every frame
+// is a waste of time, so we need more command buffers used interchangeably.
+// With more command buffers, more fences are also needed and the situation gets
+// more complicated
 const std::string MODEL_PATH = "C:/Source/Zeus/textures/viking_room.obj";
 const std::string TEXTURE_PATH = "C:/Source/Zeus/textures/viking_room.png";
 
@@ -53,6 +60,12 @@ struct Vertex
 
     static VkVertexInputBindingDescription getBindingDescription()
     {
+        // When we create a vertex buffer, we bind it to a chosen slot before
+        // rendering operations. The slot number (an index) is this binding and
+        // here we describe how data in this slot is aligned in memory and how
+        // it should be consumed (per vertex or per instance). Different vertex
+        // buffers can be bound to different bindings. And each binding may be
+        // differently positioned in memory.
         VkVertexInputBindingDescription bindingDescription{};
         bindingDescription.binding = 0;
         bindingDescription.stride = sizeof(Vertex);
@@ -67,6 +80,21 @@ struct Vertex
         std::array<VkVertexInputAttributeDescription, 3>
             attributeDescriptions{};
 
+        // We must specify a location (index) for each attribute (the same as in
+        // a shader source code, in location layout qualifier), source of data
+        // (binding from which data will be read), format (data type and number
+        // of components), and offset at which data for this specific attribute
+        // can be found (offset from the beginning of a data for a given vertex,
+        // not from the beginning of all vertex data
+
+        // location – Index of an attribute, the same as defined by the location
+        // layout specifier in a shader source code.
+        // binding – The number of the slot from which data should be read
+        // (source of data like VBO in OpenGL), the same binding as in a
+        // VkVertexInputBindingDescription structure and
+        // vkCmdBindVertexBuffers() function (described later). format – Data
+        // type and number of components per attribute. offset – Beginning of
+        // data for a given attribute.
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -262,6 +290,16 @@ private:
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
     std::vector<VkImageView> swapChainImageViews;
+
+    // We are doing this in order to simplify the code called in a rendering
+    // loop. In a normal, real-life scenario we wouldn’t (probably) create a
+    // framebuffer for each swap chain image. I assume that a better solution
+    // would be to render into a single image (texture) and after that use
+    // command buffers that would copy rendering results from that image into a
+    // given swap chain image. This way we will have only three simple command
+    // buffers that are connected with a swap chain. All other rendering
+    // commands would be independent of a swap chain, making it easier to
+    // maintain.
     std::vector<VkFramebuffer> swapChainFramebuffers;
 
     VkRenderPass renderPass;
@@ -365,15 +403,25 @@ private:
 
         CreateSwapChain();
 
-        CreateRenderPass();
-        createDescriptorSetLayout();
-        CreateGraphicsPipeline(
+        createVkRenderPass(
             device,
-            renderPass,
-            descriptorSetLayout,
-            pipelineLayout,
-            graphicsPipeline,
-            msaaSamples);
+            swapChainImageFormat,
+            msaaSamples,
+            findDepthFormat(),
+            renderPass);
+
+        createDescriptorSetLayout();
+
+        GraphicsPipelineConfig config{
+            .device = device,
+            .renderPass = renderPass,
+            .descriptorSetLayout = descriptorSetLayout,
+            .msaaSamples = msaaSamples,
+            .bindingDescription = Vertex::getBindingDescription(),
+            .attributeDescriptions = Vertex::getAttributeDescriptions(),
+        };
+        createGraphicsVkPipeline(config, pipelineLayout, graphicsPipeline);
+
         CreateCommandPool();
         createColorResources();
         createDepthResources();
@@ -1078,6 +1126,30 @@ private:
         }
     }
 
+    // When we queried for buffer memory requirement, we acquired information
+    // about required size, memory type, and alignment. Different buffer usages
+    // may require different memory alignment. The beginning of a memory object
+    // (offset of 0) satisfies all alignments. This means that all memory
+    // objects are created at addresses that fulfill the requirements of all
+    // different usages. So when we specify a zero offset, we don’t have to
+    // worry about anything.
+    // But we can create larger memory object and use it as a storage space for
+    // multiple buffers (or images). This, in fact, is the recommended behavior.
+    // Creating larger memory objects means we are creating fewer memory
+    // objects. This allows driver to track fewer objects in general. Memory
+    // objects must be tracked by a driver because of OS requirements and
+    // security measures. Larger memory objects don’t cause big problems with
+    // memory fragmentation. Finally, we should allocate larger memory amounts
+    // and keep similar objects in them to increase cache hits and thus improve
+    // performance of our application.
+
+    // But when we allocate larger memory objects and bind them to multiple
+    // buffers (or images), not all of them can be bound at offset zero. Only
+    // one can be bound at this offset, others must be bound further away, after
+    // a space used by the first buffer (or image). So the offset for the
+    // second, and all other buffers bound to the same memory object, must meet
+    // alignment requirements reported by the query. And we must remember it.
+    // That’s why alignment member is important.
     void CreateBuffer(
         VkDeviceSize size,
         VkBufferUsageFlags usage,
@@ -1159,6 +1231,28 @@ private:
         void* data;
         vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
         memcpy(data, indices.data(), (size_t)bufferSize);
+
+        // When we define all memory ranges that should be flashed, we can call
+        // the vkFlushMappedMemoryRanges() function. After that, the driver will
+        // know which parts were modified and will reload them (that is, refresh
+        // cache). Reloading usually occurs on barriers. After modifying a
+        // buffer, we should set a buffer memory barrier, which will tell the
+        // driver that some operations influenced a buffer and it should be
+        // refreshed. But, fortunately, in this case such a barrier is placed
+        // implicitly by the driver on a submission of a command buffer that
+        // references the given buffer and no additional operations are
+        // required. Now we can use this buffer during rendering commands
+        // recording.
+
+        // VkMappedMemoryRange flush_range = {
+        //     VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, // VkStructureType sType
+        //     nullptr,                    // const void            *pNext
+        //     Vulkan.VertexBuffer.Memory, // VkDeviceMemory         memory
+        //     0,                          // VkDeviceSize           offset
+        //     VK_WHOLE_SIZE               // VkDeviceSize           size
+        // };
+        // vkFlushMappedMemoryRanges(GetDevice(), 1, &flush_range);
+
         vkUnmapMemory(device, stagingBufferMemory);
 
         CreateBuffer(
@@ -1550,6 +1644,19 @@ private:
             VK_NULL_HANDLE,
             &imageIndex);
 
+        // switch (result)
+        // {
+        // case VK_SUCCESS:
+        // case VK_SUBOPTIMAL_KHR:
+        //     break;
+        // case VK_ERROR_OUT_OF_DATE_KHR:
+        //     return OnWindowSizeChanged();
+        // default:
+        //     std::cout << "Problem occurred during swap chain image
+        //     acquisition!"
+        //               << std::endl;
+        //     return false;
+        // }
         // You could also decide to do that if the swap chain is suboptimal, but
         // I've chosen to proceed anyway in that case because we've already
         // acquired an image.
@@ -1804,21 +1911,23 @@ private:
     {
         commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
-        VkCommandBufferAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = commandPool;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = (std::uint32_t)commandBuffers.size();
+        allocateVkCommandBuffers(device, commandPool, commandBuffers);
 
-        if (vkAllocateCommandBuffers(
-                device,
-                &allocInfo,
-                commandBuffers.data()) != VK_SUCCESS)
-        {
-            fatal("Failed to allocate command buffers");
-            assert(false);
-            throw std::runtime_error("failed to allocate command buffers!");
-        }
+        // VkCommandBufferAllocateInfo allocInfo{};
+        // allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        // allocInfo.commandPool = commandPool;
+        // allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        // allocInfo.commandBufferCount = (std::uint32_t)commandBuffers.size();
+        //
+        // if (vkAllocateCommandBuffers(
+        //         device,
+        //         &allocInfo,
+        //         commandBuffers.data()) != VK_SUCCESS)
+        // {
+        //     fatal("Failed to allocate command buffers");
+        //     assert(false);
+        //     throw std::runtime_error("failed to allocate command buffers!");
+        // }
     }
 
     void CreateCommandPool()
@@ -1826,18 +1935,24 @@ private:
         QueueFamilies queueFamilyIndices =
             getQueueFamilies(physicalDevice, surface);
 
-        VkCommandPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+        createVkCommandPool(
+            device,
+            queueFamilyIndices.graphicsFamily.value(),
+            commandPool);
 
-        if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) !=
-            VK_SUCCESS)
-        {
-            fatal("Failed to create command pool");
-            assert(false);
-            throw std::runtime_error("failed to create command pool!");
-        }
+        // VkCommandPoolCreateInfo poolInfo{};
+        // poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        // poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        // poolInfo.queueFamilyIndex =
+        // queueFamilyIndices.graphicsFamily.value();
+        //
+        // if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) !=
+        //     VK_SUCCESS)
+        // {
+        //     fatal("Failed to create command pool");
+        //     assert(false);
+        //     throw std::runtime_error("failed to create command pool!");
+        // }
     }
 
     void CreateFramebuffers()
@@ -1852,175 +1967,32 @@ private:
                 swapChainImageViews[i],
             };
 
-            VkFramebufferCreateInfo framebufferInfo{};
-            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferInfo.renderPass = renderPass;
-            framebufferInfo.attachmentCount =
-                static_cast<uint32_t>(attachments.size());
-            framebufferInfo.pAttachments = attachments.data();
-            framebufferInfo.width = swapChainExtent.width;
-            framebufferInfo.height = swapChainExtent.height;
-            framebufferInfo.layers = 1;
+            // VkFramebufferCreateInfo framebufferInfo{};
+            // framebufferInfo.sType =
+            // VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            // framebufferInfo.renderPass = renderPass;
+            // framebufferInfo.attachmentCount =
+            //     static_cast<uint32_t>(attachments.size());
+            // framebufferInfo.pAttachments = attachments.data();
+            // framebufferInfo.width = swapChainExtent.width;
+            // framebufferInfo.height = swapChainExtent.height;
+            // framebufferInfo.layers = 1;
+            //
+            // if (vkCreateFramebuffer(
+            //         device,
+            //         &framebufferInfo,
+            //         nullptr,
+            //         &swapChainFramebuffers[i]) != VK_SUCCESS)
+            // {
+            //     throw std::runtime_error("failed to create framebuffer!");
+            // }
 
-            if (vkCreateFramebuffer(
-                    device,
-                    &framebufferInfo,
-                    nullptr,
-                    &swapChainFramebuffers[i]) != VK_SUCCESS)
-            {
-                throw std::runtime_error("failed to create framebuffer!");
-            }
-        }
-    }
-
-    void CreateRenderPass()
-    {
-        VkAttachmentDescription colorAttachment{};
-        // The format of the color attachment should match the format of the
-        // swap chain images, and we're not doing anything with multisampling
-        // yet, so we'll stick to 1 sample.
-        colorAttachment.format = swapChainImageFormat;
-        colorAttachment.samples = msaaSamples;
-        // The loadOp and storeOp determine what to do with the data in the
-        // attachment before rendering and after rendering. In our case we're
-        // going to use the clear operation to clear the framebuffer to black
-        // before drawing a new frame. We're interested in seeing the rendered
-        // triangle on the screen, so we're going with the store operation here.
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        // he loadOp and storeOp apply to color and depth data, and
-        // stencilLoadOp / stencilStoreOp apply to stencil data. Our application
-        // won't do anything with the stencil buffer, so the results of loading
-        // and storing are irrelevant.
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-        // Textures and framebuffers in Vulkan are represented by VkImage
-        // objects with a certain pixel format, however the layout of the pixels
-        // in memory can change based on what you're trying to do with an image.
-        // images need to be transitioned to specific layouts that are suitable
-        // for the operation that they're going to be involved in next. The
-        // initialLayout specifies which layout the image will have before the
-        // render pass begins. The finalLayout specifies the layout to
-        // automatically transition to when the render pass finishes. Using
-        // VK_IMAGE_LAYOUT_UNDEFINED for initialLayout means that we don't care
-        // what previous layout the image was in. The caveat of this special
-        // value is that the contents of the image are not guaranteed to be
-        // preserved, but that doesn't matter since we're going to clear it
-        // anyway. We want the image to be ready for presentation using the swap
-        // chain after rendering, which is why we use
-        // VK_IMAGE_LAYOUT_PRESENT_SRC_KHR as finalLayout.
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        // That's because multisampled images cannot be presented directly. We
-        // first need to resolve them to a regular image. This requirement does
-        // not apply to the depth buffer, since it won't be presented at any
-        // point. Therefore we will have to add only one new attachment for
-        // color which is a so-called resolve attachment:
-        colorAttachment.finalLayout =
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        VkAttachmentDescription depthAttachment{};
-        depthAttachment.format = findDepthFormat();
-        depthAttachment.samples = msaaSamples;
-        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachment.finalLayout =
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentDescription colorAttachmentResolve{};
-        colorAttachmentResolve.format = swapChainImageFormat;
-        colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachmentResolve.stencilStoreOp =
-            VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        // Every subpass references one or more of the attachments that we've
-        // described using the structure in the previous sections. The
-        // attachment parameter specifies which attachment to reference by its
-        // index in the attachment descriptions array. Our array consists of a
-        // single VkAttachmentDescription, so its index is 0. The layout
-        // specifies which layout we would like the attachment to have during a
-        // subpass that uses this reference. Vulkan will automatically
-        // transition the attachment to this layout when the subpass is started.
-        // We intend to use the attachment to function as a color buffer and the
-        // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL layout will give us the best
-        // performance, as its name implies.
-        VkAttachmentReference colorAttachmentRef{};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentReference depthAttachmentRef{};
-        depthAttachmentRef.attachment = 1;
-        depthAttachmentRef.layout =
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-        VkAttachmentReference colorAttachmentResolveRef{};
-        colorAttachmentResolveRef.attachment = 2;
-        colorAttachmentResolveRef.layout =
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        // A single render pass can consist of multiple subpasses. Subpasses are
-        // subsequent rendering operations that depend on the contents of
-        // framebuffers in previous passes, for example a sequence of
-        // post-processing effects that are applied one after another. If you
-        // group these rendering operations into one render pass, then Vulkan is
-        // able to reorder the operations and conserve memory bandwidth for
-        // possibly better performance. For our very first triangle, however,
-        // we'll stick to a single subpass.
-        VkSubpassDescription subpass{};
-        // Vulkan may also support compute subpasses in the future, so we have
-        // to be explicit about this being a graphics subpass.
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
-        subpass.pDepthStencilAttachment = &depthAttachmentRef;
-        subpass.pResolveAttachments = &colorAttachmentResolveRef;
-
-        VkSubpassDependency dependency{};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask =
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask =
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                                   VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-        std::array<VkAttachmentDescription, 3> attachments = {
-            colorAttachment,
-            depthAttachment,
-            colorAttachmentResolve,
-        };
-        VkRenderPassCreateInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        // renderPassInfo.attachmentCount = 1;
-        renderPassInfo.attachmentCount =
-            static_cast<uint32_t>(attachments.size());
-        // The VkAttachmentReference objects reference attachments using the
-        // indices of this array.
-        // renderPassInfo.pAttachments = &colorAttachment;
-        renderPassInfo.pAttachments = attachments.data();
-        renderPassInfo.subpassCount = 1;
-        renderPassInfo.pSubpasses = &subpass;
-        renderPassInfo.dependencyCount = 1;
-        renderPassInfo.pDependencies = &dependency;
-
-        if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) !=
-            VK_SUCCESS)
-        {
-            fatal("Failed to create render pass");
-            assert(false);
-            // throw std::runtime_error("failed to create render pass!");
+            createVkFramebuffer(
+                device,
+                attachments,
+                renderPass,
+                swapChainExtent,
+                swapChainFramebuffers[i]);
         }
     }
 
@@ -2029,53 +2001,58 @@ private:
         SurfaceDetails swapChainSupport =
             getSurfaceDetails(physicalDevice, surface);
 
-        createVkSwapchainKHR(
-            swapChainSupport,
-            physicalDevice,
-            surface,
-            device,
-            window,
-            swapChain);
-
-        VkSurfaceFormatKHR surfaceFormat =
-            selectSurfaceFormat(swapChainSupport.formats);
-        // VkPresentModeKHR presentMode =
-        //     chooseSwapPresentMode(swapChainSupport.presentModes);
-        VkExtent2D extent = selectExtent(swapChainSupport.capabilities, window);
-
-        std::uint32_t imageCount =
-            swapChainSupport.capabilities.minImageCount + 1;
-
-        vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
-        swapChainImages.resize(imageCount);
-        vkGetSwapchainImagesKHR(
-            device,
-            swapChain,
-            &imageCount,
-            swapChainImages.data());
-
-        swapChainImageFormat = surfaceFormat.format;
-        swapChainExtent = extent;
-
-        swapChainImageViews.resize(swapChainImages.size());
-        for (std::uint32_t i{ 0 }; i < swapChainImages.size(); ++i)
-        {
-            createVkImageView(
-                device,
-                swapChainImages[i],
-                swapChainImageFormat,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                swapChainImageViews[i]);
-        }
-        // createVulkanSwapchain(context.device, surface, window,
-        // context.swapchain);
+        // createVkSwapchainKHR(
+        //     swapChainSupport,
+        //     physicalDevice,
+        //     surface,
+        //     device,
+        //     window,
+        //     swapChain);
         //
-        // swapChain = context.swapchain.handle;
-        // swapChainImageFormat = context.swapchain.imageFormat;
-        // swapChainExtent = context.swapchain.extent;
-        // swapChainImages = context.swapchain.swapChainImages;
-        // swapChainImageViews = context.swapchain.swapChainImageViews;
+        // VkSurfaceFormatKHR surfaceFormat =
+        //     selectSurfaceFormat(swapChainSupport.formats);
+        // // VkPresentModeKHR presentMode =
+        // //     chooseSwapPresentMode(swapChainSupport.presentModes);
+        // VkExtent2D extent = selectExtent(swapChainSupport.capabilities,
+        // window);
+        //
+        // std::uint32_t imageCount =
+        //     swapChainSupport.capabilities.minImageCount + 1;
+        //
+        // vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
+        // swapChainImages.resize(imageCount);
+        // vkGetSwapchainImagesKHR(
+        //     device,
+        //     swapChain,
+        //     &imageCount,
+        //     swapChainImages.data());
+        //
+        // swapChainImageFormat = surfaceFormat.format;
+        // swapChainExtent = extent;
+        //
+        // swapChainImageViews.resize(swapChainImages.size());
+        // for (std::uint32_t i{ 0 }; i < swapChainImages.size(); ++i)
+        // {
+        //     createVkImageView(
+        //         device,
+        //         swapChainImages[i],
+        //         swapChainImageFormat,
+        //         VK_IMAGE_ASPECT_COLOR_BIT,
+        //         1,
+        //         swapChainImageViews[i]);
+        // }
+        createVulkanSwapchain(
+            swapChainSupport,
+            context.device,
+            surface,
+            window,
+            context.swapchain);
+
+        swapChain = context.swapchain.handle;
+        swapChainImageFormat = context.swapchain.imageFormat;
+        swapChainExtent = context.swapchain.extent;
+        swapChainImages = context.swapchain.swapChainImages;
+        swapChainImageViews = context.swapchain.swapChainImageViews;
     }
 
     void CreateLogicaDevice()
