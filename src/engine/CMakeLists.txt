@@ -3,6 +3,7 @@ add_library(Engine
     core/logger.hpp
     core/dsa/LinkedList.hpp
     core/dsa/Stack.hpp
+    core/dsa/Queue.hpp
     memory/memory.cpp
     memory/memory.hpp
     memory/Allocator.cpp

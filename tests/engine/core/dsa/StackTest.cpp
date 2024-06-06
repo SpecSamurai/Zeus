@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-TEST(StackTest, Push_Empty_ValueOnTop)
+TEST(StackTest, Push)
 {
     auto sut = Zeus::Stack<int>();
 
@@ -15,7 +15,7 @@ TEST(StackTest, Push_Empty_ValueOnTop)
     EXPECT_EQ(2, sut.Size());
 }
 
-TEST(StackTest, Get_Index_MultipleElements)
+TEST(StackTest, Pop)
 {
     auto sut = Zeus::Stack<int>();
     sut.Push(1);
