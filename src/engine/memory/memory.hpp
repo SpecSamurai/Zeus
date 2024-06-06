@@ -5,6 +5,10 @@
 
 namespace Zeus
 {
+void* addPtr(const void* const ptr, const std::uintptr_t& offset) noexcept;
+
+void* subPtr(const void* const ptr, const std::uintptr_t& offset) noexcept;
+
 std::size_t alignForwardAdjustment(
     const void* const ptr,
     const std::size_t& alignment) noexcept;
@@ -22,8 +26,4 @@ std::size_t alignForwardAdjustmentWithHeader(
 
     return adjustment;
 }
-
-void* addPtr(const void* const ptr, const std::uintptr_t& offset) noexcept;
-
-void* subPtr(const void* const ptr, const std::uintptr_t& offset) noexcept;
 }

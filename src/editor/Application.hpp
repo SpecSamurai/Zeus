@@ -47,8 +47,8 @@
 // is a waste of time, so we need more command buffers used interchangeably.
 // With more command buffers, more fences are also needed and the situation gets
 // more complicated
-const std::string MODEL_PATH = "C:/Source/Zeus/textures/viking_room.obj";
-const std::string TEXTURE_PATH = "C:/Source/Zeus/textures/viking_room.png";
+const std::string MODEL_PATH = "D:/Code/Zeus/textures/viking_room.obj";
+const std::string TEXTURE_PATH = "D:/Code/Zeus/textures/viking_room.png";
 
 namespace Zeus
 {

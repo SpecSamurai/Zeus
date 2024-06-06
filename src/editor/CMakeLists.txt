@@ -20,8 +20,8 @@ FetchContent_MakeAvailable(glm)
 add_executable(Editor
     main.cpp
     Application.hpp
-    ui/UndoRedoStack.hpp
     ui/IUndoableCommand.hpp
+    ui/UndoRedoStack.hpp
     core/files.hpp
     graphics/glfw_utils.hpp
     graphics/glfw_utils.cpp
@@ -71,7 +71,7 @@ add_custom_target(Shaders ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/shaders"
     COMMAND glslc shader.vert -o shader.vert.spv
     COMMAND glslc shader.frag -o shader.frag.spv
-    COMMAND mv ./*.spv "${CMAKE_CURRENT_BINARY_DIR}/shaders"
+    COMMAND move ./*.spv "${CMAKE_CURRENT_BINARY_DIR}/shaders"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/shaders"
     COMMENT "Compiling Shaders..."
 )
