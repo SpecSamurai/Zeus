@@ -15,8 +15,8 @@ add_executable(Tests
     memory/MemoryTest.cpp
     memory/LinearAllocatorTest.cpp
     memory/FreeListAllocatorTest.cpp
-    engine/core/UndoRedoStackTest.cpp
     engine/core/dsa/LinkedListTest.cpp
+    engine/core/dsa/StackTest.cpp
 )
 
 target_link_libraries(Tests

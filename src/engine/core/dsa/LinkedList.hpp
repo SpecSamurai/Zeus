@@ -12,16 +12,16 @@ private:
     {
     public:
         Node(TValue value, Node* prev = nullptr, Node* next = nullptr)
-            : m_value{ value },
-              m_prev{ prev },
-              m_next{ next }
+            : m_prev{ prev },
+              m_next{ next },
+              m_value{ value }
         {
         }
 
     private:
-        TValue m_value;
         Node* m_prev;
         Node* m_next;
+        TValue m_value;
 
         friend class LinkedList;
     };

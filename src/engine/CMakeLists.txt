@@ -1,8 +1,8 @@
 add_library(Engine
     defines.hpp
     core/logger.hpp
-    core/UndoRedoStack.hpp
     core/dsa/LinkedList.hpp
+    core/dsa/Stack.hpp
     memory/memory.cpp
     memory/memory.hpp
     memory/Allocator.cpp
