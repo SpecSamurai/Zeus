@@ -18,6 +18,8 @@ add_executable(Tests
     engine/core/dsa/LinkedListTest.cpp
     engine/core/dsa/StackTest.cpp
     engine/core/dsa/QueueTest.cpp
+    engine/core/dsa/BinarySearchTreeTest.cpp
+    engine/core/dsa/SearchTest.cpp
 )
 
 target_link_libraries(Tests

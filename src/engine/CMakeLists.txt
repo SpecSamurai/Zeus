@@ -4,6 +4,8 @@ add_library(Engine
     core/dsa/LinkedList.hpp
     core/dsa/Stack.hpp
     core/dsa/Queue.hpp
+    core/dsa/BinarySearchTree.hpp
+    core/dsa/search.hpp
     memory/memory.cpp
     memory/memory.hpp
     memory/Allocator.cpp
