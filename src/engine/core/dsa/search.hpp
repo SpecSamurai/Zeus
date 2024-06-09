@@ -2,10 +2,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <iostream>
-#include <iterator>
-#include <ostream>
-#include <queue>
 #include <vector>
 
 namespace Zeus

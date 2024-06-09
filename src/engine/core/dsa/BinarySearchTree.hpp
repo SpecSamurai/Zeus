@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cstddef>
 #include <iostream>
-#include <ostream>
 #include <queue>
 
 namespace Zeus
@@ -100,6 +98,44 @@ public:
             else
                 return m_right->Contains(value);
         }
+    }
+
+    BinarySearchTree<TValue>* Delete(
+        BinarySearchTree<TValue>* root,
+        TValue value)
+    {
+        if (root)
+        {
+            if (value < root->m_value)
+                root->m_left = Delete(root->m_left, value);
+            else if (value > root->m_value)
+                root->m_right = Delete(root->m_right, value);
+            else
+            {
+                if (!root->m_left && !root->m_right)
+                {
+                    delete root;
+                    return nullptr;
+                }
+                else if (root->m_left != nullptr ^ root->m_right != nullptr)
+                {
+                    auto temp = root->m_left ? root->m_left : root->m_right;
+                    delete root;
+                    return temp;
+                }
+                else
+                {
+                    // Fin min on the right side
+                    auto min = root->m_right;
+                    while (min->m_left)
+                        min = min->m_left;
+
+                    root->m_value = min->m_value;
+                    root->m_right = Delete(root->m_right, min->m_value);
+                }
+            }
+        }
+        return root;
     }
 
     void PrintInOrder()

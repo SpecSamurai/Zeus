@@ -49,3 +49,20 @@ TEST(BinarySearchTreeTest, BFS)
 
     node.PrintBFS();
 }
+
+TEST(BinarySearchTreeTest, Delete)
+{
+    Zeus::BinarySearchTree<int> nodetest(10);
+    Zeus::BinarySearchTree<int> node(10);
+    node.Insert(0);
+    node.Insert(1);
+    node.Insert(3);
+    node.Insert(12);
+    node.Insert(5);
+    node.Insert(11);
+
+    node.PrintBFS();
+    nodetest.Delete(&node, 0);
+    node.PrintBFS();
+}
+
