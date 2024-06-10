@@ -6,6 +6,8 @@
 
 namespace Zeus
 {
+// Insertion O(n)
+// Searching O(n)
 class Trie
 {
 public:
