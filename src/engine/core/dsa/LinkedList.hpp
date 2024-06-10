@@ -45,6 +45,7 @@ public:
         m_tail = nullptr;
     }
 
+    // log(n)
     bool Add(TValue value, std::size_t index)
     {
         if (index > m_size)
@@ -86,6 +87,7 @@ public:
         return true;
     }
 
+    // log(n)
     bool Delete(std::size_t index)
     {
         if (index >= m_size)
@@ -128,6 +130,7 @@ public:
         return true;
     }
 
+    // log(n)
     bool Contains(TValue value) const
     {
         Node* current{ m_head };
@@ -143,6 +146,7 @@ public:
         return false;
     }
 
+    // log(n)
     TValue Get(std::size_t index) const
     {
         if (index == m_size - 1)
@@ -155,6 +159,7 @@ public:
         return current->m_value;
     }
 
+    // log(1)
     bool Append(TValue value)
     {
         return Add(value, m_size);

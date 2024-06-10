@@ -39,6 +39,7 @@ public:
         }
     }
 
+    // log(1)
     void Enqueue(TValue value)
     {
         Node* node{ new Node(value) };
@@ -56,6 +57,7 @@ public:
         ++m_size;
     }
 
+    // log(1)
     [[nodiscard]] TValue Dequeue()
     {
         TValue value{ m_head->m_value };

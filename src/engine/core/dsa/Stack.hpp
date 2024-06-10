@@ -38,6 +38,7 @@ public:
         }
     }
 
+    // log(1)
     void Push(TValue value)
     {
         Node* node{ new Node(value, m_top) };
@@ -46,6 +47,7 @@ public:
         ++m_size;
     }
 
+    // log(1)
     [[nodiscard]] TValue Pop()
     {
         TValue value{ m_top->m_value };
