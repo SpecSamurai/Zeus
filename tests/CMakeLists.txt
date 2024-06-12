@@ -15,11 +15,13 @@ add_executable(Tests
     memory/MemoryTest.cpp
     memory/LinearAllocatorTest.cpp
     memory/FreeListAllocatorTest.cpp
+    engine/core/dsa/algorithmsTest.cpp
     engine/core/dsa/LinkedListTest.cpp
+    engine/core/dsa/DisjointSetTest.cpp
     engine/core/dsa/StackTest.cpp
     engine/core/dsa/QueueTest.cpp
+    engine/core/dsa/HeapTest.cpp
     engine/core/dsa/BinarySearchTreeTest.cpp
-    engine/core/dsa/SearchTest.cpp
 )
 
 target_link_libraries(Tests
