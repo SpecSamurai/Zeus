@@ -1,9 +1,35 @@
 #include "Application.hpp"
+#include "VulkanContext.hpp"
+
+#include <cstdlib>
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-    Zeus::Application app;
-    app.Run();
+    bool testContext = 1;
+    if (testContext)
+    {
+        Zeus::VulkanContext vkContext;
 
-    return 0;
+        if (!vkContext.Init(800, 600, "Zeus"))
+            return EXIT_FAILURE;
+
+        while (!glfwWindowShouldClose(vkContext.window))
+        {
+            glfwPollEvents();
+            // DrawFrame();
+            // lastTime = glfwGetTime();
+        }
+
+        // Wait for operations in a specific command queue to be finished.
+        // Can be used as a rudimentary synchronization
+        vkDeviceWaitIdle(vkContext.device.logicalDevice);
+        vkContext.Destroy();
+    }
+    else
+    {
+        Zeus::Application app;
+        app.Run();
+    }
+
+    return EXIT_SUCCESS;
 }
