@@ -20,7 +20,6 @@ struct VulkanSwapchain
 };
 
 bool createVulkanSwapchain(
-    SurfaceDetails swapChainSupport,
     const VulkanDevice& vulkanDevice,
     const VkSurfaceKHR& surface,
     GLFWwindow* window,

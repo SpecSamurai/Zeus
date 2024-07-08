@@ -15,25 +15,27 @@
 namespace Zeus
 {
 bool createVulkanSwapchain(
-    SurfaceDetails swapChainSupport,
     const VulkanDevice& vulkanDevice,
     const VkSurfaceKHR& surface,
     GLFWwindow* window,
     VulkanSwapchain& vulkanSwapchain)
 {
+    SurfaceDetails surfaceDetails =
+        getSurfaceDetails(vulkanDevice.physicalDevice, surface);
+
     VkSurfaceFormatKHR surfaceFormat =
-        selectSurfaceFormat(swapChainSupport.formats);
+        selectSurfaceFormat(surfaceDetails.formats);
     VkPresentModeKHR presentMode =
-        selectPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent = selectExtent(swapChainSupport.capabilities, window);
+        selectPresentMode(surfaceDetails.presentModes);
+    VkExtent2D extent = selectExtent(surfaceDetails.capabilities, window);
 
     // One more image for triple buffering or simply for more frames in flight
-    std::uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+    std::uint32_t imageCount = surfaceDetails.capabilities.minImageCount + 1;
     // 0 is a special value that means that there is no maximum
-    if (swapChainSupport.capabilities.maxImageCount > 0 &&
-        imageCount > swapChainSupport.capabilities.maxImageCount)
+    if (surfaceDetails.capabilities.maxImageCount > 0 &&
+        imageCount > surfaceDetails.capabilities.maxImageCount)
     {
-        imageCount = swapChainSupport.capabilities.maxImageCount;
+        imageCount = surfaceDetails.capabilities.maxImageCount;
     }
 
     VkSwapchainCreateInfoKHR createInfo{};
@@ -191,7 +193,7 @@ bool createVulkanSwapchain(
     // {
     //     return surface_capabilities.currentTransform;
     // }
-    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+    createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
 
     // The compositeAlpha field specifies if the alpha channel should be
     // used for blending with other windows in the window system. You'll
@@ -222,11 +224,14 @@ bool createVulkanSwapchain(
     // auto oldSwapchain = vulkanSwapchain.handle;
     // createInfo.oldSwapchain = oldSwapchain; // VK_NULL_HANDLE;
 
-    VkResult result{ vkCreateSwapchainKHR(
-        vulkanDevice.logicalDevice,
-        &createInfo,
-        nullptr,
-        &vulkanSwapchain.handle) };
+    VkResult result{
+        vkCreateSwapchainKHR(
+            vulkanDevice.logicalDevice,
+            &createInfo,
+            nullptr,
+            &vulkanSwapchain.handle),
+    };
+
     if (result != VK_SUCCESS)
     {
         error("Failed to create swap chain. {}", vkResultToString(result));
