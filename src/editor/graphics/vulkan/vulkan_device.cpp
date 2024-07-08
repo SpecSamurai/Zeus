@@ -18,7 +18,7 @@ bool createVulkanDevice(
     const VkSurfaceKHR& surface,
     VulkanDevice& vulkanDevice)
 {
-    std::uint32_t physicalDeviceCount{0};
+    std::uint32_t physicalDeviceCount{ 0 };
     vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
     if (physicalDeviceCount == 0)
@@ -33,7 +33,7 @@ bool createVulkanDevice(
         &physicalDeviceCount,
         physicalDevices.data());
 
-    bool deviceFound{false};
+    bool deviceFound{ false };
     for (const auto& physicalDevice : physicalDevices)
     {
         if (!areDeviceExtensionSupported(physicalDevice, DEVICE_EXTENSIONS))
@@ -50,9 +50,8 @@ bool createVulkanDevice(
         auto queueFamilies = getQueueFamilies(physicalDevice, surface);
         auto surfaceDetails = getSurfaceDetails(physicalDevice, surface);
 
-        bool isForSwapchain{
-            !surfaceDetails.formats.empty() &&
-            !surfaceDetails.presentModes.empty()};
+        bool isForSwapchain{ !surfaceDetails.formats.empty() &&
+                             !surfaceDetails.presentModes.empty() };
 
         if (queueFamilies.isComplete() && isForSwapchain &&
             deviceFeatures.samplerAnisotropy)
@@ -117,7 +116,7 @@ bool createVkDevice(
         queueFamilies.presentFamily.value(),
     };
 
-    float queuePriority{1.0f};
+    float queuePriority{ 1.0f };
     for (std::uint32_t queueFamily : uniqueQueueFamilies)
     {
         VkDeviceQueueCreateInfo queueCreateInfo{
@@ -156,7 +155,8 @@ bool createVkDevice(
 #endif
 
     VkResult result{
-        vkCreateDevice(physicalDevice, &createInfo, nullptr, &device)};
+        vkCreateDevice(physicalDevice, &createInfo, nullptr, &device)
+    };
     if (result != VK_SUCCESS)
     {
         error("Failed to create logical device. {}", vkResultToString(result));
@@ -169,7 +169,7 @@ bool areDeviceExtensionSupported(
     const VkPhysicalDevice& device,
     const std::vector<const char*>& deviceExtensions)
 {
-    std::uint32_t extensionCount{0};
+    std::uint32_t extensionCount{ 0 };
     vkEnumerateDeviceExtensionProperties(
         device,
         nullptr,
@@ -206,7 +206,7 @@ const SurfaceDetails getSurfaceDetails(
         surface,
         &details.capabilities);
 
-    std::uint32_t surfaceFormatsCount{0};
+    std::uint32_t surfaceFormatsCount{ 0 };
     vkGetPhysicalDeviceSurfaceFormatsKHR(
         physicalDevice,
         surface,
@@ -223,7 +223,7 @@ const SurfaceDetails getSurfaceDetails(
             details.formats.data());
     }
 
-    std::uint32_t presentModesCount{0};
+    std::uint32_t presentModesCount{ 0 };
     vkGetPhysicalDeviceSurfacePresentModesKHR(
         physicalDevice,
         surface,
@@ -249,7 +249,7 @@ const QueueFamilies getQueueFamilies(
 {
     QueueFamilies output{};
 
-    std::uint32_t queueFamilyCount{0};
+    std::uint32_t queueFamilyCount{ 0 };
     vkGetPhysicalDeviceQueueFamilyProperties(
         physicalDevice,
         &queueFamilyCount,
@@ -261,7 +261,7 @@ const QueueFamilies getQueueFamilies(
         &queueFamilyCount,
         queueFamilies.data());
 
-    for (std::uint32_t index{0}; index < queueFamilies.size(); ++index)
+    for (std::uint32_t index{ 0 }; index < queueFamilies.size(); ++index)
     {
         if (queueFamilies[index].queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
@@ -278,7 +278,7 @@ const QueueFamilies getQueueFamilies(
             output.computeFamily = index;
         }
 
-        VkBool32 surfaceSupport{false};
+        VkBool32 surfaceSupport{ false };
         vkGetPhysicalDeviceSurfaceSupportKHR(
             physicalDevice,
             index,
@@ -307,7 +307,8 @@ VkSampleCountFlagBits getMaxUsableSampleCount(
 
     VkSampleCountFlags sampleCountFlags{
         physicalDeviceProperties.limits.framebufferColorSampleCounts &
-        physicalDeviceProperties.limits.framebufferDepthSampleCounts};
+        physicalDeviceProperties.limits.framebufferDepthSampleCounts
+    };
 
     if (sampleCountFlags & VK_SAMPLE_COUNT_64_BIT)
     {

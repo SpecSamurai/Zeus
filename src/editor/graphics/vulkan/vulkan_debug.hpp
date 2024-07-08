@@ -10,7 +10,7 @@ bool createVkDebugUtilsMessengerEXT(
     const VkInstance& instance,
     VkDebugUtilsMessengerEXT& debugMessenger);
 
-bool areValidationLayerSupported(
+bool areValidationLayersSupported(
     const std::vector<const char*>& validationLayers);
 
 VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(

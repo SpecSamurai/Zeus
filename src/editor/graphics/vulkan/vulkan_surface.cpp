@@ -15,7 +15,8 @@ bool createVkSurfaceKHR(
     VkSurfaceKHR& surface)
 {
     VkResult result{
-        glfwCreateWindowSurface(instance, window, nullptr, &surface)};
+        glfwCreateWindowSurface(instance, window, nullptr, &surface)
+    };
 
     if (result != VK_SUCCESS)
     {

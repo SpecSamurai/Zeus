@@ -19,7 +19,7 @@ const std::vector<const char*> getRequiredGlobalExtensions();
 bool createVkInstance(VkInstance& instance)
 {
 #ifndef NDEBUG
-    if (!areValidationLayerSupported(VALIDATION_LAYERS))
+    if (!areValidationLayersSupported(VALIDATION_LAYERS))
     {
         error("Validation layers requested, but not available");
         return false;
@@ -61,7 +61,7 @@ bool createVkInstance(VkInstance& instance)
     createInfo.pNext = &debugMessengerCreateInfo;
 #endif
 
-    VkResult result{vkCreateInstance(&createInfo, nullptr, &instance)};
+    VkResult result{ vkCreateInstance(&createInfo, nullptr, &instance) };
     if (result != VK_SUCCESS)
     {
         error("Instance failed to create. {}", vkResultToString(result));
@@ -72,9 +72,10 @@ bool createVkInstance(VkInstance& instance)
 
 const std::vector<const char*> getRequiredGlobalExtensions()
 {
-    std::uint32_t glfwExtensionsCount{0};
+    std::uint32_t glfwExtensionsCount{ 0 };
     const char** glfwExtensions{
-        glfwGetRequiredInstanceExtensions(&glfwExtensionsCount)};
+        glfwGetRequiredInstanceExtensions(&glfwExtensionsCount),
+    };
 
     std::vector<const char*> extensions(
         glfwExtensions,

@@ -22,11 +22,11 @@ bool createVkDebugUtilsMessengerEXT(
         .pfnUserCallback = debugCallback,
     };
 
-    VkResult result{createDebugUtilsMessengerEXT(
+    VkResult result{ createDebugUtilsMessengerEXT(
         instance,
         &createInfo,
         nullptr,
-        &debugMessenger)};
+        &debugMessenger) };
     if (result != VK_SUCCESS)
     {
         error("Failed to create debug messenger. {}", vkResultToString(result));
@@ -35,10 +35,10 @@ bool createVkDebugUtilsMessengerEXT(
     return result == VK_SUCCESS;
 }
 
-bool areValidationLayerSupported(
+bool areValidationLayersSupported(
     const std::vector<const char*>& validationLayers)
 {
-    std::uint32_t layerCount{0};
+    std::uint32_t layerCount{ 0 };
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
     std::vector<VkLayerProperties> availableLayers(layerCount);
@@ -46,7 +46,7 @@ bool areValidationLayerSupported(
 
     for (const char* layerName : validationLayers)
     {
-        bool layerFound{false};
+        bool layerFound{ false };
 
         for (const auto& layerProperties : availableLayers)
         {
