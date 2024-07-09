@@ -71,6 +71,8 @@ add_custom_target(Shaders ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/shaders"
     COMMAND glslc shader.vert -o shader.vert.spv
     COMMAND glslc shader.frag -o shader.frag.spv
+    COMMAND glslc test.vert -o test.vert.spv
+    COMMAND glslc test.frag -o test.frag.spv
     COMMAND move ./*.spv "${CMAKE_CURRENT_BINARY_DIR}/shaders"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/shaders"
     COMMENT "Compiling Shaders..."
