@@ -12,6 +12,8 @@ bool createVkSemaphore(const VkDevice& device, VkSemaphore& semaphore)
 {
     VkSemaphoreCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        .pNext = VK_NULL_HANDLE,
+        .flags = 0,
     };
 
     VkResult result{
@@ -29,6 +31,8 @@ bool createVkFence(const VkDevice& device, bool signaled, VkFence& fence)
 {
     VkFenceCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .pNext = VK_NULL_HANDLE,
+        .flags = 0,
     };
 
     if (signaled)
