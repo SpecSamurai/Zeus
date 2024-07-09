@@ -8,7 +8,7 @@ namespace Zeus
 {
 bool createVkFramebuffer(
     const VkDevice& device,
-    const std::array<VkImageView, 3>& attachments,
+    const std::array<VkImageView, 1>& attachments,
     const VkRenderPass& renderPass,
     const VkExtent2D& swapChainExtent,
     VkFramebuffer& framebuffer);
