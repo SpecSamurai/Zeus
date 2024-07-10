@@ -25,7 +25,9 @@ add_executable(Editor
     core/files.hpp
     graphics/glfw_utils.hpp
     graphics/glfw_utils.cpp
+    graphics/Vertex.hpp
     graphics/vulkan/VulkanContext.hpp
+    graphics/vulkan/VulkanContext.cpp
     graphics/vulkan/vulkan_settings.hpp
     graphics/vulkan/vulkan_utils.hpp
     graphics/vulkan/vulkan_utils.cpp
@@ -39,6 +41,8 @@ add_executable(Editor
     graphics/vulkan/vulkan_surface.cpp
     graphics/vulkan/vulkan_device.hpp
     graphics/vulkan/vulkan_device.cpp
+    graphics/vulkan/vulkan_memory.hpp
+    graphics/vulkan/vulkan_memory.cpp
     graphics/vulkan/vulkan_swapchain.hpp
     graphics/vulkan/vulkan_swapchain.cpp
     graphics/vulkan/vulkan_framebuffer.hpp
