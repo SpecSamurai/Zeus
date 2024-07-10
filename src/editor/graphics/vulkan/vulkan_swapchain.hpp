@@ -14,9 +14,9 @@ struct VulkanSwapchain
     VkPresentModeKHR presentMode;
     VkExtent2D extent;
 
-    std::vector<VkImage> swapChainImages;
-    std::vector<VkImageView> swapChainImageViews;
-    std::vector<VkFramebuffer> swapChainFramebuffers;
+    std::vector<VkImage> swapchainImages;
+    std::vector<VkImageView> swapchainImageViews;
+    std::vector<VkFramebuffer> swapchainFramebuffers;
 };
 
 bool createVulkanSwapchain(

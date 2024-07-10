@@ -7,7 +7,7 @@
 
 #include <core/logger.hpp>
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 #include <vulkan/vulkan_core.h>
 
 #include <algorithm>
@@ -252,29 +252,29 @@ bool createVulkanSwapchain(
         &imageCount,
         nullptr);
 
-    vulkanSwapchain.swapChainImages.resize(imageCount);
+    vulkanSwapchain.swapchainImages.resize(imageCount);
 
     vkGetSwapchainImagesKHR(
         vulkanDevice.logicalDevice,
         vulkanSwapchain.handle,
         &imageCount,
-        vulkanSwapchain.swapChainImages.data());
+        vulkanSwapchain.swapchainImages.data());
 
     vulkanSwapchain.imageFormat = surfaceFormat.format;
     vulkanSwapchain.extent = extent;
 
-    vulkanSwapchain.swapChainImageViews.resize(
-        vulkanSwapchain.swapChainImages.size());
+    vulkanSwapchain.swapchainImageViews.resize(
+        vulkanSwapchain.swapchainImages.size());
 
-    for (std::uint32_t i{ 0 }; i < vulkanSwapchain.swapChainImages.size(); ++i)
+    for (std::uint32_t i{ 0 }; i < vulkanSwapchain.swapchainImages.size(); ++i)
     {
         if (!createVkImageView(
                 vulkanDevice.logicalDevice,
-                vulkanSwapchain.swapChainImages[i],
+                vulkanSwapchain.swapchainImages[i],
                 vulkanSwapchain.imageFormat,
                 VK_IMAGE_ASPECT_COLOR_BIT,
                 1,
-                vulkanSwapchain.swapChainImageViews[i]))
+                vulkanSwapchain.swapchainImageViews[i]))
         {
             return false;
         }
