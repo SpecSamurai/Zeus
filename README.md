@@ -1,5 +1,14 @@
 # Zeus - Game Engine
 
+```
+COMMAND dxc.exe -Zpr -spirv -O0 -T vs_6_8 -E main shader.vert.hlsl -Fo shader.vert.spv
+COMMAND dxc.exe -Zpr -spirv -O0 -T ps_6_8 -E main shader.frag.hlsl -Fo shader.frag.spv
+```
+
+## Math
+Math implementation follows column-major memory layout to keep it consistent with both GLSL and SPIR-V.
+TODO: Add flag to change to row-major memory layout.
+
 ## Git Submodules
 While cloning the repo you need to pull all the submodules:
 `git clone --recurse-submodules`
