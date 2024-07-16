@@ -63,7 +63,7 @@ public:
     }
 
 private:
-    constexpr std::size_t size()
+    constexpr std::size_t size() const
     {
         return 3;
     }
