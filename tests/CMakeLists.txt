@@ -15,6 +15,14 @@ add_executable(Tests
     memory/MemoryTest.cpp
     memory/LinearAllocatorTest.cpp
     memory/FreeListAllocatorTest.cpp
+
+    engine/math/TransformationsTest.cpp
+    engine/math/TrigonometricTest.cpp
+    engine/math/Matrix4x4Test.cpp
+    engine/math/Vector2Test.cpp
+    engine/math/Vector3Test.cpp
+    engine/math/Vector4Test.cpp
+
     engine/core/dsa/algorithmsTest.cpp
     engine/core/dsa/LinkedListTest.cpp
     engine/core/dsa/DisjointSetTest.cpp

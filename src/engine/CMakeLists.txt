@@ -1,5 +1,6 @@
 add_library(Engine
     defines.hpp
+
     core/logger.hpp
     core/dsa/LinkedList.hpp
     core/dsa/Stack.hpp
@@ -9,6 +10,17 @@ add_library(Engine
     core/dsa/Trie.hpp
     core/dsa/BinarySearchTree.hpp
     core/dsa/algorithms.hpp
+
+    math/definitions.hpp
+    math/transformations.cpp
+    math/transformations.hpp
+    math/trigonometric.cpp
+    math/trigonometric.hpp
+    math/Matrix4x4.hpp
+    math/Vector2.hpp
+    math/Vector3.hpp
+    math/Vector4.hpp
+
     memory/memory.cpp
     memory/memory.hpp
     memory/Allocator.cpp
