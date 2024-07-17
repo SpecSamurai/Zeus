@@ -18,6 +18,8 @@ add_executable(Tests
 
     engine/math/TransformationsTest.cpp
     engine/math/TrigonometricTest.cpp
+    engine/math/TransformationsTest.cpp
+    engine/math/Matrix3x3Test.cpp
     engine/math/Matrix4x4Test.cpp
     engine/math/Vector2Test.cpp
     engine/math/Vector3Test.cpp
