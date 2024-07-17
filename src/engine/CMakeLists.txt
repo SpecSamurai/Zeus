@@ -12,10 +12,11 @@ add_library(Engine
     core/dsa/algorithms.hpp
 
     math/definitions.hpp
-    math/transformations.cpp
     math/transformations.hpp
     math/trigonometric.cpp
     math/trigonometric.hpp
+    math/geometric.hpp
+    math/Matrix3x3.hpp
     math/Matrix4x4.hpp
     math/Vector2.hpp
     math/Vector3.hpp
