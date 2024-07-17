@@ -10,13 +10,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     {
         Zeus::VulkanContext vkContext;
 
-        if (!vkContext.Init(800, 600, "Zeus"))
-            return EXIT_FAILURE;
+        vkContext.Init(800, 600, "Zeus");
 
         while (!glfwWindowShouldClose(vkContext.window))
         {
             glfwPollEvents();
-            // DrawFrame();
+            vkContext.DrawFrame();
             // lastTime = glfwGetTime();
         }
 
