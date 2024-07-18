@@ -78,7 +78,7 @@ inline void log(
         assert(false && "Unknown LogLevel");
     }
 
-    auto formated{std::format(message, std::forward<Args>(args)...)};
+    auto formated{ std::format(message, std::forward<Args>(args)...) };
     output << ' ' << formated << RESET_SEQUENCE;
 
     std::cerr << output.str() << std::endl;
