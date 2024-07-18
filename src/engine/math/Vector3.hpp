@@ -9,6 +9,10 @@ template <typename T>
 class Vector3
 {
 public:
+    Vector3() : x{ 0 }, y{ 0 }, z{ 0 }
+    {
+    }
+
     Vector3(T x, T y, T z) : x{ x }, y{ y }, z{ z }
     {
     }
