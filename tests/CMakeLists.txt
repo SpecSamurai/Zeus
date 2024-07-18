@@ -16,6 +16,7 @@ add_executable(Tests
     memory/LinearAllocatorTest.cpp
     memory/FreeListAllocatorTest.cpp
 
+    engine/math/GeometricTest.cpp
     engine/math/TransformationsTest.cpp
     engine/math/TrigonometricTest.cpp
     engine/math/TransformationsTest.cpp
