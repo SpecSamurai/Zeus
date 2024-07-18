@@ -19,13 +19,17 @@ FetchContent_MakeAvailable(glm)
 
 add_executable(Editor
     main.cpp
-    Application.hpp
+
+    core/files.hpp
+
     ui/IUndoableCommand.hpp
     ui/UndoRedoStack.hpp
-    core/files.hpp
+
+    graphics/Camera.hpp
+    graphics/Vertex.hpp
     graphics/glfw_utils.hpp
     graphics/glfw_utils.cpp
-    graphics/Vertex.hpp
+
     graphics/vulkan/VulkanContext.hpp
     graphics/vulkan/VulkanContext.cpp
     graphics/vulkan/vulkan_settings.hpp
