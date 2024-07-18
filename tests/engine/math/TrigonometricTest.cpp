@@ -1,5 +1,5 @@
-#include "math/trigonometric.hpp"
-#include "math/definitions.hpp"
+#include <math/definitions.hpp>
+#include <math/trigonometric.hpp>
 
 #include <gtest/gtest.h>
 

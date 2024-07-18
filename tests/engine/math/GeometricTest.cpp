@@ -1,6 +1,6 @@
-#include "math/geometric.hpp"
-#include "math/Vector3.hpp"
-#include "math/Vector4.hpp"
+#include <math/Vector3.hpp>
+#include <math/Vector4.hpp>
+#include <math/geometric.hpp>
 
 #include <gtest/gtest.h>
 
