@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <array>
+#include <vector>
 
 namespace Zeus
 {
@@ -13,8 +13,9 @@ struct GraphicsPipelineConfig
     const VkDescriptorSetLayout& descriptorSetLayout;
     const VkSampleCountFlagBits msaaSamples;
     const VkVertexInputBindingDescription& bindingDescription;
-    const std::array<VkVertexInputAttributeDescription, 3>&
-        attributeDescriptions;
+    const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions;
+    const std::vector<char>& vertShaderCode;
+    const std::vector<char>& fragShaderCode;
 };
 
 bool createGraphicsVkPipeline(
