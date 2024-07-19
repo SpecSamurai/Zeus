@@ -15,18 +15,18 @@ bool createVkDebugUtilsMessengerEXT(
     const VkInstance& instance,
     VkDebugUtilsMessengerEXT& debugMessenger)
 {
-    VkDebugUtilsMessengerCreateInfoEXT createInfo{
-        .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-        .messageSeverity = MESSAGE_SEVERITY,
-        .messageType = MESSAGE_TYPE,
-        .pfnUserCallback = debugCallback,
-    };
+    VkDebugUtilsMessengerCreateInfoEXT createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.messageSeverity = DEBUG_MESSAGE.MESSAGE_SEVERITY;
+    createInfo.messageType = DEBUG_MESSAGE.MESSAGE_TYPE;
+    createInfo.pfnUserCallback = debugCallback;
 
     VkResult result{ createDebugUtilsMessengerEXT(
         instance,
         &createInfo,
         nullptr,
         &debugMessenger) };
+
     if (result != VK_SUCCESS)
     {
         error("Failed to create debug messenger. {}", vkResultToString(result));
