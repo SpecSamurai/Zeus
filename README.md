@@ -3,6 +3,7 @@
 ## Todo
 - Reverse depth
 - Runtime shaders compilation | libshaderc
+- Transfer queue
 
 ## Math
 - Column-Major matrices to maintain consistency with both GLSL and SPIR-V.
