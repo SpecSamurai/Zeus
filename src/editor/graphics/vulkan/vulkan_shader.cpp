@@ -19,11 +19,10 @@ bool createVkShaderModule(
     // requirements of uint32_t. The data is stored in an std::vector where the
     // default allocator already ensures that the data satisfies the worst case
     // alignment requirements.
-    VkShaderModuleCreateInfo createInfo{
-        .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-        .codeSize = code.size(),
-        .pCode = reinterpret_cast<const uint32_t*>(code.data()),
-    };
+    VkShaderModuleCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    createInfo.codeSize = code.size();
+    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkResult result{
         vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule)
