@@ -4,8 +4,9 @@
 
 #include <core/logger.hpp>
 
-#include <cstdint>
 #include <vulkan/vulkan_core.h>
+
+#include <cstdint>
 
 namespace Zeus
 {
@@ -14,45 +15,30 @@ bool createVkImageView(
     const VkImage& image,
     const VkFormat format,
     const VkImageAspectFlags aspectFlags,
-    uint32_t mipLevels,
+    const std::uint32_t mipLevels,
     VkImageView& imageView)
 {
-    // Format of  an image view; it must be compatible with the image’s format
-    // but may not be the same format (that is, it may be a different format but
-    // with the same number of bits per pixel).
-    // components – Mapping of an image components into a vector returned in the
-    // shader by texturing operations. This applies only to read operations
-    // (sampling), but since we are using an image as a color attachment (we are
-    // rendering into an image) we must set the so-called identity mapping (R
-    // component into R, G -> G, and so on) or just use “identity” value
-    // (VK_COMPONENT_SWIZZLE_IDENTITY).
-    // subresourceRange – Describes the set of mipmap levels and array layers
-    // that will be accessible to a view. If our image is mipmapped, we may
-    // specify the specific mipmap level we want to render to (and in case of
-    // render targets we must specify exactly one mipmap level of one array
-    // layer).
-    VkImageViewCreateInfo createInfo{
-        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-        .image = image,
-        .viewType = VK_IMAGE_VIEW_TYPE_2D,
-        .format = format,
-        .components =
-            {
-                .r = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .g = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .b = VK_COMPONENT_SWIZZLE_IDENTITY,
-                .a = VK_COMPONENT_SWIZZLE_IDENTITY,
-            },
-        .subresourceRange =
-            {
-                .aspectMask = aspectFlags,
-                .baseMipLevel = 0,
-                .levelCount = mipLevels,
-                // Usage: Stereograhic 3D application
-                .baseArrayLayer = 0,
-                .layerCount = 1,
-            },
-    };
+    VkImageViewCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    createInfo.image = image;
+    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    createInfo.format = format;
+
+    VkComponentMapping componentMapping{};
+    componentMapping.r = VK_COMPONENT_SWIZZLE_IDENTITY,
+    componentMapping.g = VK_COMPONENT_SWIZZLE_IDENTITY,
+    componentMapping.b = VK_COMPONENT_SWIZZLE_IDENTITY,
+    componentMapping.a = VK_COMPONENT_SWIZZLE_IDENTITY,
+    createInfo.components = componentMapping;
+
+    VkImageSubresourceRange imageSubresourceRange{};
+    imageSubresourceRange.aspectMask = aspectFlags;
+    imageSubresourceRange.baseMipLevel = 0;
+    imageSubresourceRange.levelCount = mipLevels;
+    // Usage: Stereograhic 3D application
+    imageSubresourceRange.baseArrayLayer = 0;
+    imageSubresourceRange.layerCount = 1;
+    createInfo.subresourceRange = imageSubresourceRange;
 
     VkResult result{
         vkCreateImageView(device, &createInfo, nullptr, &imageView)
