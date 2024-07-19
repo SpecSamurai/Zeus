@@ -13,7 +13,6 @@
 
 namespace Zeus
 {
-// Global means that they apply to the entire program and not a specific device
 const std::vector<const char*> getRequiredGlobalExtensions();
 
 bool createVkInstance(VkInstance& instance)

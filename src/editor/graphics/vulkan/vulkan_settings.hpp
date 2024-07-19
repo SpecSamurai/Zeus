@@ -15,11 +15,6 @@ inline const std::vector<const char*> DEVICE_EXTENSIONS = {
 
 inline constexpr bool VSYNC{ true };
 
-// We choose the number 2 because we don't want the CPU to get too far ahead of
-// the GPU. With 2 frames in flight, the CPU and the GPU can be working on their
-// own tasks at the same time. If the CPU finishes early, it will wait till the
-// GPU finishes rendering before submitting more work. With 3 or more frames in
-// flight, the CPU could get ahead of the GPU, adding frames of latency.
 inline constexpr int MAX_FRAMES_IN_FLIGHT{ 2 };
 
 inline constexpr struct FaceCullingConfig
