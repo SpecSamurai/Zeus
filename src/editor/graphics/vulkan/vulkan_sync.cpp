@@ -10,15 +10,13 @@ namespace Zeus
 {
 bool createVkSemaphore(const VkDevice& device, VkSemaphore& semaphore)
 {
-    VkSemaphoreCreateInfo createInfo{
-        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-        .pNext = VK_NULL_HANDLE,
-        .flags = 0,
-    };
+    VkSemaphoreCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
     VkResult result{
         vkCreateSemaphore(device, &createInfo, nullptr, &semaphore)
     };
+
     if (result != VK_SUCCESS)
     {
         error("Failed to create a Semaphore. {}", vkResultToString(result));
@@ -29,11 +27,8 @@ bool createVkSemaphore(const VkDevice& device, VkSemaphore& semaphore)
 
 bool createVkFence(const VkDevice& device, bool signaled, VkFence& fence)
 {
-    VkFenceCreateInfo createInfo{
-        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-        .pNext = VK_NULL_HANDLE,
-        .flags = 0,
-    };
+    VkFenceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
     if (signaled)
     {
@@ -41,6 +36,7 @@ bool createVkFence(const VkDevice& device, bool signaled, VkFence& fence)
     }
 
     VkResult result{ vkCreateFence(device, &createInfo, nullptr, &fence) };
+
     if (result != VK_SUCCESS)
     {
         error("Failed to create a Fence. {}", vkResultToString(result));
