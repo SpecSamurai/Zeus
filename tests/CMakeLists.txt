@@ -12,9 +12,9 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(Tests
-    memory/MemoryTest.cpp
-    memory/LinearAllocatorTest.cpp
-    memory/FreeListAllocatorTest.cpp
+    engine/memory/MemoryTest.cpp
+    engine/memory/LinearAllocatorTest.cpp
+    engine/memory/FreeListAllocatorTest.cpp
 
     engine/math/GeometricTest.cpp
     engine/math/TransformationsTest.cpp
@@ -25,14 +25,6 @@ add_executable(Tests
     engine/math/Vector2Test.cpp
     engine/math/Vector3Test.cpp
     engine/math/Vector4Test.cpp
-
-    engine/core/dsa/algorithmsTest.cpp
-    engine/core/dsa/LinkedListTest.cpp
-    engine/core/dsa/DisjointSetTest.cpp
-    engine/core/dsa/StackTest.cpp
-    engine/core/dsa/QueueTest.cpp
-    engine/core/dsa/HeapTest.cpp
-    engine/core/dsa/BinarySearchTreeTest.cpp
 )
 
 target_link_libraries(Tests

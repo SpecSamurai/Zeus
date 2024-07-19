@@ -2,14 +2,6 @@ add_library(Engine
     defines.hpp
 
     core/logger.hpp
-    core/dsa/LinkedList.hpp
-    core/dsa/Stack.hpp
-    core/dsa/Queue.hpp
-    core/dsa/Heap.hpp
-    core/dsa/DisjointSet.hpp
-    core/dsa/Trie.hpp
-    core/dsa/BinarySearchTree.hpp
-    core/dsa/algorithms.hpp
 
     math/definitions.hpp
     math/transformations.hpp
