@@ -26,34 +26,32 @@ bool createVkInstance(VkInstance& instance)
     }
 #endif
 
-    VkApplicationInfo applicationInfo{
-        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        .pApplicationName = "Zeus",
-        .applicationVersion = APPLICATION_VERSION,
-        .pEngineName = "Zeus Engine",
-        .engineVersion = APPLICATION_VERSION,
-        .apiVersion = VK_API_VERSION_1_3,
-    };
+    VkApplicationInfo applicationInfo{};
+    applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    applicationInfo.pApplicationName = "Zeus";
+    applicationInfo.applicationVersion = APPLICATION_VERSION;
+    applicationInfo.pEngineName = "Zeus Engine";
+    applicationInfo.engineVersion = APPLICATION_VERSION;
+    applicationInfo.apiVersion = VK_API_VERSION_1_3;
 
     auto extensions = getRequiredGlobalExtensions();
 
-    VkInstanceCreateInfo createInfo{
-        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        .pNext = nullptr,
-        .pApplicationInfo = &applicationInfo,
-        .enabledLayerCount = 0,
-        .ppEnabledLayerNames = nullptr,
-        .enabledExtensionCount = static_cast<std::uint32_t>(extensions.size()),
-        .ppEnabledExtensionNames = extensions.data(),
-    };
+    VkInstanceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &applicationInfo;
+    createInfo.enabledLayerCount = 0;
+    createInfo.ppEnabledLayerNames = nullptr;
+    createInfo.enabledExtensionCount =
+        static_cast<std::uint32_t>(extensions.size());
+    createInfo.ppEnabledExtensionNames = extensions.data();
 
 #ifndef NDEBUG
-    VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo{
-        .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-        .messageSeverity = MESSAGE_SEVERITY,
-        .messageType = MESSAGE_TYPE,
-        .pfnUserCallback = debugCallback,
-    };
+    VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo{};
+    debugMessengerCreateInfo.sType =
+        VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    debugMessengerCreateInfo.messageSeverity = DEBUG_MESSAGE.MESSAGE_SEVERITY;
+    debugMessengerCreateInfo.messageType = DEBUG_MESSAGE.MESSAGE_TYPE;
+    debugMessengerCreateInfo.pfnUserCallback = debugCallback;
 
     createInfo.enabledLayerCount =
         static_cast<std::uint32_t>(VALIDATION_LAYERS.size());
