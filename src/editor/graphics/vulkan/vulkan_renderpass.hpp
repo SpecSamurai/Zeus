@@ -4,10 +4,15 @@
 
 namespace Zeus
 {
+struct RenderPassConfig
+{
+    VkFormat colorAttachmentFormat;
+    VkFormat depthAttachmentFormat;
+    VkSampleCountFlagBits msaaSamples;
+};
+
 bool createVkRenderPass(
-    VkDevice device,
-    VkFormat swapChainImageFormat,
-    VkSampleCountFlagBits msaaSamples,
-    VkFormat depthFormat,
+    const VkDevice& device,
+    const RenderPassConfig& config,
     VkRenderPass& renderPass);
 }
