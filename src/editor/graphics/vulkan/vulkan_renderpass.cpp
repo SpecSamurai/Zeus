@@ -4,10 +4,10 @@
 
 #include <core/logger.hpp>
 
-#include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 #include <array>
+#include <cstdint>
 
 namespace Zeus
 {
