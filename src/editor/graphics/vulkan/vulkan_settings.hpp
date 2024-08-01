@@ -15,7 +15,7 @@ inline const std::vector<const char*> DEVICE_EXTENSIONS = {
 
 inline constexpr bool VSYNC{ true };
 
-inline constexpr int MAX_FRAMES_IN_FLIGHT{ 2 };
+inline constexpr std::uint32_t FRAMES_IN_FLIGHT{ 2 };
 
 inline constexpr struct FaceCullingConfig
 {
