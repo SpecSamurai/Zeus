@@ -10,6 +10,70 @@
 
 namespace Zeus
 {
+bool createVkImage(
+    const VkDevice& device,
+    const VkPhysicalDevice& physicalDevice,
+    const ImageConfig& config,
+    VkImage& image,
+    VkDeviceMemory& imageMemory)
+{
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageInfo.extent.width = config.width;
+    imageInfo.extent.height = config.height;
+    imageInfo.extent.depth = 1;
+    imageInfo.mipLevels = config.mipLevels;
+    imageInfo.arrayLayers = 1;
+    imageInfo.format = config.format;
+    imageInfo.tiling = config.tiling;
+    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.usage = config.usage;
+    imageInfo.samples = config.numSamples;
+    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    VkResult createImageResult{
+        vkCreateImage(device, &imageInfo, nullptr, &image)
+    };
+
+    if (createImageResult != VK_SUCCESS)
+    {
+        error(
+            "Failed to create image. {}",
+            vkResultToString(createImageResult));
+
+        return false;
+    }
+
+    VkMemoryRequirements memoryRequirements;
+    vkGetImageMemoryRequirements(device, image, &memoryRequirements);
+
+    VkMemoryAllocateInfo allocateInfo{};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.allocationSize = memoryRequirements.size;
+    allocateInfo.memoryTypeIndex = findMemoryType(
+        physicalDevice,
+        memoryRequirements.memoryTypeBits,
+        config.properties);
+
+    VkResult allocateResult{
+        vkAllocateMemory(device, &allocateInfo, nullptr, &imageMemory)
+    };
+
+    if (allocateResult != VK_SUCCESS)
+    {
+        error(
+            "Failed to allocate image memory. {}",
+            vkResultToString(allocateResult));
+
+        return false;
+    }
+
+    vkBindImageMemory(device, image, imageMemory, 0);
+
+    return true;
+}
+
 bool createVkImageView(
     const VkDevice& device,
     const VkImage& image,

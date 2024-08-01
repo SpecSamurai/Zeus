@@ -6,6 +6,25 @@
 
 namespace Zeus
 {
+struct ImageConfig
+{
+    std::uint32_t width;
+    std::uint32_t height;
+    std::uint32_t mipLevels;
+    VkSampleCountFlagBits numSamples;
+    VkFormat format;
+    VkImageTiling tiling;
+    VkImageUsageFlags usage;
+    VkMemoryPropertyFlags properties;
+};
+
+bool createVkImage(
+    const VkDevice& device,
+    const VkPhysicalDevice& physicalDevice,
+    const ImageConfig& config,
+    VkImage& image,
+    VkDeviceMemory& imageMemory);
+
 bool createVkImageView(
     const VkDevice& device,
     const VkImage& image,
