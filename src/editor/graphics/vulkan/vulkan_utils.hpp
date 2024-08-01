@@ -6,6 +6,11 @@
 
 namespace Zeus
 {
+std::uint32_t findMemoryType(
+    const VkPhysicalDevice& physicalDevice,
+    std::uint32_t typeFilter,
+    VkMemoryPropertyFlags properties);
+
 VkResult createDebugUtilsMessengerEXT(
     VkInstance instance,
     const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
