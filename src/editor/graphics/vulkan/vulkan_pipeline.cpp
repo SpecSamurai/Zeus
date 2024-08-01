@@ -125,14 +125,18 @@ bool createGraphicsVkPipeline(
     // .alphaToCoverageEnable = VK_FALSE,
     // .alphaToOneEnable = VK_FALSE,
 
-    // VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo{
-    //     .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-    //     .depthTestEnable = VK_TRUE,
-    //     .depthWriteEnable = VK_TRUE,
-    //     .depthCompareOp = VK_COMPARE_OP_LESS,
-    //     .depthBoundsTestEnable = VK_FALSE,
-    //     .stencilTestEnable = VK_FALSE,
-    // };
+    VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo{};
+    depthStencilStateCreateInfo.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depthStencilStateCreateInfo.depthTestEnable = VK_TRUE;
+    depthStencilStateCreateInfo.depthWriteEnable = VK_TRUE;
+    depthStencilStateCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+    depthStencilStateCreateInfo.depthBoundsTestEnable = VK_FALSE;
+    depthStencilStateCreateInfo.minDepthBounds = 0.0f; // Optional
+    depthStencilStateCreateInfo.maxDepthBounds = 1.0f; // Optional
+    depthStencilStateCreateInfo.stencilTestEnable = VK_FALSE;
+    depthStencilStateCreateInfo.front = {}; // Optional
+    depthStencilStateCreateInfo.back = {};  // Optional
 
     VkPipelineColorBlendAttachmentState colorBlendAttachmentState{};
     colorBlendAttachmentState.blendEnable = VK_FALSE;
@@ -202,7 +206,7 @@ bool createGraphicsVkPipeline(
     pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
     pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
     pipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
-    // pipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
+    pipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
     pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
     pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
     pipelineCreateInfo.layout = pipelineLayout;
