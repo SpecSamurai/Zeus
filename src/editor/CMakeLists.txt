@@ -27,40 +27,44 @@ add_executable(Editor
 
     graphics/Camera.hpp
     graphics/Vertex.hpp
-    graphics/glfw_utils.hpp
     graphics/glfw_utils.cpp
+    graphics/glfw_utils.hpp
 
-    graphics/vulkan/VulkanContext.hpp
-    graphics/vulkan/VulkanContext.cpp
-    graphics/vulkan/vulkan_settings.hpp
-    graphics/vulkan/vulkan_utils.hpp
-    graphics/vulkan/vulkan_utils.cpp
-    graphics/vulkan/vulkan_instance.hpp
-    graphics/vulkan/vulkan_instance.cpp
-    graphics/vulkan/vulkan_debug.hpp
+    graphics/VulkanContext.hpp
+    graphics/VulkanContext.cpp
+
+    graphics/vulkan_device.cpp
+    graphics/vulkan_device.hpp
+    graphics/vulkan_swapchain.cpp
+    graphics/vulkan_swapchain.hpp
+    graphics/vulkan_command_buffer.cpp
+    graphics/vulkan_command_buffer.hpp
+
+    graphics/vulkan/vulkan_buffer.cpp
+    graphics/vulkan/vulkan_buffer.hpp
     graphics/vulkan/vulkan_debug.cpp
-    graphics/vulkan/vulkan_sync.hpp
-    graphics/vulkan/vulkan_sync.cpp
-    graphics/vulkan/vulkan_surface.hpp
-    graphics/vulkan/vulkan_surface.cpp
-    graphics/vulkan/vulkan_device.hpp
-    graphics/vulkan/vulkan_device.cpp
-    graphics/vulkan/vulkan_memory.hpp
-    graphics/vulkan/vulkan_memory.cpp
-    graphics/vulkan/vulkan_swapchain.hpp
-    graphics/vulkan/vulkan_swapchain.cpp
-    graphics/vulkan/vulkan_framebuffer.hpp
+    graphics/vulkan/vulkan_debug.hpp
+    graphics/vulkan/vulkan_descriptors.cpp
+    graphics/vulkan/vulkan_descriptors.hpp
     graphics/vulkan/vulkan_framebuffer.cpp
-    graphics/vulkan/vulkan_renderpass.hpp
-    graphics/vulkan/vulkan_renderpass.cpp
+    graphics/vulkan/vulkan_framebuffer.hpp
     graphics/vulkan/vulkan_image.hpp
     graphics/vulkan/vulkan_image.cpp
-    graphics/vulkan/vulkan_shader.hpp
-    graphics/vulkan/vulkan_shader.cpp
-    graphics/vulkan/vulkan_pipeline.hpp
+    graphics/vulkan/vulkan_instance.cpp
+    graphics/vulkan/vulkan_instance.hpp
     graphics/vulkan/vulkan_pipeline.cpp
-    graphics/vulkan/vulkan_command_buffer.hpp
-    graphics/vulkan/vulkan_command_buffer.cpp
+    graphics/vulkan/vulkan_pipeline.hpp
+    graphics/vulkan/vulkan_renderpass.cpp
+    graphics/vulkan/vulkan_renderpass.hpp
+    graphics/vulkan/vulkan_settings.hpp
+    graphics/vulkan/vulkan_shader.cpp
+    graphics/vulkan/vulkan_shader.hpp
+    graphics/vulkan/vulkan_surface.cpp
+    graphics/vulkan/vulkan_surface.hpp
+    graphics/vulkan/vulkan_sync.cpp
+    graphics/vulkan/vulkan_sync.hpp
+    graphics/vulkan/vulkan_utils.cpp
+    graphics/vulkan/vulkan_utils.hpp
 )
 
 target_include_directories(Editor
