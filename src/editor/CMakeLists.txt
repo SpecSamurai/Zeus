@@ -37,11 +37,11 @@ add_executable(Editor
     graphics/vulkan_device.hpp
     graphics/vulkan_swapchain.cpp
     graphics/vulkan_swapchain.hpp
-    graphics/vulkan_command_buffer.cpp
-    graphics/vulkan_command_buffer.hpp
 
     graphics/vulkan/vulkan_buffer.cpp
     graphics/vulkan/vulkan_buffer.hpp
+    graphics/vulkan/vulkan_command_buffer.cpp
+    graphics/vulkan/vulkan_command_buffer.hpp
     graphics/vulkan/vulkan_debug.cpp
     graphics/vulkan/vulkan_debug.hpp
     graphics/vulkan/vulkan_descriptors.cpp

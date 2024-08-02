@@ -22,20 +22,21 @@ bool allocateVkCommandBuffers(
 bool beginVkCommandBuffer(VkCommandBuffer& commandBuffer);
 bool endVkCommandBuffer(VkCommandBuffer& commandBuffer);
 
-VkCommandBuffer beginSingleTimeCommands(
-    VkDevice device,
-    VkCommandPool commandPool);
+bool beginOneTimeVkCommandBuffer(
+    const VkDevice& device,
+    const VkCommandPool& commandPool,
+    VkCommandBuffer& commandBuffer);
 
-void endSingleTimeCommands(
-    VulkanDevice device,
-    VkCommandBuffer commandBuffer,
-    VkCommandPool commandPool);
+bool endOneTimeVkCommandBuffer(
+    const VulkanDevice& device,
+    const VkCommandPool& commandPool,
+    VkCommandBuffer& commandBuffer);
 
 void cmdBeginVkRenderPass(
     const VkRenderPass& renderPass,
     const VkExtent2D& extent,
     const VkFramebuffer& framebuffer,
-    const std::array<VkClearValue, 1>& clearValues,
+    const std::array<VkClearValue, 2>& clearValues,
     VkCommandBuffer& commandBuffer);
 
 void cmdSetVkViewport(const VkExtent2D& extent, VkCommandBuffer& commandBuffer);

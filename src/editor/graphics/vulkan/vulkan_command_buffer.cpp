@@ -18,26 +18,10 @@ bool createVkCommandPool(
     std::uint32_t queueFamilyIndex,
     VkCommandPool& commandPool)
 {
-    //  VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT – Indicates that command
-    //  buffers, allocated from this pool, may be reset individually. Normally,
-    //  without this flag, we can’t rerecord the same command buffer multiple
-    //  times. It must be reset first. And, what’s more, command buffers created
-    //  from one pool may be reset only all at once. Specifying this flag allows
-    //  us to reset command buffers individually, and (even better) it is done
-    //  implicitly by calling the vkBeginCommandBuffer() function.
-
-    // VK_COMMAND_POOL_CREATE_TRANSIENT_BIT – This flag tells the driver that
-    // command buffers allocated from this pool will be living for a short
-    // amount of time, they will be often recorded and reset (re-recorded). This
-    // information helps optimize command buffer allocation and perform it more
-    // optimally.
-
-    VkCommandPoolCreateInfo createInfo{
-        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        .pNext = VK_NULL_HANDLE,
-        .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        .queueFamilyIndex = queueFamilyIndex,
-    };
+    VkCommandPoolCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    createInfo.queueFamilyIndex = queueFamilyIndex;
 
     VkResult result{
         vkCreateCommandPool(device, &createInfo, nullptr, &commandPool)
@@ -56,13 +40,12 @@ bool allocateVkCommandBuffers(
     const VkCommandPool& commandPool,
     std::vector<VkCommandBuffer>& commandBuffers)
 {
-    VkCommandBufferAllocateInfo allocateInfo{
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .pNext = VK_NULL_HANDLE,
-        .commandPool = commandPool,
-        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandBufferCount = static_cast<std::uint32_t>(commandBuffers.size()),
-    };
+    VkCommandBufferAllocateInfo allocateInfo{};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocateInfo.commandPool = commandPool;
+    allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocateInfo.commandBufferCount =
+        static_cast<std::uint32_t>(commandBuffers.size());
 
     VkResult result{
         vkAllocateCommandBuffers(device, &allocateInfo, commandBuffers.data())
@@ -80,14 +63,11 @@ bool allocateVkCommandBuffers(
 
 bool beginVkCommandBuffer(VkCommandBuffer& commandBuffer)
 {
-    VkCommandBufferBeginInfo beginInfo{
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        .pNext = VK_NULL_HANDLE,
-        .flags = 0,
-        .pInheritanceInfo = nullptr,
-    };
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
     VkResult result{ vkBeginCommandBuffer(commandBuffer, &beginInfo) };
+
     if (result != VK_SUCCESS)
     {
         error(
@@ -101,6 +81,7 @@ bool beginVkCommandBuffer(VkCommandBuffer& commandBuffer)
 bool endVkCommandBuffer(VkCommandBuffer& commandBuffer)
 {
     VkResult result{ vkEndCommandBuffer(commandBuffer) };
+
     if (result != VK_SUCCESS)
     {
         error("Failed to record command buffer. {}", vkResultToString(result));
@@ -109,43 +90,39 @@ bool endVkCommandBuffer(VkCommandBuffer& commandBuffer)
     return result == VK_SUCCESS;
 }
 
-// Memory transfer operations are executed using command buffers, just like
-// drawing commands. Therefore we must first allocate a temporary command
-// buffer. You may wish to create a separate command pool for these kinds of
-// short-lived buffers, because the implementation may be able to apply
-// memory allocation optimizations. You should use the
-// VK_COMMAND_POOL_CREATE_TRANSIENT_BIT flag during command pool generation
-// in that case.
-VkCommandBuffer beginSingleTimeCommands(
-    VkDevice device,
-    VkCommandPool commandPool)
+bool beginOneTimeVkCommandBuffer(
+    const VkDevice& device,
+    const VkCommandPool& commandPool,
+    VkCommandBuffer& commandBuffer)
 {
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = commandPool;
-    allocInfo.commandBufferCount = 1;
+    VkCommandBufferAllocateInfo allocateInfo{};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocateInfo.commandPool = commandPool;
+    allocateInfo.commandBufferCount = 1;
 
-    VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+    vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffer);
 
-    // We're only going to use the command buffer once and wait with
-    // returning from the function until the copy operation has finished
-    // executing. It's good practice to tell the driver about our intent
-    // using VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT.
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    VkResult result{ vkBeginCommandBuffer(commandBuffer, &beginInfo) };
 
-    return commandBuffer;
+    if (result != VK_SUCCESS)
+    {
+        error(
+            "Failed to begin recording command buffer. {}",
+            vkResultToString(result));
+    }
+
+    return result == VK_SUCCESS;
 }
 
-void endSingleTimeCommands(
-    VulkanDevice device,
-    VkCommandBuffer commandBuffer,
-    VkCommandPool commandPool)
+bool endOneTimeVkCommandBuffer(
+    const VulkanDevice& device,
+    const VkCommandPool& commandPool,
+    VkCommandBuffer& commandBuffer)
 {
     vkEndCommandBuffer(commandBuffer);
 
@@ -154,17 +131,27 @@ void endSingleTimeCommands(
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    VkResult result{
+        vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE)
+    };
+
+    if (result != VK_SUCCESS)
+    {
+        error("Failed to submit command buffer. {}", vkResultToString(result));
+    }
+
     vkQueueWaitIdle(device.graphicsQueue);
 
     vkFreeCommandBuffers(device.logicalDevice, commandPool, 1, &commandBuffer);
+
+    return true;
 }
 
 void cmdBeginVkRenderPass(
     const VkRenderPass& renderPass,
     const VkExtent2D& extent,
     const VkFramebuffer& framebuffer,
-    const std::array<VkClearValue, 1>& clearValues,
+    const std::array<VkClearValue, 2>& clearValues,
     VkCommandBuffer& commandBuffer)
 {
     VkRenderPassBeginInfo renderPassInfo{};
@@ -173,17 +160,6 @@ void cmdBeginVkRenderPass(
     renderPassInfo.framebuffer = framebuffer;
     renderPassInfo.renderArea.offset = { 0, 0 };
     renderPassInfo.renderArea.extent = extent;
-
-    // The last two parameters define the clear values to use for
-    // VK_ATTACHMENT_LOAD_OP_CLEAR, which we used as load operation for the
-    // color attachment. I've defined the clear color to simply be black
-    // with 100% opacity.
-    // VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    // renderPassInfo.clearValueCount = 1;
-    // renderPassInfo.pClearValues = &clearColor;
-    // std::array<VkClearValue, 1> clearValues{};
-    // clearValues[0].color = { { 0.0f, 0.0f, 0.0f, 1.0f } };
-    // clearValues[1].depthStencil = { 1.0f, 0 };
 
     renderPassInfo.clearValueCount =
         static_cast<std::uint32_t>(clearValues.size());

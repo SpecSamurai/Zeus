@@ -77,9 +77,11 @@ void cmdCopyBuffer(
     const VkBuffer& dstBuffer,
     const VkDeviceSize& size)
 {
-    VkCommandBuffer commandBuffer{
-        beginSingleTimeCommands(device.logicalDevice, commandPool)
-    };
+    VkCommandBuffer commandBuffer{};
+    beginOneTimeVkCommandBuffer(
+        device.logicalDevice,
+        commandPool,
+        commandBuffer);
 
     VkBufferCopy copyRegion{};
     copyRegion.srcOffset = 0; // Optional
@@ -88,6 +90,6 @@ void cmdCopyBuffer(
 
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-    endSingleTimeCommands(device, commandBuffer, commandPool);
+    endOneTimeVkCommandBuffer(device, commandPool, commandBuffer);
 }
 }
