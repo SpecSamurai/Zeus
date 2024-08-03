@@ -42,16 +42,14 @@ add_executable(Editor
     graphics/vulkan/vulkan_buffer.hpp
     graphics/vulkan/vulkan_command_buffer.cpp
     graphics/vulkan/vulkan_command_buffer.hpp
-    graphics/vulkan/vulkan_debug.cpp
-    graphics/vulkan/vulkan_debug.hpp
     graphics/vulkan/vulkan_descriptors.cpp
     graphics/vulkan/vulkan_descriptors.hpp
     graphics/vulkan/vulkan_framebuffer.cpp
     graphics/vulkan/vulkan_framebuffer.hpp
     graphics/vulkan/vulkan_image.hpp
     graphics/vulkan/vulkan_image.cpp
-    graphics/vulkan/vulkan_instance.cpp
-    graphics/vulkan/vulkan_instance.hpp
+    graphics/vulkan/InstanceBuilder.cpp
+    graphics/vulkan/InstanceBuilder.hpp
     graphics/vulkan/vulkan_pipeline.cpp
     graphics/vulkan/vulkan_pipeline.hpp
     graphics/vulkan/vulkan_renderpass.cpp

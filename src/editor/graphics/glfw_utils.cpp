@@ -2,8 +2,12 @@
 
 #include <core/logger.hpp>
 
-#define GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+
+#include <vulkan/vulkan_core.h>
+
+#include <vector>
 
 namespace Zeus
 {
@@ -37,5 +41,23 @@ GLFWwindow* createGlfwWindow(int width, int height, const char* title)
     }
 
     return window;
+}
+
+const std::vector<const char*> getRequiredGlobalExtensions()
+{
+    std::uint32_t glfwExtensionsCount{ 0 };
+    const char** glfwExtensions{
+        glfwGetRequiredInstanceExtensions(&glfwExtensionsCount),
+    };
+
+    std::vector<const char*> extensions(
+        glfwExtensions,
+        glfwExtensions + glfwExtensionsCount);
+
+#ifndef NDEBUG
+    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+
+    return extensions;
 }
 }
