@@ -35,11 +35,11 @@ void destroyInstance(Instance& instance)
 {
 #ifndef NDEBUG
     destroyDebugUtilsMessengerEXT(
-        instance.instance,
+        instance.handle,
         instance.debugUtilsMessenger,
         nullptr);
 #endif
 
-    vkDestroyInstance(instance.instance, nullptr);
+    vkDestroyInstance(instance.handle, nullptr);
 }
 }

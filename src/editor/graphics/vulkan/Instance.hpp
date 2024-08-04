@@ -12,7 +12,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL defaultDebugCallback(
 
 struct Instance
 {
-    VkInstance instance{ VK_NULL_HANDLE };
+    VkInstance handle{ VK_NULL_HANDLE };
 #ifndef NDEBUG
     VkDebugUtilsMessengerEXT debugUtilsMessenger{ VK_NULL_HANDLE };
 #endif

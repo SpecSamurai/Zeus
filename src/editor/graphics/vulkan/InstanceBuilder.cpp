@@ -53,7 +53,7 @@ std::optional<Instance> InstanceBuilder::build()
     Instance instance{};
 
     VkResult instanceResult{
-        vkCreateInstance(&instanceCreateInfo, nullptr, &instance.instance)
+        vkCreateInstance(&instanceCreateInfo, nullptr, &instance.handle)
     };
 
     if (instanceResult != VK_SUCCESS)
@@ -74,7 +74,7 @@ std::optional<Instance> InstanceBuilder::build()
     debugCreateInfo.pUserData = info.userData;
 
     VkResult result{ createDebugUtilsMessengerEXT(
-        instance.instance,
+        instance.handle,
         &debugCreateInfo,
         nullptr,
         &instance.debugUtilsMessenger) };
