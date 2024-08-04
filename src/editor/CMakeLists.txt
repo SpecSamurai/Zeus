@@ -33,10 +33,21 @@ add_executable(Editor
     graphics/VulkanContext.hpp
     graphics/VulkanContext.cpp
 
-    graphics/vulkan_device.cpp
-    graphics/vulkan_device.hpp
     graphics/vulkan_swapchain.cpp
     graphics/vulkan_swapchain.hpp
+
+    graphics/vulkan/Device.hpp
+    graphics/vulkan/DeviceBuilder.cpp
+    graphics/vulkan/DeviceBuilder.hpp
+    graphics/vulkan/Instance.cpp
+    graphics/vulkan/Instance.hpp
+    graphics/vulkan/InstanceBuilder.cpp
+    graphics/vulkan/InstanceBuilder.hpp
+    graphics/vulkan/PhysicalDevice.hpp
+    graphics/vulkan/PhysicalDeviceSelector.cpp
+    graphics/vulkan/PhysicalDeviceSelector.hpp
+    graphics/vulkan/SwapchainBuilder.cpp
+    graphics/vulkan/SwapchainBuilder.hpp
 
     graphics/vulkan/vulkan_buffer.cpp
     graphics/vulkan/vulkan_buffer.hpp
@@ -44,12 +55,12 @@ add_executable(Editor
     graphics/vulkan/vulkan_command_buffer.hpp
     graphics/vulkan/vulkan_descriptors.cpp
     graphics/vulkan/vulkan_descriptors.hpp
+    graphics/vulkan/vulkan_device.cpp
+    graphics/vulkan/vulkan_device.hpp
     graphics/vulkan/vulkan_framebuffer.cpp
     graphics/vulkan/vulkan_framebuffer.hpp
     graphics/vulkan/vulkan_image.hpp
     graphics/vulkan/vulkan_image.cpp
-    graphics/vulkan/InstanceBuilder.cpp
-    graphics/vulkan/InstanceBuilder.hpp
     graphics/vulkan/vulkan_pipeline.cpp
     graphics/vulkan/vulkan_pipeline.hpp
     graphics/vulkan/vulkan_renderpass.cpp
