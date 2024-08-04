@@ -1,6 +1,6 @@
 #include "vulkan_command_buffer.hpp"
 
-#include "vulkan_device.hpp"
+#include "Device.hpp"
 #include "vulkan_utils.hpp"
 
 #include <core/logger.hpp>
@@ -120,7 +120,7 @@ bool beginOneTimeVkCommandBuffer(
 }
 
 bool endOneTimeVkCommandBuffer(
-    const VulkanDevice& device,
+    const Device& device,
     const VkCommandPool& commandPool,
     VkCommandBuffer& commandBuffer)
 {

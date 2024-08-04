@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vulkan_device.hpp"
+#include "Device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -28,7 +28,7 @@ bool beginOneTimeVkCommandBuffer(
     VkCommandBuffer& commandBuffer);
 
 bool endOneTimeVkCommandBuffer(
-    const VulkanDevice& device,
+    const Device& device,
     const VkCommandPool& commandPool,
     VkCommandBuffer& commandBuffer);
 

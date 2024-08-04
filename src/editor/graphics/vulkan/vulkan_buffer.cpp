@@ -1,7 +1,6 @@
 #include "vulkan_buffer.hpp"
 
 #include "vulkan_command_buffer.hpp"
-#include "vulkan_device.hpp"
 #include "vulkan_utils.hpp"
 
 #include <core/logger.hpp>
@@ -71,7 +70,7 @@ bool createVkBuffer(
 }
 
 void cmdCopyBuffer(
-    const VulkanDevice& device,
+    const Device& device,
     const VkCommandPool& commandPool,
     const VkBuffer& srcBuffer,
     const VkBuffer& dstBuffer,

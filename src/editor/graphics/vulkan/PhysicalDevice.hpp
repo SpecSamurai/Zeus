@@ -7,9 +7,8 @@
 
 namespace Zeus
 {
-class PhysicalDevice
+struct PhysicalDevice
 {
-public:
     struct QueueFamiliesInfo
     {
         std::optional<std::uint32_t> graphicsFamily;

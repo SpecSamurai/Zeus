@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vulkan_device.hpp"
+#include "Device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -21,7 +21,7 @@ bool createVkBuffer(
     VkDeviceMemory& bufferMemory);
 
 void cmdCopyBuffer(
-    const VulkanDevice& device,
+    const Device& device,
     const VkCommandPool& commandPool,
     const VkBuffer& srcBuffer,
     const VkBuffer& dstBuffer,
