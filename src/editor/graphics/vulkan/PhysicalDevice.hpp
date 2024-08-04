@@ -3,6 +3,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace Zeus
@@ -17,7 +18,7 @@ struct PhysicalDevice
         std::optional<std::uint32_t> computeFamily;
     } queueFamilies;
 
-    const char* name{ nullptr };
+    std::string name{};
 
     VkPhysicalDevice handle{ VK_NULL_HANDLE };
     VkSurfaceKHR surface{ VK_NULL_HANDLE };

@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <map>
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace Zeus
@@ -100,7 +101,7 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::createIfValid(
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 
-    output.name = deviceProperties.deviceName;
+    output.name = std::string(deviceProperties.deviceName);
     output.handle = physicalDevice;
     output.surface = surface;
     output.extensions = criteria.extensions;

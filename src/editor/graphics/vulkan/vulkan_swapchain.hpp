@@ -1,8 +1,12 @@
 #pragma once
 
-#include "vulkan_device.hpp"
+#include "Device.hpp"
 
-#include "GLFW/glfw3.h"
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
+
+#include <vector>
 
 namespace Zeus
 {
@@ -20,7 +24,7 @@ struct VulkanSwapchain
 };
 
 bool createVulkanSwapchain(
-    const VulkanDevice& vulkanDevice,
+    const Device& device,
     const VkSurfaceKHR& surface,
     GLFWwindow* window,
     VulkanSwapchain& vulkanSwapchain);

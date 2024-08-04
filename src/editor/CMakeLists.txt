@@ -33,9 +33,6 @@ add_executable(Editor
     graphics/VulkanContext.hpp
     graphics/VulkanContext.cpp
 
-    graphics/vulkan_swapchain.cpp
-    graphics/vulkan_swapchain.hpp
-
     graphics/vulkan/Device.hpp
     graphics/vulkan/DeviceBuilder.cpp
     graphics/vulkan/DeviceBuilder.hpp
@@ -68,6 +65,8 @@ add_executable(Editor
     graphics/vulkan/vulkan_settings.hpp
     graphics/vulkan/vulkan_shader.cpp
     graphics/vulkan/vulkan_shader.hpp
+    graphics/vulkan/vulkan_swapchain.cpp
+    graphics/vulkan/vulkan_swapchain.hpp
     graphics/vulkan/vulkan_surface.cpp
     graphics/vulkan/vulkan_surface.hpp
     graphics/vulkan/vulkan_sync.cpp
