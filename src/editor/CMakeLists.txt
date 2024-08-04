@@ -65,8 +65,6 @@ add_executable(Editor
     graphics/vulkan/vulkan_settings.hpp
     graphics/vulkan/vulkan_shader.cpp
     graphics/vulkan/vulkan_shader.hpp
-    graphics/vulkan/vulkan_swapchain.cpp
-    graphics/vulkan/vulkan_swapchain.hpp
     graphics/vulkan/vulkan_surface.cpp
     graphics/vulkan/vulkan_surface.hpp
     graphics/vulkan/vulkan_sync.cpp

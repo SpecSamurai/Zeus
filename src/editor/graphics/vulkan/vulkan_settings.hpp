@@ -51,5 +51,9 @@ inline constexpr struct VulkanInstanceConfig
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
+    inline static constexpr VkSurfaceFormatKHR SURFACE_FORMAT{
+        VK_FORMAT_B8G8R8A8_SRGB,
+        VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+    };
 } INSTANCE_DEFAULT;
 }
