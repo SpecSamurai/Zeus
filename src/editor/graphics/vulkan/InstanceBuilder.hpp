@@ -60,28 +60,4 @@ private:
 #endif
     } info;
 };
-
-inline constexpr struct InstanceDefaultConfig
-{
-    inline static constexpr std::uint32_t API_VERSION{ VK_API_VERSION_1_3 };
-
-    inline static const std::vector<const char*> VALIDATION_LAYERS = {
-        "VK_LAYER_KHRONOS_validation",
-    };
-
-    inline static constexpr struct DebugMessage
-    {
-        inline static constexpr VkDebugUtilsMessageSeverityFlagsEXT
-            MESSAGE_SEVERITY{ VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                              // VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
-                              VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                              VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT };
-
-        inline static constexpr VkDebugUtilsMessageTypeFlagsEXT MESSAGE_TYPE{
-            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
-        };
-    } DEBUG_MESSAGE;
-} INSTANCE_DEFAULT;
 }

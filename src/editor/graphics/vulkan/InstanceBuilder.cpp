@@ -1,5 +1,6 @@
 #include "InstanceBuilder.hpp"
 
+#include "vulkan_settings.hpp"
 #include "vulkan_utils.hpp"
 
 #include <core/logger.hpp>
