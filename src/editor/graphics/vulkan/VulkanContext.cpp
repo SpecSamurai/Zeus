@@ -80,7 +80,7 @@ void VulkanContext::framebufferResizeCallback(
     app->framebufferResized = true;
 
     // added to make window draw while resizing
-    // app->RecreateSwapchain();
-    // app->DrawFrame();
+    app->RecreateSwapchain();
+    app->DrawFrame();
 }
 }

@@ -62,7 +62,7 @@ std::optional<Device> DeviceBuilder::build()
     createInfo.pEnabledFeatures = &physicalDeviceFeatures;
 
 #ifndef NDEBUG
-    // Deprecated but set to be backwards compatibility
+    // Deprecated but set for backwards compatibility
     createInfo.enabledLayerCount =
         static_cast<std::uint32_t>(INSTANCE_DEFAULT.VALIDATION_LAYERS.size());
     createInfo.ppEnabledLayerNames = INSTANCE_DEFAULT.VALIDATION_LAYERS.data();

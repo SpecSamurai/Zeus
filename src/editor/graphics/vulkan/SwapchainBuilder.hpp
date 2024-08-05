@@ -16,7 +16,7 @@ struct Swapchain
     VkSwapchainKHR handle{ VK_NULL_HANDLE };
 
     std::uint32_t imageCount{ 0 };
-    // u8 max_frames_in_flight;
+    // max_frames_in_flight;
 
     VkFormat imageFormat;
     VkColorSpaceKHR colorSpace;
@@ -38,7 +38,7 @@ inline void destroySwapchain(const Device& device, const Swapchain& swapchain)
         vkDestroyImageView(device.logicalDevice, imageView, nullptr);
     }
 
-    // vkDestroySwapchainKHR(device.logicalDevice, swapchain.handle, nullptr);
+    vkDestroySwapchainKHR(device.logicalDevice, swapchain.handle, nullptr);
 }
 
 class SwapchainBuilder
@@ -73,7 +73,7 @@ public:
     SwapchainBuilder& setCompositeAlphaFlags(
         VkCompositeAlphaFlagBitsKHR compositeAlphaFlags);
 
-private:
+public:
     bool validate();
 
     struct SwapchainInfo
@@ -90,7 +90,6 @@ private:
         VkExtent2D desiredExtent{};
 
         std::uint32_t minImageCount{ 0 };
-        std::uint32_t required_min_image_count{ 0 };
 
         std::vector<VkSurfaceFormatKHR> desiredSurfaceFormats{};
 

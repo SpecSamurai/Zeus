@@ -48,31 +48,13 @@ std::optional<Swapchain> SwapchainBuilder::build()
         selectExtent(surfaceDetails.capabilities, info.desiredExtent)
     };
 
-    //     uint32_t image_count = info.min_image_count;
-    // if (info.required_min_image_count >= 1) {
-    //     if (info.required_min_image_count <
-    //     surface_support.capabilities.minImageCount)
-    //         return
-    //         make_error_code(SwapchainError::required_min_image_count_too_low);
-    //
-    //     image_count = info.required_min_image_count;
-    // } else if (info.min_image_count == 0) {
-    //     // We intentionally use minImageCount + 1 to maintain existing
-    //     behavior, even if it typically results in triple buffering on most
-    //     systems. image_count = surface_support.capabilities.minImageCount +
-    //     1;
-    // } else {
-    //     image_count = info.min_image_count;
-    //     if (image_count < surface_support.capabilities.minImageCount)
-    //         image_count = surface_support.capabilities.minImageCount;
-    // }
-    // if (surface_support.capabilities.maxImageCount > 0 && image_count >
-    // surface_support.capabilities.maxImageCount) {
-    //     image_count = surface_support.capabilities.maxImageCount;
-    // }
+    std::uint32_t imageCount{
+        info.minImageCount <= surfaceDetails.capabilities.minImageCount
+            // One more image for triple buffering or for more frames in flight
+            ? surfaceDetails.capabilities.minImageCount + 1
+            : info.minImageCount
+    };
 
-    // One more image for triple buffering or simply for more frames in flight
-    std::uint32_t imageCount = surfaceDetails.capabilities.minImageCount + 1;
     // 0 is a special value that means that there is no maximum
     if (surfaceDetails.capabilities.maxImageCount > 0 &&
         imageCount > surfaceDetails.capabilities.maxImageCount)
@@ -80,61 +62,25 @@ std::optional<Swapchain> SwapchainBuilder::build()
         imageCount = surfaceDetails.capabilities.maxImageCount;
     }
 
+    if ((surfaceDetails.capabilities.supportedUsageFlags &
+         info.imageUsageFlags) == 0)
+    {
+        error("Image usage not supported.");
+        return std::nullopt;
+    }
+
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = info.surface;
-
     createInfo.minImageCount = imageCount;
-    // we can't use format from one pair and colorspace from another pair
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
-    createInfo.imageExtent = extent; // info.extent;
+    createInfo.presentMode = presentMode;
+    createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = info.arrayLayerCount;
-
-    // if (surface_capabilities.supportedUsageFlags &
-    //     VK_IMAGE_USAGE_TRANSFER_DST_BIT)
-    // {
-    //     return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-    //            VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    // }
-    // std::cout << "VK_IMAGE_USAGE_TRANSFER_DST image usage is not supported
-    // by"
-    //              "the swap chain!"
-    //           << std::endl
-    //           << "Supported swap chain's image usages include:" << std::endl
-    //           << (surface_capabilities.supportedUsageFlags &
-    //                       VK_IMAGE_USAGE_TRANSFER_SRC_BIT
-    //                   ? "    VK_IMAGE_USAGE_TRANSFER_SRC\n"
-    //                   : "")
-    //           << (surface_capabilities.supportedUsageFlags &
-    //                       VK_IMAGE_USAGE_TRANSFER_DST_BIT
-    //                   ? "    VK_IMAGE_USAGE_TRANSFER_DST\n"
-    //                   : "")
-    //           << (surface_capabilities.supportedUsageFlags &
-    //                       VK_IMAGE_USAGE_SAMPLED_BIT
-    //                   ? "    VK_IMAGE_USAGE_SAMPLED\n"
-    //                   : "")
-    //           << (surface_capabilities.supportedUsageFlags &
-    //                       VK_IMAGE_USAGE_STORAGE_BIT
-    //                   ? "    VK_IMAGE_USAGE_STORAGE\n"
-    //                   : "")
-    //           << (surface_capabilities.supportedUsageFlags &
-    //                       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
-    //                   ? "    VK_IMAGE_USAGE_COLOR_ATTACHMENT\n"
-    //                   : "")
-    //           << (surface_capabilities.supportedUsageFlags &
-    //                       VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
-    //                   ? "    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT\n"
-    //                   : "")
-    //           << (surface_capabilities.supportedUsageFlags &
-    //                       VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT
-    //                   ? "    VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT\n"
-    //                   : "")
-    //           << (surface_capabilities.supportedUsageFlags &
-    //                       VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
-    //                   ? "    VK_IMAGE_USAGE_INPUT_ATTACHMENT"
-    //                   : "")
-    //           << std::endl;
+    createInfo.compositeAlpha = info.compositeAlpha;
+    createInfo.clipped = info.clipped;
+    createInfo.oldSwapchain = info.oldSwapchain;
     createInfo.imageUsage = info.imageUsageFlags;
 
     std::array<std::uint32_t, 2> queueFamilyIndices{ info.graphicsFamily,
@@ -147,26 +93,12 @@ std::optional<Swapchain> SwapchainBuilder::build()
         createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
     }
     else
-    {
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        createInfo.queueFamilyIndexCount = 0;     // Optional
-        createInfo.pQueueFamilyIndices = nullptr; // Optional
-    }
 
-    if (surfaceDetails.capabilities.supportedTransforms &
-        VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
-    {
-        createInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-    }
+    if (surfaceDetails.capabilities.supportedTransforms & info.preTransform)
+        createInfo.preTransform = info.preTransform;
     else
-    {
         createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
-    }
-
-    createInfo.compositeAlpha = info.compositeAlpha;
-    createInfo.presentMode = presentMode;
-    createInfo.clipped = info.clipped;
-    createInfo.oldSwapchain = info.oldSwapchain;
 
     Swapchain swapchain{};
 
@@ -184,28 +116,25 @@ std::optional<Swapchain> SwapchainBuilder::build()
         return std::nullopt;
     }
 
-    if (info.oldSwapchain != VK_NULL_HANDLE)
-    {
-        vkDestroySwapchainKHR(info.device, info.oldSwapchain, nullptr);
-        info.oldSwapchain = VK_NULL_HANDLE;
-    }
+    swapchain.imageCount = imageCount;
+    swapchain.colorSpace = surfaceFormat.colorSpace;
+    swapchain.imageFormat = surfaceFormat.format;
+    swapchain.extent = extent;
+    swapchain.presentMode = presentMode;
 
     vkGetSwapchainImagesKHR(
         info.device,
         swapchain.handle,
-        &imageCount,
+        &swapchain.imageCount,
         nullptr);
 
-    swapchain.images.resize(imageCount);
+    swapchain.images.resize(swapchain.imageCount);
 
     vkGetSwapchainImagesKHR(
         info.device,
         swapchain.handle,
-        &imageCount,
+        &swapchain.imageCount,
         swapchain.images.data());
-
-    swapchain.imageFormat = surfaceFormat.format;
-    swapchain.extent = extent; // info.extent;
 
     swapchain.imageViews.resize(swapchain.images.size());
 
@@ -230,9 +159,9 @@ VkSurfaceFormatKHR selectSurfaceFormat(
     const std::vector<VkSurfaceFormatKHR>& surfaceFormats,
     const std::vector<VkSurfaceFormatKHR>& desiredFormats)
 {
-    // If the list contains only one entry with undefined format
-    // it means that there are no preferred surface formats and any can be
-    // chosen
+    // If the list contains only one entry with undefined format it means that
+    // there are no preferred surface formats and any can be chosen.
+    // Can't use format from one pair and colorspace from another pair.
     if ((surfaceFormats.size() == 1) &&
         (surfaceFormats[0].format == VK_FORMAT_UNDEFINED))
     {

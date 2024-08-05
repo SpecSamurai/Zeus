@@ -271,7 +271,9 @@ public:
                 .colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR,
             })
             .addDesiredSurfaceFormat(INSTANCE_DEFAULT.SURFACE_FORMAT)
-            .setDesiredExtent(width, height);
+            .setDesiredExtent(
+                static_cast<std::uint32_t>(width),
+                static_cast<std::uint32_t>(height));
 
         swapchain = swapchainBuilder.build().value();
 
@@ -414,8 +416,6 @@ public:
 
         DestroySwapchain();
 
-        vkDestroySwapchainKHR(device.logicalDevice, swapchain.handle, nullptr);
-
         vkDestroyPipeline(device.logicalDevice, graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(device.logicalDevice, pipelineLayout, nullptr);
 
@@ -505,13 +505,14 @@ public:
         // Should recreate the renderpass. It's possible for the swap chain
         // image format to change when moving a window from LDR to HDR monitor.
         vkDeviceWaitIdle(device.logicalDevice);
+
+        const auto& result = swapchainBuilder.setOldSwapchain(swapchain.handle)
+                                 .setDesiredExtent(
+                                     static_cast<std::uint32_t>(width),
+                                     static_cast<std::uint32_t>(height))
+                                 .build();
         DestroySwapchain();
-
-        // createVulkanSwapchain(device, surface, window, swapchain);
-
-        swapchainBuilder.setOldSwapchain(swapchain.handle)
-            .setDesiredExtent(width, height);
-        swapchain = swapchainBuilder.build().value();
+        swapchain = result.value();
 
         // createColorResources();
         createDepthResources();

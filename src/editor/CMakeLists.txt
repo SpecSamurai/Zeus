@@ -30,9 +30,6 @@ add_executable(Editor
     graphics/glfw_utils.cpp
     graphics/glfw_utils.hpp
 
-    graphics/VulkanContext.hpp
-    graphics/VulkanContext.cpp
-
     graphics/vulkan/Device.hpp
     graphics/vulkan/DeviceBuilder.cpp
     graphics/vulkan/DeviceBuilder.hpp
@@ -45,6 +42,8 @@ add_executable(Editor
     graphics/vulkan/PhysicalDeviceSelector.hpp
     graphics/vulkan/SwapchainBuilder.cpp
     graphics/vulkan/SwapchainBuilder.hpp
+    graphics/vulkan/VulkanContext.hpp
+    graphics/vulkan/VulkanContext.cpp
 
     graphics/vulkan/vulkan_buffer.cpp
     graphics/vulkan/vulkan_buffer.hpp
