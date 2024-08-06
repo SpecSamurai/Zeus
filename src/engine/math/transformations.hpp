@@ -1,13 +1,32 @@
 #pragma once
 
+#include "Matrix3x3.hpp"
 #include "Matrix4x4.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
 
 #include <cmath>
+#include <cstddef>
+#include <utility>
 
 namespace Zeus
 {
+template <typename T>
+constexpr void transpose(Matrix4x4<T>& matrix)
+{
+    for (std::size_t i{ 0 }; i < 4; ++i)
+        for (std::size_t j{ i + 1 }; j < 4; ++j)
+            std::swap(matrix[i][j], matrix[j][i]);
+}
+
+template <typename T>
+constexpr void transpose(Matrix3x3<T>& matrix)
+{
+    for (std::size_t i{ 0 }; i < 3; ++i)
+        for (std::size_t j{ i + 1 }; j < 3; ++j)
+            std::swap(matrix[i][j], matrix[j][i]);
+}
+
 template <typename T>
 constexpr T identity()
 {

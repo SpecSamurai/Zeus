@@ -4,6 +4,58 @@
 
 #include <gtest/gtest.h>
 
+TEST(TransformationsTest, transpose_Matrix3x3)
+{
+    auto sut = Zeus::Matrix3x3(
+        // clang-format off
+        1.f, 2.f, 3.f,
+        4.f, 5.f, 6.f,
+        7.f, 8.f, 9.f
+        // clang-format on
+    );
+
+    auto expected = Zeus::Matrix3x3(
+        // clang-format off
+        1.f, 4.f, 7.f,
+        2.f, 5.f, 8.f,
+        3.f, 6.f, 9.f
+        // clang-format on
+    );
+
+    Zeus::transpose(sut);
+
+    for (std::size_t i{ 0 }; i < 3; ++i)
+        for (std::size_t j{ 0 }; j < 3; ++j)
+            EXPECT_EQ(sut[i][j], expected[i][j]);
+}
+
+TEST(TransformationsTest, transpose_Matrix4x4)
+{
+    auto sut = Zeus::Matrix4x4(
+        // clang-format off
+        1.f, 2.f, 3.f, 4.f,
+        5.f, 6.f, 7.f, 8.f,
+        9.f, 10.f, 11.f, 12.f,
+        13.f, 14.f, 15.f, 16.f
+        // clang-format on
+    );
+
+    auto expected = Zeus::Matrix4x4(
+        // clang-format off
+        1.f, 5.f, 9.f, 13.f,
+        2.f, 6.f, 10.f, 14.f,
+        3.f, 7.f, 11.f, 15.f,
+        4.f, 8.f, 12.f, 16.f
+        // clang-format on
+    );
+
+    Zeus::transpose(sut);
+
+    for (std::size_t i{ 0 }; i < 4; ++i)
+        for (std::size_t j{ 0 }; j < 4; ++j)
+            EXPECT_EQ(sut[i][j], expected[i][j]);
+}
+
 TEST(TransformationsTest, Identity_Matrix3x3)
 {
     auto identity = Zeus::identity<Zeus::Matrix3x3<float>>();
