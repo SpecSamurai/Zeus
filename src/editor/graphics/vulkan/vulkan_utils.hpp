@@ -4,6 +4,16 @@
 
 #include <vulkan/vulkan.h>
 
+#define CHECK_VKRESULT(expression, msg)                                        \
+    {                                                                          \
+        VkResult result = expression;                                          \
+        if (result != VK_SUCCESS)                                              \
+        {                                                                      \
+            fatal("{} {}", msg, Zeus::vkResultToString(result));               \
+            assert(result == VK_SUCCESS);                                      \
+        }                                                                      \
+    }
+
 namespace Zeus
 {
 std::uint32_t findMemoryType(

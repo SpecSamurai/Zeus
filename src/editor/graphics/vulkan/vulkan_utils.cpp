@@ -84,18 +84,18 @@ const char* vkResultToString(VkResult result)
     {
         // Success Codes
     case VK_SUCCESS:
-        return "VK_SUCCESS Command successfully completed";
+        return "VK_SUCCESS Command successfully completed.";
     case VK_NOT_READY:
-        return "VK_NOT_READY A fence or query has not yet completed";
+        return "VK_NOT_READY A fence or query has not yet completed.";
     case VK_TIMEOUT:
         return "VK_TIMEOUT A wait operation has not completed in the specified "
-               "time";
+               "time.";
     case VK_EVENT_SET:
-        return "VK_EVENT_SET An event is signaled";
+        return "VK_EVENT_SET An event is signaled.";
     case VK_EVENT_RESET:
-        return "VK_EVENT_RESET An event is unsignaled";
+        return "VK_EVENT_RESET An event is unsignaled.";
     case VK_INCOMPLETE:
-        return "VK_INCOMPLETE A return array was too small for the result";
+        return "VK_INCOMPLETE A return array was too small for the result.";
     case VK_SUBOPTIMAL_KHR:
         return "VK_SUBOPTIMAL_KHR A swapchain no longer matches the surface "
                "properties exactly, but can still be used to present to the "
