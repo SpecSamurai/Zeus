@@ -55,8 +55,6 @@ add_executable(Editor
     graphics/vulkan/vulkan_settings.hpp
     graphics/vulkan/vulkan_surface.cpp
     graphics/vulkan/vulkan_surface.hpp
-    graphics/vulkan/vulkan_sync.cpp
-    graphics/vulkan/vulkan_sync.hpp
 )
 
 target_include_directories(Editor

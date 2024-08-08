@@ -33,6 +33,8 @@ add_library(Engine
     vulkan/vulkan_utils.hpp
     vulkan/vulkan_shader.cpp
     vulkan/vulkan_shader.hpp
+    vulkan/vulkan_sync.cpp
+    vulkan/vulkan_sync.hpp
 )
 
 target_include_directories(Engine
