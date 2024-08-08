@@ -8,19 +8,10 @@ FetchContent_Declare(
     GIT_TAG 3.4
 )
 
-FetchContent_Declare(
-	glm
-	GIT_REPOSITORY	https://github.com/g-truc/glm.git
-	GIT_TAG 1.0.1
-)
-
 FetchContent_MakeAvailable(glfw)
-FetchContent_MakeAvailable(glm)
 
 add_executable(Editor
     main.cpp
-
-    core/files.hpp
 
     ui/IUndoableCommand.hpp
     ui/UndoRedoStack.hpp
@@ -62,14 +53,10 @@ add_executable(Editor
     graphics/vulkan/vulkan_renderpass.cpp
     graphics/vulkan/vulkan_renderpass.hpp
     graphics/vulkan/vulkan_settings.hpp
-    graphics/vulkan/vulkan_shader.cpp
-    graphics/vulkan/vulkan_shader.hpp
     graphics/vulkan/vulkan_surface.cpp
     graphics/vulkan/vulkan_surface.hpp
     graphics/vulkan/vulkan_sync.cpp
     graphics/vulkan/vulkan_sync.hpp
-    graphics/vulkan/vulkan_utils.cpp
-    graphics/vulkan/vulkan_utils.hpp
 )
 
 target_include_directories(Editor
@@ -77,7 +64,7 @@ target_include_directories(Editor
 )
 
 target_link_libraries(Editor
-    PRIVATE Engine Vulkan::Vulkan glfw imgui glm::glm stb tiny_obj_loader
+    PRIVATE Engine Vulkan::Vulkan glfw imgui stb tiny_obj_loader
 )
 
 target_compile_options(Editor PRIVATE

@@ -1,3 +1,5 @@
+find_package(Vulkan REQUIRED)
+
 add_library(Engine
     defines.hpp
 
@@ -24,10 +26,21 @@ add_library(Engine
     memory/AllocationHeader.hpp
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
+
+    vulkan/vulkan_debug.cpp
+    vulkan/vulkan_debug.hpp
+    vulkan/vulkan_utils.cpp
+    vulkan/vulkan_utils.hpp
+    vulkan/vulkan_shader.cpp
+    vulkan/vulkan_shader.hpp
 )
 
 target_include_directories(Engine
-    INTERFACE .
+    PUBLIC .
+)
+
+target_link_libraries(Engine
+    PRIVATE Vulkan::Vulkan
 )
 
 target_compile_options(Engine PRIVATE
