@@ -18,8 +18,6 @@ add_executable(Editor
 
     graphics/Camera.hpp
     graphics/Vertex.hpp
-    graphics/glfw_utils.cpp
-    graphics/glfw_utils.hpp
 
     graphics/vulkan/Device.hpp
     graphics/vulkan/DeviceBuilder.cpp
@@ -53,8 +51,6 @@ add_executable(Editor
     graphics/vulkan/vulkan_renderpass.cpp
     graphics/vulkan/vulkan_renderpass.hpp
     graphics/vulkan/vulkan_settings.hpp
-    graphics/vulkan/vulkan_surface.cpp
-    graphics/vulkan/vulkan_surface.hpp
 )
 
 target_include_directories(Editor

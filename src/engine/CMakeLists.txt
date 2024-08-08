@@ -1,5 +1,13 @@
 find_package(Vulkan REQUIRED)
 
+FetchContent_Declare(
+    glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG 3.4
+)
+
+FetchContent_MakeAvailable(glfw)
+
 add_library(Engine
     defines.hpp
 
@@ -33,8 +41,13 @@ add_library(Engine
     vulkan/vulkan_utils.hpp
     vulkan/vulkan_shader.cpp
     vulkan/vulkan_shader.hpp
+    vulkan/vulkan_surface.cpp
+    vulkan/vulkan_surface.hpp
     vulkan/vulkan_sync.cpp
     vulkan/vulkan_sync.hpp
+
+    window/glfw_utils.cpp
+    window/glfw_utils.hpp
 )
 
 target_include_directories(Engine
@@ -42,7 +55,7 @@ target_include_directories(Engine
 )
 
 target_link_libraries(Engine
-    PRIVATE Vulkan::Vulkan
+    PRIVATE Vulkan::Vulkan glfw
 )
 
 target_compile_options(Engine PRIVATE

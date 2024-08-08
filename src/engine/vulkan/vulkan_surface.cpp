@@ -1,15 +1,15 @@
 #include "vulkan_surface.hpp"
 
-#include "vulkan_utils.hpp"
+#include "vulkan/vulkan_utils.hpp"
 
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 namespace Zeus
 {
-bool createVkSurfaceKHR(
+VkResult createVkSurfaceKHR(
     const VkInstance& instance,
     GLFWwindow* window,
     VkSurfaceKHR& surface)
@@ -18,11 +18,8 @@ bool createVkSurfaceKHR(
         glfwCreateWindowSurface(instance, window, nullptr, &surface)
     };
 
-    if (result != VK_SUCCESS)
-    {
-        fatal("Failed to create window surface. {}", vkResultToString(result));
-    }
+    CHECK_VKRESULT(result, "Failed to create window surface.");
 
-    return result == VK_SUCCESS;
+    return result;
 }
 }
