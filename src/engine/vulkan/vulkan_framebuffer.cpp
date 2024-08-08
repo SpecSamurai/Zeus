@@ -1,40 +1,37 @@
 #include "vulkan_framebuffer.hpp"
 
-#include "vulkan_utils.hpp"
+#include "vulkan/vulkan_utils.hpp"
 
-#include <core/logger.hpp>
+#include <vulkan/vulkan.h>
 
-#include <vulkan/vulkan_core.h>
-
+#include <cstdint>
 #include <vector>
 
 namespace Zeus
 {
-bool createVkFramebuffer(
+VkResult createVkFramebuffer(
+    VkFramebuffer& framebuffer,
     const VkDevice& device,
     const std::vector<VkImageView>& attachments,
     const VkRenderPass& renderPass,
-    const VkExtent2D& swapChainExtent,
-    VkFramebuffer& framebuffer)
+    const VkExtent2D& extent,
+    std::uint32_t layers)
 {
     VkFramebufferCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     createInfo.renderPass = renderPass;
     createInfo.attachmentCount = static_cast<std::uint32_t>(attachments.size());
     createInfo.pAttachments = attachments.data();
-    createInfo.width = swapChainExtent.width;
-    createInfo.height = swapChainExtent.height;
-    createInfo.layers = 1;
+    createInfo.width = extent.width;
+    createInfo.height = extent.height;
+    createInfo.layers = layers;
 
     VkResult result{
         vkCreateFramebuffer(device, &createInfo, nullptr, &framebuffer)
     };
 
-    if (result != VK_SUCCESS)
-    {
-        error("Failed to create framebuffer. {}", vkResultToString(result));
-    }
+    CHECK_VKRESULT(result, "Failed to create Framebuffer.");
 
-    return result == VK_SUCCESS;
+    return result;
 }
 }
