@@ -1,11 +1,9 @@
 #pragma once
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 namespace Zeus
 {
-
-
 struct Instance
 {
     VkInstance handle{ VK_NULL_HANDLE };

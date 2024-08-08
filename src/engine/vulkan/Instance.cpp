@@ -1,14 +1,11 @@
 #include "Instance.hpp"
 
-#include <vulkan/vulkan_debug.hpp>
-#include <vulkan/vulkan_utils.hpp>
+#include "vulkan_debug.hpp"
 
-#include <core/logger.hpp>
+#include <vulkan/vulkan.h>
 
 namespace Zeus
 {
-
-
 void destroyInstance(Instance& instance)
 {
 #ifndef NDEBUG

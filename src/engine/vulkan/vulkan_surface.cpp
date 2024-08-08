@@ -1,6 +1,6 @@
 #include "vulkan_surface.hpp"
 
-#include "vulkan/vulkan_utils.hpp"
+#include "vulkan_utils.hpp"
 
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN

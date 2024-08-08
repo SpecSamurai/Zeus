@@ -9,7 +9,7 @@ namespace Zeus
 {
 inline constexpr bool VSYNC{ true };
 
-inline constexpr std::uint32_t FRAMES_IN_FLIGHT{ 2 };
+inline constexpr std::uint32_t MAX_CONCURRENT_FRAMES{ 2 };
 
 inline constexpr struct FaceCullingConfig
 {

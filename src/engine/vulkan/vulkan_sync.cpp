@@ -1,6 +1,6 @@
 #include "vulkan_sync.hpp"
 
-#include "vulkan/vulkan_utils.hpp"
+#include "vulkan_utils.hpp"
 
 #include <vulkan/vulkan.h>
 

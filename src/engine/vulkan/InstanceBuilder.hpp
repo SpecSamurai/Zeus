@@ -2,7 +2,7 @@
 
 #include "Instance.hpp"
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <cstdint>
 #include <optional>

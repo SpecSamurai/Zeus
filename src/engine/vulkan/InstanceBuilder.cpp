@@ -1,11 +1,11 @@
 #include "InstanceBuilder.hpp"
 
+#include "core/logger.hpp"
+#include "vulkan_debug.hpp"
 #include "vulkan_settings.hpp"
 #include "vulkan_utils.hpp"
 
-#include <core/logger.hpp>
-
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <cstdint>
 #include <optional>
@@ -56,13 +56,7 @@ std::optional<Instance> InstanceBuilder::build()
         vkCreateInstance(&instanceCreateInfo, nullptr, &instance.handle)
     };
 
-    if (instanceResult != VK_SUCCESS)
-    {
-        error(
-            "Instance failed to create. {}",
-            vkResultToString(instanceResult));
-        return std::nullopt;
-    }
+    CHECK_VKRESULT(instanceResult, "Instance failed to create.");
 
 #ifndef NDEBUG
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
@@ -73,17 +67,13 @@ std::optional<Instance> InstanceBuilder::build()
     debugCreateInfo.pfnUserCallback = info.debugCallback;
     debugCreateInfo.pUserData = info.userData;
 
-    VkResult result{ createDebugUtilsMessengerEXT(
+    VkResult debugResult{ createDebugUtilsMessengerEXT(
         instance.handle,
         &debugCreateInfo,
         nullptr,
         &instance.debugUtilsMessenger) };
 
-    if (result != VK_SUCCESS)
-    {
-        error("Failed to create debug messenger. {}", vkResultToString(result));
-        return std::nullopt;
-    }
+    CHECK_VKRESULT(debugResult, "Failed to create debug messenger.");
 #endif
 
     return instance;
@@ -203,16 +193,19 @@ InstanceBuilder& InstanceBuilder::setApplicationVersion(
     info.applicationVersion = applicationVersion;
     return *this;
 }
+
 InstanceBuilder& InstanceBuilder::setEngineVersion(std::uint32_t engineVersion)
 {
     info.engineVersion = engineVersion;
     return *this;
 }
+
 InstanceBuilder& InstanceBuilder::setApiVersion(std::uint32_t apiVersion)
 {
     info.apiVersion = apiVersion;
     return *this;
 }
+
 InstanceBuilder& InstanceBuilder::setExtensions(
     const std::vector<const char*>& extensions)
 {

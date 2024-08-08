@@ -35,10 +35,16 @@ add_library(Engine
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
 
+    vulkan/Instance.cpp
+    vulkan/Instance.hpp
+    vulkan/InstanceBuilder.cpp
+    vulkan/InstanceBuilder.hpp
+
     vulkan/vulkan_debug.cpp
     vulkan/vulkan_debug.hpp
     vulkan/vulkan_utils.cpp
     vulkan/vulkan_utils.hpp
+    vulkan/vulkan_settings.hpp
     vulkan/vulkan_shader.cpp
     vulkan/vulkan_shader.hpp
     vulkan/vulkan_surface.cpp

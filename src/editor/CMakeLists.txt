@@ -22,10 +22,7 @@ add_executable(Editor
     graphics/vulkan/Device.hpp
     graphics/vulkan/DeviceBuilder.cpp
     graphics/vulkan/DeviceBuilder.hpp
-    graphics/vulkan/Instance.cpp
-    graphics/vulkan/Instance.hpp
-    graphics/vulkan/InstanceBuilder.cpp
-    graphics/vulkan/InstanceBuilder.hpp
+
     graphics/vulkan/PhysicalDevice.hpp
     graphics/vulkan/PhysicalDeviceSelector.cpp
     graphics/vulkan/PhysicalDeviceSelector.hpp
@@ -50,7 +47,6 @@ add_executable(Editor
     graphics/vulkan/vulkan_pipeline.hpp
     graphics/vulkan/vulkan_renderpass.cpp
     graphics/vulkan/vulkan_renderpass.hpp
-    graphics/vulkan/vulkan_settings.hpp
 )
 
 target_include_directories(Editor

@@ -1,8 +1,7 @@
 #include "vulkan_shader.hpp"
 
-#include "vulkan/vulkan_utils.hpp"
-
 #include "core/logger.hpp"
+#include "vulkan_utils.hpp"
 
 #include <vulkan/vulkan.h>
 
