@@ -1,11 +1,10 @@
 #include "vulkan_device.hpp"
 
-#include <core/logger.hpp>
-
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <cstdint>
 #include <set>
+#include <string>
 #include <vector>
 
 namespace Zeus

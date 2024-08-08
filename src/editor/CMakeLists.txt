@@ -37,8 +37,6 @@ add_executable(Editor
     graphics/vulkan/vulkan_command_buffer.hpp
     graphics/vulkan/vulkan_descriptors.cpp
     graphics/vulkan/vulkan_descriptors.hpp
-    graphics/vulkan/vulkan_device.cpp
-    graphics/vulkan/vulkan_device.hpp
     graphics/vulkan/vulkan_image.hpp
     graphics/vulkan/vulkan_image.cpp
     graphics/vulkan/vulkan_pipeline.cpp

@@ -42,6 +42,8 @@ add_library(Engine
 
     vulkan/vulkan_debug.cpp
     vulkan/vulkan_debug.hpp
+    vulkan/vulkan_device.cpp
+    vulkan/vulkan_device.hpp
     vulkan/vulkan_framebuffer.cpp
     vulkan/vulkan_framebuffer.hpp
     vulkan/vulkan_utils.cpp
