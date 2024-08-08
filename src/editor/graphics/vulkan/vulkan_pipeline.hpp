@@ -16,6 +16,7 @@ struct GraphicsPipelineConfig
     const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions;
     const std::vector<char>& vertShaderCode;
     const std::vector<char>& fragShaderCode;
+    const std::vector<VkPushConstantRange>& pushConstantRanges;
 };
 
 bool createGraphicsVkPipeline(

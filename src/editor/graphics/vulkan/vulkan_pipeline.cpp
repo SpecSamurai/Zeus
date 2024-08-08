@@ -179,8 +179,10 @@ bool createGraphicsVkPipeline(
         VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutCreateInfo.setLayoutCount = 1;
     pipelineLayoutCreateInfo.pSetLayouts = &config.descriptorSetLayout;
-    pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-    pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+    pipelineLayoutCreateInfo.pushConstantRangeCount =
+        static_cast<std::uint32_t>(config.pushConstantRanges.size());
+    pipelineLayoutCreateInfo.pPushConstantRanges =
+        config.pushConstantRanges.data();
 
     VkResult pipelineLayoutResult{ vkCreatePipelineLayout(
         config.device,
