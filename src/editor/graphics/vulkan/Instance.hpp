@@ -4,11 +4,7 @@
 
 namespace Zeus
 {
-VKAPI_ATTR VkBool32 VKAPI_CALL defaultDebugCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-    [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
-    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-    [[maybe_unused]] void* pUserData);
+
 
 struct Instance
 {
