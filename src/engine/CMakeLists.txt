@@ -40,6 +40,8 @@ add_library(Engine
     vulkan/InstanceBuilder.cpp
     vulkan/InstanceBuilder.hpp
 
+    vulkan/vulkan_command.cpp
+    vulkan/vulkan_command.hpp
     vulkan/vulkan_debug.cpp
     vulkan/vulkan_debug.hpp
     vulkan/vulkan_device.cpp
