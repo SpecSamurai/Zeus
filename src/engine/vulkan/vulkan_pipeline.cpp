@@ -1,8 +1,6 @@
 #include "vulkan_pipeline.hpp"
 
-#include "Vertex.hpp"
 #include "vulkan_settings.hpp"
-#include "vulkan_shader.hpp"
 #include "vulkan_utils.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -17,23 +15,23 @@ bool createGraphicsVkPipeline(
     VkPipelineLayout& pipelineLayout,
     VkPipeline& graphicsPipeline)
 {
-    VkShaderModule vertShaderModule{};
-    createVkShaderModule(
-        config.device,
-        config.vertShaderCode,
-        vertShaderModule);
-
-    VkShaderModule fragShaderModule{};
-    createVkShaderModule(
-        config.device,
-        config.fragShaderCode,
-        fragShaderModule);
+    // VkShaderModule vertShaderModule{};
+    // createVkShaderModule(
+    //     config.device,
+    //     config.vertShaderCode,
+    //     vertShaderModule);
+    //
+    // VkShaderModule fragShaderModule{};
+    // createVkShaderModule(
+    //     config.device,
+    //     config.fragShaderCode,
+    //     fragShaderModule);
 
     VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo{};
     vertShaderStageCreateInfo.sType =
         VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageCreateInfo.module = vertShaderModule;
+    vertShaderStageCreateInfo.module = config.vertShaderModule;
     vertShaderStageCreateInfo.pName = "main";
     vertShaderStageCreateInfo.pSpecializationInfo = nullptr;
 
@@ -41,7 +39,7 @@ bool createGraphicsVkPipeline(
     fragShaderStageCreateInfo.sType =
         VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageCreateInfo.module = fragShaderModule;
+    fragShaderStageCreateInfo.module = config.fragShaderModule;
     fragShaderStageCreateInfo.pName = "main";
     fragShaderStageCreateInfo.pSpecializationInfo = VK_NULL_HANDLE;
 
@@ -237,8 +235,8 @@ bool createGraphicsVkPipeline(
         return false;
     }
 
-    vkDestroyShaderModule(config.device, fragShaderModule, nullptr);
-    vkDestroyShaderModule(config.device, vertShaderModule, nullptr);
+    vkDestroyShaderModule(config.device, config.fragShaderModule, nullptr);
+    vkDestroyShaderModule(config.device, config.vertShaderModule, nullptr);
 
     return result == VK_SUCCESS;
 }

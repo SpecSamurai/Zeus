@@ -50,6 +50,8 @@ add_library(Engine
     vulkan/vulkan_framebuffer.hpp
     vulkan/vulkan_utils.cpp
     vulkan/vulkan_utils.hpp
+    vulkan/vulkan_pipeline.cpp
+    vulkan/vulkan_pipeline.hpp
     vulkan/vulkan_settings.hpp
     vulkan/vulkan_shader.cpp
     vulkan/vulkan_shader.hpp

@@ -14,8 +14,10 @@ struct GraphicsPipelineConfig
     const VkSampleCountFlagBits msaaSamples;
     const VkVertexInputBindingDescription& bindingDescription;
     const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions;
-    const std::vector<char>& vertShaderCode;
-    const std::vector<char>& fragShaderCode;
+    VkShaderModule vertShaderModule;
+    VkShaderModule fragShaderModule;
+    // const std::vector<char>& vertShaderCode;
+    // const std::vector<char>& fragShaderCode;
     const std::vector<VkPushConstantRange>& pushConstantRanges;
 };
 
