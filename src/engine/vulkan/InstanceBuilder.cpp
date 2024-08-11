@@ -1,5 +1,6 @@
 #include "InstanceBuilder.hpp"
 
+#include "MemoryAllocator.hpp"
 #include "core/logger.hpp"
 #include "vulkan_debug.hpp"
 #include "vulkan_settings.hpp"
@@ -52,9 +53,10 @@ std::optional<Instance> InstanceBuilder::build()
 
     Instance instance{};
 
-    VkResult instanceResult{
-        vkCreateInstance(&instanceCreateInfo, nullptr, &instance.handle)
-    };
+    VkResult instanceResult{ vkCreateInstance(
+        &instanceCreateInfo,
+        MemoryAllocator::pAllocator,
+        &instance.handle) };
 
     VKCHECK(instanceResult, "Instance failed to create.");
 
