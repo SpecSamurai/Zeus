@@ -16,8 +16,9 @@ add_executable(Editor
     ui/IUndoableCommand.hpp
     ui/UndoRedoStack.hpp
 
+    graphics/temp.hpp
+
     graphics/Camera.hpp
-    graphics/Vertex.hpp
 
     graphics/vulkan/Device.hpp
     graphics/vulkan/DeviceBuilder.cpp
