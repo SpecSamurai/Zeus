@@ -4,9 +4,9 @@
 
 #include <vulkan/vulkan.h>
 
-#define CHECK_VKRESULT(expression, msg)                                        \
+#define VKCHECK(expression, msg)                                               \
     {                                                                          \
-        VkResult checkVkResult = expression;                                   \
+        VkResult checkVkResult{ expression };                                  \
         if (checkVkResult != VK_SUCCESS)                                       \
         {                                                                      \
             fatal("{} {}", msg, Zeus::vkResultToString(checkVkResult));        \

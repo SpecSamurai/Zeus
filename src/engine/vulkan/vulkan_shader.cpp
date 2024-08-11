@@ -28,14 +28,14 @@ VkResult createVkShaderModule(
         vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule)
     };
 
-    CHECK_VKRESULT(result, "Failed to create shader module.");
+    VKCHECK(result, "Failed to create shader module.");
 
     return result;
 }
 
 VkShaderModule loadShader(VkDevice device, const char* filename)
 {
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
     if (!file.is_open())
     {

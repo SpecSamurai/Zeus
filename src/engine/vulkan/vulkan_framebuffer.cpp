@@ -30,7 +30,7 @@ VkResult createVkFramebuffer(
         vkCreateFramebuffer(device, &createInfo, nullptr, &framebuffer)
     };
 
-    CHECK_VKRESULT(result, "Failed to create Framebuffer.");
+    VKCHECK(result, "Failed to create Framebuffer.");
 
     return result;
 }

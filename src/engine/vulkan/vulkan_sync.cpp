@@ -15,7 +15,7 @@ VkResult createVkSemaphore(const VkDevice& device, VkSemaphore& semaphore)
         vkCreateSemaphore(device, &createInfo, nullptr, &semaphore)
     };
 
-    CHECK_VKRESULT(result, "Failed to create a Semaphore.")
+    VKCHECK(result, "Failed to create a Semaphore.")
 
     return result;
 }
@@ -32,7 +32,7 @@ VkResult createVkFence(const VkDevice& device, bool signaled, VkFence& fence)
 
     VkResult result{ vkCreateFence(device, &createInfo, nullptr, &fence) };
 
-    CHECK_VKRESULT(result, "Failed to create a Fence.")
+    VKCHECK(result, "Failed to create a Fence.")
 
     return result;
 }

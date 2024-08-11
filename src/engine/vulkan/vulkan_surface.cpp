@@ -18,7 +18,7 @@ VkResult createVkSurfaceKHR(
         glfwCreateWindowSurface(instance, window, nullptr, &surface)
     };
 
-    CHECK_VKRESULT(result, "Failed to create window surface.");
+    VKCHECK(result, "Failed to create window surface.");
 
     return result;
 }

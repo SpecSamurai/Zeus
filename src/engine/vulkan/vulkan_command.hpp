@@ -50,7 +50,8 @@ void cmdBeginVkRenderPass(
     const VkExtent2D& extent,
     const VkFramebuffer& framebuffer,
     const std::vector<VkClearValue>& clearValues,
-    VkOffset2D offset = { 0, 0 });
+    VkOffset2D offset = { 0, 0 },
+    VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
 
 VkResult cmdVkQueueSubmit(
     VkQueue queue,

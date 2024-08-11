@@ -24,7 +24,7 @@ VkResult createVkCommandPool(
         vkCreateCommandPool(device, &createInfo, nullptr, &commandPool)
     };
 
-    CHECK_VKRESULT(result, "Failed to create command pool.");
+    VKCHECK(result, "Failed to create command pool.");
 
     return result;
 }
@@ -46,7 +46,7 @@ VkResult allocateVkCommandBuffers(
         vkAllocateCommandBuffers(device, &allocateInfo, commandBuffers.data())
     };
 
-    CHECK_VKRESULT(result, "Failed to allocate command buffers.");
+    VKCHECK(result, "Failed to allocate command buffers.");
 
     return result;
 }
@@ -67,7 +67,7 @@ VkResult allocateVkCommandBuffer(
         vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffers)
     };
 
-    CHECK_VKRESULT(result, "Failed to allocate command buffers.");
+    VKCHECK(result, "Failed to allocate command buffers.");
 
     return result;
 }
@@ -84,7 +84,7 @@ VkResult beginVkCommandBuffer(
 
     VkResult result{ vkBeginCommandBuffer(commandBuffer, &beginInfo) };
 
-    CHECK_VKRESULT(result, "Failed to begin recording command buffer.");
+    VKCHECK(result, "Failed to begin recording command buffer.");
 
     return result;
 }
@@ -93,7 +93,7 @@ VkResult endVkCommandBuffer(VkCommandBuffer& commandBuffer)
 {
     VkResult result{ vkEndCommandBuffer(commandBuffer) };
 
-    CHECK_VKRESULT(result, "Failed to record command buffer.");
+    VKCHECK(result, "Failed to record command buffer.");
 
     return result;
 }
@@ -104,7 +104,8 @@ void cmdBeginVkRenderPass(
     const VkExtent2D& extent,
     const VkFramebuffer& framebuffer,
     const std::vector<VkClearValue>& clearValues,
-    VkOffset2D offset)
+    VkOffset2D offset,
+    VkSubpassContents contents)
 {
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -117,10 +118,7 @@ void cmdBeginVkRenderPass(
         static_cast<std::uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
 
-    vkCmdBeginRenderPass(
-        commandBuffer,
-        &renderPassInfo,
-        VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, contents);
 }
 
 bool beginOneTimeVkCommandBuffer(
@@ -180,7 +178,7 @@ VkResult cmdVkQueueSubmit(
 
     VkResult result{ vkQueueSubmit(queue, 1, &submitInfo, fence) };
 
-    CHECK_VKRESULT(result, "Failed to submit command buffer.");
+    VKCHECK(result, "Failed to submit command buffer.");
 
     return result;
 }

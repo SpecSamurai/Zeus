@@ -56,7 +56,7 @@ std::optional<Instance> InstanceBuilder::build()
         vkCreateInstance(&instanceCreateInfo, nullptr, &instance.handle)
     };
 
-    CHECK_VKRESULT(instanceResult, "Instance failed to create.");
+    VKCHECK(instanceResult, "Instance failed to create.");
 
 #ifndef NDEBUG
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
@@ -73,7 +73,7 @@ std::optional<Instance> InstanceBuilder::build()
         nullptr,
         &instance.debugUtilsMessenger) };
 
-    CHECK_VKRESULT(debugResult, "Failed to create debug messenger.");
+    VKCHECK(debugResult, "Failed to create debug messenger.");
 #endif
 
     return instance;
