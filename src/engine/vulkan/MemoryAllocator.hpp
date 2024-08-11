@@ -1,6 +1,9 @@
 #pragma once
 
+#include "core/logger.hpp"
+
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <cstdint>
 
@@ -13,5 +16,73 @@ std::uint32_t findMemoryType(
 
 class MemoryAllocator
 {
+#ifndef NDEBUG
+public:
+    inline static VkAllocationCallbacks* pAllocator{ nullptr };
+#else
+    inline static VkAllocationCallbacks* createAllocationCallbacks()
+    {
+        VkAllocationCallbacks* callbacks = new VkAllocationCallbacks{};
+        callbacks->pUserData = {};
+        callbacks->pfnAllocation = allocationFunction;
+        callbacks->pfnReallocation = reallocationFunction;
+        callbacks->pfnFree = freeFunction;
+        callbacks->pfnInternalAllocation = internalAllocationNotification;
+        callbacks->pfnInternalFree = internalFreeNotification;
+
+        return callbacks;
+    }
+
+public:
+    inline static VkAllocationCallbacks* pAllocator{
+        createAllocationCallbacks()
+    };
+
+private:
+    static void* allocationFunction(
+        [[maybe_unused]] void* pUserData,
+        [[maybe_unused]] size_t size,
+        [[maybe_unused]] size_t alignment,
+        [[maybe_unused]] VkSystemAllocationScope allocationScope)
+    {
+        debug("allocationFunction");
+        return nullptr;
+    }
+
+    static void freeFunction(
+        [[maybe_unused]] void* pUserData,
+        [[maybe_unused]] void* pMemory)
+    {
+    }
+
+    static void internalAllocationNotification(
+        [[maybe_unused]] void* pUserData,
+        [[maybe_unused]] size_t size,
+        [[maybe_unused]] VkInternalAllocationType allocationType,
+        [[maybe_unused]] VkSystemAllocationScope allocationScope)
+    {
+        debug("internalAllocationNotification");
+    }
+
+    static void internalFreeNotification(
+        [[maybe_unused]] void* pUserData,
+        [[maybe_unused]] size_t size,
+        [[maybe_unused]] VkInternalAllocationType allocationType,
+        [[maybe_unused]] VkSystemAllocationScope allocationScope)
+    {
+        debug("internalFreeNotification");
+    }
+
+    static void* reallocationFunction(
+        [[maybe_unused]] void* pUserData,
+        [[maybe_unused]] void* pOriginal,
+        [[maybe_unused]] size_t size,
+        [[maybe_unused]] size_t alignment,
+        [[maybe_unused]] VkSystemAllocationScope allocationScope)
+    {
+        debug("reallocationFunction");
+        return nullptr;
+    }
+#endif
 };
 }
