@@ -4,6 +4,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <cassert>
+
 #define VKCHECK(expression, msg)                                               \
     {                                                                          \
         VkResult checkVkResult{ expression };                                  \
@@ -16,10 +18,5 @@
 
 namespace Zeus
 {
-std::uint32_t findMemoryType(
-    const VkPhysicalDevice& physicalDevice,
-    std::uint32_t typeFilter,
-    VkMemoryPropertyFlags properties);
-
 const char* vkResultToString(VkResult result);
 };

@@ -39,6 +39,10 @@ add_library(Engine
     vulkan/Instance.hpp
     vulkan/InstanceBuilder.cpp
     vulkan/InstanceBuilder.hpp
+    vulkan/PipelineBuilder.cpp
+    vulkan/PipelineBuilder.hpp
+    vulkan/MemoryAllocator.cpp
+    vulkan/MemoryAllocator.hpp
 
     vulkan/vulkan_command.cpp
     vulkan/vulkan_command.hpp
