@@ -9,15 +9,13 @@
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
-#include <optional>
 #include <vector>
 
 namespace Zeus
 {
-std::optional<Instance> InstanceBuilder::build()
+Instance InstanceBuilder::build()
 {
-    if (!validate())
-        return std::nullopt;
+    assert(validate());
 
     VkApplicationInfo applicationInfo{};
     applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;

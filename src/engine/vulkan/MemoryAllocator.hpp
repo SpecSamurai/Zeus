@@ -38,6 +38,13 @@ public:
         createAllocationCallbacks()
     };
 
+    // TODO: doesn't make sense deallocate static differently
+    ~MemoryAllocator()
+    {
+        delete pAllocator;
+        pAllocator = nullptr;
+    }
+
 private:
     static void* allocationFunction(
         [[maybe_unused]] void* pUserData,

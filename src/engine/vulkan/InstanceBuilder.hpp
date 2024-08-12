@@ -5,7 +5,6 @@
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
-#include <optional>
 #include <vector>
 
 namespace Zeus
@@ -13,7 +12,7 @@ namespace Zeus
 class InstanceBuilder
 {
 public:
-    std::optional<Instance> build();
+    Instance build();
 
     InstanceBuilder& setAppName(const char* name);
     InstanceBuilder& setEngineName(const char* name);
