@@ -2,7 +2,7 @@
 
 #include "Device.hpp"
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <cstdint>
 #include <optional>
@@ -51,19 +51,13 @@ public:
         const VkSurfaceKHR& surface);
 
     SwapchainBuilder& setOldSwapchain(VkSwapchainKHR oldSwapchain);
-
     SwapchainBuilder& setDesiredExtent(
         std::uint32_t width,
         std::uint32_t height);
-
     SwapchainBuilder& addDesiredSurfaceFormat(VkSurfaceFormatKHR format);
-
     SwapchainBuilder& setDesiredPresentMode(VkPresentModeKHR presentMode);
-
     SwapchainBuilder& setImageUsageFlags(VkImageUsageFlags usageFlags);
-
     SwapchainBuilder& setImageArrayLayerCount(std::uint32_t arrayLayerCount);
-
     SwapchainBuilder& setMinImageCount(std::uint32_t minImageCount);
 
     // Default is no transform.

@@ -1,13 +1,12 @@
 #include "SwapchainBuilder.hpp"
 
+#include "core/logger.hpp"
 #include "vulkan_device.hpp"
 #include "vulkan_image.hpp"
 #include "vulkan_settings.hpp"
 #include "vulkan_utils.hpp"
 
-#include <core/logger.hpp>
-
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <algorithm>
 #include <array>
@@ -102,19 +101,13 @@ std::optional<Swapchain> SwapchainBuilder::build()
 
     Swapchain swapchain{};
 
-    VkResult result{
-        vkCreateSwapchainKHR(
-            info.device,
-            &createInfo,
-            nullptr,
-            &swapchain.handle),
-    };
+    VkResult result{ vkCreateSwapchainKHR(
+        info.device,
+        &createInfo,
+        nullptr,
+        &swapchain.handle) };
 
-    if (result != VK_SUCCESS)
-    {
-        error("Failed to create swap chain. {}", vkResultToString(result));
-        return std::nullopt;
-    }
+    VKCHECK(result, "Failed to create swap chain.");
 
     swapchain.imageCount = imageCount;
     swapchain.colorSpace = surfaceFormat.colorSpace;
@@ -140,16 +133,13 @@ std::optional<Swapchain> SwapchainBuilder::build()
 
     for (std::uint32_t i{ 0 }; i < swapchain.images.size(); ++i)
     {
-        if (!createVkImageView(
-                info.device,
-                swapchain.images[i],
-                swapchain.imageFormat,
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                1,
-                swapchain.imageViews[i]))
-        {
-            return std::nullopt;
-        }
+        createVkImageView(
+            info.device,
+            swapchain.images[i],
+            swapchain.imageFormat,
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            1,
+            swapchain.imageViews[i]);
     }
 
     return swapchain;
