@@ -1,15 +1,15 @@
 #include "DeviceBuilder.hpp"
 
 #include "Device.hpp"
+
 #include "vulkan_settings.hpp"
 #include "vulkan_utils.hpp"
 
-#include <optional>
 #include <set>
 
 namespace Zeus
 {
-std::optional<Device> DeviceBuilder::build()
+Device DeviceBuilder::build()
 {
     Device device{};
 
@@ -45,10 +45,6 @@ std::optional<Device> DeviceBuilder::build()
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    VkPhysicalDeviceFeatures physicalDeviceFeatures{};
-    physicalDeviceFeatures.sampleRateShading = VK_TRUE;
-    physicalDeviceFeatures.samplerAnisotropy = VK_TRUE;
-
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.queueCreateInfoCount =
@@ -59,7 +55,7 @@ std::optional<Device> DeviceBuilder::build()
     createInfo.enabledExtensionCount =
         static_cast<std::uint32_t>(physicalDevice.extensions.size());
     createInfo.ppEnabledExtensionNames = physicalDevice.extensions.data();
-    createInfo.pEnabledFeatures = &physicalDeviceFeatures;
+    createInfo.pEnabledFeatures = &physicalDevice.features;
 
 #ifndef NDEBUG
     // Deprecated but set for backwards compatibility
@@ -74,11 +70,7 @@ std::optional<Device> DeviceBuilder::build()
         nullptr,
         &device.logicalDevice) };
 
-    if (result != VK_SUCCESS)
-    {
-        error("Failed to create logical device. {}", vkResultToString(result));
-        return std::nullopt;
-    }
+    VKCHECK(result, "Failed to create logical device.");
 
     vkGetDeviceQueue(
         device.logicalDevice,
