@@ -1,12 +1,12 @@
 #include "PhysicalDeviceSelector.hpp"
 
 #include "PhysicalDevice.hpp"
+
+#include "core/logger.hpp"
 #include "vulkan_device.hpp"
 #include "vulkan_settings.hpp"
 
-#include <core/logger.hpp>
-
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <cstdint>
 #include <map>
@@ -22,7 +22,7 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
         return std::nullopt;
 
     std::uint32_t physicalDeviceCount{ 0 };
-    vkEnumeratePhysicalDevices(instance.handle, &physicalDeviceCount, nullptr);
+    vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
     if (physicalDeviceCount == 0)
     {
@@ -31,10 +31,7 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
     }
 
     std::vector<VkPhysicalDevice> devices(physicalDeviceCount);
-    vkEnumeratePhysicalDevices(
-        instance.handle,
-        &physicalDeviceCount,
-        devices.data());
+    vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, devices.data());
 
     std::multimap<int, PhysicalDevice> candidates;
 
@@ -53,6 +50,12 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
     {
         const auto& device = candidates.rbegin()->second;
         debug("Selected physical device: {}", device.name);
+        debug(
+            "GRAPHICS: {} | PRESENT: {} | COMPUTE: {} | TRANSFER: {}",
+            device.queueFamilies.graphicsFamily.value(),
+            device.queueFamilies.presentFamily.value(),
+            device.queueFamilies.computeFamily.value(),
+            device.queueFamilies.transferFamily.value());
 
         return device;
     }
@@ -67,7 +70,7 @@ bool PhysicalDeviceSelector::validate()
 {
     bool isValid{ true };
 
-    if (instance.handle == VK_NULL_HANDLE)
+    if (instance == VK_NULL_HANDLE)
     {
         error("Instance not set.");
         isValid = false;
@@ -196,13 +199,12 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::createIfValid(
 
     output.queueFamilies = queueFamiliesInfo;
 
-    VkPhysicalDeviceFeatures deviceFeatures;
-    vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
-
-    if (!deviceFeatures.geometryShader || !deviceFeatures.samplerAnisotropy)
+    if (!checkPhysicalDeviceFeatures(physicalDevice))
     {
         return std::nullopt;
     }
+
+    output.features = criteria.features;
 
     output.msaaSamples = getMaxUsableSampleCount(physicalDevice);
 
@@ -223,7 +225,38 @@ int PhysicalDeviceSelector::ratePhysicalDevice(
     return score;
 }
 
-PhysicalDeviceSelector::PhysicalDeviceSelector(const Instance& instance)
+bool PhysicalDeviceSelector::checkPhysicalDeviceFeatures(
+    VkPhysicalDevice physicalDevice)
+{
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
+
+    bool isValid{ true };
+
+    if (criteria.features.samplerAnisotropy &&
+        !deviceFeatures.samplerAnisotropy)
+    {
+        error("Device doesn't support samplerAnisotropy.");
+        isValid = false;
+    }
+
+    if (criteria.features.fillModeNonSolid && !deviceFeatures.fillModeNonSolid)
+    {
+        error("Device doesn't support fillModeNonSolid.");
+        isValid = false;
+    }
+
+    if (criteria.features.sampleRateShading &&
+        !deviceFeatures.sampleRateShading)
+    {
+        error("Device doesn't support sampleRateShading.");
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+PhysicalDeviceSelector::PhysicalDeviceSelector(const VkInstance& instance)
 {
     this->instance = instance;
 }
@@ -247,12 +280,14 @@ PhysicalDeviceSelector& PhysicalDeviceSelector::requirePresent(bool require)
     criteria.requirePresent = require;
     return *this;
 }
+
 PhysicalDeviceSelector& PhysicalDeviceSelector::dedicatedTransferQueue(
     bool dedicated)
 {
     criteria.dedicatedTransferQueue = dedicated;
     return *this;
 }
+
 PhysicalDeviceSelector& PhysicalDeviceSelector::dedicatedComputeQueue(
     bool dedicated)
 {

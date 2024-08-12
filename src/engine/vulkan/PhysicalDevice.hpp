@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <optional>
 #include <string>
@@ -24,7 +24,7 @@ struct PhysicalDevice
     VkSurfaceKHR surface{ VK_NULL_HANDLE };
 
     // Requested features
-    // VkPhysicalDeviceFeatures features{};
+    VkPhysicalDeviceFeatures features{};
     // VkPhysicalDeviceProperties properties{};
     // VkPhysicalDeviceMemoryProperties memoryProperties{};
 

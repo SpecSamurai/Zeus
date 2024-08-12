@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Instance.hpp"
 #include "PhysicalDevice.hpp"
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <optional>
 #include <vector>
@@ -13,7 +12,7 @@ namespace Zeus
 class PhysicalDeviceSelector
 {
 public:
-    PhysicalDeviceSelector(const Instance& instance);
+    PhysicalDeviceSelector(const VkInstance& instance);
 
     std::optional<PhysicalDevice> select();
 
@@ -43,7 +42,9 @@ private:
 
     int ratePhysicalDevice(const PhysicalDevice& physicalDevice);
 
-    Instance instance{};
+    bool checkPhysicalDeviceFeatures(VkPhysicalDevice physicalDevice);
+
+    VkInstance instance{};
     VkSurfaceKHR surface{ VK_NULL_HANDLE };
 
     struct SelectionCriteria
