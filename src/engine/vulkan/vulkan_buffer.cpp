@@ -1,7 +1,8 @@
 #include "vulkan_buffer.hpp"
 
-#include "vulkan_command_buffer.hpp"
-#include "vulkan_utils.hpp"
+#include <vulkan/MemoryAllocator.hpp>
+#include <vulkan/vulkan_command.hpp>
+#include <vulkan/vulkan_utils.hpp>
 
 #include <core/logger.hpp>
 
@@ -78,9 +79,9 @@ void cmdCopyBuffer(
 {
     VkCommandBuffer commandBuffer{};
     beginOneTimeVkCommandBuffer(
+        commandBuffer,
         device.logicalDevice,
-        commandPool,
-        commandBuffer);
+        commandPool);
 
     VkBufferCopy copyRegion{};
     copyRegion.srcOffset = 0; // Optional
@@ -89,6 +90,10 @@ void cmdCopyBuffer(
 
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-    endOneTimeVkCommandBuffer(device, commandPool, commandBuffer);
+    endOneTimeVkCommandBuffer(
+        commandBuffer,
+        device.logicalDevice,
+        device.graphicsQueue,
+        commandPool);
 }
 }

@@ -35,27 +35,43 @@ add_library(Engine
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
 
+    vulkan/Device.hpp
+    vulkan/DeviceBuilder.cpp
+    vulkan/DeviceBuilder.hpp
     vulkan/Instance.cpp
     vulkan/Instance.hpp
     vulkan/InstanceBuilder.cpp
     vulkan/InstanceBuilder.hpp
+    vulkan/PhysicalDevice.hpp
+    vulkan/PhysicalDeviceSelector.cpp
+    vulkan/PhysicalDeviceSelector.hpp
     vulkan/PipelineBuilder.cpp
     vulkan/PipelineBuilder.hpp
+    vulkan/SwapchainBuilder.cpp
+    vulkan/SwapchainBuilder.hpp
     vulkan/MemoryAllocator.cpp
     vulkan/MemoryAllocator.hpp
 
+    vulkan/vulkan_buffer.cpp
+    vulkan/vulkan_buffer.hpp
     vulkan/vulkan_command.cpp
     vulkan/vulkan_command.hpp
     vulkan/vulkan_debug.cpp
     vulkan/vulkan_debug.hpp
+    vulkan/vulkan_descriptors.cpp
+    vulkan/vulkan_descriptors.hpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_device.hpp
     vulkan/vulkan_framebuffer.cpp
     vulkan/vulkan_framebuffer.hpp
+    vulkan/vulkan_image.hpp
+    vulkan/vulkan_image.cpp
     vulkan/vulkan_utils.cpp
     vulkan/vulkan_utils.hpp
     vulkan/vulkan_pipeline.cpp
     vulkan/vulkan_pipeline.hpp
+    vulkan/vulkan_renderpass.cpp
+    vulkan/vulkan_renderpass.hpp
     vulkan/vulkan_settings.hpp
     vulkan/vulkan_shader.cpp
     vulkan/vulkan_shader.hpp

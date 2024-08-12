@@ -2,16 +2,14 @@
 
 #include "vulkan_utils.hpp"
 
-#include <core/logger.hpp>
-
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 #include <array>
 #include <cstdint>
 
 namespace Zeus
 {
-bool createVkRenderPass(
+VkResult createVkRenderPass(
     const VkDevice& device,
     const RenderPassConfig& config,
     VkRenderPass& renderPass)
@@ -108,11 +106,8 @@ bool createVkRenderPass(
         vkCreateRenderPass(device, &createInfo, nullptr, &renderPass)
     };
 
-    if (result != VK_SUCCESS)
-    {
-        error("Failed to create render pass. {}", vkResultToString(result));
-    }
+    VKCHECK(result, "Failed to create render pass.");
 
-    return result == VK_SUCCESS;
+    return result;
 }
 }

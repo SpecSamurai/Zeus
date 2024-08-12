@@ -25,7 +25,7 @@ bool createVkImage(
     VkImage& image,
     VkDeviceMemory& imageMemory);
 
-bool createVkImageView(
+VkResult createVkImageView(
     const VkDevice& device,
     const VkImage& image,
     const VkFormat format,

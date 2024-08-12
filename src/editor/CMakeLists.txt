@@ -20,26 +20,8 @@ add_executable(Editor
 
     graphics/Camera.hpp
 
-    graphics/vulkan/Device.hpp
-    graphics/vulkan/DeviceBuilder.cpp
-    graphics/vulkan/DeviceBuilder.hpp
-
-    graphics/vulkan/PhysicalDevice.hpp
-    graphics/vulkan/PhysicalDeviceSelector.cpp
-    graphics/vulkan/PhysicalDeviceSelector.hpp
-    graphics/vulkan/SwapchainBuilder.cpp
-    graphics/vulkan/SwapchainBuilder.hpp
     graphics/vulkan/VulkanContext.hpp
     graphics/vulkan/VulkanContext.cpp
-
-    graphics/vulkan/vulkan_buffer.cpp
-    graphics/vulkan/vulkan_buffer.hpp
-    graphics/vulkan/vulkan_descriptors.cpp
-    graphics/vulkan/vulkan_descriptors.hpp
-    graphics/vulkan/vulkan_image.hpp
-    graphics/vulkan/vulkan_image.cpp
-    graphics/vulkan/vulkan_renderpass.cpp
-    graphics/vulkan/vulkan_renderpass.hpp
 )
 
 target_include_directories(Editor

@@ -1,8 +1,8 @@
 #include "vulkan_image.hpp"
-
-#include "vulkan_utils.hpp"
+#include "vulkan/MemoryAllocator.hpp"
 
 #include <core/logger.hpp>
+#include <vulkan/vulkan_utils.hpp>
 
 #include <vulkan/vulkan_core.h>
 
@@ -36,14 +36,7 @@ bool createVkImage(
         vkCreateImage(device, &imageInfo, nullptr, &image)
     };
 
-    if (createImageResult != VK_SUCCESS)
-    {
-        error(
-            "Failed to create image. {}",
-            vkResultToString(createImageResult));
-
-        return false;
-    }
+    VKCHECK(createImageResult, "Failed to create image. {}");
 
     VkMemoryRequirements memoryRequirements;
     vkGetImageMemoryRequirements(device, image, &memoryRequirements);
@@ -60,21 +53,14 @@ bool createVkImage(
         vkAllocateMemory(device, &allocateInfo, nullptr, &imageMemory)
     };
 
-    if (allocateResult != VK_SUCCESS)
-    {
-        error(
-            "Failed to allocate image memory. {}",
-            vkResultToString(allocateResult));
-
-        return false;
-    }
+    VKCHECK(allocateResult, "Failed to allocate image memory.");
 
     vkBindImageMemory(device, image, imageMemory, 0);
 
     return true;
 }
 
-bool createVkImageView(
+VkResult createVkImageView(
     const VkDevice& device,
     const VkImage& image,
     const VkFormat format,
@@ -87,32 +73,23 @@ bool createVkImageView(
     createInfo.image = image;
     createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     createInfo.format = format;
-
-    VkComponentMapping componentMapping{};
-    componentMapping.r = VK_COMPONENT_SWIZZLE_IDENTITY,
-    componentMapping.g = VK_COMPONENT_SWIZZLE_IDENTITY,
-    componentMapping.b = VK_COMPONENT_SWIZZLE_IDENTITY,
-    componentMapping.a = VK_COMPONENT_SWIZZLE_IDENTITY,
-    createInfo.components = componentMapping;
-
-    VkImageSubresourceRange imageSubresourceRange{};
-    imageSubresourceRange.aspectMask = aspectFlags;
-    imageSubresourceRange.baseMipLevel = 0;
-    imageSubresourceRange.levelCount = mipLevels;
+    createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.subresourceRange.aspectMask = aspectFlags;
+    createInfo.subresourceRange.baseMipLevel = 0;
+    createInfo.subresourceRange.levelCount = mipLevels;
     // Usage: Stereograhic 3D application
-    imageSubresourceRange.baseArrayLayer = 0;
-    imageSubresourceRange.layerCount = 1;
-    createInfo.subresourceRange = imageSubresourceRange;
+    createInfo.subresourceRange.baseArrayLayer = 0;
+    createInfo.subresourceRange.layerCount = 1;
 
     VkResult result{
         vkCreateImageView(device, &createInfo, nullptr, &imageView)
     };
 
-    if (result != VK_SUCCESS)
-    {
-        error("Failed to create image view. {}", vkResultToString(result));
-    }
+    VKCHECK(result, "Failed to create image view.");
 
-    return result == VK_SUCCESS;
+    return result;
 }
 }

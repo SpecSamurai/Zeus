@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.h>
 
 namespace Zeus
 {
@@ -11,7 +11,7 @@ struct RenderPassConfig
     VkSampleCountFlagBits msaaSamples;
 };
 
-bool createVkRenderPass(
+VkResult createVkRenderPass(
     const VkDevice& device,
     const RenderPassConfig& config,
     VkRenderPass& renderPass);
