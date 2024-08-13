@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 
 namespace Zeus
@@ -103,7 +104,7 @@ void destroyDebugUtilsMessengerEXT(
 void setDebugUtilsObjectNameEXT(
     VkDevice device,
     VkObjectType objectType,
-    uint64_t objectHandle,
+    std::uint64_t objectHandle,
     const char* pObjectName)
 {
     VkDebugUtilsObjectNameInfoEXT nameInfo{};

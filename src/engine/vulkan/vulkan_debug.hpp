@@ -4,6 +4,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <cstdint>
+
 namespace Zeus
 {
 VKAPI_ATTR VkBool32 VKAPI_CALL defaultDebugCallback(
@@ -26,7 +28,7 @@ void destroyDebugUtilsMessengerEXT(
 void setDebugUtilsObjectNameEXT(
     VkDevice device,
     VkObjectType objectType,
-    uint64_t objectHandle,
+    std::uint64_t objectHandle,
     const char* pObjectName);
 
 void cmdBeginDebugUtilsLabelEXT(
