@@ -52,8 +52,6 @@ add_library(Engine
     vulkan/MemoryAllocator.cpp
     vulkan/MemoryAllocator.hpp
 
-    vulkan/vulkan_buffer.cpp
-    vulkan/vulkan_buffer.hpp
     vulkan/vulkan_command.cpp
     vulkan/vulkan_command.hpp
     vulkan/vulkan_debug.cpp
