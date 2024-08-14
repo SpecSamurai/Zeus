@@ -112,7 +112,7 @@ VkDescriptorPoolSize createVkDescriptorPoolSize(
     return poolSize;
 }
 
-VkWriteDescriptorSet addWriteDescriptorSet(
+VkWriteDescriptorSet createWriteDescriptorSet(
     VkDescriptorSet dstSet,
     std::uint32_t dstBinding,
     std::uint32_t dstArrayElement,
