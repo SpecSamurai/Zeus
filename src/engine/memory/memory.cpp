@@ -5,6 +5,11 @@
 
 namespace Zeus
 {
+std::size_t align(std::size_t size, std::size_t alignment)
+{
+    return (size + (alignment - 1)) & -alignment;
+}
+
 // formula increase an offset (address) to a next address aligned to the
 // alignment formula makes sense only when alignment is a power of 2
 std::size_t alignForwardAdjustment(
