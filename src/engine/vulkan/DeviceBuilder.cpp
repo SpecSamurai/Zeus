@@ -15,6 +15,7 @@ Device DeviceBuilder::build()
 
     device.physicalDevice = physicalDevice.handle;
     device.msaaSamples = physicalDevice.msaaSamples;
+    device.properties = physicalDevice.properties;
 
     device.graphicsFamily =
         physicalDevice.queueFamilies.graphicsFamily.value_or(0);

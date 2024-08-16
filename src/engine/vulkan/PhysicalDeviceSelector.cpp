@@ -205,6 +205,7 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::createIfValid(
     }
 
     output.features = criteria.features;
+    output.properties = deviceProperties;
 
     output.msaaSamples = getMaxUsableSampleCount(physicalDevice);
 

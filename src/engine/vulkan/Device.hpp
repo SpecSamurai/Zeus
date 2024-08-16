@@ -16,7 +16,7 @@ struct Device
     // swapchainsupport swapchainsupport;
     // VkCommandPool graphics_command_pool;
 
-    // VkPhysicalDeviceProperties properties;
+    VkPhysicalDeviceProperties properties;
     // VkPhysicalDeviceFeatures features;
     // VkPhysicalDeviceMemoryProperties memory;
     // VkFormat depthFormat;

@@ -25,7 +25,7 @@ struct PhysicalDevice
 
     // Requested features
     VkPhysicalDeviceFeatures features{};
-    // VkPhysicalDeviceProperties properties{};
+    VkPhysicalDeviceProperties properties{};
     // VkPhysicalDeviceMemoryProperties memoryProperties{};
 
     VkSampleCountFlagBits msaaSamples;
