@@ -8,6 +8,7 @@
 #include <cassert>
 
 #define VKCHECK(expression, msg)                                               \
+    do                                                                         \
     {                                                                          \
         VkResult checkVkResult{ expression };                                  \
         if (checkVkResult != VK_SUCCESS)                                       \
@@ -15,4 +16,4 @@
             fatal("{} {}", msg, string_VkResult(checkVkResult));               \
             assert(checkVkResult == VK_SUCCESS);                               \
         }                                                                      \
-    }
+    } while (0)
