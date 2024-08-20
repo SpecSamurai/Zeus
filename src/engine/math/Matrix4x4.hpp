@@ -68,7 +68,6 @@ private:
         return 4;
     }
 
-private:
     Vector4<T> m_data[4];
 };
 

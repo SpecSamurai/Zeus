@@ -29,7 +29,6 @@ public:
         T y, g, t;
     };
 
-public:
     constexpr T& operator[](const std::size_t i)
     {
         assert(0 <= i && i < size());

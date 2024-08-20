@@ -60,7 +60,6 @@ private:
         return 3;
     }
 
-private:
     Vector3<T> m_data[3];
 };
 
