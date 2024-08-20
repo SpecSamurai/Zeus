@@ -18,8 +18,6 @@ add_executable(Editor
 
     graphics/temp.hpp
 
-    graphics/Camera.hpp
-
     graphics/vulkan/VulkanContext.hpp
     graphics/vulkan/VulkanContext.cpp
 )

@@ -10,6 +10,7 @@ FetchContent_MakeAvailable(glfw)
 
 add_library(Engine
     defines.hpp
+    Camera.hpp
 
     core/logger.hpp
 
@@ -23,6 +24,7 @@ add_library(Engine
     math/Vector2.hpp
     math/Vector3.hpp
     math/Vector4.hpp
+    math/Quaternion.hpp
 
     memory/memory.cpp
     memory/memory.hpp
@@ -77,6 +79,7 @@ add_library(Engine
     vulkan/vulkan_surface.hpp
     vulkan/vulkan_sync.cpp
     vulkan/vulkan_sync.hpp
+    vulkan/vulkan_types.hpp
 
     window/glfw_utils.cpp
     window/glfw_utils.hpp
