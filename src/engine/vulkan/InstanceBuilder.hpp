@@ -14,27 +14,20 @@ class InstanceBuilder
 public:
     Instance build();
 
-    InstanceBuilder& setAppName(const char* name);
-    InstanceBuilder& setEngineName(const char* name);
-    InstanceBuilder& setApplicationVersion(std::uint32_t applicationVersion);
-    InstanceBuilder& setEngineVersion(std::uint32_t engineVersion);
-    InstanceBuilder& setApiVersion(std::uint32_t apiVersion);
-    InstanceBuilder& setExtensions(const std::vector<const char*>& extensions);
+    void setAppName(const char* name);
+    void setEngineName(const char* name);
+    void setApplicationVersion(std::uint32_t applicationVersion);
+    void setEngineVersion(std::uint32_t engineVersion);
+    void setApiVersion(std::uint32_t apiVersion);
+    void setExtensions(const std::vector<const char*>& extensions);
 
 #ifndef NDEBUG
-    InstanceBuilder& setValidationLayers(
-        const std::vector<const char*>& validationLayers);
-
-    InstanceBuilder& setDebugCallback(
-        PFN_vkDebugUtilsMessengerCallbackEXT callback);
-
-    InstanceBuilder& setDebugMessageSeverity(
+    void setValidationLayers(const std::vector<const char*>& validationLayers);
+    void setDebugCallback(PFN_vkDebugUtilsMessengerCallbackEXT callback);
+    void setDebugMessageSeverity(
         VkDebugUtilsMessageSeverityFlagsEXT messageSeverity);
-
-    InstanceBuilder& setDebugMessageType(
-        VkDebugUtilsMessageTypeFlagsEXT messageType);
-
-    InstanceBuilder& setUserData(void* userData);
+    void setDebugMessageType(VkDebugUtilsMessageTypeFlagsEXT messageType);
+    void setUserData(void* userData);
 #endif
 
 private:

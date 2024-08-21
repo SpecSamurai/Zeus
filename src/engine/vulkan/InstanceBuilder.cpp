@@ -13,6 +13,22 @@
 
 namespace Zeus
 {
+constexpr struct DebugMessage
+{
+    static constexpr VkDebugUtilsMessageSeverityFlagsEXT MESSAGE_SEVERITY{
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+        // VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
+    };
+
+    static constexpr VkDebugUtilsMessageTypeFlagsEXT MESSAGE_TYPE{
+        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
+    };
+} DEBUG_MESSAGE;
+
 Instance InstanceBuilder::build()
 {
     assert(validate());
@@ -125,14 +141,13 @@ bool InstanceBuilder::validate()
     if (info.debugMessageType == 0)
     {
         warning("Debug Message Type not set. Used default.");
-        info.debugMessageType = INSTANCE_DEFAULT.DEBUG_MESSAGE.MESSAGE_TYPE;
+        info.debugMessageType = DEBUG_MESSAGE.MESSAGE_TYPE;
     }
 
     if (info.debugMessageSeverity == 0)
     {
         warning("Debug Message Severity not set. Used default.");
-        info.debugMessageSeverity =
-            INSTANCE_DEFAULT.DEBUG_MESSAGE.MESSAGE_SEVERITY;
+        info.debugMessageSeverity = DEBUG_MESSAGE.MESSAGE_SEVERITY;
     }
 #endif
 
@@ -169,87 +184,74 @@ bool InstanceBuilder::validate()
     if (info.apiVersion == 0)
     {
         warning("Api version not set");
-        info.apiVersion = INSTANCE_DEFAULT.API_VERSION;
+        info.apiVersion = VK_API_VERSION_1_3;
     }
 
     return isValid;
 }
 
-InstanceBuilder& InstanceBuilder::setAppName(const char* name)
+void InstanceBuilder::setAppName(const char* name)
 {
     info.applicationName = name;
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setEngineName(const char* name)
+void InstanceBuilder::setEngineName(const char* name)
 {
     info.engineName = name;
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setApplicationVersion(
-    std::uint32_t applicationVersion)
+void InstanceBuilder::setApplicationVersion(std::uint32_t applicationVersion)
 {
     info.applicationVersion = applicationVersion;
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setEngineVersion(std::uint32_t engineVersion)
+void InstanceBuilder::setEngineVersion(std::uint32_t engineVersion)
 {
     info.engineVersion = engineVersion;
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setApiVersion(std::uint32_t apiVersion)
+void InstanceBuilder::setApiVersion(std::uint32_t apiVersion)
 {
     info.apiVersion = apiVersion;
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setExtensions(
-    const std::vector<const char*>& extensions)
+void InstanceBuilder::setExtensions(const std::vector<const char*>& extensions)
 {
     for (const auto& extension : extensions)
     {
         info.extensions.push_back(extension);
     }
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setValidationLayers(
+void InstanceBuilder::setValidationLayers(
     const std::vector<const char*>& validationLayers)
 {
     for (const auto& layer : validationLayers)
     {
         info.validationLayers.push_back(layer);
     }
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setDebugCallback(
+void InstanceBuilder::setDebugCallback(
     PFN_vkDebugUtilsMessengerCallbackEXT callback)
 {
     info.debugCallback = callback;
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setDebugMessageSeverity(
+void InstanceBuilder::setDebugMessageSeverity(
     VkDebugUtilsMessageSeverityFlagsEXT debugMessageSeverity)
 {
     info.debugMessageSeverity = debugMessageSeverity;
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setDebugMessageType(
+void InstanceBuilder::setDebugMessageType(
     VkDebugUtilsMessageTypeFlagsEXT debugMessageType)
 {
     info.debugMessageType = debugMessageType;
-    return *this;
 }
 
-InstanceBuilder& InstanceBuilder::setUserData(void* userData)
+void InstanceBuilder::setUserData(void* userData)
 {
     info.userData = userData;
-    return *this;
 }
 }
