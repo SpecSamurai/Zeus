@@ -10,7 +10,6 @@
 
 namespace Zeus
 {
-
 VkPipeline PipelineBuilder::build(
     VkDevice device,
     VkPipelineLayout pipelineLayout)
@@ -117,16 +116,14 @@ VkPipeline PipelineBuilder::build(
     return pipeline;
 }
 
-PipelineBuilder& PipelineBuilder::addShaderStage(
+void PipelineBuilder::addShaderStage(
     VkShaderStageFlagBits stage,
     VkShaderModule module)
 {
     info.shaderStages.push_back(createPipelineShaderStageInfo(stage, module));
-
-    return *this;
 }
 
-PipelineBuilder& PipelineBuilder::addInputBindingDescription(
+void PipelineBuilder::addInputBindingDescription(
     std::uint32_t binding,
     std::uint32_t stride,
     VkVertexInputRate inputRate)
@@ -137,11 +134,9 @@ PipelineBuilder& PipelineBuilder::addInputBindingDescription(
     description.inputRate = inputRate;
 
     info.vertexInputBindingDescription.push_back(description);
-
-    return *this;
 }
 
-PipelineBuilder& PipelineBuilder::addInputAttributeDescription(
+void PipelineBuilder::addInputAttributeDescription(
     std::uint32_t location,
     std::uint32_t binding,
     VkFormat format,
@@ -154,46 +149,36 @@ PipelineBuilder& PipelineBuilder::addInputAttributeDescription(
     descriptions.offset = offset;
 
     info.vertexInputAttributeDescription.push_back(descriptions);
-
-    return *this;
 }
 
-PipelineBuilder& PipelineBuilder::setDynamicStates(
+void PipelineBuilder::setDynamicStates(
     std::vector<VkDynamicState> dynamicStates)
 {
     info.dynamicStates = dynamicStates;
-
-    return *this;
 }
 
-PipelineBuilder& PipelineBuilder::setRenderPass(
+void PipelineBuilder::setRenderPass(
     VkRenderPass renderPass,
     std::uint32_t subpass)
 {
     info.renderPass = renderPass;
     info.subpass = subpass;
-
-    return *this;
 }
 
-PipelineBuilder& PipelineBuilder::setPolygonMode(VkPolygonMode polygonMode)
+void PipelineBuilder::setPolygonMode(VkPolygonMode polygonMode)
 {
     info.polygonMode = polygonMode;
-
-    return *this;
 }
 
-PipelineBuilder& PipelineBuilder::setCullMode(
+void PipelineBuilder::setCullMode(
     VkCullModeFlags cullMode,
     VkFrontFace frontFace)
 {
     info.cullMode = cullMode;
     info.frontFace = frontFace;
-
-    return *this;
 }
 
-PipelineBuilder& PipelineBuilder::clear()
+void PipelineBuilder::clear()
 {
     info.shaderStages.clear();
     info.vertexInputBindingDescription.clear();
@@ -210,7 +195,5 @@ PipelineBuilder& PipelineBuilder::clear()
 
     info.basePipelineHandle = { VK_NULL_HANDLE };
     info.basePipelineIndex = { -1 };
-
-    return *this;
 }
 }

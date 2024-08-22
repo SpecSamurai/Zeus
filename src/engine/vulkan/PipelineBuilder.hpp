@@ -12,35 +12,25 @@ class PipelineBuilder
 public:
     VkPipeline build(VkDevice device, VkPipelineLayout pipelineLayout);
 
-    PipelineBuilder& addShaderStage(
-        VkShaderStageFlagBits stage,
-        VkShaderModule module);
+    void addShaderStage(VkShaderStageFlagBits stage, VkShaderModule module);
 
-    PipelineBuilder& addInputBindingDescription(
+    void addInputBindingDescription(
         std::uint32_t binding,
         std::uint32_t stride,
         VkVertexInputRate inputRate = VK_VERTEX_INPUT_RATE_VERTEX);
 
-    PipelineBuilder& addInputAttributeDescription(
+    void addInputAttributeDescription(
         std::uint32_t location,
         std::uint32_t binding,
         VkFormat format,
         std::uint32_t offset);
 
-    PipelineBuilder& setDynamicStates(
-        std::vector<VkDynamicState> dynamicStates);
+    void setDynamicStates(std::vector<VkDynamicState> dynamicStates);
+    void setRenderPass(VkRenderPass renderPass, std::uint32_t subpass = 0);
+    void setPolygonMode(VkPolygonMode polygonMode);
+    void setCullMode(VkCullModeFlags cullMode, VkFrontFace frontFace);
 
-    PipelineBuilder& setRenderPass(
-        VkRenderPass renderPass,
-        std::uint32_t subpass = 0);
-
-    PipelineBuilder& setPolygonMode(VkPolygonMode polygonMode);
-
-    PipelineBuilder& setCullMode(
-        VkCullModeFlags cullMode,
-        VkFrontFace frontFace);
-
-    PipelineBuilder& clear();
+    void clear();
 
 private:
     struct PipelineCreateInfo
