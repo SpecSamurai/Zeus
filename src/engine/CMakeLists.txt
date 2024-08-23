@@ -40,6 +40,8 @@ add_library(Engine
     vulkan/Device.hpp
     vulkan/DeviceBuilder.cpp
     vulkan/DeviceBuilder.hpp
+    vulkan/DeletionQueue.cpp
+    vulkan/DeletionQueue.hpp
     vulkan/Instance.cpp
     vulkan/Instance.hpp
     vulkan/InstanceBuilder.cpp
@@ -66,8 +68,6 @@ add_library(Engine
     vulkan/vulkan_framebuffer.hpp
     vulkan/vulkan_image.hpp
     vulkan/vulkan_image.cpp
-    vulkan/vulkan_utils.cpp
-    vulkan/vulkan_utils.hpp
     vulkan/vulkan_pipeline.cpp
     vulkan/vulkan_pipeline.hpp
     vulkan/vulkan_renderpass.cpp

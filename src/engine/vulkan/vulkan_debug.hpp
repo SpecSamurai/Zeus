@@ -1,13 +1,34 @@
 #pragma once
 
+#include "core/logger.hpp"
 #include "math/definitions.hpp"
 
+#include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan.h>
 
+#include <cassert>
 #include <cstdint>
+#ifdef NDEBUG
+#include <tuple>
+#endif
 
 namespace Zeus
 {
+#ifdef NDEBUG
+#define VKCHECK(expression, msg) std::ignore = expression
+#else
+#define VKCHECK(expression, msg)                                               \
+    do                                                                         \
+    {                                                                          \
+        VkResult checkVkResult{ expression };                                  \
+        if (checkVkResult != VK_SUCCESS)                                       \
+        {                                                                      \
+            fatal("{} {}", msg, string_VkResult(checkVkResult));               \
+            assert(checkVkResult == VK_SUCCESS);                               \
+        }                                                                      \
+    } while (0)
+#endif
+
 VKAPI_ATTR VkBool32 VKAPI_CALL defaultDebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
