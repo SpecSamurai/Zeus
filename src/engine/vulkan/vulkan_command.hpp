@@ -30,27 +30,13 @@ VkResult beginVkCommandBuffer(
     VkCommandBufferUsageFlags flags = 0,
     const VkCommandBufferInheritanceInfo* pInheritanceInfo = nullptr);
 
-VkResult endVkCommandBuffer(VkCommandBuffer& commandBuffer);
-
-// Recommended use with VK_COMMAND_POOL_CREATE_TRANSIENT_BIT
-bool beginOneTimeVkCommandBuffer(
-    VkCommandBuffer& commandBuffer,
-    const VkDevice& device,
-    const VkCommandPool& commandPool);
-
-void endOneTimeVkCommandBuffer(
-    VkCommandBuffer& commandBuffer,
-    const VkDevice& device,
-    const VkQueue& queue,
-    const VkCommandPool& commandPool);
-
 void cmdBeginVkRenderPass(
     VkCommandBuffer& commandBuffer,
     const VkRenderPass& renderPass,
     const VkExtent2D& extent,
     const VkFramebuffer& framebuffer,
     const std::vector<VkClearValue>& clearValues,
-    VkOffset2D offset = { 0, 0 },
+    VkOffset2D offset = { .x = 0, .y = 0 },
     VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
 
 VkResult cmdVkQueueSubmit(
@@ -63,6 +49,23 @@ VkResult cmdVkQueueSubmit(
     const VkPipelineStageFlags* pWaitDstStageMask = nullptr,
     std::uint32_t signalSemaphoreCount = 0,
     const VkSemaphore* pSignalSemaphores = nullptr);
+
+VkSemaphoreSubmitInfo createVkSemaphoreSubmitInfo(
+    VkSemaphore semaphore,
+    VkPipelineStageFlags2 stageMask);
+
+VkCommandBufferSubmitInfo createVkCommandBufferSubmitInfo(
+    VkCommandBuffer commandBuffer);
+
+VkResult cmdVkQueueSubmit2(
+    VkQueue queue,
+    VkFence fence,
+    std::uint32_t waitSemaphoreInfoCount,
+    const VkSemaphoreSubmitInfo* pWaitSemaphoreInfos,
+    std::uint32_t commandBufferInfoCount,
+    const VkCommandBufferSubmitInfo* pCommandBufferInfos,
+    std::uint32_t signalSemaphoreInfoCount,
+    const VkSemaphoreSubmitInfo* pSignalSemaphoreInfos);
 
 VkResult cmdVkQueuePresentKHR(
     VkQueue presentQueue,
@@ -85,5 +88,5 @@ void cmdSetVkViewport(
 void cmdSetVkScissor(
     VkCommandBuffer& commandBuffer,
     VkExtent2D extent,
-    VkOffset2D offset = { 0, 0 });
+    VkOffset2D offset = { .x = 0, .y = 0 });
 }
