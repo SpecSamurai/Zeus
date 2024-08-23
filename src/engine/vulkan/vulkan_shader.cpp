@@ -1,7 +1,8 @@
 #include "vulkan_shader.hpp"
 
+#include "MemoryAllocator.hpp"
 #include "core/logger.hpp"
-#include "vulkan_utils.hpp"
+#include "vulkan_debug.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -24,9 +25,11 @@ VkResult createVkShaderModule(
     createInfo.codeSize = codeSize;
     createInfo.pCode = pCode;
 
-    VkResult result{
-        vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule)
-    };
+    VkResult result{ vkCreateShaderModule(
+        device,
+        &createInfo,
+        MemoryAllocator::pAllocator,
+        &shaderModule) };
 
     VKCHECK(result, "Failed to create shader module.");
 

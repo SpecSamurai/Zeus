@@ -22,7 +22,8 @@ VkResult createDescriptorSetLayout(
     const VkDescriptorSetLayoutBinding* pBindings,
     VkDescriptorSetLayoutCreateFlags flags = 0);
 
-std::vector<VkDescriptorSet> allocateVkDescriptorSets(
+VkResult allocateVkDescriptorSets(
+    std::vector<VkDescriptorSet>& descriptorSets,
     VkDevice device,
     VkDescriptorPool descriptorPool,
     VkDescriptorSetLayout descriptorSetLayout,

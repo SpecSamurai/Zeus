@@ -1,6 +1,7 @@
 #include "vulkan_framebuffer.hpp"
 
-#include "vulkan/vulkan_utils.hpp"
+#include "MemoryAllocator.hpp"
+#include "vulkan_debug.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -26,9 +27,11 @@ VkResult createVkFramebuffer(
     createInfo.height = extent.height;
     createInfo.layers = layers;
 
-    VkResult result{
-        vkCreateFramebuffer(device, &createInfo, nullptr, &framebuffer)
-    };
+    VkResult result{ vkCreateFramebuffer(
+        device,
+        &createInfo,
+        MemoryAllocator::pAllocator,
+        &framebuffer) };
 
     VKCHECK(result, "Failed to create Framebuffer.");
 

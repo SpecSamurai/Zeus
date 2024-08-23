@@ -1,6 +1,7 @@
 #include "vulkan_sync.hpp"
 
-#include "vulkan_utils.hpp"
+#include "MemoryAllocator.hpp"
+#include "vulkan_debug.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -30,7 +31,9 @@ VkResult createVkFence(const VkDevice& device, bool signaled, VkFence& fence)
         createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     }
 
-    VkResult result{ vkCreateFence(device, &createInfo, nullptr, &fence) };
+    VkResult result{
+        vkCreateFence(device, &createInfo, MemoryAllocator::pAllocator, &fence)
+    };
 
     VKCHECK(result, "Failed to create a Fence.");
 

@@ -1,6 +1,7 @@
 #include "vulkan_descriptors.hpp"
 
-#include "vulkan_utils.hpp"
+#include "MemoryAllocator.hpp"
+#include "vulkan_debug.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -24,9 +25,11 @@ VkResult createDescriptorPool(
     createInfo.poolSizeCount = poolSizeCount;
     createInfo.pPoolSizes = pPoolSizes;
 
-    VkResult result{
-        vkCreateDescriptorPool(device, &createInfo, nullptr, &descriptorPool)
-    };
+    VkResult result{ vkCreateDescriptorPool(
+        device,
+        &createInfo,
+        MemoryAllocator::pAllocator,
+        &descriptorPool) };
 
     VKCHECK(result, "Failed to create descriptor pool.");
 
@@ -49,7 +52,7 @@ VkResult createDescriptorSetLayout(
     VkResult result{ vkCreateDescriptorSetLayout(
         device,
         &createInfo,
-        nullptr,
+        MemoryAllocator::pAllocator,
         &descriptorSetLayout) };
 
     VKCHECK(result, "Failed to create descriptor set layout.");
@@ -57,13 +60,14 @@ VkResult createDescriptorSetLayout(
     return result;
 }
 
-std::vector<VkDescriptorSet> allocateVkDescriptorSets(
+VkResult allocateVkDescriptorSets(
+    std::vector<VkDescriptorSet>& descriptorSets,
     VkDevice device,
     VkDescriptorPool descriptorPool,
     VkDescriptorSetLayout descriptorSetLayout,
     std::uint32_t descriptorSetCount)
 {
-    std::vector<VkDescriptorSet> descriptorSets(descriptorSetCount);
+    descriptorSets.resize(descriptorSetCount);
 
     std::vector<VkDescriptorSetLayout> layouts(
         descriptorSetCount,
@@ -81,7 +85,7 @@ std::vector<VkDescriptorSet> allocateVkDescriptorSets(
 
     VKCHECK(result, "Failed to allocate descriptor sets");
 
-    return descriptorSets;
+    return result;
 }
 
 VkDescriptorSetLayoutBinding createVkDescriptorSetLayoutBinding(
