@@ -12,9 +12,11 @@ VkResult createVkSemaphore(const VkDevice& device, VkSemaphore& semaphore)
     VkSemaphoreCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-    VkResult result{
-        vkCreateSemaphore(device, &createInfo, nullptr, &semaphore)
-    };
+    VkResult result{ vkCreateSemaphore(
+        device,
+        &createInfo,
+        MemoryAllocator::pAllocator,
+        &semaphore) };
 
     VKCHECK(result, "Failed to create a Semaphore.");
 
