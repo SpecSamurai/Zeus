@@ -1,6 +1,6 @@
 #include "vulkan_renderpass.hpp"
 
-#include "vulkan_utils.hpp"
+#include "vulkan_debug.hpp"
 
 #include <vulkan/vulkan.h>
 
