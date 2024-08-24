@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <fstream>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 namespace Zeus
 {
@@ -36,7 +37,10 @@ VkResult createVkShaderModule(
     return result;
 }
 
-VkShaderModule loadShader(VkDevice device, const char* filename)
+VkResult loadShader(
+    VkShaderModule& shaderModule,
+    VkDevice device,
+    const char* filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
@@ -44,6 +48,8 @@ VkShaderModule loadShader(VkDevice device, const char* filename)
     {
         error("Failed to open file: {}", filename);
         assert(file.is_open());
+
+        return VK_ERROR_INITIALIZATION_FAILED;
     }
 
     std::size_t fileSize{ static_cast<std::size_t>(file.tellg()) };
@@ -56,13 +62,10 @@ VkShaderModule loadShader(VkDevice device, const char* filename)
 
     file.close();
 
-    VkShaderModule shaderModule;
-    createVkShaderModule(
+    return createVkShaderModule(
         device,
         fileSize,
         reinterpret_cast<const uint32_t*>(buffer.data()),
         shaderModule);
-
-    return shaderModule;
 }
 };

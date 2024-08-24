@@ -13,5 +13,8 @@ VkResult createVkShaderModule(
     const std::uint32_t* pCode,
     VkShaderModule& shaderModule);
 
-VkShaderModule loadShader(VkDevice device, const char* filename);
+VkResult loadShader(
+    VkShaderModule& shaderModule,
+    VkDevice device,
+    const char* filename);
 }
