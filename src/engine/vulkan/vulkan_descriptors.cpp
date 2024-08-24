@@ -88,6 +88,27 @@ VkResult allocateVkDescriptorSets(
     return result;
 }
 
+VkResult allocateVkDescriptorSet(
+    VkDescriptorSet& descriptorSet,
+    VkDevice device,
+    VkDescriptorPool descriptorPool,
+    VkDescriptorSetLayout descriptorSetLayout)
+{
+    VkDescriptorSetAllocateInfo allocateInfo{};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = descriptorPool;
+    allocateInfo.descriptorSetCount = 1;
+    allocateInfo.pSetLayouts = &descriptorSetLayout;
+
+    VkResult result{
+        vkAllocateDescriptorSets(device, &allocateInfo, &descriptorSet)
+    };
+
+    VKCHECK(result, "Failed to allocate descriptor sets");
+
+    return result;
+}
+
 VkDescriptorSetLayoutBinding createVkDescriptorSetLayoutBinding(
     std::uint32_t binding,
     VkDescriptorType descriptorType,

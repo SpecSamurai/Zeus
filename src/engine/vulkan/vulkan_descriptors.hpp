@@ -29,6 +29,12 @@ VkResult allocateVkDescriptorSets(
     VkDescriptorSetLayout descriptorSetLayout,
     std::uint32_t descriptorSetCount);
 
+VkResult allocateVkDescriptorSet(
+    VkDescriptorSet& descriptorSet,
+    VkDevice device,
+    VkDescriptorPool descriptorPool,
+    VkDescriptorSetLayout descriptorSetLayout);
+
 VkDescriptorSetLayoutBinding createVkDescriptorSetLayoutBinding(
     std::uint32_t binding,
     VkDescriptorType descriptorType,
