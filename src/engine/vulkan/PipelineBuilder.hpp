@@ -10,9 +10,31 @@ namespace Zeus
 class PipelineBuilder
 {
 public:
+    PipelineBuilder();
+
     VkPipeline build(VkDevice device, VkPipelineLayout pipelineLayout);
 
     void addShaderStage(VkShaderStageFlagBits stage, VkShaderModule module);
+    void setDynamicStates(std::vector<VkDynamicState> dynamicStates);
+    void setRenderPass(VkRenderPass renderPass, std::uint32_t subpass = 0);
+    void setPolygonMode(VkPolygonMode polygonMode);
+    void setCullMode(VkCullModeFlags cullMode, VkFrontFace frontFace);
+    void setPrimitiveTopology(VkPrimitiveTopology topology);
+
+    void dynamicRendering(bool value = true);
+
+    void setColorAttachmentFormat(VkFormat format);
+
+    void disableDepthTest();
+    void enableDepthTest(bool depthWriteEnable, VkCompareOp depthCompareOp);
+    void setDepthFormat(VkFormat format);
+    void setStencilFormat(VkFormat format);
+
+    void disableBlending();
+    void enableAdditiveBlending();
+    void enableAlphaBlending();
+
+    void disableMiltisampling();
 
     void addInputBindingDescription(
         std::uint32_t binding,
@@ -25,39 +47,39 @@ public:
         VkFormat format,
         std::uint32_t offset);
 
-    void setDynamicStates(std::vector<VkDynamicState> dynamicStates);
-    void setRenderPass(VkRenderPass renderPass, std::uint32_t subpass = 0);
-    void setPolygonMode(VkPolygonMode polygonMode);
-    void setCullMode(VkCullModeFlags cullMode, VkFrontFace frontFace);
-
     void clear();
+    void clearShaderStages();
 
 private:
     struct PipelineCreateInfo
     {
+        bool dynamicRendering{ false };
+
         std::vector<VkPipelineShaderStageCreateInfo> shaderStages{};
         std::vector<VkVertexInputBindingDescription>
             vertexInputBindingDescription{};
         std::vector<VkVertexInputAttributeDescription>
             vertexInputAttributeDescription{};
 
-        // const VkPipelineShaderStageCreateInfo* pStages;
-        // const VkPipelineVertexInputStateCreateInfo* pVertexInputState;
-        // const VkPipelineInputAssemblyStateCreateInfo* pInputAssemblyState;
-        // const VkPipelineTessellationStateCreateInfo* pTessellationState;
-        // const VkPipelineMultisampleStateCreateInfo* pMultisampleState;
-        // const VkPipelineDepthStencilStateCreateInfo* pDepthStencilState;
-        // const VkPipelineColorBlendStateCreateInfo* pColorBlendState;
-        // const VkPipelineDynamicStateCreateInfo* pDynamicState;
-
+        VkPipelineRenderingCreateInfo pipelineRendering;
+        VkPipelineInputAssemblyStateCreateInfo inputAssemblyState;
+        VkPipelineTessellationStateCreateInfo tessellationState;
+        VkPipelineViewportStateCreateInfo viewportState;
+        // VkPipelineRasterizationStateCreateInfo rasterizationState;
+        VkPipelineMultisampleStateCreateInfo multisampleState;
+        VkPipelineDepthStencilStateCreateInfo depthStencilState;
+        VkPipelineColorBlendAttachmentState colorBlendAttachmentState;
+        // VkPipelineDynamicStateCreateInfo dynamicState;
         std::vector<VkDynamicState> dynamicStates{};
+
+        VkFormat colorAttachmentformat;
 
         VkPolygonMode polygonMode{ VK_POLYGON_MODE_FILL };
         VkCullModeFlags cullMode{ VK_CULL_MODE_NONE };
         VkFrontFace frontFace{ VK_FRONT_FACE_COUNTER_CLOCKWISE };
 
-        VkRenderPass renderPass;
-        std::uint32_t subpass;
+        VkRenderPass renderPass{ VK_NULL_HANDLE };
+        std::uint32_t subpass{ 0 };
 
         VkPipeline basePipelineHandle{ VK_NULL_HANDLE };
         std::int32_t basePipelineIndex{ -1 };

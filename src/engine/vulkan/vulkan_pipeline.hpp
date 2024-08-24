@@ -6,6 +6,15 @@
 
 namespace Zeus
 {
+VkResult createComputePipeline(
+    VkPipeline& pipeline,
+    VkDevice device,
+    VkPipelineLayout layout,
+    VkShaderModule module,
+    VkPipelineCreateFlags flags = 0,
+    VkPipeline basePipelineHandle = VK_NULL_HANDLE,
+    std::int32_t basePipelineIndex = -1);
+
 VkResult createVkPipelineLayout(
     VkPipelineLayout& pipelineLayout,
     VkDevice device,
@@ -40,16 +49,6 @@ VkPipelineViewportStateCreateInfo createPipelineViewportStateInfo(
     const VkViewport* pViewports = nullptr,
     std::uint32_t scissorCount = 1,
     const VkRect2D* pScissors = nullptr);
-
-VkPipelineMultisampleStateCreateInfo createPipelineMultisampleStateInfo(
-    VkSampleCountFlagBits rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
-    VkBool32 sampleShadingEnable = VK_FALSE,
-    float minSampleShading = 0.f,
-    const VkSampleMask* pSampleMask = nullptr,
-    VkBool32 alphaToCoverageEnable = VK_FALSE,
-    VkBool32 alphaToOneEnable = VK_FALSE);
-
-VkPipelineDepthStencilStateCreateInfo createPipelineDepthStencilStateInfo();
 
 VkPipelineDynamicStateCreateInfo createPipelineDynamicStateCreateInfo(
     std::uint32_t dynamicStateCount,

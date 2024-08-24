@@ -1,6 +1,7 @@
 #include "vulkan_pipeline.hpp"
 
-#include "vulkan_utils.hpp"
+#include "MemoryAllocator.hpp"
+#include "vulkan_debug.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -8,6 +9,43 @@
 
 namespace Zeus
 {
+VkResult createComputePipeline(
+    VkPipeline& pipeline,
+    VkDevice device,
+    VkPipelineLayout layout,
+    VkShaderModule module,
+    VkPipelineCreateFlags flags,
+    VkPipeline basePipelineHandle,
+    std::int32_t basePipelineIndex)
+{
+    VkPipelineShaderStageCreateInfo stageCreateInfo{};
+    stageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    stageCreateInfo.flags = 0;
+    stageCreateInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+    stageCreateInfo.module = module;
+    stageCreateInfo.pName = "main";
+
+    VkComputePipelineCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+    createInfo.flags = flags;
+    createInfo.stage = stageCreateInfo;
+    createInfo.layout = layout;
+    createInfo.basePipelineHandle = basePipelineHandle;
+    createInfo.basePipelineIndex = basePipelineIndex;
+
+    VkResult result{ vkCreateComputePipelines(
+        device,
+        VK_NULL_HANDLE,
+        1,
+        &createInfo,
+        MemoryAllocator::pAllocator,
+        &pipeline) };
+
+    VKCHECK(result, "Failed to create compute pipeline layout.");
+
+    return result;
+}
+
 VkResult createVkPipelineLayout(
     VkPipelineLayout& pipelineLayout,
     VkDevice device,
@@ -23,9 +61,11 @@ VkResult createVkPipelineLayout(
     createInfo.pushConstantRangeCount = pushConstantRangeCount;
     createInfo.pPushConstantRanges = pPushConstantRanges;
 
-    VkResult result{
-        vkCreatePipelineLayout(device, &createInfo, nullptr, &pipelineLayout)
-    };
+    VkResult result{ vkCreatePipelineLayout(
+        device,
+        &createInfo,
+        MemoryAllocator::pAllocator,
+        &pipelineLayout) };
 
     VKCHECK(result, "Failed to create pipeline layout.");
 
@@ -108,102 +148,12 @@ VkPipelineViewportStateCreateInfo createPipelineViewportStateInfo(
     std::uint32_t scissorCount,
     const VkRect2D* pScissors)
 {
-    // x – Left side of the viewport.
-    // y – Upper side of the viewport.
-    // VkViewport viewport{};
-    // viewport.x = 0.0f;
-    // viewport.y = 0.0f;
-    // viewport.width = (float)swapchain.extent.width;
-    // viewport.height = (float)swapchain.extent.height;
-    // viewport.minDepth = 0.0f;
-    // viewport.maxDepth = 1.0f;
-    //
-    // VkRect2D scissor{};
-    // scissor.offset = { 0, 0 };
-    // scissor.extent = swapchain.extent;
-    //
-    // VkPipelineViewportStateCreateInfo viewportState{};
-    // viewportState.sType =
-    // VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    // viewportState.viewportCount = 1;
-    // viewportState.pViewports = &viewport;
-    // viewportState.scissorCount = 1;
-    // viewportState.pScissors = &scissor;
-
     VkPipelineViewportStateCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     createInfo.viewportCount = viewportCount;
     createInfo.pViewports = pViewports;
     createInfo.scissorCount = scissorCount;
     createInfo.pScissors = pScissors;
-
-    return createInfo;
-}
-
-VkPipelineMultisampleStateCreateInfo createPipelineMultisampleStateInfo(
-    VkSampleCountFlagBits rasterizationSamples,
-    VkBool32 sampleShadingEnable,
-    float minSampleShading,
-    const VkSampleMask* pSampleMask,
-    VkBool32 alphaToCoverageEnable,
-    VkBool32 alphaToOneEnable)
-{
-    VkPipelineMultisampleStateCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    createInfo.rasterizationSamples = rasterizationSamples;
-    createInfo.sampleShadingEnable = VK_FALSE;
-    // .sampleShadingEnable = VK_TRUE, // VK_FALSE
-    //                          // closer to one is smooth
-    // .minSampleShading = .2f, // 1.0f, min fraction for sample shading;
-    // .pSampleMask = nullptr,
-    // .alphaToCoverageEnable = VK_FALSE,
-    // .alphaToOneEnable = VK_FALSE,
-
-    return createInfo;
-}
-
-VkPipelineDepthStencilStateCreateInfo createPipelineDepthStencilStateInfo()
-{
-    VkPipelineDepthStencilStateCreateInfo createInfo{};
-    createInfo.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    createInfo.depthTestEnable = VK_TRUE;
-    createInfo.depthWriteEnable = VK_TRUE;
-    createInfo.depthCompareOp = VK_COMPARE_OP_LESS;
-    createInfo.depthBoundsTestEnable = VK_FALSE;
-    createInfo.stencilTestEnable = VK_FALSE;
-    createInfo.front = {};            // Optional
-    createInfo.back = {};             // Optional
-    createInfo.minDepthBounds = 0.0f; // Optional
-    createInfo.maxDepthBounds = 1.0f; // Optional
-
-    return createInfo;
-}
-
-VkPipelineColorBlendStateCreateInfo createPipelineColorBlendStateCreateInfo()
-{
-    VkPipelineColorBlendAttachmentState colorBlendAttachmentState{};
-    colorBlendAttachmentState.blendEnable = VK_FALSE;
-    colorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
-    colorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
-    colorBlendAttachmentState.colorWriteMask =
-        VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-        VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-
-    VkPipelineColorBlendStateCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    createInfo.logicOpEnable = VK_FALSE;
-    createInfo.logicOp = VK_LOGIC_OP_COPY;
-    createInfo.attachmentCount = 1;
-    createInfo.pAttachments = &colorBlendAttachmentState;
-    createInfo.blendConstants[0] = 0.0f;
-    createInfo.blendConstants[1] = 0.0f;
-    createInfo.blendConstants[2] = 0.0f;
-    createInfo.blendConstants[3] = 0.0f;
 
     return createInfo;
 }
