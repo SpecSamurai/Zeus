@@ -28,7 +28,7 @@ VkResult createDescriptorPool(
     VkResult result{ vkCreateDescriptorPool(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator,
+        MemoryAllocator::pAllocator.get(),
         &descriptorPool) };
 
     VKCHECK(result, "Failed to create descriptor pool.");
@@ -52,7 +52,7 @@ VkResult createDescriptorSetLayout(
     VkResult result{ vkCreateDescriptorSetLayout(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator,
+        MemoryAllocator::pAllocator.get(),
         &descriptorSetLayout) };
 
     VKCHECK(result, "Failed to create descriptor set layout.");

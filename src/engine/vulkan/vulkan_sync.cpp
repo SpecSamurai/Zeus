@@ -15,7 +15,7 @@ VkResult createVkSemaphore(const VkDevice& device, VkSemaphore& semaphore)
     VkResult result{ vkCreateSemaphore(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator,
+        MemoryAllocator::pAllocator.get(),
         &semaphore) };
 
     VKCHECK(result, "Failed to create a Semaphore.");
@@ -33,9 +33,11 @@ VkResult createVkFence(const VkDevice& device, bool signaled, VkFence& fence)
         createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     }
 
-    VkResult result{
-        vkCreateFence(device, &createInfo, MemoryAllocator::pAllocator, &fence)
-    };
+    VkResult result{ vkCreateFence(
+        device,
+        &createInfo,
+        MemoryAllocator::pAllocator.get(),
+        &fence) };
 
     VKCHECK(result, "Failed to create a Fence.");
 

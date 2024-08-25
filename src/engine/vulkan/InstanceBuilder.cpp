@@ -69,7 +69,7 @@ Instance InstanceBuilder::build()
     VKCHECK(
         vkCreateInstance(
             &instanceCreateInfo,
-            MemoryAllocator::pAllocator,
+            MemoryAllocator::pAllocator.get(),
             &instance.handle),
         "Instance failed to create.");
 
@@ -86,7 +86,7 @@ Instance InstanceBuilder::build()
         createDebugUtilsMessengerEXT(
             instance.handle,
             &debugCreateInfo,
-            MemoryAllocator::pAllocator,
+            MemoryAllocator::pAllocator.get(),
             &instance.debugUtilsMessenger),
         "Failed to create debug messenger.");
 #endif

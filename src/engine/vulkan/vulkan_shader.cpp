@@ -29,7 +29,7 @@ VkResult createVkShaderModule(
     VkResult result{ vkCreateShaderModule(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator,
+        MemoryAllocator::pAllocator.get(),
         &shaderModule) };
 
     VKCHECK(result, "Failed to create shader module.");

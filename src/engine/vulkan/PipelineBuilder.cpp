@@ -86,7 +86,7 @@ VkPipeline PipelineBuilder::build(
             VK_NULL_HANDLE,
             1,
             &pipelineCreateInfo,
-            MemoryAllocator::pAllocator,
+            MemoryAllocator::pAllocator.get(),
             &pipeline),
     };
 

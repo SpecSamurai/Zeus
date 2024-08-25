@@ -24,7 +24,7 @@ VkResult createVkCommandPool(
     VkResult result{ vkCreateCommandPool(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator,
+        MemoryAllocator::pAllocator.get(),
         &commandPool) };
 
     VKCHECK(result, "Failed to create command pool.");

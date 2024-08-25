@@ -13,9 +13,9 @@ void destroyInstance(Instance& instance)
     destroyDebugUtilsMessengerEXT(
         instance.handle,
         instance.debugUtilsMessenger,
-        MemoryAllocator::pAllocator);
+        MemoryAllocator::pAllocator.get());
 #endif
 
-    vkDestroyInstance(instance.handle, MemoryAllocator::pAllocator);
+    vkDestroyInstance(instance.handle, MemoryAllocator::pAllocator.get());
 }
 }

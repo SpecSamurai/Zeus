@@ -18,7 +18,7 @@ VkResult createVkSurfaceKHR(
     VkResult result{ glfwCreateWindowSurface(
         instance,
         window,
-        MemoryAllocator::pAllocator,
+        MemoryAllocator::pAllocator.get(),
         &surface) };
 
     VKCHECK(result, "Failed to create window surface.");

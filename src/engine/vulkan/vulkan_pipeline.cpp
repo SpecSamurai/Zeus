@@ -38,7 +38,7 @@ VkResult createComputePipeline(
         VK_NULL_HANDLE,
         1,
         &createInfo,
-        MemoryAllocator::pAllocator,
+        MemoryAllocator::pAllocator.get(),
         &pipeline) };
 
     VKCHECK(result, "Failed to create compute pipeline layout.");
@@ -64,7 +64,7 @@ VkResult createVkPipelineLayout(
     VkResult result{ vkCreatePipelineLayout(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator,
+        MemoryAllocator::pAllocator.get(),
         &pipelineLayout) };
 
     VKCHECK(result, "Failed to create pipeline layout.");

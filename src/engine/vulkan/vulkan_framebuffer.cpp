@@ -30,7 +30,7 @@ VkResult createVkFramebuffer(
     VkResult result{ vkCreateFramebuffer(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator,
+        MemoryAllocator::pAllocator.get(),
         &framebuffer) };
 
     VKCHECK(result, "Failed to create Framebuffer.");
