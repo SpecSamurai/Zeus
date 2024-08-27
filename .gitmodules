@@ -2,3 +2,6 @@
 	path = libraries/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "libraries/VulkanMemoryAllocator"]
+	path = libraries/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator

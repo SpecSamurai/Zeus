@@ -32,6 +32,9 @@ add_library(imgui STATIC
 target_include_directories(imgui PUBLIC imgui)
 target_link_libraries(imgui PRIVATE Vulkan::Vulkan glfw)
 
+add_library(VulkanMemoryAllocator INTERFACE)
+target_include_directories(VulkanMemoryAllocator INTERFACE VulkanMemoryAllocator/include)
+
 add_library(stb
     stb/stb_image.h
     stb/stb_image.c
