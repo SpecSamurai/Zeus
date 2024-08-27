@@ -1,8 +1,8 @@
 #include "InstanceBuilder.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "core/logger.hpp"
 #include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 #include "vulkan_settings.hpp"
 
 #include <vulkan/vulkan.h>
@@ -69,7 +69,7 @@ Instance InstanceBuilder::build()
     VKCHECK(
         vkCreateInstance(
             &instanceCreateInfo,
-            MemoryAllocator::pAllocator.get(),
+            allocationCallbacks.get(),
             &instance.handle),
         "Instance failed to create.");
 
@@ -86,7 +86,7 @@ Instance InstanceBuilder::build()
         createDebugUtilsMessengerEXT(
             instance.handle,
             &debugCreateInfo,
-            MemoryAllocator::pAllocator.get(),
+            allocationCallbacks.get(),
             &instance.debugUtilsMessenger),
         "Failed to create debug messenger.");
 #endif

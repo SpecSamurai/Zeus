@@ -1,7 +1,7 @@
 #include "vulkan_descriptors.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -28,7 +28,7 @@ VkResult createDescriptorPool(
     VkResult result{ vkCreateDescriptorPool(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator.get(),
+        allocationCallbacks.get(),
         &descriptorPool) };
 
     VKCHECK(result, "Failed to create descriptor pool.");
@@ -52,7 +52,7 @@ VkResult createDescriptorSetLayout(
     VkResult result{ vkCreateDescriptorSetLayout(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator.get(),
+        allocationCallbacks.get(),
         &descriptorSetLayout) };
 
     VKCHECK(result, "Failed to create descriptor set layout.");

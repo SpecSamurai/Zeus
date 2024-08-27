@@ -1,7 +1,7 @@
 #include "vulkan_command.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -24,7 +24,7 @@ VkResult createVkCommandPool(
     VkResult result{ vkCreateCommandPool(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator.get(),
+        allocationCallbacks.get(),
         &commandPool) };
 
     VKCHECK(result, "Failed to create command pool.");

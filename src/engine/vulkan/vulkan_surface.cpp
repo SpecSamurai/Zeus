@@ -1,7 +1,7 @@
 #include "vulkan_surface.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
@@ -18,7 +18,7 @@ VkResult createVkSurfaceKHR(
     VkResult result{ glfwCreateWindowSurface(
         instance,
         window,
-        MemoryAllocator::pAllocator.get(),
+        allocationCallbacks.get(),
         &surface) };
 
     VKCHECK(result, "Failed to create window surface.");

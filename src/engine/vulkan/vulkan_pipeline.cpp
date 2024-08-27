@@ -1,7 +1,7 @@
 #include "vulkan_pipeline.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -38,7 +38,7 @@ VkResult createComputePipeline(
         VK_NULL_HANDLE,
         1,
         &createInfo,
-        MemoryAllocator::pAllocator.get(),
+        allocationCallbacks.get(),
         &pipeline) };
 
     VKCHECK(result, "Failed to create compute pipeline layout.");
@@ -64,7 +64,7 @@ VkResult createVkPipelineLayout(
     VkResult result{ vkCreatePipelineLayout(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator.get(),
+        allocationCallbacks.get(),
         &pipelineLayout) };
 
     VKCHECK(result, "Failed to create pipeline layout.");

@@ -1,7 +1,7 @@
 #include "Instance.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -13,9 +13,9 @@ void destroyInstance(Instance& instance)
     destroyDebugUtilsMessengerEXT(
         instance.handle,
         instance.debugUtilsMessenger,
-        MemoryAllocator::pAllocator.get());
+        allocationCallbacks.get());
 #endif
 
-    vkDestroyInstance(instance.handle, MemoryAllocator::pAllocator.get());
+    vkDestroyInstance(instance.handle, allocationCallbacks.get());
 }
 }

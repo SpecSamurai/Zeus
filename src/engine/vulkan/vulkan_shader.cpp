@@ -1,8 +1,8 @@
 #include "vulkan_shader.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "core/logger.hpp"
 #include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -11,7 +11,6 @@
 #include <cstdint>
 #include <fstream>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 namespace Zeus
 {
@@ -29,7 +28,7 @@ VkResult createVkShaderModule(
     VkResult result{ vkCreateShaderModule(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator.get(),
+        allocationCallbacks.get(),
         &shaderModule) };
 
     VKCHECK(result, "Failed to create shader module.");

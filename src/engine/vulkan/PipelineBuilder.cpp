@@ -1,7 +1,7 @@
 #include "PipelineBuilder.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 #include "vulkan_pipeline.hpp"
 
 #include <vulkan/vulkan.h>
@@ -86,7 +86,7 @@ VkPipeline PipelineBuilder::build(
             VK_NULL_HANDLE,
             1,
             &pipelineCreateInfo,
-            MemoryAllocator::pAllocator.get(),
+            allocationCallbacks.get(),
             &pipeline),
     };
 

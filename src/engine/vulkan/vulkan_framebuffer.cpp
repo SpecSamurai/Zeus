@@ -1,7 +1,7 @@
 #include "vulkan_framebuffer.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -30,7 +30,7 @@ VkResult createVkFramebuffer(
     VkResult result{ vkCreateFramebuffer(
         device,
         &createInfo,
-        MemoryAllocator::pAllocator.get(),
+        allocationCallbacks.get(),
         &framebuffer) };
 
     VKCHECK(result, "Failed to create Framebuffer.");
