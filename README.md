@@ -39,3 +39,9 @@ ctest --preset test
 
 ## Environment variables
 - `VULKAN_SDK` specifies the location of the Vulkan SDK root directory
+
+## Libraries
+- [Dear ImGui](https://github.com/ocornut/imgui)
+- [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
+- [GLFW](https://github.com/glfw/glfw)
+- [GoogleTest](https://github.com/google/googletest)
