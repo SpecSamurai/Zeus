@@ -1,3 +1,4 @@
+#define VMA_IMPLEMENTATION
 #include "vulkan_memory.hpp"
 
 #include "core/logger.hpp"

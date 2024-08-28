@@ -1,7 +1,7 @@
 #include "DescriptorAllocator.hpp"
 
-#include "MemoryAllocator.hpp"
 #include "vulkan_descriptors.hpp"
+#include "vulkan_memory.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -45,9 +45,6 @@ void DescriptorAllocator::clearDescriptors(VkDevice device)
 
 void DescriptorAllocator::destroyPool(VkDevice device)
 {
-    vkDestroyDescriptorPool(
-        device,
-        descriptorPool,
-        MemoryAllocator::pAllocator.get());
+    vkDestroyDescriptorPool(device, descriptorPool, allocationCallbacks.get());
 }
 }
