@@ -12,59 +12,37 @@ namespace Zeus
 {
 struct Swapchain
 {
-    // VkDevice device{ VK_NULL_HANDLE };
-    VkSwapchainKHR handle{ VK_NULL_HANDLE };
+    VkSwapchainKHR handle;
 
-    std::uint32_t imageCount{ 0 };
-    // max_frames_in_flight;
+    std::uint32_t imageCount;
+    std::uint32_t maxConcurrentFrames;
 
     VkFormat imageFormat;
-    VkColorSpaceKHR colorSpace;
-    // VkImageUsageFlags imageUsageFlags = 0;
+    VkImageUsageFlags imageUsageFlags;
 
     VkExtent2D extent;
 
-    VkPresentModeKHR presentMode;
-
     std::vector<VkImage> images;
     std::vector<VkImageView> imageViews;
-    // std::vector<VkFramebuffer> swapchainFramebuffers;
 };
 
-inline void destroySwapchain(const Device& device, const Swapchain& swapchain)
-{
-    for (auto& imageView : swapchain.imageViews)
-    {
-        vkDestroyImageView(device.logicalDevice, imageView, nullptr);
-    }
-
-    vkDestroySwapchainKHR(device.logicalDevice, swapchain.handle, nullptr);
-}
+void destroySwapchain(const Device& device, const Swapchain& swapchain);
 
 class SwapchainBuilder
 {
 public:
     std::optional<Swapchain> build();
 
-    SwapchainBuilder& setDevice(
-        const Device& device,
-        const VkSurfaceKHR& surface);
-
-    SwapchainBuilder& setOldSwapchain(VkSwapchainKHR oldSwapchain);
-    SwapchainBuilder& setDesiredExtent(
-        std::uint32_t width,
-        std::uint32_t height);
-    SwapchainBuilder& addDesiredSurfaceFormat(VkSurfaceFormatKHR format);
-    SwapchainBuilder& setDesiredPresentMode(VkPresentModeKHR presentMode);
-    SwapchainBuilder& setImageUsageFlags(VkImageUsageFlags usageFlags);
-    SwapchainBuilder& setImageArrayLayerCount(std::uint32_t arrayLayerCount);
-    SwapchainBuilder& setMinImageCount(std::uint32_t minImageCount);
-
-    // Default is no transform.
-    SwapchainBuilder& setPreTransformFlags(
-        VkSurfaceTransformFlagBitsKHR preTransformFlags);
-
-    SwapchainBuilder& setCompositeAlphaFlags(
+    void setDevice(const Device& device, const VkSurfaceKHR& surface);
+    void setOldSwapchain(VkSwapchainKHR oldSwapchain);
+    void setDesiredExtent(std::uint32_t width, std::uint32_t height);
+    void addDesiredSurfaceFormat(VkSurfaceFormatKHR format);
+    void setDesiredPresentMode(VkPresentModeKHR presentMode);
+    void setImageUsageFlags(VkImageUsageFlags usageFlags);
+    void setImageArrayLayerCount(std::uint32_t arrayLayerCount);
+    void setMinImageCount(std::uint32_t minImageCount);
+    void setPreTransformFlags(VkSurfaceTransformFlagBitsKHR preTransformFlags);
+    void setCompositeAlphaFlags(
         VkCompositeAlphaFlagBitsKHR compositeAlphaFlags);
 
 public:

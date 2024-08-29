@@ -1,19 +1,36 @@
 #include "SwapchainBuilder.hpp"
 
 #include "core/logger.hpp"
+#include "vulkan_debug.hpp"
 #include "vulkan_device.hpp"
 #include "vulkan_image.hpp"
-#include "vulkan_settings.hpp"
-#include "vulkan_utils.hpp"
+#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <optional>
 
 namespace Zeus
 {
+void destroySwapchain(const Device& device, const Swapchain& swapchain)
+{
+    for (auto& imageView : swapchain.imageViews)
+    {
+        vkDestroyImageView(
+            device.logicalDevice,
+            imageView,
+            allocationCallbacks.get());
+    }
+
+    vkDestroySwapchainKHR(
+        device.logicalDevice,
+        swapchain.handle,
+        allocationCallbacks.get());
+}
+
 VkSurfaceFormatKHR selectSurfaceFormat(
     const std::vector<VkSurfaceFormatKHR>& surfaceFormats,
     const std::vector<VkSurfaceFormatKHR>& desiredFormats);
@@ -100,20 +117,17 @@ std::optional<Swapchain> SwapchainBuilder::build()
         createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
 
     Swapchain swapchain{};
-
     VkResult result{ vkCreateSwapchainKHR(
         info.device,
         &createInfo,
-        nullptr,
+        allocationCallbacks.get(),
         &swapchain.handle) };
 
     VKCHECK(result, "Failed to create swap chain.");
 
-    swapchain.imageCount = imageCount;
-    swapchain.colorSpace = surfaceFormat.colorSpace;
     swapchain.imageFormat = surfaceFormat.format;
     swapchain.extent = extent;
-    swapchain.presentMode = presentMode;
+    swapchain.imageUsageFlags = info.imageUsageFlags;
 
     vkGetSwapchainImagesKHR(
         info.device,
@@ -129,7 +143,8 @@ std::optional<Swapchain> SwapchainBuilder::build()
         &swapchain.imageCount,
         swapchain.images.data());
 
-    swapchain.imageViews.resize(swapchain.images.size());
+    swapchain.maxConcurrentFrames = swapchain.imageCount - 1;
+    swapchain.imageViews.resize(swapchain.imageCount);
 
     for (std::uint32_t i{ 0 }; i < swapchain.images.size(); ++i)
     {
@@ -141,6 +156,12 @@ std::optional<Swapchain> SwapchainBuilder::build()
             1,
             swapchain.imageViews[i]);
     }
+
+    debug("Swapchain created images count {}", swapchain.imageCount);
+    debug("Max Concurrent Frames {}.", swapchain.maxConcurrentFrames);
+
+    assert(swapchain.imageCount == imageCount);
+    assert(swapchain.images.size() == imageCount);
 
     return swapchain;
 }
@@ -224,50 +245,61 @@ bool SwapchainBuilder::validate()
 
     if (info.device == VK_NULL_HANDLE)
     {
-        error("Device not set.");
         isValid = false;
+        error("Device not set.");
     }
 
     if (info.physicalDevice == VK_NULL_HANDLE)
     {
-        error("Physical device not set.");
         isValid = false;
+        error("Physical device not set.");
     }
 
     if (info.surface == VK_NULL_HANDLE)
     {
-        error("Surface not set.");
         isValid = false;
+        error("Surface not set.");
     }
 
     if (info.graphicsFamily == UINT32_MAX)
     {
-        error("Graphics family not set.");
         isValid = false;
+        error("Graphics family not set.");
     }
 
     if (info.presentFamily == UINT32_MAX)
     {
-        error("Present family not set.");
         isValid = false;
+        error("Present family not set.");
     }
 
     if (info.desiredExtent.width == 0 || info.desiredExtent.height == 0)
     {
-        error("Extent not set.");
         isValid = false;
+        error("Extent not set.");
     }
 
     if (info.desiredSurfaceFormats.empty())
     {
-        info.desiredSurfaceFormats.push_back(INSTANCE_DEFAULT.SURFACE_FORMAT);
+        VkSurfaceFormatKHR surfaceFormatUNORM{
+            VK_FORMAT_B8G8R8A8_UNORM,
+            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+        };
+
+        VkSurfaceFormatKHR surfaceFormatSRGB{
+            VK_FORMAT_B8G8R8A8_SRGB,
+            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+        };
+
+        info.desiredSurfaceFormats.push_back(surfaceFormatUNORM);
+        info.desiredSurfaceFormats.push_back(surfaceFormatSRGB);
         warning("Desired formats not set. Used default.");
     }
 
     return isValid;
 }
 
-SwapchainBuilder& SwapchainBuilder::setDevice(
+void SwapchainBuilder::setDevice(
     const Device& device,
     const VkSurfaceKHR& surface)
 {
@@ -277,17 +309,14 @@ SwapchainBuilder& SwapchainBuilder::setDevice(
 
     info.graphicsFamily = device.graphicsFamily;
     info.presentFamily = device.presentFamily;
-
-    return *this;
 }
 
-SwapchainBuilder& SwapchainBuilder::setOldSwapchain(VkSwapchainKHR oldSwapchain)
+void SwapchainBuilder::setOldSwapchain(VkSwapchainKHR oldSwapchain)
 {
     info.oldSwapchain = oldSwapchain;
-    return *this;
 }
 
-SwapchainBuilder& SwapchainBuilder::setDesiredExtent(
+void SwapchainBuilder::setDesiredExtent(
     std::uint32_t width,
     std::uint32_t height)
 {
@@ -295,56 +324,42 @@ SwapchainBuilder& SwapchainBuilder::setDesiredExtent(
         .width = width,
         .height = height,
     };
-
-    return *this;
 }
 
-SwapchainBuilder& SwapchainBuilder::setMinImageCount(
-    std::uint32_t minImageCount)
+void SwapchainBuilder::setMinImageCount(std::uint32_t minImageCount)
 {
     info.minImageCount = minImageCount;
-    return *this;
 }
 
-SwapchainBuilder& SwapchainBuilder::addDesiredSurfaceFormat(
-    VkSurfaceFormatKHR format)
+void SwapchainBuilder::addDesiredSurfaceFormat(VkSurfaceFormatKHR format)
 {
     info.desiredSurfaceFormats.push_back(format);
-    return *this;
 }
 
-SwapchainBuilder& SwapchainBuilder::setDesiredPresentMode(
-    VkPresentModeKHR presentMode)
+void SwapchainBuilder::setDesiredPresentMode(VkPresentModeKHR presentMode)
 {
     info.desiredPresentMode = presentMode;
-    return *this;
 }
 
-SwapchainBuilder& SwapchainBuilder::setImageUsageFlags(
-    VkImageUsageFlags imageUsageFlags)
+void SwapchainBuilder::setImageUsageFlags(VkImageUsageFlags imageUsageFlags)
 {
     info.imageUsageFlags = imageUsageFlags;
-    return *this;
 }
 
-SwapchainBuilder& SwapchainBuilder::setPreTransformFlags(
+void SwapchainBuilder::setPreTransformFlags(
     VkSurfaceTransformFlagBitsKHR preTransform)
 {
     info.preTransform = preTransform;
-    return *this;
 }
 
-SwapchainBuilder& SwapchainBuilder::setCompositeAlphaFlags(
+void SwapchainBuilder::setCompositeAlphaFlags(
     VkCompositeAlphaFlagBitsKHR compositeAlphaFlags)
 {
     info.compositeAlpha = compositeAlphaFlags;
-    return *this;
 }
 
-SwapchainBuilder& SwapchainBuilder::setImageArrayLayerCount(
-    std::uint32_t arrayLayerCount)
+void SwapchainBuilder::setImageArrayLayerCount(std::uint32_t arrayLayerCount)
 {
     info.arrayLayerCount = arrayLayerCount;
-    return *this;
 }
 }
