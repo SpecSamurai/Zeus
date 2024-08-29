@@ -1,41 +1,48 @@
 #include <memory/memory.hpp>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
 
-TEST(MemoryTest, align_ZeroAlignment)
+TEST(MemoryTest, isPowerOf2_True)
 {
-    std::size_t size1{ 0 };
-    std::size_t size2{ 1 };
-    std::size_t size3{ 2 };
+    EXPECT_TRUE(Zeus::isPowerOf2(0));
+    EXPECT_TRUE(Zeus::isPowerOf2(1));
+    EXPECT_TRUE(Zeus::isPowerOf2(2));
+    EXPECT_TRUE(Zeus::isPowerOf2(4));
+    EXPECT_TRUE(Zeus::isPowerOf2(8));
+    EXPECT_TRUE(Zeus::isPowerOf2(128));
+}
 
-    auto actual1{ Zeus::align(size1, 0) };
-    auto actual2{ Zeus::align(size2, 0) };
-    auto actual3{ Zeus::align(size3, 0) };
+TEST(MemoryTest, isPowerOf2_False)
+{
+    EXPECT_FALSE(Zeus::isPowerOf2(3));
+    EXPECT_FALSE(Zeus::isPowerOf2(10));
+    EXPECT_FALSE(Zeus::isPowerOf2(20));
+    EXPECT_FALSE(Zeus::isPowerOf2(22));
+}
+
+TEST(MemoryTest, alignUp_ZeroAlignment)
+{
+    auto actual1{ Zeus::alignUp(0, 0) };
+    auto actual2{ Zeus::alignUp(1, 0) };
+    auto actual3{ Zeus::alignUp(2, 0) };
 
     EXPECT_EQ(actual1, 0);
     EXPECT_EQ(actual2, 0);
     EXPECT_EQ(actual3, 0);
 }
 
-TEST(MemoryTest, align_AlignmentPowerOfTwo)
+TEST(MemoryTest, alignUp_ValueLesserThanAlignment)
 {
-    std::size_t size1{ 0 };
-    std::size_t size2{ 1 };
-    std::size_t size3{ 2 };
-    std::size_t size4{ 3 };
-    std::size_t size5{ 4 };
-    std::size_t size6{ 5 };
-
-    auto actual1{ Zeus::align(size1, 2) };
-    auto actual2{ Zeus::align(size2, 4) };
-    auto actual3{ Zeus::align(size3, 8) };
-    auto actual4{ Zeus::align(size4, 16) };
-    auto actual5{ Zeus::align(size5, 32) };
-    auto actual6{ Zeus::align(size6, 64) };
+    auto actual1{ Zeus::alignUp(0, 2) };
+    auto actual2{ Zeus::alignUp(1, 4) };
+    auto actual3{ Zeus::alignUp(2, 8) };
+    auto actual4{ Zeus::alignUp(3, 16) };
+    auto actual5{ Zeus::alignUp(4, 32) };
+    auto actual6{ Zeus::alignUp(5, 64) };
 
     EXPECT_EQ(actual1, 0);
     EXPECT_EQ(actual2, 4);
@@ -45,19 +52,58 @@ TEST(MemoryTest, align_AlignmentPowerOfTwo)
     EXPECT_EQ(actual6, 64);
 }
 
-TEST(MemoryTest, align_SizeGreaterOrEqualAlignment)
+TEST(MemoryTest, alignUp_ValueGreaterOrEqualAlignment)
 {
-    std::size_t size{ 10 };
-
-    auto actual1{ Zeus::align(size, 2) };
-    auto actual2{ Zeus::align(size, 4) };
-    auto actual3{ Zeus::align(size, 8) };
-    auto actual4{ Zeus::align(size, 16) };
+    auto actual1{ Zeus::alignUp(10, 2) };
+    auto actual2{ Zeus::alignUp(10, 4) };
+    auto actual3{ Zeus::alignUp(10, 8) };
+    auto actual4{ Zeus::alignUp(10, 16) };
 
     EXPECT_EQ(actual1, 10);
     EXPECT_EQ(actual2, 12);
     EXPECT_EQ(actual3, 16);
     EXPECT_EQ(actual4, 16);
+}
+
+TEST(MemoryTest, alignDown_ZeroAlignment)
+{
+    auto actual1{ Zeus::alignDown(0, 0) };
+    auto actual2{ Zeus::alignDown(1, 0) };
+    auto actual3{ Zeus::alignDown(2, 0) };
+
+    EXPECT_EQ(actual1, 0);
+    EXPECT_EQ(actual2, 0);
+    EXPECT_EQ(actual3, 0);
+}
+
+TEST(MemoryTest, alignDown_ValueLesserThanAlignment)
+{
+    auto actual1{ Zeus::alignDown(0, 2) };
+    auto actual2{ Zeus::alignDown(3, 4) };
+    auto actual3{ Zeus::alignDown(5, 8) };
+    auto actual4{ Zeus::alignDown(11, 16) };
+    auto actual5{ Zeus::alignDown(17, 32) };
+    auto actual6{ Zeus::alignDown(5, 64) };
+
+    EXPECT_EQ(actual1, 0);
+    EXPECT_EQ(actual2, 0);
+    EXPECT_EQ(actual3, 0);
+    EXPECT_EQ(actual4, 0);
+    EXPECT_EQ(actual5, 0);
+    EXPECT_EQ(actual6, 0);
+}
+
+TEST(MemoryTest, alignDown_ValueGreaterOrEqualAlignment)
+{
+    auto actual1{ Zeus::alignDown(10, 2) };
+    auto actual2{ Zeus::alignDown(10, 4) };
+    auto actual3{ Zeus::alignDown(10, 8) };
+    auto actual4{ Zeus::alignDown(10, 16) };
+
+    EXPECT_EQ(actual1, 10);
+    EXPECT_EQ(actual2, 8);
+    EXPECT_EQ(actual3, 8);
+    EXPECT_EQ(actual4, 0);
 }
 
 TEST(MemoryTest, getMovedPtr_NullPtr_MovedByOffset)
