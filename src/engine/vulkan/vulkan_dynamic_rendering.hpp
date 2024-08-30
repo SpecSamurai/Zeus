@@ -2,6 +2,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <cstdint>
+
 namespace Zeus
 {
 VkRenderingAttachmentInfo createDepthAttachmentInfo(
@@ -15,12 +17,12 @@ VkRenderingAttachmentInfo createColorAttachmentInfo(
 
 void cmdBeginRendering(
     VkCommandBuffer commandBuffer,
-    VkExtent2D renderExtent, // VkRect2D renderArea,
-    uint32_t colorAttachmentCount,
+    VkExtent2D renderExtent,
+    std::uint32_t colorAttachmentCount,
     const VkRenderingAttachmentInfo* pColorAttachments,
     const VkRenderingAttachmentInfo* pDepthAttachment = nullptr,
     const VkRenderingAttachmentInfo* pStencilAttachment = nullptr,
     VkRenderingFlags flags = 0,
-    uint32_t layerCount = 1,
-    uint32_t viewMask = 0);
+    std::uint32_t layerCount = 1,
+    std::uint32_t viewMask = 0);
 }

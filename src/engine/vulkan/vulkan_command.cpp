@@ -242,11 +242,7 @@ VkResult cmdVkQueuePresentKHR(
     // result value from all swapchains.
     presentInfo.pResults = pResults;
 
-    VkResult result{ vkQueuePresentKHR(presentQueue, &presentInfo) };
-
-    VKCHECK(result, "Failed to present image.");
-
-    return result;
+    return vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
 void cmdSetVkViewport(

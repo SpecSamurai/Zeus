@@ -2,6 +2,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <cstdint>
+
 namespace Zeus
 {
 VkRenderingAttachmentInfo createDepthAttachmentInfo(
@@ -14,6 +16,8 @@ VkRenderingAttachmentInfo createDepthAttachmentInfo(
     renderingAttachmentInfo.imageLayout = imageLayout;
     renderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     renderingAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    // Reverse depth value: 0.f
+    // Normal depth: 1.f
     renderingAttachmentInfo.clearValue.depthStencil.depth = 0.f;
 
     return renderingAttachmentInfo;
@@ -45,20 +49,19 @@ VkRenderingAttachmentInfo createColorAttachmentInfo(
 
 void cmdBeginRendering(
     VkCommandBuffer commandBuffer,
-    VkExtent2D renderExtent, // VkRect2D renderArea,
-    uint32_t colorAttachmentCount,
+    VkExtent2D renderExtent,
+    std::uint32_t colorAttachmentCount,
     const VkRenderingAttachmentInfo* pColorAttachments,
     const VkRenderingAttachmentInfo* pDepthAttachment,
     const VkRenderingAttachmentInfo* pStencilAttachment,
     VkRenderingFlags flags,
-    uint32_t layerCount,
-    uint32_t viewMask)
+    std::uint32_t layerCount,
+    std::uint32_t viewMask)
 {
     VkRenderingInfo renderingInfo{};
     renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
     renderingInfo.flags = flags;
-    renderingInfo.renderArea =
-        VkRect2D{ VkOffset2D{ 0, 0 }, renderExtent }; // renderArea;
+    renderingInfo.renderArea = VkRect2D{ VkOffset2D{ 0, 0 }, renderExtent };
     renderingInfo.layerCount = layerCount;
     renderingInfo.viewMask = viewMask;
     renderingInfo.colorAttachmentCount = colorAttachmentCount;
