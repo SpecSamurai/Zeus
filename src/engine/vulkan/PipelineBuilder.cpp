@@ -181,7 +181,7 @@ void PipelineBuilder::setColorAttachmentFormat(VkFormat format)
 }
 
 void PipelineBuilder::enableDepthTest(
-    bool depthWriteEnable,
+    VkBool32 depthWriteEnable,
     VkCompareOp depthCompareOp)
 {
     info.depthStencilState.sType =

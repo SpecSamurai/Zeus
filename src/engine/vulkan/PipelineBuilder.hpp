@@ -26,12 +26,15 @@ public:
     void setColorAttachmentFormat(VkFormat format);
 
     void disableDepthTest();
-    void enableDepthTest(bool depthWriteEnable, VkCompareOp depthCompareOp);
+    void enableDepthTest(VkBool32 depthWriteEnable, VkCompareOp depthCompareOp);
     void setDepthFormat(VkFormat format);
     void setStencilFormat(VkFormat format);
 
+    // out = srcColor * srcColorBlendFactor <op> dstColor * dstColorBlendFactor
     void disableBlending();
+    // out = srcColor.rgb * srcColor.a + dstColor.rgb * 1.0
     void enableAdditiveBlending();
+    // out = srcColor.rgb * srcColor.a + dstColor.rgb * (1.0 - srcColor.a)
     void enableAlphaBlending();
 
     void disableMiltisampling();
