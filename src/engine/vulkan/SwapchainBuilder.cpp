@@ -3,7 +3,6 @@
 #include "core/logger.hpp"
 #include "vulkan_debug.hpp"
 #include "vulkan_device.hpp"
-#include "vulkan_image.hpp"
 #include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
@@ -148,13 +147,30 @@ std::optional<Swapchain> SwapchainBuilder::build()
 
     for (std::uint32_t i{ 0 }; i < swapchain.images.size(); ++i)
     {
-        createVkImageView(
-            info.device,
-            swapchain.images[i],
-            swapchain.imageFormat,
-            VK_IMAGE_ASPECT_COLOR_BIT,
-            1,
-            swapchain.imageViews[i]);
+        VkImageViewCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.flags = 0;
+        createInfo.image = swapchain.images[i];
+        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        createInfo.format = swapchain.imageFormat;
+        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        createInfo.subresourceRange.baseMipLevel = 0;
+        createInfo.subresourceRange.levelCount = 1;
+        createInfo.subresourceRange.baseArrayLayer = 0;
+        createInfo.subresourceRange.layerCount = 1;
+
+        VKCHECK(
+            vkCreateImageView(
+                info.device,
+                &createInfo,
+                allocationCallbacks.get(),
+                &swapchain.imageViews[i]),
+            "Failed to create swapchain image view.");
     }
 
     debug("Swapchain created images count {}", swapchain.imageCount);
@@ -291,8 +307,8 @@ bool SwapchainBuilder::validate()
             VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
         };
 
-        info.desiredSurfaceFormats.push_back(surfaceFormatUNORM);
-        info.desiredSurfaceFormats.push_back(surfaceFormatSRGB);
+        info.desiredSurfaceFormats.emplace_back(surfaceFormatUNORM);
+        info.desiredSurfaceFormats.emplace_back(surfaceFormatSRGB);
         warning("Desired formats not set. Used default.");
     }
 
