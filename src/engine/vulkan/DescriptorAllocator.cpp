@@ -23,7 +23,7 @@ VkDescriptorSet DescriptorAllocator::allocate(
     return descriptorSet;
 }
 
-void DescriptorAllocator::initPool(
+void DescriptorAllocator::init(
     VkDevice device,
     std::uint32_t maxSets,
     const std::vector<VkDescriptorPoolSize>& poolSizes,

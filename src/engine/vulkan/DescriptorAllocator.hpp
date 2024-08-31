@@ -14,7 +14,7 @@ public:
         VkDevice device,
         VkDescriptorSetLayout descriptorSetLayout);
 
-    void initPool(
+    void init(
         VkDevice device,
         std::uint32_t maxSets,
         const std::vector<VkDescriptorPoolSize>& poolSizes,

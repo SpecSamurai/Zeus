@@ -1,6 +1,7 @@
 #include "DescriptorLayoutBuilder.hpp"
 
-#include "vulkan_descriptors.hpp"
+#include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -11,13 +12,19 @@ VkDescriptorSetLayout DescriptorLayoutBuilder::build(
     VkDescriptorSetLayoutCreateFlags flags)
 {
     VkDescriptorSetLayout descriptorSetLayout;
+    VkDescriptorSetLayoutCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    createInfo.flags = flags;
+    createInfo.bindingCount = static_cast<std::uint32_t>(layoutBindings.size());
+    createInfo.pBindings = layoutBindings.data();
 
-    createDescriptorSetLayout(
-        descriptorSetLayout,
+    VkResult result{ vkCreateDescriptorSetLayout(
         device,
-        static_cast<std::uint32_t>(layoutBindings.size()),
-        layoutBindings.data(),
-        flags);
+        &createInfo,
+        allocationCallbacks.get(),
+        &descriptorSetLayout) };
+
+    VKCHECK(result, "Failed to create descriptor set layout.");
 
     return descriptorSetLayout;
 }
@@ -29,16 +36,14 @@ void DescriptorLayoutBuilder::addBinding(
     std::uint32_t descriptorCount,
     const VkSampler* pImmutableSamplers)
 {
-    VkDescriptorSetLayoutBinding layoutBinding{
-        createVkDescriptorSetLayoutBinding(
-            binding,
-            descriptorType,
-            descriptorCount,
-            stageFlags,
-            pImmutableSamplers)
-    };
+    VkDescriptorSetLayoutBinding layoutBinding{};
+    layoutBinding.binding = binding;
+    layoutBinding.descriptorType = descriptorType;
+    layoutBinding.descriptorCount = descriptorCount;
+    layoutBinding.stageFlags = stageFlags;
+    layoutBinding.pImmutableSamplers = pImmutableSamplers;
 
-    layoutBindings.push_back(layoutBinding);
+    layoutBindings.emplace_back(layoutBinding);
 }
 
 void DescriptorLayoutBuilder::clear()

@@ -15,13 +15,6 @@ VkResult createDescriptorPool(
     const VkDescriptorPoolSize* pPoolSizes,
     VkDescriptorPoolCreateFlags flags = 0);
 
-VkResult createDescriptorSetLayout(
-    VkDescriptorSetLayout& descriptorSetLayout,
-    VkDevice device,
-    std::uint32_t bindingCount,
-    const VkDescriptorSetLayoutBinding* pBindings,
-    VkDescriptorSetLayoutCreateFlags flags = 0);
-
 VkResult allocateVkDescriptorSets(
     std::vector<VkDescriptorSet>& descriptorSets,
     VkDevice device,
@@ -35,24 +28,7 @@ VkResult allocateVkDescriptorSet(
     VkDescriptorPool descriptorPool,
     VkDescriptorSetLayout descriptorSetLayout);
 
-VkDescriptorSetLayoutBinding createVkDescriptorSetLayoutBinding(
-    std::uint32_t binding,
-    VkDescriptorType descriptorType,
-    std::uint32_t descriptorCount,
-    VkShaderStageFlags stageFlags,
-    const VkSampler* pImmutableSamplers = nullptr);
-
 VkDescriptorPoolSize createVkDescriptorPoolSize(
     VkDescriptorType type,
     std::uint32_t descriptorCount);
-
-VkWriteDescriptorSet createWriteDescriptorSet(
-    VkDescriptorSet dstSet,
-    std::uint32_t dstBinding,
-    std::uint32_t dstArrayElement,
-    std::uint32_t descriptorCount,
-    VkDescriptorType descriptorType,
-    const VkDescriptorImageInfo* pImageInfo = nullptr,
-    const VkDescriptorBufferInfo* pBufferInfo = nullptr,
-    const VkBufferView* pTexelBufferView = nullptr);
 }

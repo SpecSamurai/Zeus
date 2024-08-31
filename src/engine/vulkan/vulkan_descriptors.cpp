@@ -36,30 +36,6 @@ VkResult createDescriptorPool(
     return result;
 }
 
-VkResult createDescriptorSetLayout(
-    VkDescriptorSetLayout& descriptorSetLayout,
-    VkDevice device,
-    std::uint32_t bindingCount,
-    const VkDescriptorSetLayoutBinding* pBindings,
-    VkDescriptorSetLayoutCreateFlags flags)
-{
-    VkDescriptorSetLayoutCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    createInfo.flags = flags;
-    createInfo.bindingCount = bindingCount;
-    createInfo.pBindings = pBindings;
-
-    VkResult result{ vkCreateDescriptorSetLayout(
-        device,
-        &createInfo,
-        allocationCallbacks.get(),
-        &descriptorSetLayout) };
-
-    VKCHECK(result, "Failed to create descriptor set layout.");
-
-    return result;
-}
-
 VkResult allocateVkDescriptorSets(
     std::vector<VkDescriptorSet>& descriptorSets,
     VkDevice device,
@@ -100,30 +76,7 @@ VkResult allocateVkDescriptorSet(
     allocateInfo.descriptorSetCount = 1;
     allocateInfo.pSetLayouts = &descriptorSetLayout;
 
-    VkResult result{
-        vkAllocateDescriptorSets(device, &allocateInfo, &descriptorSet)
-    };
-
-    VKCHECK(result, "Failed to allocate descriptor sets");
-
-    return result;
-}
-
-VkDescriptorSetLayoutBinding createVkDescriptorSetLayoutBinding(
-    std::uint32_t binding,
-    VkDescriptorType descriptorType,
-    std::uint32_t descriptorCount,
-    VkShaderStageFlags stageFlags,
-    const VkSampler* pImmutableSamplers)
-{
-    VkDescriptorSetLayoutBinding layoutBinding{};
-    layoutBinding.binding = binding;
-    layoutBinding.descriptorType = descriptorType;
-    layoutBinding.descriptorCount = descriptorCount;
-    layoutBinding.stageFlags = stageFlags;
-    layoutBinding.pImmutableSamplers = pImmutableSamplers;
-
-    return layoutBinding;
+    return vkAllocateDescriptorSets(device, &allocateInfo, &descriptorSet);
 }
 
 VkDescriptorPoolSize createVkDescriptorPoolSize(
@@ -135,30 +88,5 @@ VkDescriptorPoolSize createVkDescriptorPoolSize(
     poolSize.descriptorCount = descriptorCount;
 
     return poolSize;
-}
-
-VkWriteDescriptorSet createWriteDescriptorSet(
-    VkDescriptorSet dstSet,
-    std::uint32_t dstBinding,
-    std::uint32_t dstArrayElement,
-    std::uint32_t descriptorCount,
-    VkDescriptorType descriptorType,
-    const VkDescriptorImageInfo* pImageInfo,
-    const VkDescriptorBufferInfo* pBufferInfo,
-    const VkBufferView* pTexelBufferView)
-{
-    VkWriteDescriptorSet writeDescriptorSet{};
-    writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-
-    writeDescriptorSet.dstSet = dstSet;
-    writeDescriptorSet.dstBinding = dstBinding;
-    writeDescriptorSet.dstArrayElement = dstArrayElement;
-    writeDescriptorSet.descriptorCount = descriptorCount;
-    writeDescriptorSet.descriptorType = descriptorType;
-    writeDescriptorSet.pImageInfo = pImageInfo;
-    writeDescriptorSet.pBufferInfo = pBufferInfo;
-    writeDescriptorSet.pTexelBufferView = pTexelBufferView;
-
-    return writeDescriptorSet;
 }
 }
