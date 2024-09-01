@@ -1,25 +1,13 @@
-include(FetchContent)
-
 find_package(Vulkan REQUIRED)
-
-FetchContent_Declare(
-    glfw
-    GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG 3.4
-)
-
-FetchContent_MakeAvailable(glfw)
 
 add_executable(Editor
     main.cpp
 
+    VulkanContext.cpp
+    VulkanContext.hpp
+
     ui/IUndoableCommand.hpp
     ui/UndoRedoStack.hpp
-
-    graphics/temp.hpp
-
-    graphics/vulkan/VulkanContext.hpp
-    graphics/vulkan/VulkanContext.cpp
 )
 
 target_include_directories(Editor
@@ -27,7 +15,7 @@ target_include_directories(Editor
 )
 
 target_link_libraries(Editor
-    PRIVATE Engine Vulkan::Vulkan glfw imgui stb tiny_obj_loader
+    PRIVATE Engine Vulkan::Vulkan glfw imgui stb
 )
 
 target_compile_options(Editor PRIVATE
@@ -44,7 +32,8 @@ file(GLOB_RECURSE SHADER_SOURCE_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag"
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.comp"
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.mesh"
-    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.task")
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.task"
+)
 
 foreach(SHADER_FILE ${SHADER_SOURCE_FILES})
     get_filename_component(FILE_NAME ${SHADER_FILE} NAME)
