@@ -16,23 +16,15 @@ public:
 
     std::optional<PhysicalDevice> select();
 
-    PhysicalDeviceSelector& setSurface(const VkSurfaceKHR& surface);
-
-    PhysicalDeviceSelector& setPreferredType(
-        VkPhysicalDeviceType preferredType);
-
-    PhysicalDeviceSelector& requirePresent(bool require = true);
-    PhysicalDeviceSelector& dedicatedTransferQueue(bool dedicated = true);
-    PhysicalDeviceSelector& dedicatedComputeQueue(bool dedicated = true);
-
-    PhysicalDeviceSelector& addExtensions(
-        const std::vector<const char*>& extensions);
-
-    PhysicalDeviceSelector& setFeatures(
-        const VkPhysicalDeviceFeatures& features);
-
-    PhysicalDeviceSelector& setFeatures2(
-        const VkPhysicalDeviceFeatures2& features);
+    void setSurface(const VkSurfaceKHR& surface);
+    void setPreferredType(VkPhysicalDeviceType preferredType);
+    void requirePresent(bool require = true);
+    void dedicatedTransferQueue(bool dedicated = true);
+    void dedicatedComputeQueue(bool dedicated = true);
+    void addExtensions(const std::vector<const char*>& extensions);
+    void setFeatures(const VkPhysicalDeviceFeatures& features);
+    void setFeatures1_2(const VkPhysicalDeviceVulkan12Features& features);
+    void setFeatures1_3(const VkPhysicalDeviceVulkan13Features& features);
 
 private:
     bool validate();
@@ -60,8 +52,10 @@ private:
 
         std::vector<const char*> extensions{};
 
-        VkPhysicalDeviceFeatures features{};
         VkPhysicalDeviceFeatures2 features2{};
+        VkPhysicalDeviceFeatures features{};
+        VkPhysicalDeviceVulkan12Features features1_2{};
+        VkPhysicalDeviceVulkan13Features features1_3{};
     } criteria;
 };
 }

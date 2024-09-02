@@ -199,12 +199,16 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::createIfValid(
 
     output.queueFamilies = queueFamiliesInfo;
 
+    criteria.features1_2.pNext = &criteria.features1_3;
+    criteria.features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    criteria.features2.pNext = &criteria.features1_2;
     if (!checkPhysicalDeviceFeatures(physicalDevice))
     {
         return std::nullopt;
     }
 
     output.features = criteria.features;
+    output.features2 = criteria.features2;
     output.properties = deviceProperties;
 
     output.msaaSamples = getMaxUsableSampleCount(physicalDevice);
@@ -229,28 +233,69 @@ int PhysicalDeviceSelector::ratePhysicalDevice(
 bool PhysicalDeviceSelector::checkPhysicalDeviceFeatures(
     VkPhysicalDevice physicalDevice)
 {
-    VkPhysicalDeviceFeatures deviceFeatures;
-    vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
-
     bool isValid{ true };
 
-    if (criteria.features.samplerAnisotropy &&
-        !deviceFeatures.samplerAnisotropy)
+    VkPhysicalDeviceVulkan13Features features1_3{};
+    features1_3.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+
+    VkPhysicalDeviceVulkan12Features features1_2{};
+    features1_2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    features1_2.pNext = &features1_3;
+
+    VkPhysicalDeviceFeatures2 deviceFeatures2{};
+    deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    deviceFeatures2.pNext = &features1_2;
+
+    vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
+
+    if (criteria.features2.features.samplerAnisotropy &&
+        !deviceFeatures2.features.samplerAnisotropy)
     {
         error("Device doesn't support samplerAnisotropy.");
         isValid = false;
     }
 
-    if (criteria.features.fillModeNonSolid && !deviceFeatures.fillModeNonSolid)
+    if (criteria.features2.features.fillModeNonSolid &&
+        !deviceFeatures2.features.fillModeNonSolid)
     {
         error("Device doesn't support fillModeNonSolid.");
         isValid = false;
     }
 
-    if (criteria.features.sampleRateShading &&
-        !deviceFeatures.sampleRateShading)
+    if (criteria.features2.features.sampleRateShading &&
+        !deviceFeatures2.features.sampleRateShading)
     {
         error("Device doesn't support sampleRateShading.");
+        isValid = false;
+    }
+
+    if (criteria.features1_2.bufferDeviceAddress &&
+        !features1_2.bufferDeviceAddress)
+    {
+        error("Device doesn't support VkPhysicalDeviceVulkan12Features "
+              "bufferDeviceAddress.");
+        isValid = false;
+    }
+
+    if (criteria.features1_2.descriptorIndexing &&
+        !features1_2.descriptorIndexing)
+    {
+        error("Device doesn't support VkPhysicalDeviceVulkan12Features "
+              "descriptorIndexing.");
+        isValid = false;
+    }
+
+    if (criteria.features1_3.dynamicRendering && !features1_3.dynamicRendering)
+    {
+        error("Device doesn't support VkPhysicalDeviceVulkan13Features "
+              "dynamicRendering.");
+        isValid = false;
+    }
+
+    if (criteria.features1_3.synchronization2 && !features1_3.synchronization2)
+    {
+        error("Device doesn't support VkPhysicalDeviceVulkan13Features "
+              "synchronization2.");
         isValid = false;
     }
 
@@ -262,61 +307,57 @@ PhysicalDeviceSelector::PhysicalDeviceSelector(const VkInstance& instance)
     this->instance = instance;
 }
 
-PhysicalDeviceSelector& PhysicalDeviceSelector::setSurface(
-    const VkSurfaceKHR& surface)
+void PhysicalDeviceSelector::setSurface(const VkSurfaceKHR& surface)
 {
     this->surface = surface;
-    return *this;
 }
 
-PhysicalDeviceSelector& PhysicalDeviceSelector::setPreferredType(
+void PhysicalDeviceSelector::setPreferredType(
     VkPhysicalDeviceType preferredType)
 {
     criteria.preferredType = preferredType;
-    return *this;
 }
 
-PhysicalDeviceSelector& PhysicalDeviceSelector::requirePresent(bool require)
+void PhysicalDeviceSelector::requirePresent(bool require)
 {
     criteria.requirePresent = require;
-    return *this;
 }
 
-PhysicalDeviceSelector& PhysicalDeviceSelector::dedicatedTransferQueue(
-    bool dedicated)
+void PhysicalDeviceSelector::dedicatedTransferQueue(bool dedicated)
 {
     criteria.dedicatedTransferQueue = dedicated;
-    return *this;
 }
 
-PhysicalDeviceSelector& PhysicalDeviceSelector::dedicatedComputeQueue(
-    bool dedicated)
+void PhysicalDeviceSelector::dedicatedComputeQueue(bool dedicated)
 {
     criteria.dedicatedComputeQueue = dedicated;
-    return *this;
 }
 
-PhysicalDeviceSelector& PhysicalDeviceSelector::addExtensions(
+void PhysicalDeviceSelector::addExtensions(
     const std::vector<const char*>& extensions)
 {
     for (const auto& extension : extensions)
     {
         criteria.extensions.push_back(extension);
     }
-    return *this;
 }
 
-PhysicalDeviceSelector& PhysicalDeviceSelector::setFeatures(
+void PhysicalDeviceSelector::setFeatures(
     const VkPhysicalDeviceFeatures& features)
 {
+    criteria.features2.features = features;
     criteria.features = features;
-    return *this;
 }
 
-PhysicalDeviceSelector& PhysicalDeviceSelector::setFeatures2(
-    const VkPhysicalDeviceFeatures2& features)
+void PhysicalDeviceSelector::setFeatures1_2(
+    const VkPhysicalDeviceVulkan12Features& features)
 {
-    criteria.features2 = features;
-    return *this;
+    criteria.features1_2 = features;
+}
+
+void PhysicalDeviceSelector::setFeatures1_3(
+    const VkPhysicalDeviceVulkan13Features& features)
+{
+    criteria.features1_3 = features;
 }
 }
