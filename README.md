@@ -1,7 +1,8 @@
 # Zeus - Game Engine
 
 ## Todo
-- Reverse depth
+- Grid
+- Finish refactor Device abstractions
 - Runtime shaders compilation | libshaderc
 - Transfer queue
 - SIMD
@@ -21,6 +22,11 @@
 - Vulkan's NDC requires flipping Y axis downwards.
 
 Local -> World -> View spaces use right-handed system with Y pointing upwards.
+
+## Features
+- GLTF
+- Reverse depth
+    - `Clear Value: 0, depthCompareOp: VK_COMPARE_OP_GREATER_OR_EQUAL, Perspective: near > far`
 
 ## Git Submodules
 While cloning the repo you need to pull all the submodules:
@@ -48,9 +54,3 @@ ctest --preset test
 
 ## Environment variables
 - `VULKAN_SDK` specifies the location of the Vulkan SDK root directory
-
-## Libraries
-- [Dear ImGui](https://github.com/ocornut/imgui)
-- [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
-- [GLFW](https://github.com/glfw/glfw)
-- [GoogleTest](https://github.com/google/googletest)
