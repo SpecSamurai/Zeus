@@ -25,12 +25,8 @@ struct PhysicalDevice
 
     // Requested features
     VkPhysicalDeviceFeatures features{};
+    VkPhysicalDeviceFeatures2 features2{};
     VkPhysicalDeviceProperties properties{};
-    // VkPhysicalDeviceMemoryProperties memoryProperties{};
-
-    VkSampleCountFlagBits msaaSamples;
-    // vulkanswapchain swapchain_support;
-    // VkFormat depthFormat;
 
     std::vector<const char*> extensions{};
 };
