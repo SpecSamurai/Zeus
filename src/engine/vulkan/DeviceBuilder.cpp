@@ -2,8 +2,9 @@
 
 #include "Device.hpp"
 
+#include "vulkan_debug.hpp"
+#include "vulkan_memory.hpp"
 #include "vulkan_settings.hpp"
-#include "vulkan_utils.hpp"
 
 #include <set>
 
@@ -14,7 +15,6 @@ Device DeviceBuilder::build()
     Device device{};
 
     device.physicalDevice = physicalDevice.handle;
-    device.msaaSamples = physicalDevice.msaaSamples;
     device.properties = physicalDevice.properties;
 
     device.graphicsFamily =
@@ -56,7 +56,8 @@ Device DeviceBuilder::build()
     createInfo.enabledExtensionCount =
         static_cast<std::uint32_t>(physicalDevice.extensions.size());
     createInfo.ppEnabledExtensionNames = physicalDevice.extensions.data();
-    createInfo.pEnabledFeatures = &physicalDevice.features;
+    // createInfo.pEnabledFeatures = &physicalDevice.features;
+    createInfo.pNext = &physicalDevice.features2;
 
 #ifndef NDEBUG
     // Deprecated but set for backwards compatibility
@@ -68,7 +69,7 @@ Device DeviceBuilder::build()
     VkResult result{ vkCreateDevice(
         physicalDevice.handle,
         &createInfo,
-        nullptr,
+        allocationCallbacks.get(),
         &device.logicalDevice) };
 
     VKCHECK(result, "Failed to create logical device.");
