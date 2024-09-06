@@ -21,14 +21,12 @@ public:
     void setApiVersion(std::uint32_t apiVersion);
     void setExtensions(const std::vector<const char*>& extensions);
 
-#ifndef NDEBUG
     void setValidationLayers(const std::vector<const char*>& validationLayers);
     void setDebugCallback(PFN_vkDebugUtilsMessengerCallbackEXT callback);
     void setDebugMessageSeverity(
         VkDebugUtilsMessageSeverityFlagsEXT messageSeverity);
     void setDebugMessageType(VkDebugUtilsMessageTypeFlagsEXT messageType);
     void setUserData(void* userData);
-#endif
 
 private:
     bool validate();
@@ -43,13 +41,11 @@ private:
 
         std::vector<const char*> extensions{};
 
-#ifndef NDEBUG
         std::vector<const char*> validationLayers{};
         PFN_vkDebugUtilsMessengerCallbackEXT debugCallback{};
         VkDebugUtilsMessageSeverityFlagsEXT debugMessageSeverity{};
         VkDebugUtilsMessageTypeFlagsEXT debugMessageType{};
         void* userData{ nullptr };
-#endif
     } info;
 };
 }

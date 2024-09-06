@@ -6,7 +6,14 @@ FetchContent_Declare(
     GIT_TAG 3.4
 )
 
+FetchContent_Declare(
+    fastgltf
+    GIT_REPOSITORY https://github.com/spnda/fastgltf.git
+    GIT_TAG v0.8.0
+)
+
 FetchContent_MakeAvailable(glfw)
+FetchContent_MakeAvailable(fastgltf)
 
 add_library(Engine
     defines.hpp
@@ -15,16 +22,17 @@ add_library(Engine
     core/logger.hpp
 
     math/definitions.hpp
+    math/geometric.hpp
     math/transformations.hpp
     math/trigonometric.cpp
     math/trigonometric.hpp
-    math/geometric.hpp
+
     math/Matrix3x3.hpp
     math/Matrix4x4.hpp
+    math/Quaternion.hpp
     math/Vector2.hpp
     math/Vector3.hpp
     math/Vector4.hpp
-    math/Quaternion.hpp
 
     memory/memory.cpp
     memory/memory.hpp
@@ -37,11 +45,21 @@ add_library(Engine
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
 
+    vulkan/DeletionQueue.cpp
+    vulkan/DeletionQueue.hpp
+    vulkan/DescriptorAllocator.cpp
+    vulkan/DescriptorAllocator.hpp
+    vulkan/DescriptorLayoutBuilder.cpp
+    vulkan/DescriptorLayoutBuilder.hpp
+    vulkan/DescriptorWriter.cpp
+    vulkan/DescriptorWriter.hpp
     vulkan/Device.hpp
     vulkan/DeviceBuilder.cpp
     vulkan/DeviceBuilder.hpp
-    vulkan/DeletionQueue.cpp
-    vulkan/DeletionQueue.hpp
+    vulkan/DynamicDescriptorAllocator.cpp
+    vulkan/DynamicDescriptorAllocator.hpp
+    vulkan/ImageBuilder.cpp
+    vulkan/ImageBuilder.hpp
     vulkan/Instance.cpp
     vulkan/Instance.hpp
     vulkan/InstanceBuilder.cpp
@@ -53,9 +71,9 @@ add_library(Engine
     vulkan/PipelineBuilder.hpp
     vulkan/SwapchainBuilder.cpp
     vulkan/SwapchainBuilder.hpp
-    vulkan/MemoryAllocator.cpp
-    vulkan/MemoryAllocator.hpp
 
+    vulkan/vulkan_buffer.cpp
+    vulkan/vulkan_buffer.hpp
     vulkan/vulkan_command.cpp
     vulkan/vulkan_command.hpp
     vulkan/vulkan_debug.cpp
@@ -64,10 +82,14 @@ add_library(Engine
     vulkan/vulkan_descriptors.hpp
     vulkan/vulkan_device.cpp
     vulkan/vulkan_device.hpp
+    vulkan/vulkan_dynamic_rendering.cpp
+    vulkan/vulkan_dynamic_rendering.hpp
     vulkan/vulkan_framebuffer.cpp
     vulkan/vulkan_framebuffer.hpp
     vulkan/vulkan_image.hpp
     vulkan/vulkan_image.cpp
+    vulkan/vulkan_memory.cpp
+    vulkan/vulkan_memory.hpp
     vulkan/vulkan_pipeline.cpp
     vulkan/vulkan_pipeline.hpp
     vulkan/vulkan_renderpass.cpp
@@ -90,7 +112,7 @@ target_include_directories(Engine
 )
 
 target_link_libraries(Engine
-    PRIVATE Vulkan::Vulkan glfw
+    PUBLIC Vulkan::Vulkan glfw VulkanMemoryAllocator stb fastgltf
 )
 
 target_compile_options(Engine PRIVATE
