@@ -3,7 +3,6 @@
 #include "core/logger.hpp"
 #include "vulkan_debug.hpp"
 #include "vulkan_memory.hpp"
-#include "vulkan_settings.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -12,6 +11,10 @@
 
 namespace Zeus
 {
+const std::vector<const char*> INSTANCE_EXTENSIONS{
+    VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
+};
+
 constexpr struct DebugMessage
 {
     static constexpr VkDebugUtilsMessageSeverityFlagsEXT MESSAGE_SEVERITY{
@@ -102,7 +105,7 @@ bool InstanceBuilder::validate()
     if (info.validationLayers.empty())
     {
         warning("Validation layers not set. Used default.");
-        info.validationLayers = INSTANCE_DEFAULT.VALIDATION_LAYERS;
+        info.validationLayers = VALIDATION_LAYERS;
     }
 
     std::uint32_t layerCount{ 0 };

@@ -94,7 +94,6 @@ add_library(Engine
     vulkan/vulkan_pipeline.hpp
     vulkan/vulkan_renderpass.cpp
     vulkan/vulkan_renderpass.hpp
-    vulkan/vulkan_settings.hpp
     vulkan/vulkan_shader.cpp
     vulkan/vulkan_shader.hpp
     vulkan/vulkan_surface.cpp

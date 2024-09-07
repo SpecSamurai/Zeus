@@ -4,7 +4,6 @@
 
 #include "vulkan_debug.hpp"
 #include "vulkan_memory.hpp"
-#include "vulkan_settings.hpp"
 
 #include <set>
 
@@ -62,8 +61,8 @@ Device DeviceBuilder::build()
 #ifndef NDEBUG
     // Deprecated but set for backwards compatibility
     createInfo.enabledLayerCount =
-        static_cast<std::uint32_t>(INSTANCE_DEFAULT.VALIDATION_LAYERS.size());
-    createInfo.ppEnabledLayerNames = INSTANCE_DEFAULT.VALIDATION_LAYERS.data();
+        static_cast<std::uint32_t>(VALIDATION_LAYERS.size());
+    createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
 #endif
 
     VkResult result{ vkCreateDevice(

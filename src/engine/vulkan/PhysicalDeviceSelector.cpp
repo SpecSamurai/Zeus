@@ -4,7 +4,6 @@
 
 #include "core/logger.hpp"
 #include "vulkan_device.hpp"
-#include "vulkan_settings.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -82,10 +81,25 @@ bool PhysicalDeviceSelector::validate()
         isValid = false;
     }
 
-    if (criteria.requirePresent && criteria.extensions.empty())
+    if (criteria.extensions.empty())
     {
-        warning("Present is required but Extensions are not set. Use default.");
-        criteria.extensions = INSTANCE_DEFAULT.DEVICE_EXTENSIONS;
+        warning("Extensions are not set. Use default.");
+        criteria.extensions = {
+            // VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+            // VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+            // VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+            // VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
+        };
+    }
+
+    if (criteria.requirePresent &&
+        (std::find(
+             criteria.extensions.begin(),
+             criteria.extensions.end(),
+             VK_KHR_SWAPCHAIN_EXTENSION_NAME) == criteria.extensions.end()))
+    {
+        warning("Present is required but extension is not set. Use default.");
+        criteria.extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
     }
 
     return isValid;

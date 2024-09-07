@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <vector>
 #ifdef NDEBUG
 #include <tuple>
 #endif
@@ -28,6 +29,10 @@ namespace Zeus
         }                                                                      \
     } while (0)
 #endif
+
+inline static const std::vector<const char*> VALIDATION_LAYERS{
+    "VK_LAYER_KHRONOS_validation",
+};
 
 VKAPI_ATTR VkBool32 VKAPI_CALL defaultDebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
