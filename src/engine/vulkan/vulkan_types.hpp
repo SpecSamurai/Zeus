@@ -32,4 +32,25 @@ struct FrameData
     // TODO: conisider adding draw resources per frame
     // Image Backbuffer;
 };
+
+// UV parameters are interleaved is due to alignement limitations
+struct Vertex
+{
+    Vector3f position;
+    float uvX;
+    Vector3f normal;
+    float uvY;
+    Vector4f color;
+    // static VertexInputDescription get_vertex_description();
+};
+
+struct SceneData
+{
+    alignas(16) Matrix4x4f view;
+    alignas(16) Matrix4x4f projection;
+    alignas(16) Matrix4x4f view_projection;
+    Vector4f ambientColor;
+    Vector4f sunlightDirection; // w is strength
+    Vector4f sunlightColor;
+};
 }
