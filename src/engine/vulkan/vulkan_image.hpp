@@ -1,35 +1,49 @@
 #pragma once
 
-#include <vulkan/vulkan_core.h>
+#include "vulkan_types.hpp"
+
+#include <vulkan/vulkan.h>
 
 #include <cstdint>
+#include <vector>
 
 namespace Zeus
 {
-struct ImageConfig
-{
-    std::uint32_t width;
-    std::uint32_t height;
-    std::uint32_t mipLevels;
-    VkSampleCountFlagBits numSamples;
-    VkFormat format;
-    VkImageTiling tiling;
-    VkImageUsageFlags usage;
-    VkMemoryPropertyFlags properties;
-};
+void destroyImage(VkDevice device, VmaAllocator allocator, Image& image);
 
-bool createVkImage(
-    const VkDevice& device,
-    const VkPhysicalDevice& physicalDevice,
-    const ImageConfig& config,
-    VkImage& image,
-    VkDeviceMemory& imageMemory);
+VkResult create2DImage(
+    VmaAllocator allocator,
+    Image& image,
+    VkImageUsageFlags usage,
+    VkMemoryPropertyFlags memoryPropertyFlags,
+    std::uint32_t mipLevels = 1,
+    VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL);
 
-VkResult createVkImageView(
-    const VkDevice& device,
-    const VkImage& image,
-    const VkFormat format,
+VkResult create2DImageView(
+    VkDevice device,
+    Image& image,
     const VkImageAspectFlags aspectFlags,
-    const std::uint32_t mipLevels,
-    VkImageView& imageView);
+    std::uint32_t mipLevels = 1);
+
+VkFormat findSupportedImageFormat(
+    VkPhysicalDevice physicalDevice,
+    const std::vector<VkFormat>& candidates,
+    VkImageTiling tiling,
+    VkFormatFeatureFlags features);
+
+void transitionImageLayout(
+    VkCommandBuffer commandBuffer,
+    VkImage& image,
+    VkFormat format,
+    VkImageLayout currentLayout,
+    VkImageLayout newLayout);
+
+void blitImage(
+    VkCommandBuffer commandBuffer,
+    VkImage srcImage,
+    VkImage dstImage,
+    VkExtent2D srcSize,
+    VkExtent2D dstSize);
+
+std::uint32_t calcMipLevels(std::uint32_t width, std::uint32_t height);
 }

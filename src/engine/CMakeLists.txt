@@ -58,8 +58,6 @@ add_library(Engine
     vulkan/DeviceBuilder.hpp
     vulkan/DynamicDescriptorAllocator.cpp
     vulkan/DynamicDescriptorAllocator.hpp
-    vulkan/ImageBuilder.cpp
-    vulkan/ImageBuilder.hpp
     vulkan/Instance.cpp
     vulkan/Instance.hpp
     vulkan/InstanceBuilder.cpp
