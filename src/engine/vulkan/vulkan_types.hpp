@@ -3,6 +3,7 @@
 #include "DeletionQueue.hpp"
 #include "DynamicDescriptorAllocator.hpp"
 #include "math/definitions.hpp"
+#include "vulkan_buffer.hpp"
 #include "vulkan_image.hpp"
 
 #include <vulkan/vulkan.h>
@@ -52,5 +53,18 @@ struct SceneData
     Vector4f ambientColor;
     Vector4f sunlightDirection; // w is strength
     Vector4f sunlightColor;
+};
+
+struct MeshBuffers
+{
+    Buffer indexBuffer;
+    Buffer vertexBuffer;
+    VkDeviceAddress vertexBufferAddress;
+};
+
+struct MeshPushConstants
+{
+    Matrix4x4f modelMatrix;
+    VkDeviceAddress vertexBufferAddress;
 };
 }
