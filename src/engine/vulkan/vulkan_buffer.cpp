@@ -2,7 +2,6 @@
 
 #include "vulkan_debug.hpp"
 #include "vulkan_memory.hpp"
-#include "vulkan_types.hpp"
 
 #include <vulkan/vulkan.h>
 

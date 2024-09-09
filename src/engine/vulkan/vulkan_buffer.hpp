@@ -1,12 +1,18 @@
 #pragma once
 
 #include "vulkan_memory.hpp"
-#include "vulkan_types.hpp"
 
 #include <vulkan/vulkan.h>
 
 namespace Zeus
 {
+struct Buffer
+{
+    VkBuffer buffer;
+    VmaAllocation allocation;
+    VmaAllocationInfo info;
+};
+
 VkResult createBuffer(
     VmaAllocator allocator,
     Buffer& buffer,

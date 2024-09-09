@@ -1,7 +1,7 @@
 #include "vulkan_image.hpp"
 
 #include "vulkan_debug.hpp"
-#include "vulkan_types.hpp"
+#include "vulkan_memory.hpp"
 
 #include <vulkan/utility/vk_format_utils.h>
 #include <vulkan/vulkan.h>

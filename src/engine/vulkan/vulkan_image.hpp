@@ -1,7 +1,6 @@
 #pragma once
 
-#include "vulkan_types.hpp"
-
+#include "vulkan_memory.hpp"
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
@@ -9,6 +8,16 @@
 
 namespace Zeus
 {
+struct Image
+{
+    VkImage image;
+    VkImageView imageView;
+    VkExtent3D imageExtent;
+    VkFormat imageFormat;
+    VmaAllocation allocation;
+    VmaAllocationInfo allocationInfo;
+};
+
 void destroyImage(VkDevice device, VmaAllocator allocator, Image& image);
 
 VkResult create2DImage(
