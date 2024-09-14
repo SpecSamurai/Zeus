@@ -1,14 +1,38 @@
 #pragma once
 
+#include "Vector3.hpp"
+
+#include <cassert>
 #include <cstddef>
+#include <type_traits>
 
 namespace Zeus
 {
 template <typename T>
 class Quaternion
 {
+    static_assert(std::is_floating_point_v<T>);
+
 public:
-    Quaternion() : x{ 0 }, y{ 0 }, z{ 0 }, w{ 0 }
+    T x, y, z, w;
+
+    Quaternion() : x{ 0 }, y{ 0 }, z{ 0 }, w{ 1 }
+    {
+    }
+
+    Quaternion(const Quaternion<T>& quaternion)
+        : x{ quaternion.x },
+          y{ quaternion.y },
+          z{ quaternion.z },
+          w{ quaternion.w }
+    {
+    }
+
+    Quaternion(T real, const Vector3<T>& complex)
+        : w{ real },
+          x{ complex.x },
+          y{ complex.y },
+          z{ complex.z }
     {
     }
 
@@ -16,11 +40,15 @@ public:
     {
     }
 
-    Quaternion(T scalar) : x{ scalar }, y{ scalar }, z{ scalar }, w{ scalar }
+    constexpr Vector3<T> complex() const
     {
+        return Vector3(x, y, z);
     }
 
-    T x, y, z, w;
+    constexpr T real() const
+    {
+        return w;
+    }
 
     constexpr T& operator[](const std::size_t i)
     {
@@ -57,5 +85,125 @@ public:
             return w;
         }
     }
+
+private:
+    constexpr std::size_t size() const
+    {
+        return 4;
+    }
 };
+
+template <typename T>
+constexpr Quaternion<T> operator-(const Quaternion<T>& quaternion)
+{
+    return Quaternion<T>(
+        -quaternion.x,
+        -quaternion.y,
+        -quaternion.z,
+        -quaternion.w);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator+(
+    const Quaternion<T>& left,
+    const Quaternion<T>& right)
+{
+    return Quaternion<T>(
+        left.x + right.x,
+        left.y + right.y,
+        left.z + right.z,
+        left.w + right.w);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator+(const T scalar, const Quaternion<T>& right)
+{
+    return Quaternion<T>(
+        scalar + right.x,
+        scalar + right.y,
+        scalar + right.z,
+        scalar + right.w);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator+(const Quaternion<T>& left, const T scalar)
+{
+    return Quaternion<T>(
+        left.x + scalar,
+        left.y + scalar,
+        left.z + scalar,
+        left.w + scalar);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator-(
+    const Quaternion<T>& left,
+    const Quaternion<T>& right)
+{
+    return Quaternion<T>(
+        left.x - right.x,
+        left.y - right.y,
+        left.z - right.z,
+        left.w - right.w);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator-(const Quaternion<T>& left, const T scalar)
+{
+    return Quaternion<T>(
+        left.x - scalar,
+        left.y - scalar,
+        left.z - scalar,
+        left.w - scalar);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator-(const T scalar, const Quaternion<T>& right)
+{
+    return Quaternion<T>(
+        scalar - right.x,
+        scalar - right.y,
+        scalar - right.z,
+        scalar - right.w);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator*(const Quaternion<T>& left, const T scalar)
+{
+    return Quaternion<T>(
+        left.x * scalar,
+        left.y * scalar,
+        left.z * scalar,
+        left.w * scalar);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator*(const T scalar, const Quaternion<T>& right)
+{
+    return Quaternion<T>(
+        scalar * right.x,
+        scalar * right.y,
+        scalar * right.z,
+        scalar * right.w);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator/(const Quaternion<T>& left, const T scalar)
+{
+    return Quaternion<T>(
+        left.x / scalar,
+        left.y / scalar,
+        left.z / scalar,
+        left.w / scalar);
+}
+
+template <typename T>
+constexpr Quaternion<T> operator/(const T scalar, const Quaternion<T>& right)
+{
+    return Quaternion<T>(
+        scalar / right.x,
+        scalar / right.y,
+        scalar / right.z,
+        scalar / right.w);
+}
 }
