@@ -12,19 +12,19 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(Tests
-    engine/memory/MemoryTest.cpp
-    engine/memory/LinearAllocatorTest.cpp
-    engine/memory/FreeListAllocatorTest.cpp
-
     engine/math/GeometricTest.cpp
-    engine/math/TransformationsTest.cpp
-    engine/math/TrigonometricTest.cpp
-    engine/math/TransformationsTest.cpp
     engine/math/Matrix3x3Test.cpp
     engine/math/Matrix4x4Test.cpp
+    engine/math/QuaternionTest.cpp
+    engine/math/TransformationsTest.cpp
+    engine/math/TrigonometricTest.cpp
     engine/math/Vector2Test.cpp
     engine/math/Vector3Test.cpp
     engine/math/Vector4Test.cpp
+
+    engine/memory/FreeListAllocatorTest.cpp
+    engine/memory/LinearAllocatorTest.cpp
+    engine/memory/MemoryTest.cpp
 )
 
 target_link_libraries(Tests
