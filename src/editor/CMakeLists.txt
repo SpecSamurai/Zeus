@@ -3,15 +3,12 @@ find_package(Vulkan REQUIRED)
 add_executable(Editor
     main.cpp
 
-    VulkanContext.cpp
-    VulkanContext.hpp
-
     ui/IUndoableCommand.hpp
     ui/UndoRedoStack.hpp
 )
 
 target_include_directories(Editor
-    PRIVATE core graphics graphics/vulkan
+    PRIVATE ui
 )
 
 target_link_libraries(Editor
