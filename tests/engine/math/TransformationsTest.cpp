@@ -1,4 +1,5 @@
 #include <math/Matrix3x3.hpp>
+#include <math/Quaternion.hpp>
 #include <math/Vector3.hpp>
 #include <math/transformations.hpp>
 
@@ -263,6 +264,59 @@ TEST(TransformationsTest, Scale_Matrix4x4_Vector)
     );
 
     auto actual = scale * sut;
+
+    for (std::size_t i{ 0 }; i < 4; ++i)
+        for (std::size_t j{ 0 }; j < 4; ++j)
+            EXPECT_EQ(expected[i][j], actual[i][j]);
+}
+
+TEST(TransformationsTest, Quaternion_rotateVector)
+{
+    auto sut = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
+    auto vector = Zeus::Vector3(1.f, 1.f, 1.f);
+
+    auto actual = Zeus::rotateVector(sut, vector);
+
+    auto expected = Zeus::Vector3(-23, 13, 1);
+
+    EXPECT_EQ(expected.x, actual.x);
+    EXPECT_EQ(expected.y, actual.y);
+    EXPECT_EQ(expected.z, actual.z);
+}
+
+TEST(TransformationsTest, Quaternion_rotationMatrix3x3)
+{
+    auto sut = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
+
+    auto actual = Zeus::rotationMatrix3x3(sut);
+
+    auto expected = Zeus::Matrix3x3<float>(
+        // clang-format off
+        -25.0f, 28.0f, -10.0f,
+        -20.0f, -19.0f, 20.0f,
+        22.0f,  4.0f,  -9.0f
+        // clang-format on
+    );
+
+    for (std::size_t i{ 0 }; i < 3; ++i)
+        for (std::size_t j{ 0 }; j < 3; ++j)
+            EXPECT_EQ(expected[i][j], actual[i][j]);
+}
+
+TEST(TransformationsTest, Quaternion_rotationMatrix4x4)
+{
+    auto sut = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
+
+    auto actual = Zeus::rotationMatrix4x4(sut);
+
+    auto expected = Zeus::Matrix4x4<float>(
+        // clang-format off
+        -25.0f, 28.0f, -10.0f, 0.f,
+        -20.0f, -19.0f, 20.0f, 0.f,
+        22.0f,  4.0f,  -9.0f, 0.f,
+        0.f, 0.f, 0.f, 1.f
+        // clang-format on
+    );
 
     for (std::size_t i{ 0 }; i < 4; ++i)
         for (std::size_t j{ 0 }; j < 4; ++j)

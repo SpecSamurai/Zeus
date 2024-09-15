@@ -2,8 +2,10 @@
 
 #include "Matrix3x3.hpp"
 #include "Matrix4x4.hpp"
+#include "Quaternion.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
+#include "geometric.hpp"
 
 #include <cmath>
 #include <cstddef>
@@ -104,6 +106,7 @@ constexpr Matrix4x4<T> scale(const T scale)
 template <typename T>
 constexpr Matrix4x4<T> rotation(const T angle, Vector3<T> axis)
 {
+    static_assert(std::is_floating_point_v<T>);
     float c{ std::cos(angle) };
     float s{ std::sin(angle) };
 
@@ -134,11 +137,12 @@ constexpr Matrix4x4<T> rotation(const T angle, Vector3<T> axis)
 }
 
 template <typename T>
-Matrix4x4<T> lookAt(
+constexpr Matrix4x4<T> lookAt(
     const Vector3<T>& eye,
     const Vector3<T>& target,
     const Vector3<T>& upDir)
 {
+    static_assert(std::is_floating_point_v<T>);
     // the scene is actually rotated, not the camera
     Vector3<T> dir{ eye - target };
 
@@ -168,7 +172,7 @@ Matrix4x4<T> lookAt(
 }
 
 template <typename T>
-Matrix4x4<T> orthographic(
+constexpr Matrix4x4<T> orthographic(
     float left,
     float right,
     float bottom,
@@ -190,12 +194,14 @@ Matrix4x4<T> orthographic(
 }
 
 template <typename T>
-Matrix4x4<T> perspective(
+constexpr Matrix4x4<T> perspective(
     float fovYRadians,
     float aspectRatio,
     float near,
     float far)
 {
+    static_assert(std::is_floating_point_v<T>);
+
     float invHalfTangent = 1.0f / tan(0.5f * fovYRadians);
 
     // float tangent = tan(0.5f * fovYRadians);
@@ -212,5 +218,89 @@ Matrix4x4<T> perspective(
     result[3][2] = (near * far) / (near - far);
 
     return result;
+}
+
+// Quaternion * Vector3 (rotates vector)
+// https://blog.molecular-matters.com/2013/05/24/a-faster-quaternion-vector-multiplication/
+template <typename T>
+constexpr Vector3<T> rotateVector(
+    const Quaternion<T>& quaternion,
+    const Vector3<T>& vector)
+{
+    const Vector3<T> q_xyz(quaternion.x, quaternion.y, quaternion.z);
+    const Vector3<T> t{ 2.0f * cross(q_xyz, vector) };
+    return vector + quaternion.w * t + cross(q_xyz, t);
+}
+
+template <typename T>
+constexpr Matrix3x3<T> rotationMatrix3x3(const Quaternion<T>& quaternion)
+{
+    constexpr T ONE{ static_cast<T>(1) };
+    constexpr T TWO{ static_cast<T>(2) };
+
+    T xx{ quaternion.x * quaternion.x };
+    T yy{ quaternion.y * quaternion.y };
+    T zz{ quaternion.z * quaternion.z };
+    T xz{ quaternion.x * quaternion.z };
+    T xy{ quaternion.x * quaternion.y };
+    T yz{ quaternion.y * quaternion.z };
+    T wx{ quaternion.w * quaternion.x };
+    T wy{ quaternion.w * quaternion.y };
+    T wz{ quaternion.w * quaternion.z };
+
+    Matrix3x3<T> matrix(ONE);
+    matrix[0][0] = ONE - TWO * (yy + zz);
+    matrix[0][1] = TWO * (xy + wz);
+    matrix[0][2] = TWO * (xz - wy);
+
+    matrix[1][0] = TWO * (xy - wz);
+    matrix[1][1] = ONE - TWO * (xx + zz);
+    matrix[1][2] = TWO * (yz + wx);
+
+    matrix[2][0] = TWO * (xz + wy);
+    matrix[2][1] = TWO * (yz - wx);
+    matrix[2][2] = ONE - TWO * (xx + yy);
+
+    return matrix;
+}
+
+template <typename T>
+constexpr Matrix4x4<T> rotationMatrix4x4(const Quaternion<T>& quaternion)
+{
+    constexpr T ONE{ static_cast<T>(1) };
+    constexpr T TWO{ static_cast<T>(2) };
+
+    T xx{ quaternion.x * quaternion.x };
+    T yy{ quaternion.y * quaternion.y };
+    T zz{ quaternion.z * quaternion.z };
+    T xz{ quaternion.x * quaternion.z };
+    T xy{ quaternion.x * quaternion.y };
+    T yz{ quaternion.y * quaternion.z };
+    T wx{ quaternion.w * quaternion.x };
+    T wy{ quaternion.w * quaternion.y };
+    T wz{ quaternion.w * quaternion.z };
+
+    Matrix4x4<T> matrix(ONE);
+    matrix[0][0] = ONE - TWO * (yy + zz);
+    matrix[0][1] = TWO * (xy + wz);
+    matrix[0][2] = TWO * (xz - wy);
+    matrix[0][3] = 0;
+
+    matrix[1][0] = TWO * (xy - wz);
+    matrix[1][1] = ONE - TWO * (xx + zz);
+    matrix[1][2] = TWO * (yz + wx);
+    matrix[1][3] = 0;
+
+    matrix[2][0] = TWO * (xz + wy);
+    matrix[2][1] = TWO * (yz - wx);
+    matrix[2][2] = ONE - TWO * (xx + yy);
+    matrix[2][3] = 0;
+
+    matrix[3][0] = 0;
+    matrix[3][1] = 0;
+    matrix[3][2] = 0;
+    matrix[3][3] = ONE;
+
+    return matrix;
 }
 }
