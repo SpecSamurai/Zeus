@@ -52,6 +52,14 @@ TEST(GeometricTest, DotProduct_Vector4_Orthogonality)
     EXPECT_EQ(0.f, Zeus::dot(v1, v2));
 }
 
+TEST(GeometricTest, DotProduct_Quaternion_Properties)
+{
+    Zeus::Quaternion v1(1.f, 2.f, 3.f, 4.f);
+    Zeus::Quaternion v2(5.f, 6.f, 7.f, 8.f);
+
+    EXPECT_EQ(Zeus::dot(v1, v2), Zeus::dot(v2, v1));
+}
+
 TEST(GeometricTest, CrossProduct_Vector3)
 {
     Zeus::Vector3 v1(1.f, 0.f, 0.f);
@@ -72,6 +80,20 @@ TEST(GeometricTest, CrossProduct_Vector4)
 
     auto actual = Zeus::cross(v1, v2);
     auto expected = Zeus::Vector4(0.f, 0.f, 1.f, 0.f);
+
+    EXPECT_EQ(expected.x, actual.x);
+    EXPECT_EQ(expected.y, actual.y);
+    EXPECT_EQ(expected.z, actual.z);
+    EXPECT_EQ(expected.w, actual.w);
+}
+
+TEST(GeometricTest, HamiltonProduct_Quaternion)
+{
+    Zeus::Quaternion v1(1.f, 0.f, 0.f, 1.f);
+    Zeus::Quaternion v2(0.f, 1.f, 0.f, 1.f);
+
+    auto actual = Zeus::product(v1, v2);
+    auto expected = Zeus::Quaternion(1.f, 1.f, 1.f, 1.f);
 
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
@@ -102,6 +124,15 @@ TEST(GeometricTest, Length_Vector4)
     Zeus::Vector4 sut(1.f, 2.f, 2.f, 4.f);
 
     auto actual = Zeus::length(sut);
+
+    EXPECT_EQ(5.f, actual);
+}
+
+TEST(GeometricTest, norm_Quaternion)
+{
+    Zeus::Quaternion sut(1.f, 2.f, 2.f, 4.f);
+
+    auto actual = Zeus::norm(sut);
 
     EXPECT_EQ(5.f, actual);
 }
@@ -140,4 +171,41 @@ TEST(GeometricTest, Normalize_Vector4)
     EXPECT_EQ(expected.y, actual.y);
     EXPECT_EQ(expected.z, actual.z);
     EXPECT_EQ(expected.w, actual.w);
+}
+
+TEST(GeometricTest, Normalize_Quaternion)
+{
+    Zeus::Quaternion sut(1.f, 2.f, 2.f, 4.f);
+    Zeus::Quaternion expected(1.f / 5.f, 2.f / 5.f, 2.f / 5.f, 4.f / 5.f);
+
+    auto actual = Zeus::normalize(sut);
+
+    EXPECT_EQ(expected.x, actual.x);
+    EXPECT_EQ(expected.y, actual.y);
+    EXPECT_EQ(expected.z, actual.z);
+    EXPECT_EQ(expected.w, actual.w);
+}
+
+TEST(GeometricTest, Normalize_conjugate)
+{
+    Zeus::Quaternion sut(1.f, 2.f, 2.f, 4.f);
+
+    auto actual = Zeus::conjugate(sut);
+
+    EXPECT_EQ(-1.f, actual.x);
+    EXPECT_EQ(-2.f, actual.y);
+    EXPECT_EQ(-2.f, actual.z);
+    EXPECT_EQ(4.f, actual.w);
+}
+
+TEST(GeometricTest, Normalize_inverse)
+{
+    Zeus::Quaternion sut(1.f, 2.f, 2.f, 4.f);
+
+    auto actual = Zeus::inverse(sut);
+
+    EXPECT_EQ(-1.f / 25.f, actual.x);
+    EXPECT_EQ(-2.f / 25.f, actual.y);
+    EXPECT_EQ(-2.f / 25.f, actual.z);
+    EXPECT_EQ(4.f / 25.f, actual.w);
 }
