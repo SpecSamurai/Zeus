@@ -21,6 +21,9 @@ add_library(Engine
 
     core/logger.hpp
 
+    gltf/utility.cpp
+    gltf/utility.hpp
+
     math/definitions.hpp
     math/geometric.hpp
     math/transformations.hpp
@@ -69,6 +72,8 @@ add_library(Engine
     vulkan/PipelineBuilder.hpp
     vulkan/SwapchainBuilder.cpp
     vulkan/SwapchainBuilder.hpp
+    vulkan/VulkanContext.cpp
+    vulkan/VulkanContext.hpp
 
     vulkan/vulkan_buffer.cpp
     vulkan/vulkan_buffer.hpp
@@ -109,7 +114,7 @@ target_include_directories(Engine
 )
 
 target_link_libraries(Engine
-    PUBLIC Vulkan::Vulkan glfw VulkanMemoryAllocator stb fastgltf
+    PUBLIC Vulkan::Vulkan glfw VulkanMemoryAllocator stb fastgltf imgui
 )
 
 target_compile_options(Engine PRIVATE
