@@ -67,4 +67,23 @@ struct MeshPushConstants
     Matrix4x4f modelMatrix;
     VkDeviceAddress vertexBufferAddress;
 };
+
+enum class MaterialAlphaMode : std::uint8_t
+{
+    Opaque,
+    Transparent
+};
+
+struct MaterialPipeline
+{
+    VkPipeline pipeline;
+    VkPipelineLayout layout;
+};
+
+struct Material
+{
+    MaterialPipeline* pipeline;
+    VkDescriptorSet descriptorSet;
+    MaterialAlphaMode alphaMode;
+};
 }
