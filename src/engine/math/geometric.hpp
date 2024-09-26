@@ -57,23 +57,6 @@ constexpr Vector4<T> cross(const Vector4<T>& left, const Vector4<T>& right)
         0.0f);
 }
 
-// Hamilton product
-template <typename T>
-constexpr Quaternion<T> product(
-    const Quaternion<T>& left,
-    const Quaternion<T>& right)
-{
-    return Quaternion<T>(
-        left.w * right.x + left.x * right.w + left.y * right.z -
-            left.z * right.y,
-        left.w * right.y - left.x * right.z + left.y * right.w +
-            left.z * right.x,
-        left.w * right.z + left.x * right.y - left.y * right.x +
-            left.z * right.w,
-        left.w * right.w - left.x * right.x - left.y * right.y -
-            left.z * right.z);
-}
-
 template <typename T>
 constexpr T length(const Vector2<T>& v)
 {
@@ -168,8 +151,8 @@ constexpr Quaternion<T> inverse(const Quaternion<T>& quaternion)
 template <typename T>
 constexpr Quaternion<T> angleAxis(const T angle, const Vector3<T>& axis)
 {
-    constexpr float HALF_ANGLE{ angle * static_cast<T>(0.5) };
-    constexpr float SIN_HALF_ANGLE{ std::sin(HALF_ANGLE) };
+    float HALF_ANGLE{ angle * static_cast<T>(0.5) };
+    float SIN_HALF_ANGLE{ std::sin(HALF_ANGLE) };
 
     auto w{ std::cos(HALF_ANGLE) };
     auto x{ axis.x * SIN_HALF_ANGLE };

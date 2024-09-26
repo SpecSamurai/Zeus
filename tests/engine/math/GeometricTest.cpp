@@ -87,20 +87,6 @@ TEST(GeometricTest, CrossProduct_Vector4)
     EXPECT_EQ(expected.w, actual.w);
 }
 
-TEST(GeometricTest, HamiltonProduct_Quaternion)
-{
-    Zeus::Quaternion v1(1.f, 0.f, 0.f, 1.f);
-    Zeus::Quaternion v2(0.f, 1.f, 0.f, 1.f);
-
-    auto actual = Zeus::product(v1, v2);
-    auto expected = Zeus::Quaternion(1.f, 1.f, 1.f, 1.f);
-
-    EXPECT_EQ(expected.x, actual.x);
-    EXPECT_EQ(expected.y, actual.y);
-    EXPECT_EQ(expected.z, actual.z);
-    EXPECT_EQ(expected.w, actual.w);
-}
-
 TEST(GeometricTest, Length_Vector2)
 {
     Zeus::Vector2 sut(3.f, 4.f);

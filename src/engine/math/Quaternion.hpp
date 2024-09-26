@@ -188,6 +188,23 @@ constexpr Quaternion<T> operator*(const T scalar, const Quaternion<T>& right)
 }
 
 template <typename T>
+constexpr Quaternion<T> operator*(
+    const Quaternion<T>& left,
+    const Quaternion<T>& right)
+{
+    // Hamilton product
+    return Quaternion<T>(
+        left.w * right.x + left.x * right.w + left.y * right.z -
+            left.z * right.y,
+        left.w * right.y - left.x * right.z + left.y * right.w +
+            left.z * right.x,
+        left.w * right.z + left.x * right.y - left.y * right.x +
+            left.z * right.w,
+        left.w * right.w - left.x * right.x - left.y * right.y -
+            left.z * right.z);
+}
+
+template <typename T>
 constexpr Quaternion<T> operator/(const Quaternion<T>& left, const T scalar)
 {
     return Quaternion<T>(

@@ -180,6 +180,20 @@ TEST(QuaternionTest, BinaryMultiplicationOperator_QuaternionWithScalar)
     EXPECT_EQ(8.f, actual2.w);
 }
 
+TEST(QuaternionTest, BinaryMultiplicationOperator_HamiltonProduct)
+{
+    Zeus::Quaternion v1(1.f, 0.f, 0.f, 1.f);
+    Zeus::Quaternion v2(0.f, 1.f, 0.f, 1.f);
+
+    auto actual = v1 * v2;
+    auto expected = Zeus::Quaternion(1.f, 1.f, 1.f, 1.f);
+
+    EXPECT_EQ(expected.x, actual.x);
+    EXPECT_EQ(expected.y, actual.y);
+    EXPECT_EQ(expected.z, actual.z);
+    EXPECT_EQ(expected.w, actual.w);
+}
+
 TEST(QuaternionTest, BinaryDivisionOperator_QuaternionWithScalar)
 {
     auto sut = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
