@@ -29,10 +29,10 @@ public:
     }
 
     Quaternion(T real, const Vector3<T>& complex)
-        : w{ real },
-          x{ complex.x },
+        : x{ complex.x },
           y{ complex.y },
-          z{ complex.z }
+          z{ complex.z },
+          w{ real }
     {
     }
 

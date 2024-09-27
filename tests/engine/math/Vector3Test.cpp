@@ -94,6 +94,17 @@ TEST(Vector3Test, BinaryAdditionOperator_VectorWithScalar)
     EXPECT_EQ(4.f, actual2.z);
 }
 
+TEST(Vector3Test, UnarySubtractionOperator_Vector)
+{
+    auto sut = Zeus::Vector3(1.f, 2.f, 3.f);
+
+    auto actual = -sut;
+
+    EXPECT_EQ(-1.f, actual.x);
+    EXPECT_EQ(-2.f, actual.y);
+    EXPECT_EQ(-3.f, actual.z);
+}
+
 TEST(Vector3Test, BinarySubtractionOperator_Vectors)
 {
     auto sut1 = Zeus::Vector3(10.f, 9.f, 8.f);

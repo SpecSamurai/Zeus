@@ -149,7 +149,7 @@ constexpr Quaternion<T> inverse(const Quaternion<T>& quaternion)
 
 // angle is expected to be in radians
 template <typename T>
-constexpr Quaternion<T> angleAxis(const T angle, const Vector3<T>& axis)
+constexpr Quaternion<T> angleAxis2quat(const T angle, const Vector3<T>& axis)
 {
     float HALF_ANGLE{ angle * static_cast<T>(0.5) };
     float SIN_HALF_ANGLE{ std::sin(HALF_ANGLE) };

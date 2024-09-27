@@ -91,6 +91,12 @@ constexpr Vector3<T> operator+(const Vector3<T>& left, const T& scalar)
 }
 
 template <typename T>
+constexpr Vector3<T> operator-(const Vector3<T>& vector)
+{
+    return Vector3<T>(-vector.x, -vector.y, -vector.z);
+}
+
+template <typename T>
 constexpr Vector3<T> operator-(const Vector3<T>& left, const Vector3<T>& right)
 {
     return Vector3<T>(left.x - right.x, left.y - right.y, left.z - right.z);
