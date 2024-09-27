@@ -17,9 +17,16 @@ FetchContent_MakeAvailable(fastgltf)
 
 add_library(Engine
     defines.hpp
-    Camera.hpp
 
     core/logger.hpp
+
+    camera/camera_utils.cpp
+    camera/camera_utils.hpp
+    camera/ArcballCamera.hpp
+    camera/EditorCamera.hpp
+    camera/FreeflyCamera.hpp
+
+    input/InputManager.hpp
 
     gltf/utility.cpp
     gltf/utility.hpp
