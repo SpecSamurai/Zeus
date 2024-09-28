@@ -55,8 +55,8 @@ add_library(Engine
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
 
-    vulkan/DeletionQueue.cpp
-    vulkan/DeletionQueue.hpp
+    # vulkan/DeletionQueue.cpp
+    # vulkan/DeletionQueue.hpp
     vulkan/DescriptorAllocator.cpp
     vulkan/DescriptorAllocator.hpp
     vulkan/DescriptorLayoutBuilder.cpp
@@ -114,6 +114,8 @@ add_library(Engine
 
     window/glfw_utils.cpp
     window/glfw_utils.hpp
+    window/Window.cpp
+    window/Window.hpp
 )
 
 target_include_directories(Engine

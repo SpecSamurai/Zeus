@@ -45,7 +45,7 @@ public:
     void setCompositeAlphaFlags(
         VkCompositeAlphaFlagBitsKHR compositeAlphaFlags);
 
-public:
+private:
     bool validate();
 
     struct SwapchainInfo
