@@ -20,8 +20,8 @@ enum class CameraMovement : std::uint8_t
 
 enum class CameraType : std::uint8_t
 {
-    FREE_FLY,
-    ARC_BALL,
+    FREEFLY,
+    ARCBALL,
 };
 
 class EditorCamera
