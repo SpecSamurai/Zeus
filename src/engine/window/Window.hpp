@@ -18,6 +18,7 @@ public:
     const char* title;
     VkExtent2D extent;
     bool resized{ false };
+    bool invalidExtent{ false };
 
 private:
     static void framebufferResizeCallback(
