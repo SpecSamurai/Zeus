@@ -1,12 +1,13 @@
 #include "Application.hpp"
+#include "Engine.hpp"
 
 #include <cstdlib>
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-    Zeus::Application app;
+    Zeus::Engine app(1440, 1080, "Zeus Editor");
 
-    app.Init(1440, 1080, "Zeus Engine");
+    app.Init();
 
     app.Run();
 
