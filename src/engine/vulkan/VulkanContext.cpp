@@ -1,14 +1,14 @@
 #include "VulkanContext.hpp"
 
 #include "Device.hpp"
+#include "DeviceBuilder.hpp"
 #include "Instance.hpp"
+#include "InstanceBuilder.hpp"
+#include "PhysicalDeviceSelector.hpp"
+#include "SwapchainBuilder.hpp"
 #include "core/logger.hpp"
-#include "vulkan/DeviceBuilder.hpp"
-#include "vulkan/InstanceBuilder.hpp"
-#include "vulkan/PhysicalDeviceSelector.hpp"
-#include "vulkan/SwapchainBuilder.hpp"
-#include "vulkan/vulkan_memory.hpp"
-#include "vulkan/vulkan_surface.hpp"
+#include "vulkan_memory.hpp"
+#include "vulkan_surface.hpp"
 #include "window/glfw_utils.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -35,8 +35,6 @@ void VulkanContext::Init()
 void VulkanContext::Destroy()
 {
     debug("Destroying VulkanContext");
-
-    vkDeviceWaitIdle(device.logicalDevice);
 
     destroySwapchain(device, swapchain);
     vmaDestroyAllocator(allocator);
