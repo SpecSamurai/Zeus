@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DeletionQueue.hpp"
+// #include "DeletionQueue.hpp"
 #include "DynamicDescriptorAllocator.hpp"
 #include "math/definitions.hpp"
 #include "vulkan_buffer.hpp"
@@ -18,7 +18,7 @@ const static Vector4f GREEN{ Vector4f(0.f, 1.f, 0.f, 1.f) };
 
 struct FrameData
 {
-    DeletionQueue deletionQueue;
+    // DeletionQueue deletionQueue;
 
     VkCommandPool commandPool;
     VkCommandBuffer mainCommandBuffer;
@@ -28,7 +28,7 @@ struct FrameData
 
     VkFence renderFence;
 
-    DynamicDescriptorAllocator frameDescriptors;
+    DynamicDescriptorAllocator descriptorAllocator;
 
     // TODO: conisider adding draw resources per frame
     // Image Backbuffer;
