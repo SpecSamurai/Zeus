@@ -5,12 +5,13 @@
 #include "vulkan_device.hpp"
 #include "vulkan_memory.hpp"
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <optional>
+#include <string>
 
 namespace Zeus
 {
@@ -171,6 +172,23 @@ std::optional<Swapchain> SwapchainBuilder::build()
                 allocationCallbacks.get(),
                 &swapchain.imageViews[i]),
             "Failed to create swapchain image view.");
+
+#ifndef NDEBUG
+        std::string imageName{ "Image Swapchain " + std::to_string(i) };
+        setDebugUtilsObjectNameEXT(
+            info.device,
+            VK_OBJECT_TYPE_IMAGE,
+            reinterpret_cast<std::uint64_t>(swapchain.images[i]),
+            imageName.c_str());
+
+        std::string imageViewName{ "Image View Swapchain " +
+                                   std::to_string(i) };
+        setDebugUtilsObjectNameEXT(
+            info.device,
+            VK_OBJECT_TYPE_IMAGE_VIEW,
+            reinterpret_cast<std::uint64_t>(swapchain.imageViews[i]),
+            imageViewName.c_str());
+#endif
     }
 
     debug("Swapchain created images count {}", swapchain.imageCount);
