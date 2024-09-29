@@ -46,7 +46,7 @@ void Window::framebufferResizeCallback(
     auto obj = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
 
     obj->extent.width = static_cast<std::uint32_t>(width);
-    obj->extent.width = static_cast<std::uint32_t>(height);
+    obj->extent.height = static_cast<std::uint32_t>(height);
     obj->resized = true;
     obj->invalidExtent = width == 0 || height == 0;
 }
@@ -60,7 +60,7 @@ void Window::windowIconifyCallback(GLFWwindow* window, int iconified)
         debug("Window iconified: {}", obj->title);
 
         obj->extent.width = 0;
-        obj->extent.width = 0;
+        obj->extent.height = 0;
         obj->resized = true;
         obj->invalidExtent = true;
     }
@@ -72,7 +72,7 @@ void Window::windowIconifyCallback(GLFWwindow* window, int iconified)
         debug("Window restored: {}", obj->title);
 
         obj->extent.width = static_cast<std::uint32_t>(width);
-        obj->extent.width = static_cast<std::uint32_t>(height);
+        obj->extent.height = static_cast<std::uint32_t>(height);
         obj->resized = true;
         obj->invalidExtent = width == 0 || height == 0;
     }

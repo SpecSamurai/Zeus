@@ -58,8 +58,6 @@ add_library(Engine
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
 
-    # vulkan/DeletionQueue.cpp
-    # vulkan/DeletionQueue.hpp
     vulkan/DescriptorAllocator.cpp
     vulkan/DescriptorAllocator.hpp
     vulkan/DescriptorLayoutBuilder.cpp

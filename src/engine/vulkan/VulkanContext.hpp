@@ -19,7 +19,7 @@ public:
 
     void Init();
     void Destroy();
-    void RecreateSwapchain();
+    void ResizeSwapchain(const VkExtent2D& extent);
 
 private:
     void InitInstance();
@@ -27,10 +27,8 @@ private:
     void InitMemoryAllocator();
     void InitSwapchain();
 
-private:
-    SwapchainBuilder swapchainBuilder;
-
 public:
+    SwapchainBuilder swapchainBuilder;
     Window window;
     Instance instance;
     Device device;

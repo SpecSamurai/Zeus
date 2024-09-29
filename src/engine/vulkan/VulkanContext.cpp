@@ -44,6 +44,21 @@ void VulkanContext::Destroy()
     window.Destroy();
 }
 
+void VulkanContext::ResizeSwapchain(const VkExtent2D& extent)
+{
+    vkDeviceWaitIdle(device.logicalDevice);
+
+    swapchainBuilder.setOldSwapchain(swapchain.handle);
+    swapchainBuilder.setDesiredExtent(extent.width, extent.height);
+
+    const auto& result{ swapchainBuilder.build() };
+
+    destroySwapchain(device, swapchain);
+    swapchain = result.value();
+
+    debug("Swapchain resized: {}x{}", extent.width, extent.height);
+}
+
 void VulkanContext::InitInstance()
 {
     InstanceBuilder instanceBuilder;
@@ -121,34 +136,5 @@ void VulkanContext::InitSwapchain()
         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
     swapchain = swapchainBuilder.build().value();
-}
-
-void VulkanContext::RecreateSwapchain()
-{
-    // Handles minimazation
-    // int width = 0, height = 0;
-    // glfwGetFramebufferSize(window, &width, &height);
-    // while (width == 0 || height == 0)
-    // {
-    //     glfwGetFramebufferSize(window, &width, &height);
-    //     glfwWaitEvents();
-    // }
-
-    vkDeviceWaitIdle(device.logicalDevice);
-
-    swapchainBuilder.setOldSwapchain(swapchain.handle);
-    swapchainBuilder.setDesiredExtent(
-        window.extent.width,
-        window.extent.height);
-
-    const auto& result{ swapchainBuilder.build() };
-
-    destroySwapchain(device, swapchain);
-    swapchain = result.value();
-
-    // createColorResources();
-    // createDepthResources();
-
-    window.resized = false;
 }
 }
