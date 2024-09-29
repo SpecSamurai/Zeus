@@ -4,9 +4,10 @@
 #include "vulkan/vulkan_image.hpp"
 #include "vulkan/vulkan_types.hpp"
 
+#include <vulkan/vulkan_core.h>
+
 #include <functional>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 namespace Zeus
 {
@@ -24,8 +25,11 @@ public:
 
 private:
     void Draw();
+
+    void RecreateSwapchain();
     void InitSyncObjects();
     void InitCommands();
+    void InitDrawObjects();
 
     inline constexpr FrameData& getCurrentFrame()
     {
@@ -44,8 +48,17 @@ private:
     VkCommandPool oneTimeSubmitCommandPool{ VK_NULL_HANDLE };
     VkCommandBuffer oneTimeSubmitCommandBuffer{ VK_NULL_HANDLE };
 
+    struct Statistics
+    {
+        float frametime;
+        float meshDrawTime;
+        int triangleCount;
+        int drawcallCount;
+    } statistics;
+
     float renderScale{ 1.f };
 
     bool stopRendering{ false };
+    bool resizeRequested{ false };
 };
 }

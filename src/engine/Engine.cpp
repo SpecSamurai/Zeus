@@ -1,16 +1,19 @@
 #include "Engine.hpp"
+
 #include "core/logger.hpp"
 #include "vulkan/vulkan_command.hpp"
 #include "vulkan/vulkan_debug.hpp"
+#include "vulkan/vulkan_image.hpp"
 #include "vulkan/vulkan_memory.hpp"
 #include "vulkan/vulkan_sync.hpp"
 #include "vulkan/vulkan_types.hpp"
+
+#include <vulkan/vulkan_core.h>
 
 #include <chrono>
 #include <cstdint>
 #include <string>
 #include <thread>
-#include <vulkan/vulkan_core.h>
 
 namespace Zeus
 {
@@ -27,42 +30,14 @@ void Engine::Init()
 
     InitSyncObjects();
     InitCommands();
+    InitDrawObjects();
 }
 
 void Engine::Run()
 {
     while (!glfwWindowShouldClose(vkContext.window.handle))
     {
-        // auto start = std::chrono::system_clock::now();
         glfwPollEvents();
-
-        // // Handle events on queue
-        // while (SDL_PollEvent(&e) != 0)
-        // {
-        //     // close the window when user alt-f4s or clicks the X button
-        //     if (e.type == SDL_QUIT)
-        //         bQuit = true;
-        //
-        //     if (e.type == SDL_WINDOWEVENT)
-        //     {
-        //
-        //         if (e.window.event == SDL_WINDOWEVENT_RESIZED)
-        //         {
-        //             resize_requested = true;
-        //         }
-        //         if (e.window.event == SDL_WINDOWEVENT_MINIMIZED)
-        //         {
-        //             freeze_rendering = true;
-        //         }
-        //         if (e.window.event == SDL_WINDOWEVENT_RESTORED)
-        //         {
-        //             freeze_rendering = false;
-        //         }
-        //     }
-        //
-        //     mainCamera.processSDLEvent(e);
-        //     ImGui_ImplSDL2_ProcessEvent(&e);
-        // }
 
         if (vkContext.window.invalidExtent) // freeze_rendering)
         {
@@ -72,60 +47,11 @@ void Engine::Run()
 
         if (vkContext.window.resized)
         {
-            vkContext.RecreateSwapchain();
+            RecreateSwapchain();
         }
 
-        // // imgui new frame
-        // ImGui_ImplVulkan_NewFrame();
-        // ImGui_ImplSDL2_NewFrame();
-        //
-        // ImGui::NewFrame();
-        //
-        // ImGui::Begin("Stats");
-        //
-        // ImGui::Text("frametime %f ms", stats.frametime);
-        // ImGui::Text("drawtime %f ms", stats.mesh_draw_time);
-        // ImGui::Text("triangles %i", stats.triangle_count);
-        // ImGui::Text("draws %i", stats.drawcall_count);
-        // ImGui::End();
-        //
-        // if (ImGui::Begin("background"))
-        // {
-        //
-        //     ComputeEffect& selected =
-        //         backgroundEffects[currentBackgroundEffect];
-        //
-        //     ImGui::Text("Selected effect: ", selected.name);
-        //
-        //     ImGui::SliderInt(
-        //         "Effect Index",
-        //         &currentBackgroundEffect,
-        //         0,
-        //         backgroundEffects.size() - 1);
-        //
-        //     ImGui::InputFloat4("data1", (float*)&selected.data.data1);
-        //     ImGui::InputFloat4("data2", (float*)&selected.data.data2);
-        //     ImGui::InputFloat4("data3", (float*)&selected.data.data3);
-        //     ImGui::InputFloat4("data4", (float*)&selected.data.data4);
-        //
-        //     ImGui::End();
-        // }
-        //
-        // ImGui::Render();
-        //
-        // // imgui commands
-        // // ImGui::ShowDemoWindow();
-        //
-        // update_scene();
 
         Draw();
-
-        // auto end = std::chrono::system_clock::now();
-        // auto elapsed =
-        //     std::chrono::duration_cast<std::chrono::microseconds>(end -
-        //     start);
-        //
-        // stats.frametime = elapsed.count() / 1000.f;
     }
 }
 
@@ -133,6 +59,17 @@ void Engine::Shutdown()
 {
     debug("Shutting down engine");
     vkDeviceWaitIdle(vkContext.device.logicalDevice);
+
+    debug("Destroying draw objects");
+    destroyImage(
+        vkContext.device.logicalDevice,
+        vkContext.allocator,
+        drawImage);
+
+    destroyImage(
+        vkContext.device.logicalDevice,
+        vkContext.allocator,
+        depthImage);
 
     debug("Destroying commands");
     vkDestroyCommandPool(
@@ -221,7 +158,215 @@ void Engine::cmdOneTimeSubmit(
 
 void Engine::Draw()
 {
+    VKCHECK(
+        vkWaitForFences(
+            vkContext.device.logicalDevice,
+            1,
+            &getCurrentFrame().renderFence,
+            VK_TRUE,
+            UINT64_MAX),
+        "Failed to wait for fence");
+
+    // getCurrentFrame().deletionQueue.flush();
+    getCurrentFrame().descriptorAllocator.Clear(vkContext.device.logicalDevice);
+
+    std::uint32_t swapchainImageIndex;
+    VkResult result{ vkAcquireNextImageKHR(
+        vkContext.device.logicalDevice,
+        vkContext.swapchain.handle,
+        UINT64_MAX,
+        getCurrentFrame().imageAcquiredSemaphore,
+        VK_NULL_HANDLE,
+        &swapchainImageIndex) };
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        // recreateSwapChain();
+        resizeRequested = true;
+        return;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+    {
+        error("Failed to acquire swapchain image");
+        return;
+    }
+
+    drawExtent.height = std::min(
+                            vkContext.swapchain.extent.height,
+                            drawImage.imageExtent.height) *
+                        1.f;
+    drawExtent.width = std::min(
+                           vkContext.swapchain.extent.width,
+                           drawImage.imageExtent.width) *
+                       1.f;
+
+    VKCHECK(
+        vkResetFences(
+            vkContext.device.logicalDevice,
+            1,
+            &getCurrentFrame().renderFence),
+        "Failed to reset fence");
+
+    VKCHECK(
+        vkResetCommandBuffer(getCurrentFrame().mainCommandBuffer, 0),
+        "Failed to reset command buffer");
+
+    beginVkCommandBuffer(
+        getCurrentFrame().mainCommandBuffer,
+        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+    transitionImageLayout(
+        getCurrentFrame().mainCommandBuffer,
+        drawImage.image,
+        drawImage.imageFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_GENERAL);
+
+    transitionImageLayout(
+        getCurrentFrame().mainCommandBuffer,
+        depthImage.image,
+        depthImage.imageFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+
+    // drawMain(getCurrentFrame().mainCommandBuffer);
+
+    VkClearColorValue clearValue;
+    clearValue = { { 0.0f, 0.0f, 1.f, 1.0f } };
+
+    VkImageSubresourceRange subImage{};
+    subImage.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    subImage.baseMipLevel = 0;
+    subImage.levelCount = VK_REMAINING_MIP_LEVELS;
+    subImage.baseArrayLayer = 0;
+    subImage.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+    vkCmdClearColorImage(
+        getCurrentFrame().mainCommandBuffer,
+        drawImage.image,
+        VK_IMAGE_LAYOUT_GENERAL,
+        &clearValue,
+        1,
+        &subImage);
+
+    transitionImageLayout(
+        getCurrentFrame().mainCommandBuffer,
+        drawImage.image,
+        drawImage.imageFormat,
+        VK_IMAGE_LAYOUT_GENERAL,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+    transitionImageLayout(
+        getCurrentFrame().mainCommandBuffer,
+        vkContext.swapchain.images[swapchainImageIndex],
+        vkContext.swapchain.imageFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+    // VkExtent2D extent;
+    // extent.height = _windowExtent.height;
+    // extent.width = _windowExtent.width;
+    // extent.depth = 1;
+
+    blitImage(
+        getCurrentFrame().mainCommandBuffer,
+        drawImage.image,
+        vkContext.swapchain.images[swapchainImageIndex],
+        drawExtent,
+        vkContext.swapchain.extent);
+
+    transitionImageLayout(
+        getCurrentFrame().mainCommandBuffer,
+        vkContext.swapchain.images[swapchainImageIndex],
+        vkContext.swapchain.imageFormat,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    // drawUI(
+    //     getCurrentFrame().mainCommandBuffer,
+    //     vkContext.swapchain.imageViews[swapchainImageIndex]);
+
+    transitionImageLayout(
+        getCurrentFrame().mainCommandBuffer,
+        vkContext.swapchain.images[swapchainImageIndex],
+        vkContext.swapchain.imageFormat,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+    VKCHECK(
+        vkEndCommandBuffer(getCurrentFrame().mainCommandBuffer),
+        "Failed to record command buffer");
+
+    VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
+        getCurrentFrame().mainCommandBuffer) };
+
+    VkSemaphoreSubmitInfo waitSemaphoreInfo{ createVkSemaphoreSubmitInfo(
+        getCurrentFrame().imageAcquiredSemaphore,
+        VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT) };
+
+    VkSemaphoreSubmitInfo signalSemaphoreInfo{ createVkSemaphoreSubmitInfo(
+        getCurrentFrame().renderCompleteSemaphore,
+        VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT) };
+
+    cmdVkQueueSubmit2(
+        vkContext.device.graphicsQueue,
+        getCurrentFrame().renderFence,
+        1,
+        &waitSemaphoreInfo,
+        1,
+        &submitInfo,
+        1,
+        &signalSemaphoreInfo);
+
+    VkResult presentResult{ cmdVkQueuePresentKHR(
+        vkContext.device.presentQueue,
+        1,
+        &getCurrentFrame().renderCompleteSemaphore,
+        1,
+        &vkContext.swapchain.handle,
+        &swapchainImageIndex) };
+
+    if (presentResult == VK_ERROR_OUT_OF_DATE_KHR ||
+        presentResult == VK_SUBOPTIMAL_KHR || vkContext.window.resized)
+    {
+        resizeRequested = true;
+        // recreateSwapChain();
+    }
+    else if (presentResult != VK_SUCCESS)
+    {
+        error("Failed to present swapchain image");
+        return;
+    }
+
     currentFrame = (currentFrame + 1) % vkContext.swapchain.maxConcurrentFrames;
+}
+
+void Engine::RecreateSwapchain()
+{
+    // Handles minimazation
+    // int width = 0, height = 0;
+    // glfwGetFramebufferSize(window, &width, &height);
+    // while (width == 0 || height == 0)
+    // {
+    //     glfwGetFramebufferSize(window, &width, &height);
+    //     glfwWaitEvents();
+    // }
+
+    vkContext.ResizeSwapchain(vkContext.window.extent);
+
+    destroyImage(
+        vkContext.device.logicalDevice,
+        vkContext.allocator,
+        drawImage);
+
+    destroyImage(
+        vkContext.device.logicalDevice,
+        vkContext.allocator,
+        depthImage);
+
+    InitDrawObjects();
+
+    vkContext.window.resized = false;
 }
 
 void Engine::InitSyncObjects()
@@ -342,6 +487,71 @@ void Engine::InitCommands()
         VK_OBJECT_TYPE_COMMAND_BUFFER,
         reinterpret_cast<std::uint64_t>(oneTimeSubmitCommandBuffer),
         "CommandBuffer One-Time");
+#endif
+}
+
+void Engine::InitDrawObjects()
+{
+    VkExtent3D drawImageExtent = {
+        .width = vkContext.window.extent.width,
+        .height = vkContext.window.extent.height,
+        .depth = 1,
+    };
+
+    drawImage.imageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+    drawImage.imageExtent = drawImageExtent;
+
+    create2DImage(
+        vkContext.allocator,
+        drawImage,
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | // todo remove
+            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT |
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    create2DImageView(
+        vkContext.device.logicalDevice,
+        drawImage,
+        VK_IMAGE_ASPECT_COLOR_BIT);
+
+    depthImage.imageFormat = VK_FORMAT_D32_SFLOAT;
+    depthImage.imageExtent = drawImageExtent;
+
+    create2DImage(
+        vkContext.allocator,
+        depthImage,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    create2DImageView(
+        vkContext.device.logicalDevice,
+        depthImage,
+        VK_IMAGE_ASPECT_DEPTH_BIT);
+
+#ifndef NDEBUG
+    setDebugUtilsObjectNameEXT(
+        vkContext.device.logicalDevice,
+        VK_OBJECT_TYPE_IMAGE,
+        reinterpret_cast<std::uint64_t>(drawImage.image),
+        "Image Draw Color");
+
+    setDebugUtilsObjectNameEXT(
+        vkContext.device.logicalDevice,
+        VK_OBJECT_TYPE_IMAGE,
+        reinterpret_cast<std::uint64_t>(depthImage.image),
+        "Image Draw Depth");
+
+    setDebugUtilsObjectNameEXT(
+        vkContext.device.logicalDevice,
+        VK_OBJECT_TYPE_IMAGE_VIEW,
+        reinterpret_cast<std::uint64_t>(drawImage.imageView),
+        "Image View Draw Color");
+
+    setDebugUtilsObjectNameEXT(
+        vkContext.device.logicalDevice,
+        VK_OBJECT_TYPE_IMAGE_VIEW,
+        reinterpret_cast<std::uint64_t>(depthImage.imageView),
+        "Image View Draw Depth");
 #endif
 }
 }
