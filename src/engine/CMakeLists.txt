@@ -18,6 +18,8 @@ FetchContent_MakeAvailable(fastgltf)
 add_library(Engine
     defines.hpp
 
+    UIManager.cpp
+    UIManager.hpp
     Engine.cpp
     Engine.hpp
 
