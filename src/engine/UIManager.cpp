@@ -1,11 +1,13 @@
 #include "UIManager.hpp"
 
-#include "imgui.h"
-#include "imgui_internal.h"
 #include "vulkan/VulkanContext.hpp"
 #include "vulkan/vulkan_debug.hpp"
 #include "vulkan/vulkan_dynamic_rendering.hpp"
 #include "vulkan/vulkan_memory.hpp"
+
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_vulkan.h>
+#include <imgui.h>
 #include <vulkan/vulkan_core.h>
 
 namespace Zeus
@@ -126,98 +128,70 @@ void UIManager::ConfigureFrame()
             ImGuiWindowFlags_MenuBar,
     };
 
-    // ImGui::SetNextWindowPos(viewport->GetWorkCenter(),
-    // ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(500, 440), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.f, 2.f));
     if (ImGui::Begin("Main Window", &opened, windowFlags))
     {
-        ImGui::PopStyleVar();
         ShowMenuBar();
 
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
         if (ImGui::BeginChild(
-                "Row 1",
-                ImVec2(0, ImGui::GetContentRegionAvail().y),
-                ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY,
+                "Toolbar",
+                ImVec2(0, 25),
+                ImGuiChildFlags_None,
                 ImGuiWindowFlags_NoSavedSettings))
         {
-            // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f,
-            // 0.f)); if (ImGui::BeginChild(
-            //         "Viewport",
-            //         ImVec2(
-            //             ImGui::GetContentRegionAvail().x * 0.7f,
-            //             ImGui::GetContentRegionAvail().y),
-            //         ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX,
-            //         ImGuiWindowFlags_NoSavedSettings))
-            // {
-            //
-            //     // ImGuiIO& io{ ImGui::GetIO() };
-            //     // ImTextureID my_tex_id = io.Fonts->TexID;
-            //     // float my_tex_w = (float)io.Fonts->TexWidth;
-            //     // float my_tex_h = (float)io.Fonts->TexHeight;
-            //     // ImVec2 uv_min = ImVec2(0.0f, 0.0f);
-            //     // ImVec2 uv_max = ImVec2(1.0f, 1.0f);
-            //     // ImVec4 tint_col = ImGui::GetStyleColorVec4(ImGuiCol_Text);
-            //     // ImVec4 border_col =
-            //     // ImGui::GetStyleColorVec4(ImGuiCol_Border); ImGui::Image(
-            //     //     my_tex_id,
-            //     //     ImGui::GetWindowSize(),
-            //     //     uv_min,
-            //     //     uv_max,
-            //     //     tint_col,
-            //     //     border_col);
-            //
-            //     ImGui::EndChild();
-            // }
-            // ImGui::PopStyleVar();
-            //
-            // ImGui::SameLine();
-            //
-            // if (ImGui::BeginChild(
-            //         "Tree",
-            //         ImGui::GetContentRegionAvail(),
-            //         ImGuiChildFlags_None,
-            //         ImGuiWindowFlags_NoSavedSettings))
-            // {
-            //     // if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-            //     // {
-            //     //     if (ImGui::BeginTabItem("Description"))
-            //     //     {
-            //     //         ImGui::TextWrapped(
-            //     //             "Lorem ipsum dolor sit amet, consectetur");
-            //     //         ImGui::EndTabItem();
-            //     //     }
-            //     //     if (ImGui::BeginTabItem("Details"))
-            //     //     {
-            //     //         ImGui::Text("ID: 0123456789");
-            //     //         ImGui::EndTabItem();
-            //     //     }
-            //     //     ImGui::EndTabBar();
-            //     // }
-            //
-            //     ImGui::EndChild();
-            // }
+            ShowToolbar();
         }
         ImGui::EndChild();
 
         if (ImGui::BeginChild(
+                "Row 1",
+                ImVec2(0, ImGui::GetContentRegionAvail().y * 0.7f),
+                ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY,
+                ImGuiWindowFlags_NoSavedSettings))
+        {
+            if (ImGui::BeginChild(
+                    "Viewport",
+                    ImVec2(
+                        ImGui::GetContentRegionAvail().x * 0.7f,
+                        ImGui::GetContentRegionAvail().y),
+                    ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX,
+                    ImGuiWindowFlags_NoSavedSettings))
+            {
+            }
+            ImGui::EndChild();
+
+            ImGui::SameLine();
+
+            if (ImGui::BeginChild(
+                    "Right Column",
+                    ImGui::GetContentRegionAvail(),
+                    ImGuiChildFlags_None,
+                    ImGuiWindowFlags_NoSavedSettings))
+            {
+            }
+            ImGui::EndChild();
+        }
+        ImGui::EndChild();
+        ImGui::PopStyleVar();
+
+        if (ImGui::BeginChild(
                 "Row 2",
-                ImVec2(0, 150),
+                ImVec2(0, ImGui::GetContentRegionAvail().y * 0.3f),
                 ImGuiChildFlags_None,
                 ImGuiWindowFlags_NoSavedSettings))
         {
             if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
             {
-                if (ImGui::BeginTabItem("Description"))
+                if (ImGui::BeginTabItem("Content"))
                 {
-                    ImGui::TextWrapped("Lorem ipsum dolor sit amet");
                     ImGui::EndTabItem();
                 }
-                if (ImGui::BeginTabItem("Details"))
+                if (ImGui::BeginTabItem("Log"))
                 {
-                    ImGui::Text("ID: 0123456789");
                     ImGui::EndTabItem();
                 }
                 ImGui::EndTabBar();
@@ -244,9 +218,9 @@ void UIManager::ConfigureFrame()
 
         //     ImGui::End();
         // }
-        ImGui::End();
     }
-    ImGui::PopStyleVar();
+    ImGui::End();
+    ImGui::PopStyleVar(2);
 
     if (showDemoWindow)
         ImGui::ShowDemoWindow();
@@ -353,5 +327,18 @@ void UIManager::ShowMenuBar()
 
         ImGui::EndMenuBar();
     }
+}
+
+void UIManager::ShowToolbar()
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2.f, 0));
+    ImGui::Button("S", ImVec2(25, 25));
+    ImGui::SameLine();
+    ImGui::Button("O", ImVec2(25, 25));
+    ImGui::SameLine();
+    ImGui::Button("<", ImVec2(25, 25));
+    ImGui::SameLine();
+    ImGui::Button(">", ImVec2(25, 25));
+    ImGui::PopStyleVar();
 }
 }

@@ -2,8 +2,6 @@
 
 #include "vulkan/VulkanContext.hpp"
 
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_vulkan.h>
 #include <imgui.h>
 #include <vulkan/vulkan_core.h>
 
@@ -26,7 +24,7 @@ public:
 private:
     void ShowStatistics(const ImGuiViewport* viewport, bool opened);
     void ShowMenuBar();
-    void ShowToolBar();
+    void ShowToolbar();
 
     VkDescriptorPool uiDescriptorPool{ VK_NULL_HANDLE };
 
