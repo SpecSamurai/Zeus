@@ -15,6 +15,12 @@
 
 namespace Zeus
 {
+namespace DebugLabelColors
+{
+const static Vector4f RED{ Vector4f(1.f, 0.f, 0.f, 1.f) };
+const static Vector4f GREEN{ Vector4f(0.f, 1.f, 0.f, 1.f) };
+}
+
 #ifdef NDEBUG
 #define VKCHECK(expression, msg) std::ignore = expression
 #else
