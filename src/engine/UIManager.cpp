@@ -180,7 +180,7 @@ void UIManager::ConfigureFrame()
 
         if (ImGui::BeginChild(
                 "Row 2",
-                ImVec2(0, ImGui::GetContentRegionAvail().y * 0.3f),
+                ImVec2(0.f, ImGui::GetContentRegionAvail().y * 0.3f),
                 ImGuiChildFlags_None,
                 ImGuiWindowFlags_NoSavedSettings))
         {
@@ -255,6 +255,7 @@ void UIManager::ShowStatistics(const ImGuiViewport* viewport, bool opened)
 
 void UIManager::ShowMenuBar()
 {
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(5.f, 5.f));
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu("File"))
@@ -327,11 +328,12 @@ void UIManager::ShowMenuBar()
 
         ImGui::EndMenuBar();
     }
+    ImGui::PopStyleVar();
 }
 
 void UIManager::ShowToolbar()
 {
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2.f, 0));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2.f, 0.f));
     ImGui::Button("S", ImVec2(25, 25));
     ImGui::SameLine();
     ImGui::Button("O", ImVec2(25, 25));
