@@ -4,7 +4,7 @@
 #include "vulkan_memory.hpp"
 
 #include <vulkan/utility/vk_format_utils.h>
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <cassert>
 #include <cstdint>
@@ -100,6 +100,45 @@ VkResult create2DImageView(
         &image.imageView) };
 
     VKCHECK(result, "Failed to create image view.");
+
+    return result;
+}
+
+VkResult createVkSampler(
+    VkDevice device,
+    VkSampler& sampler,
+    VkFilter magFilter,
+    VkFilter minFilter,
+    VkSamplerMipmapMode mipmapMode,
+    VkSamplerCreateFlags flags)
+{
+    VkSamplerCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    createInfo.flags = flags;
+    createInfo.magFilter = magFilter;
+    createInfo.minFilter = minFilter;
+    createInfo.mipmapMode = mipmapMode;
+    createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    createInfo.mipLodBias = 0.f;
+    createInfo.anisotropyEnable = VK_FALSE; // VK_TRUE;
+    createInfo.maxAnisotropy = 0.f; // properties.limits.maxSamplerAnisotropy
+    createInfo.compareEnable = VK_FALSE;
+    createInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+    createInfo.minLod = 0.f;
+    createInfo.maxLod = VK_LOD_CLAMP_NONE; // mipLevels
+    createInfo.borderColor =
+        VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK; // VK_BORDER_COLOR_INT_OPAQUE_BLACK
+    createInfo.unnormalizedCoordinates = VK_FALSE;
+
+    VkResult result{ vkCreateSampler(
+        device,
+        &createInfo,
+        allocationCallbacks.get(),
+        &sampler) };
+
+    VKCHECK(result, "Failed to create sampler.");
 
     return result;
 }
