@@ -7,6 +7,9 @@
 #include "PhysicalDeviceSelector.hpp"
 #include "SwapchainBuilder.hpp"
 #include "core/logger.hpp"
+#include "vulkan/vulkan_command.hpp"
+#include "vulkan/vulkan_debug.hpp"
+#include "vulkan/vulkan_sync.hpp"
 #include "vulkan_memory.hpp"
 #include "vulkan_surface.hpp"
 #include "window/glfw_utils.hpp"
@@ -30,11 +33,23 @@ void VulkanContext::Init()
     InitDevice();
     InitMemoryAllocator();
     InitSwapchain();
+    InitSyncObjects();
+    InitCommands();
 }
 
 void VulkanContext::Destroy()
 {
     debug("Destroying VulkanContext");
+
+    vkDestroyCommandPool(
+        device.logicalDevice,
+        oneTimeSubmitCommandPool,
+        allocationCallbacks.get());
+
+    vkDestroyFence(
+        device.logicalDevice,
+        oneTimeSubmitFence,
+        allocationCallbacks.get());
 
     destroySwapchain(device, swapchain);
     vmaDestroyAllocator(allocator);
@@ -57,6 +72,50 @@ void VulkanContext::ResizeSwapchain(const VkExtent2D& extent)
     swapchain = result.value();
 
     debug("Swapchain resized: {}x{}", extent.width, extent.height);
+}
+
+void VulkanContext::cmdOneTimeSubmit(
+    std::function<void(VkCommandBuffer cmd)>&& function)
+{
+    VKCHECK(
+        vkResetFences(device.logicalDevice, 1, &oneTimeSubmitFence),
+        "Failed to reset fence");
+
+    VKCHECK(
+        vkResetCommandBuffer(oneTimeSubmitCommandBuffer, 0),
+        "Failed to reset command buffer");
+
+    beginVkCommandBuffer(
+        oneTimeSubmitCommandBuffer,
+        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+    function(oneTimeSubmitCommandBuffer);
+
+    VKCHECK(
+        vkEndCommandBuffer(oneTimeSubmitCommandBuffer),
+        "Failed to end command buffer");
+
+    VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
+        oneTimeSubmitCommandBuffer) };
+
+    cmdVkQueueSubmit2(
+        device.transferQueue,
+        oneTimeSubmitFence,
+        0,
+        nullptr,
+        1,
+        &submitInfo,
+        0,
+        nullptr);
+
+    VKCHECK(
+        vkWaitForFences(
+            device.logicalDevice,
+            1,
+            &oneTimeSubmitFence,
+            VK_TRUE,
+            UINT64_MAX),
+        "Failed to wait for fence");
 }
 
 void VulkanContext::InitInstance()
@@ -136,5 +195,48 @@ void VulkanContext::InitSwapchain()
         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
     swapchain = swapchainBuilder.build().value();
+}
+
+void VulkanContext::InitSyncObjects()
+{
+    VKCHECK(
+        createVkFence(device.logicalDevice, true, oneTimeSubmitFence),
+        "Failed to create oneTimeSubmit fence.");
+
+#ifndef NDEBUG
+    setDebugUtilsObjectNameEXT(
+        device.logicalDevice,
+        VK_OBJECT_TYPE_FENCE,
+        reinterpret_cast<std::uint64_t>(oneTimeSubmitFence),
+        "Fence One-Time Submit");
+#endif
+}
+
+void VulkanContext::InitCommands()
+{
+    createVkCommandPool(
+        device.logicalDevice,
+        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        device.graphicsFamily,
+        oneTimeSubmitCommandPool);
+
+    allocateVkCommandBuffer(
+        oneTimeSubmitCommandBuffer,
+        device.logicalDevice,
+        oneTimeSubmitCommandPool);
+
+#ifndef NDEBUG
+    setDebugUtilsObjectNameEXT(
+        device.logicalDevice,
+        VK_OBJECT_TYPE_COMMAND_POOL,
+        reinterpret_cast<std::uint64_t>(oneTimeSubmitCommandPool),
+        "CommandPool One-Time");
+
+    setDebugUtilsObjectNameEXT(
+        device.logicalDevice,
+        VK_OBJECT_TYPE_COMMAND_BUFFER,
+        reinterpret_cast<std::uint64_t>(oneTimeSubmitCommandBuffer),
+        "CommandBuffer One-Time");
+#endif
 }
 }
