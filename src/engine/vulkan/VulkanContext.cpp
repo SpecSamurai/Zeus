@@ -9,6 +9,7 @@
 #include "core/logger.hpp"
 #include "vulkan_memory.hpp"
 #include "vulkan_surface.hpp"
+#include "window/Window.hpp"
 #include "window/glfw_utils.hpp"
 
 #include <vulkan/vulkan_core.h>
