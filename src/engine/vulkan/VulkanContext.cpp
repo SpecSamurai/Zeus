@@ -7,8 +7,6 @@
 #include "PhysicalDeviceSelector.hpp"
 #include "SwapchainBuilder.hpp"
 #include "core/logger.hpp"
-#include "vulkan/vulkan_command.hpp"
-#include "vulkan/vulkan_debug.hpp"
 #include "vulkan_memory.hpp"
 #include "vulkan_surface.hpp"
 #include "window/glfw_utils.hpp"
