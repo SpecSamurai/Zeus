@@ -15,17 +15,12 @@
 
 namespace Zeus
 {
-VulkanContext::VulkanContext(
-    std::uint32_t width,
-    std::uint32_t height,
-    const char* title)
-    : window(width, height, title)
+VulkanContext::VulkanContext(const Window& window) : m_window{ window }
 {
 }
 
 void VulkanContext::Init()
 {
-    window.Init();
     InitInstance();
     InitDevice();
     InitMemoryAllocator();
@@ -36,27 +31,47 @@ void VulkanContext::Destroy()
 {
     debug("Destroying VulkanContext");
 
-    destroySwapchain(device, swapchain);
-    vmaDestroyAllocator(allocator);
-    destroyDevice(device);
-    vkDestroySurfaceKHR(instance.handle, surface, allocationCallbacks.get());
-    destroyInstance(instance);
-    window.Destroy();
+    destroySwapchain(m_device, m_swapchain);
+    vmaDestroyAllocator(m_allocator);
+    destroyDevice(m_device);
+    vkDestroySurfaceKHR(
+        m_instance.handle,
+        m_surface,
+        allocationCallbacks.get());
+    destroyInstance(m_instance);
 }
 
 void VulkanContext::ResizeSwapchain(const VkExtent2D& extent)
 {
-    vkDeviceWaitIdle(device.logicalDevice);
+    m_swapchainBuilder.setOldSwapchain(m_swapchain.handle);
+    m_swapchainBuilder.setDesiredExtent(extent.width, extent.height);
 
-    swapchainBuilder.setOldSwapchain(swapchain.handle);
-    swapchainBuilder.setDesiredExtent(extent.width, extent.height);
+    const auto& result{ m_swapchainBuilder.build() };
 
-    const auto& result{ swapchainBuilder.build() };
-
-    destroySwapchain(device, swapchain);
-    swapchain = result.value();
+    destroySwapchain(m_device, m_swapchain);
+    m_swapchain = result.value();
 
     debug("Swapchain resized: {}x{}", extent.width, extent.height);
+}
+
+Instance& VulkanContext::GetInstance()
+{
+    return m_instance;
+}
+
+Device& VulkanContext::GetDevice()
+{
+    return m_device;
+}
+
+VmaAllocator& VulkanContext::GetAllocator()
+{
+    return m_allocator;
+}
+
+Swapchain& VulkanContext::GetSwapchain()
+{
+    return m_swapchain;
 }
 
 void VulkanContext::InitInstance()
@@ -65,16 +80,16 @@ void VulkanContext::InitInstance()
     instanceBuilder.setApiVersion(VK_API_VERSION_1_3);
     instanceBuilder.setEngineName("Zeus");
     instanceBuilder.setEngineVersion(VK_MAKE_VERSION(0, 0, 1));
-    instanceBuilder.setAppName(window.title);
+    instanceBuilder.setAppName(m_window.title);
     instanceBuilder.setApplicationVersion(VK_MAKE_VERSION(0, 0, 1));
     instanceBuilder.setExtensions(getRequiredGlobalExtensions());
 
-    instance = instanceBuilder.build();
+    m_instance = instanceBuilder.build();
 }
 
 void VulkanContext::InitDevice()
 {
-    createVkSurfaceKHR(instance.handle, window.handle, surface);
+    createVkSurfaceKHR(m_instance.handle, m_window.handle, m_surface);
 
     VkPhysicalDeviceFeatures requestedFeatures{};
     requestedFeatures.sampleRateShading = VK_TRUE;
@@ -94,8 +109,8 @@ void VulkanContext::InitDevice()
     features1_2.descriptorBindingVariableDescriptorCount = true;
     features1_2.runtimeDescriptorArray = true;
 
-    PhysicalDeviceSelector physicalDeviceSelector(instance.handle);
-    physicalDeviceSelector.setSurface(surface);
+    PhysicalDeviceSelector physicalDeviceSelector(m_instance.handle);
+    physicalDeviceSelector.setSurface(m_surface);
     physicalDeviceSelector.setPreferredType(
         VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU);
     physicalDeviceSelector.requirePresent();
@@ -108,7 +123,7 @@ void VulkanContext::InitDevice()
     auto physicalDevice = physicalDeviceSelector.select().value();
 
     DeviceBuilder deviceBuilder(physicalDevice);
-    device = deviceBuilder.build();
+    m_device = deviceBuilder.build();
 }
 
 void VulkanContext::InitMemoryAllocator()
@@ -116,25 +131,25 @@ void VulkanContext::InitMemoryAllocator()
     VmaAllocatorCreateInfo createInfo{};
     createInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
     createInfo.vulkanApiVersion = VK_API_VERSION_1_3;
-    createInfo.physicalDevice = device.physicalDevice;
-    createInfo.device = device.logicalDevice;
-    createInfo.instance = instance.handle;
+    createInfo.physicalDevice = m_device.physicalDevice;
+    createInfo.device = m_device.logicalDevice;
+    createInfo.instance = m_instance.handle;
     createInfo.pAllocationCallbacks = allocationCallbacks.get();
 
-    vmaCreateAllocator(&createInfo, &allocator);
+    vmaCreateAllocator(&createInfo, &m_allocator);
 }
 
 void VulkanContext::InitSwapchain()
 {
-    swapchainBuilder = SwapchainBuilder{};
-    swapchainBuilder.setDevice(device, surface);
-    swapchainBuilder.setDesiredExtent(
-        window.extent.width,
-        window.extent.height);
-    swapchainBuilder.setDesiredPresentMode(VK_PRESENT_MODE_MAILBOX_KHR);
-    swapchainBuilder.setImageUsageFlags(
+    m_swapchainBuilder = SwapchainBuilder{};
+    m_swapchainBuilder.setDevice(m_device, m_surface);
+    m_swapchainBuilder.setDesiredExtent(
+        m_window.extent.width,
+        m_window.extent.height);
+    m_swapchainBuilder.setDesiredPresentMode(VK_PRESENT_MODE_MAILBOX_KHR);
+    m_swapchainBuilder.setImageUsageFlags(
         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
-    swapchain = swapchainBuilder.build().value();
+    m_swapchain = m_swapchainBuilder.build().value();
 }
 }

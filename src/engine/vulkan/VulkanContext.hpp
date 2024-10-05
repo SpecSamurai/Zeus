@@ -8,18 +8,21 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <cstdint>
-
 namespace Zeus
 {
 class VulkanContext
 {
 public:
-    VulkanContext(std::uint32_t width, std::uint32_t height, const char* title);
+    VulkanContext(const Window& window);
 
     void Init();
     void Destroy();
     void ResizeSwapchain(const VkExtent2D& extent);
+
+    Instance& GetInstance();
+    Device& GetDevice();
+    VmaAllocator& GetAllocator();
+    Swapchain& GetSwapchain();
 
 private:
     void InitInstance();
@@ -27,13 +30,13 @@ private:
     void InitMemoryAllocator();
     void InitSwapchain();
 
-public:
-    SwapchainBuilder swapchainBuilder;
-    Window window;
-    Instance instance;
-    Device device;
-    VmaAllocator allocator{ VK_NULL_HANDLE };
-    VkSurfaceKHR surface{ VK_NULL_HANDLE };
-    Swapchain swapchain;
+private:
+    const Window& m_window;
+    SwapchainBuilder m_swapchainBuilder;
+    Instance m_instance;
+    Device m_device;
+    VmaAllocator m_allocator{ VK_NULL_HANDLE };
+    VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
+    Swapchain m_swapchain;
 };
 }
