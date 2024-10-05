@@ -43,7 +43,7 @@ void Window::framebufferResizeCallback(
     int width,
     int height)
 {
-    auto obj = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+    auto obj{ reinterpret_cast<Window*>(glfwGetWindowUserPointer(window)) };
 
     obj->extent.width = static_cast<std::uint32_t>(width);
     obj->extent.height = static_cast<std::uint32_t>(height);
@@ -53,12 +53,10 @@ void Window::framebufferResizeCallback(
 
 void Window::windowIconifyCallback(GLFWwindow* window, int iconified)
 {
-    auto obj = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+    auto obj{ reinterpret_cast<Window*>(glfwGetWindowUserPointer(window)) };
 
     if (iconified)
     {
-        debug("Window iconified: {}", obj->title);
-
         obj->extent.width = 0;
         obj->extent.height = 0;
         obj->resized = true;
@@ -66,10 +64,8 @@ void Window::windowIconifyCallback(GLFWwindow* window, int iconified)
     }
     else
     {
-        int width = 0, height = 0;
+        int width{ 0 }, height{ 0 };
         glfwGetFramebufferSize(window, &width, &height);
-
-        debug("Window restored: {}", obj->title);
 
         obj->extent.width = static_cast<std::uint32_t>(width);
         obj->extent.height = static_cast<std::uint32_t>(height);
