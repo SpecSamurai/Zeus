@@ -7,15 +7,13 @@ add_executable(Editor
     Application.hpp
 
     ui/IUndoableCommand.hpp
+    ui/UIManager.cpp
+    ui/UIManager.hpp
     ui/UndoRedoStack.hpp
 )
 
-target_include_directories(Editor
-    PRIVATE ui
-)
-
 target_link_libraries(Editor
-    PRIVATE Engine Vulkan::Vulkan glfw imgui stb
+    PRIVATE Engine Vulkan::Vulkan glfw imgui
 )
 
 target_compile_options(Editor PRIVATE

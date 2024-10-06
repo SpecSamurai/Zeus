@@ -18,12 +18,8 @@ FetchContent_MakeAvailable(fastgltf)
 add_library(Engine
     defines.hpp
 
-    UIManager.cpp
-    UIManager.hpp
-    Engine.cpp
-    Engine.hpp
-
     core/logger.hpp
+    core/Timer.hpp
 
     camera/camera_utils.cpp
     camera/camera_utils.hpp
@@ -59,6 +55,11 @@ add_library(Engine
     memory/AllocationHeader.hpp
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
+
+    renderer/Material.hpp
+    renderer/Scene.hpp
+    renderer/Renderer.cpp
+    renderer/Renderer.hpp
 
     vulkan/DescriptorAllocator.cpp
     vulkan/DescriptorAllocator.hpp
@@ -113,7 +114,6 @@ add_library(Engine
     vulkan/vulkan_surface.hpp
     vulkan/vulkan_sync.cpp
     vulkan/vulkan_sync.hpp
-    vulkan/vulkan_types.hpp
 
     window/glfw_utils.cpp
     window/glfw_utils.hpp
