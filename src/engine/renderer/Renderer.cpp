@@ -1,4 +1,5 @@
 #include "Renderer.hpp"
+
 #include "core/logger.hpp"
 #include "vulkan/VulkanContext.hpp"
 #include "vulkan/vulkan_command.hpp"
@@ -6,6 +7,11 @@
 #include "vulkan/vulkan_image.hpp"
 #include "vulkan/vulkan_sync.hpp"
 #include "window/Window.hpp"
+
+#include <vulkan/vulkan_core.h>
+
+#include <cstddef>
+#include <cstdint>
 
 namespace Zeus
 {
@@ -21,7 +27,7 @@ void Renderer::Init()
 
     InitSyncObjects();
     InitCommands();
-    InitDrawObjects();
+    InitDrawObjects(m_window.extent);
 }
 
 void Renderer::Destroy()
@@ -76,7 +82,7 @@ void Renderer::BeginFrame()
         vkWaitForFences(
             m_vkContext.GetDevice().logicalDevice,
             1,
-            &getCurrentFrame().renderFence,
+            &CurrentFrame().renderFence,
             VK_TRUE,
             UINT64_MAX),
         "Failed to wait for fence");
@@ -88,9 +94,9 @@ void Renderer::BeginFrame()
         m_vkContext.GetDevice().logicalDevice,
         m_vkContext.GetSwapchain().handle,
         UINT64_MAX,
-        getCurrentFrame().imageAcquiredSemaphore,
+        CurrentFrame().imageAcquiredSemaphore,
         VK_NULL_HANDLE,
-        &swapchainImageIndex) };
+        &m_swapchainImageIndex) };
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
@@ -114,26 +120,26 @@ void Renderer::BeginFrame()
         vkResetFences(
             m_vkContext.GetDevice().logicalDevice,
             1,
-            &getCurrentFrame().renderFence),
+            &CurrentFrame().renderFence),
         "Failed to reset fence");
 
     VKCHECK(
-        vkResetCommandBuffer(getCurrentFrame().mainCommandBuffer, 0),
+        vkResetCommandBuffer(CurrentFrame().mainCommandBuffer, 0),
         "Failed to reset command buffer");
 
     beginVkCommandBuffer(
-        getCurrentFrame().mainCommandBuffer,
+        CurrentFrame().mainCommandBuffer,
         VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
     transitionImageLayout(
-        getCurrentFrame().mainCommandBuffer,
+        CurrentFrame().mainCommandBuffer,
         drawImage.image,
         drawImage.imageFormat,
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_GENERAL);
 
     transitionImageLayout(
-        getCurrentFrame().mainCommandBuffer,
+        CurrentFrame().mainCommandBuffer,
         depthImage.image,
         depthImage.imageFormat,
         VK_IMAGE_LAYOUT_UNDEFINED,
@@ -143,23 +149,23 @@ void Renderer::BeginFrame()
 void Renderer::EndFrame()
 {
     VKCHECK(
-        vkEndCommandBuffer(getCurrentFrame().mainCommandBuffer),
+        vkEndCommandBuffer(CurrentFrame().mainCommandBuffer),
         "Failed to record command buffer");
 
     VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
-        getCurrentFrame().mainCommandBuffer) };
+        CurrentFrame().mainCommandBuffer) };
 
     VkSemaphoreSubmitInfo waitSemaphoreInfo{ createVkSemaphoreSubmitInfo(
-        getCurrentFrame().imageAcquiredSemaphore,
+        CurrentFrame().imageAcquiredSemaphore,
         VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT) };
 
     VkSemaphoreSubmitInfo signalSemaphoreInfo{ createVkSemaphoreSubmitInfo(
-        getCurrentFrame().renderCompleteSemaphore,
+        CurrentFrame().renderCompleteSemaphore,
         VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT) };
 
     cmdVkQueueSubmit2(
         m_vkContext.GetDevice().graphicsQueue,
-        getCurrentFrame().renderFence,
+        CurrentFrame().renderFence,
         1,
         &waitSemaphoreInfo,
         1,
@@ -170,10 +176,10 @@ void Renderer::EndFrame()
     VkResult presentResult{ cmdVkQueuePresentKHR(
         m_vkContext.GetDevice().presentQueue,
         1,
-        &getCurrentFrame().renderCompleteSemaphore,
+        &CurrentFrame().renderCompleteSemaphore,
         1,
         &m_vkContext.GetSwapchain().handle,
-        &swapchainImageIndex) };
+        &m_swapchainImageIndex) };
 
     if (presentResult == VK_ERROR_OUT_OF_DATE_KHR ||
         presentResult == VK_SUBOPTIMAL_KHR || m_window.resized)
@@ -202,7 +208,7 @@ void Renderer::ResizeDrawObjects(const VkExtent2D& extent)
         m_vkContext.GetAllocator(),
         depthImage);
 
-    InitDrawObjects();
+    InitDrawObjects(extent);
 }
 
 void Renderer::InitSyncObjects()
@@ -292,11 +298,11 @@ void Renderer::InitCommands()
     }
 }
 
-void Renderer::InitDrawObjects()
+void Renderer::InitDrawObjects(const VkExtent2D& extent)
 {
     VkExtent3D drawImageExtent = {
-        .width = m_window.extent.width,
-        .height = m_window.extent.height,
+        .width = extent.width,
+        .height = extent.height,
         .depth = 1,
     };
 

@@ -5,6 +5,10 @@
 #include "vulkan/vulkan_image.hpp"
 #include "window/Window.hpp"
 
+#include <vulkan/vulkan_core.h>
+
+#include <cstdint>
+
 namespace Zeus
 {
 struct FrameData
@@ -37,15 +41,20 @@ public:
 
     void ResizeDrawObjects(const VkExtent2D& extent);
 
-    inline constexpr FrameData& getCurrentFrame()
+    inline constexpr FrameData& CurrentFrame()
     {
         return m_frames[m_currentFrame];
+    }
+
+    inline constexpr std::uint32_t CurrentSwapchainImageIndex() const
+    {
+        return m_swapchainImageIndex;
     }
 
 private:
     void InitSyncObjects();
     void InitCommands();
-    void InitDrawObjects();
+    void InitDrawObjects(const VkExtent2D& extent);
 
     Window& m_window;
     VulkanContext& m_vkContext;
@@ -53,11 +62,11 @@ private:
     std::vector<FrameData> m_frames;
 
     std::uint32_t m_currentFrame{ 0 };
+    std::uint32_t m_swapchainImageIndex;
+
     float m_renderScale{ 1.f };
 
 public:
-    std::uint32_t swapchainImageIndex;
-
     VkExtent2D drawExtent;
     Image drawImage;
     Image depthImage;
