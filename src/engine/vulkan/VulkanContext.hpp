@@ -8,6 +8,8 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <functional>
+
 namespace Zeus
 {
 class VulkanContext
@@ -19,6 +21,9 @@ public:
     void Destroy();
     void ResizeSwapchain(const VkExtent2D& extent);
 
+    void CmdImmediateSubmit(
+        std::function<void(VkCommandBuffer cmd)>&& function);
+
     Instance& GetInstance();
     Device& GetDevice();
     VmaAllocator& GetAllocator();
@@ -29,6 +34,8 @@ private:
     void InitDevice();
     void InitMemoryAllocator();
     void InitSwapchain();
+    void InitSyncObjects();
+    void InitCommands();
 
 private:
     const Window& m_window;
@@ -38,5 +45,9 @@ private:
     VmaAllocator m_allocator{ VK_NULL_HANDLE };
     VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
     Swapchain m_swapchain;
+
+    VkFence m_ImmediateSubmitFence{ VK_NULL_HANDLE };
+    VkCommandPool m_ImmediateSubmitCommandPool{ VK_NULL_HANDLE };
+    VkCommandBuffer m_ImmediateSubmitCommandBuffer{ VK_NULL_HANDLE };
 };
 }

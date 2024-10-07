@@ -48,10 +48,6 @@ private:
     Zeus::VulkanContext m_vkContext;
     Zeus::Renderer m_renderer;
 
-    VkFence oneTimeSubmitFence{ VK_NULL_HANDLE };
-    VkCommandPool oneTimeSubmitCommandPool{ VK_NULL_HANDLE };
-    VkCommandBuffer oneTimeSubmitCommandBuffer{ VK_NULL_HANDLE };
-
     EngineStatistics statistics;
 
     UIManager uiManager;

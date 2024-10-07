@@ -76,74 +76,14 @@ void Application::Run()
 
 void Application::Shutdown()
 {
-    debug("Shutting down engine");
+    debug("Shutting down application");
     vkDeviceWaitIdle(m_vkContext.GetDevice().logicalDevice);
 
     uiManager.Destroy(m_vkContext.GetDevice().logicalDevice);
 
-    debug("Destroying commands");
-    vkDestroyCommandPool(
-        m_vkContext.GetDevice().logicalDevice,
-        oneTimeSubmitCommandPool,
-        allocationCallbacks.get());
-
-    debug("Destroying sync objects");
-
-    vkDestroyFence(
-        m_vkContext.GetDevice().logicalDevice,
-        oneTimeSubmitFence,
-        allocationCallbacks.get());
-
     m_renderer.Destroy();
     m_vkContext.Destroy();
     m_window.Destroy();
-}
-
-void Application::cmdOneTimeSubmit(
-    std::function<void(VkCommandBuffer cmd)>&& function)
-{
-    VKCHECK(
-        vkResetFences(
-            m_vkContext.GetDevice().logicalDevice,
-            1,
-            &oneTimeSubmitFence),
-        "Failed to reset fence");
-
-    VKCHECK(
-        vkResetCommandBuffer(oneTimeSubmitCommandBuffer, 0),
-        "Failed to reset command buffer");
-
-    beginVkCommandBuffer(
-        oneTimeSubmitCommandBuffer,
-        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-
-    function(oneTimeSubmitCommandBuffer);
-
-    VKCHECK(
-        vkEndCommandBuffer(oneTimeSubmitCommandBuffer),
-        "Failed to end command buffer");
-
-    VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
-        oneTimeSubmitCommandBuffer) };
-
-    cmdVkQueueSubmit2(
-        m_vkContext.GetDevice().transferQueue,
-        oneTimeSubmitFence,
-        0,
-        nullptr,
-        1,
-        &submitInfo,
-        0,
-        nullptr);
-
-    VKCHECK(
-        vkWaitForFences(
-            m_vkContext.GetDevice().logicalDevice,
-            1,
-            &oneTimeSubmitFence,
-            VK_TRUE,
-            UINT64_MAX),
-        "Failed to wait for fence");
 }
 
 void Application::Draw()
@@ -299,48 +239,10 @@ void Application::RecreateSwapchain()
 
 void Application::InitSyncObjects()
 {
-    VKCHECK(
-        createVkFence(
-            m_vkContext.GetDevice().logicalDevice,
-            true,
-            oneTimeSubmitFence),
-        "Failed to create oneTimeSubmit fence.");
-
-#ifndef NDEBUG
-    setDebugUtilsObjectNameEXT(
-        m_vkContext.GetDevice().logicalDevice,
-        VK_OBJECT_TYPE_FENCE,
-        reinterpret_cast<std::uint64_t>(oneTimeSubmitFence),
-        "Fence One-Time Submit");
-#endif
 }
 
 void Application::InitCommands()
 {
-    createVkCommandPool(
-        m_vkContext.GetDevice().logicalDevice,
-        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        m_vkContext.GetDevice().graphicsFamily,
-        oneTimeSubmitCommandPool);
-
-    allocateVkCommandBuffer(
-        oneTimeSubmitCommandBuffer,
-        m_vkContext.GetDevice().logicalDevice,
-        oneTimeSubmitCommandPool);
-
-#ifndef NDEBUG
-    setDebugUtilsObjectNameEXT(
-        m_vkContext.GetDevice().logicalDevice,
-        VK_OBJECT_TYPE_COMMAND_POOL,
-        reinterpret_cast<std::uint64_t>(oneTimeSubmitCommandPool),
-        "CommandPool One-Time");
-
-    setDebugUtilsObjectNameEXT(
-        m_vkContext.GetDevice().logicalDevice,
-        VK_OBJECT_TYPE_COMMAND_BUFFER,
-        reinterpret_cast<std::uint64_t>(oneTimeSubmitCommandBuffer),
-        "CommandBuffer One-Time");
-#endif
 }
 
 void Application::InitDescriptors()
