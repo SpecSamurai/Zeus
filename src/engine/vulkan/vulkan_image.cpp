@@ -1,5 +1,6 @@
 #include "vulkan_image.hpp"
 
+#include "math/definitions.hpp"
 #include "vulkan_debug.hpp"
 #include "vulkan_memory.hpp"
 
@@ -102,6 +103,52 @@ VkResult create2DImageView(
     VKCHECK(result, "Failed to create image view.");
 
     return result;
+}
+
+void cmdClearColorImage(
+    VkCommandBuffer commandBuffer,
+    VkImage image,
+    const Vector4f& color,
+    VkImageLayout imageLayout)
+{
+    VkClearColorValue clearValue{ { color.r, color.g, color.b, color.a } };
+
+    VkImageSubresourceRange subresourceRange{};
+    subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    subresourceRange.baseMipLevel = 0;
+    subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+    subresourceRange.baseArrayLayer = 0;
+    subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+    vkCmdClearColorImage(
+        commandBuffer,
+        image,
+        imageLayout,
+        &clearValue,
+        1,
+        &subresourceRange);
+}
+
+void cmdClearDepthStencilImage(
+    VkCommandBuffer commandBuffer,
+    VkImage image,
+    const VkClearDepthStencilValue& clearValue,
+    VkImageLayout imageLayout)
+{
+    VkImageSubresourceRange subresourceRange{};
+    subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    subresourceRange.baseMipLevel = 0;
+    subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+    subresourceRange.baseArrayLayer = 0;
+    subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+    vkCmdClearDepthStencilImage(
+        commandBuffer,
+        image,
+        imageLayout,
+        &clearValue,
+        1,
+        &subresourceRange);
 }
 
 VkResult createVkSampler(

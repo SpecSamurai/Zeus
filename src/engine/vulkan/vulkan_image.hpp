@@ -1,6 +1,8 @@
 #pragma once
 
+#include "math/definitions.hpp"
 #include "vulkan_memory.hpp"
+
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
@@ -33,6 +35,18 @@ VkResult create2DImageView(
     Image& image,
     const VkImageAspectFlags aspectFlags,
     std::uint32_t mipLevels = 1);
+
+void cmdClearColorImage(
+    VkCommandBuffer commandBuffer,
+    VkImage image,
+    const Vector4f& color,
+    VkImageLayout imageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+void cmdClearDepthStencilImage(
+    VkCommandBuffer commandBuffer,
+    VkImage image,
+    const VkClearDepthStencilValue& clearValue,
+    VkImageLayout imageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 VkResult createVkSampler(
     VkDevice device,
