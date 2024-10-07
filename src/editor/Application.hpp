@@ -34,7 +34,6 @@ public:
 private:
     void Draw();
 
-    void RecreateSwapchain();
     void InitCompute();
 
 private:
@@ -58,7 +57,6 @@ private:
 
     EngineStatistics statistics;
 
-    bool stopRendering{ false };
-    bool resizeRequested{ false };
+    // bool stopRendering{ false };
 };
 }

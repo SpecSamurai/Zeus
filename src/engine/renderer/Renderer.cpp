@@ -1,7 +1,6 @@
 #include "Renderer.hpp"
 
 #include "core/logger.hpp"
-#include "math/definitions.hpp"
 #include "vulkan/VulkanContext.hpp"
 #include "vulkan/vulkan_command.hpp"
 #include "vulkan/vulkan_debug.hpp"
@@ -73,7 +72,7 @@ void Renderer::Destroy()
     }
 }
 
-void Renderer::BeginFrame()
+VkResult Renderer::BeginFrame()
 {
     VKCHECK(
         vkWaitForFences(
@@ -97,13 +96,13 @@ void Renderer::BeginFrame()
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-        // resizeRequested = true;
-        return;
+        m_swapchainRebuildRequired = true;
+        return result;
     }
     else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
     {
         error("Failed to acquire swapchain image");
-        return;
+        return result;
     }
 
     drawExtent = {
@@ -124,12 +123,12 @@ void Renderer::BeginFrame()
         vkResetCommandBuffer(CurrentFrame().mainCommandBuffer, 0),
         "Failed to reset command buffer");
 
-    beginVkCommandBuffer(
+    return beginVkCommandBuffer(
         CurrentFrame().mainCommandBuffer,
         VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 }
 
-void Renderer::EndFrame()
+VkResult Renderer::EndFrame()
 {
     VKCHECK(
         vkEndCommandBuffer(CurrentFrame().mainCommandBuffer),
@@ -165,18 +164,20 @@ void Renderer::EndFrame()
         &m_swapchainImageIndex) };
 
     if (presentResult == VK_ERROR_OUT_OF_DATE_KHR ||
-        presentResult == VK_SUBOPTIMAL_KHR || m_window.resized)
+        presentResult == VK_SUBOPTIMAL_KHR)
     {
-        // resizeRequested = true;
+        m_swapchainRebuildRequired = true;
     }
     else if (presentResult != VK_SUCCESS)
     {
         error("Failed to present swapchain image");
-        return;
+        return presentResult;
     }
 
     m_currentFrame =
         (m_currentFrame + 1) % m_vkContext.GetSwapchain().maxConcurrentFrames;
+
+    return presentResult;
 }
 
 void Renderer::Draw()
@@ -185,6 +186,10 @@ void Renderer::Draw()
 
 void Renderer::ResizeDrawObjects(const VkExtent2D& extent)
 {
+    vkDeviceWaitIdle(m_vkContext.GetDevice().logicalDevice);
+
+    m_vkContext.ResizeSwapchain(m_window.extent);
+
     destroyImage(
         m_vkContext.GetDevice().logicalDevice,
         m_vkContext.GetAllocator(),
@@ -196,6 +201,9 @@ void Renderer::ResizeDrawObjects(const VkExtent2D& extent)
         depthImage);
 
     InitDrawObjects(extent);
+
+    m_swapchainRebuildRequired = false;
+    m_window.resized = false;
 }
 
 void Renderer::InitSyncObjects()

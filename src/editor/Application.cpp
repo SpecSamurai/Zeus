@@ -1,8 +1,8 @@
 #include "Application.hpp"
-#include "math/definitions.hpp"
 
 #include <core/Timer.hpp>
 #include <core/logger.hpp>
+#include <math/definitions.hpp>
 #include <renderer/Renderer.hpp>
 #include <vulkan/DescriptorLayoutBuilder.hpp>
 #include <vulkan/VulkanContext.hpp>
@@ -49,17 +49,19 @@ void Application::Run()
     {
         Timer timer;
         timer.Start();
+
         glfwPollEvents();
 
-        if (m_window.invalidExtent) // freeze_rendering)
+        if (m_window.invalidExtent)
         {
+            glfwWaitEvents();
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
 
-        if (m_window.resized)
+        if (m_renderer.ResizeRequired())
         {
-            RecreateSwapchain();
+            m_renderer.ResizeDrawObjects(m_window.extent);
         }
 
         uiManager.ConfigureFrame();
@@ -201,25 +203,6 @@ void Application::Draw()
         VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
     m_renderer.EndFrame();
-}
-
-void Application::RecreateSwapchain()
-{
-    // Handles minimazation
-    // int width = 0, height = 0;
-    // glfwGetFramebufferSize(window, &width, &height);
-    // while (width == 0 || height == 0)
-    // {
-    //     glfwGetFramebufferSize(window, &width, &height);
-    //     glfwWaitEvents();
-    // }
-
-    vkDeviceWaitIdle(m_vkContext.GetDevice().logicalDevice);
-
-    m_vkContext.ResizeSwapchain(m_window.extent);
-    m_renderer.ResizeDrawObjects(m_window.extent);
-
-    m_window.resized = false;
 }
 
 void Application::InitCompute()

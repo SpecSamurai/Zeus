@@ -1,6 +1,5 @@
 #pragma once
 
-#include "math/definitions.hpp"
 #include "vulkan/DynamicDescriptorAllocator.hpp"
 #include "vulkan/VulkanContext.hpp"
 #include "vulkan/vulkan_image.hpp"
@@ -36,12 +35,17 @@ public:
     void Init();
     void Destroy();
 
-    void BeginFrame();
-    void EndFrame();
+    VkResult BeginFrame();
+    VkResult EndFrame();
 
     void Draw();
 
     void ResizeDrawObjects(const VkExtent2D& extent);
+
+    inline constexpr bool ResizeRequired() const
+    {
+        return m_window.resized || m_swapchainRebuildRequired;
+    }
 
     inline constexpr FrameData& CurrentFrame()
     {
@@ -67,6 +71,8 @@ private:
     std::uint32_t m_swapchainImageIndex;
 
     float m_renderScale{ 1.f };
+
+    bool m_swapchainRebuildRequired{ false };
 
 public:
     VkExtent2D drawExtent;
