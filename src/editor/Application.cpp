@@ -1,4 +1,5 @@
 #include "Application.hpp"
+#include "math/definitions.hpp"
 
 #include <core/Timer.hpp>
 #include <core/logger.hpp>
@@ -37,7 +38,7 @@ void Application::Init()
     m_vkContext.Init();
     m_renderer.Init();
 
-    InitDescriptors();
+    InitCompute();
 
     uiManager.Init(m_window, m_vkContext);
 }
@@ -90,25 +91,27 @@ void Application::Draw()
 {
     m_renderer.BeginFrame();
 
-    // drawMain(getCurrentFrame().mainCommandBuffer);
+    transitionImageLayout(
+        m_renderer.CurrentFrame().mainCommandBuffer,
+        m_renderer.drawImage.image,
+        m_renderer.drawImage.imageFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_GENERAL);
 
-    // VkClearColorValue clearValue;
-    // clearValue = { { 0.0f, 0.0f, 1.f, 1.0f } };
-    //
-    // VkImageSubresourceRange subImage{};
-    // subImage.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    // subImage.baseMipLevel = 0;
-    // subImage.levelCount = VK_REMAINING_MIP_LEVELS;
-    // subImage.baseArrayLayer = 0;
-    // subImage.layerCount = VK_REMAINING_ARRAY_LAYERS;
-    //
-    // vkCmdClearColorImage(
-    //     getCurrentFrame().mainCommandBuffer,
-    //     drawImage.image,
-    //     VK_IMAGE_LAYOUT_GENERAL,
-    //     &clearValue,
-    //     1,
-    //     &subImage);
+    transitionImageLayout(
+        m_renderer.CurrentFrame().mainCommandBuffer,
+        m_renderer.depthImage.image,
+        m_renderer.depthImage.imageFormat,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+
+    cmdClearColorImage(
+        m_renderer.CurrentFrame().mainCommandBuffer,
+        m_renderer.drawImage.image,
+        Vector4f(0.f, 0.f, 0.5f, 1.f),
+        VK_IMAGE_LAYOUT_GENERAL);
+
+    // drawMain(getCurrentFrame().mainCommandBuffer);
 
     // bind the gradient drawing compute pipeline
     // ComputeEffect& effect = backgroundEffects[0];
@@ -161,11 +164,6 @@ void Application::Draw()
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-    // VkExtent2D extent;
-    // extent.height = _windowExtent.height;
-    // extent.width = _windowExtent.width;
-    // extent.depth = 1;
-
     blitImage(
         m_renderer.CurrentFrame().mainCommandBuffer,
         m_renderer.drawImage.image,
@@ -182,19 +180,6 @@ void Application::Draw()
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-    // drawUI(
-    //     getCurrentFrame().mainCommandBuffer,
-    //     m_vkContext.swapchain.imageViews[swapchainImageIndex]);
-
-    // VkRenderingAttachmentInfo colorAttachment = vkinit::attachment_info(
-    //     targetImageView,
-    //     nullptr,
-    //     VK_IMAGE_LAYOUT_GENERAL);
-    // VkRenderingInfo renderInfo =
-    //     vkinit::rendering_info(_windowExtent, &colorAttachment, nullptr);
-
-    // vkCmdBeginRendering(cmd, &renderInfo);
-
     VkRenderingAttachmentInfo colorAttachment{
         createColorAttachmentInfo(
             m_vkContext.GetSwapchain()
@@ -205,7 +190,7 @@ void Application::Draw()
     uiManager.Draw(
         m_renderer.CurrentFrame().mainCommandBuffer,
         colorAttachment,
-        m_window.extent);
+        m_vkContext.GetSwapchain().extent);
 
     transitionImageLayout(
         m_renderer.CurrentFrame().mainCommandBuffer,
@@ -237,15 +222,7 @@ void Application::RecreateSwapchain()
     m_window.resized = false;
 }
 
-void Application::InitSyncObjects()
-{
-}
-
-void Application::InitCommands()
-{
-}
-
-void Application::InitDescriptors()
+void Application::InitCompute()
 {
     // create a descriptor pool
     std::vector<VkDescriptorPoolSize> sizes = {
@@ -254,7 +231,7 @@ void Application::InitDescriptors()
         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 3 },
     };
 
-    globalDescriptorAllocator.init(
+    computeDescriptorAllocator.init(
         m_vkContext.GetDevice().logicalDevice,
         10,
         sizes);

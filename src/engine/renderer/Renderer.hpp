@@ -1,5 +1,6 @@
 #pragma once
 
+#include "math/definitions.hpp"
 #include "vulkan/DynamicDescriptorAllocator.hpp"
 #include "vulkan/VulkanContext.hpp"
 #include "vulkan/vulkan_image.hpp"
@@ -35,9 +36,10 @@ public:
     void Init();
     void Destroy();
 
-    void Draw();
     void BeginFrame();
     void EndFrame();
+
+    void Draw();
 
     void ResizeDrawObjects(const VkExtent2D& extent);
 

@@ -10,7 +10,6 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
-#include <functional>
 
 namespace Zeus
 {
@@ -32,27 +31,20 @@ public:
     void Run();
     void Shutdown();
 
-    void cmdOneTimeSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
-
 private:
     void Draw();
 
     void RecreateSwapchain();
-    void InitSyncObjects();
-    void InitCommands();
-    void InitDrawObjects();
-    void InitDescriptors();
+    void InitCompute();
 
 private:
     Zeus::Window m_window;
     Zeus::VulkanContext m_vkContext;
     Zeus::Renderer m_renderer;
 
-    EngineStatistics statistics;
-
     UIManager uiManager;
 
-    DescriptorAllocator globalDescriptorAllocator;
+    DescriptorAllocator computeDescriptorAllocator;
 
     VkDescriptorSet _drawImageDescriptors;
     VkDescriptorSetLayout _drawImageDescriptorLayout;
@@ -63,6 +55,8 @@ private:
     // std::vector<ComputeEffect> backgroundEffects;
 
     float renderScale{ 1.f };
+
+    EngineStatistics statistics;
 
     bool stopRendering{ false };
     bool resizeRequested{ false };

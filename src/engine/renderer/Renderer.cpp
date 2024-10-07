@@ -1,6 +1,7 @@
 #include "Renderer.hpp"
 
 #include "core/logger.hpp"
+#include "math/definitions.hpp"
 #include "vulkan/VulkanContext.hpp"
 #include "vulkan/vulkan_command.hpp"
 #include "vulkan/vulkan_debug.hpp"
@@ -72,10 +73,6 @@ void Renderer::Destroy()
     }
 }
 
-void Renderer::Draw()
-{
-}
-
 void Renderer::BeginFrame()
 {
     VKCHECK(
@@ -130,20 +127,6 @@ void Renderer::BeginFrame()
     beginVkCommandBuffer(
         CurrentFrame().mainCommandBuffer,
         VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-
-    transitionImageLayout(
-        CurrentFrame().mainCommandBuffer,
-        drawImage.image,
-        drawImage.imageFormat,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_GENERAL);
-
-    transitionImageLayout(
-        CurrentFrame().mainCommandBuffer,
-        depthImage.image,
-        depthImage.imageFormat,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 }
 
 void Renderer::EndFrame()
@@ -194,6 +177,10 @@ void Renderer::EndFrame()
 
     m_currentFrame =
         (m_currentFrame + 1) % m_vkContext.GetSwapchain().maxConcurrentFrames;
+}
+
+void Renderer::Draw()
+{
 }
 
 void Renderer::ResizeDrawObjects(const VkExtent2D& extent)
