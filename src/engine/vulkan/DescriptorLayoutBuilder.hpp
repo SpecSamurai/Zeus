@@ -9,20 +9,20 @@ namespace Zeus
 class DescriptorLayoutBuilder
 {
 public:
-    VkDescriptorSetLayout build(
+    VkDescriptorSetLayout Build(
         VkDevice device,
         VkDescriptorSetLayoutCreateFlags flags = 0);
 
-    void addBinding(
+    void AddBinding(
         std::uint32_t binding,
         VkDescriptorType descriptorType,
         VkShaderStageFlags stageFlags,
         std::uint32_t descriptorCount = 1,
         const VkSampler* pImmutableSamplers = nullptr);
 
-    void clear();
+    void Clear();
 
 private:
-    std::vector<VkDescriptorSetLayoutBinding> layoutBindings{};
+    std::vector<VkDescriptorSetLayoutBinding> m_layoutBindings{};
 };
 }

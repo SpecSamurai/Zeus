@@ -7,7 +7,7 @@
 
 namespace Zeus
 {
-VkDescriptorSetLayout DescriptorLayoutBuilder::build(
+VkDescriptorSetLayout DescriptorLayoutBuilder::Build(
     VkDevice device,
     VkDescriptorSetLayoutCreateFlags flags)
 {
@@ -15,8 +15,8 @@ VkDescriptorSetLayout DescriptorLayoutBuilder::build(
     VkDescriptorSetLayoutCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     createInfo.flags = flags;
-    createInfo.bindingCount = static_cast<std::uint32_t>(layoutBindings.size());
-    createInfo.pBindings = layoutBindings.data();
+    createInfo.bindingCount = static_cast<std::uint32_t>(m_layoutBindings.size());
+    createInfo.pBindings = m_layoutBindings.data();
 
     VkResult result{ vkCreateDescriptorSetLayout(
         device,
@@ -29,7 +29,7 @@ VkDescriptorSetLayout DescriptorLayoutBuilder::build(
     return descriptorSetLayout;
 }
 
-void DescriptorLayoutBuilder::addBinding(
+void DescriptorLayoutBuilder::AddBinding(
     std::uint32_t binding,
     VkDescriptorType descriptorType,
     VkShaderStageFlags stageFlags,
@@ -43,11 +43,11 @@ void DescriptorLayoutBuilder::addBinding(
     layoutBinding.stageFlags = stageFlags;
     layoutBinding.pImmutableSamplers = pImmutableSamplers;
 
-    layoutBindings.emplace_back(layoutBinding);
+    m_layoutBindings.emplace_back(layoutBinding);
 }
 
-void DescriptorLayoutBuilder::clear()
+void DescriptorLayoutBuilder::Clear()
 {
-    layoutBindings.clear();
+    m_layoutBindings.clear();
 }
 }
