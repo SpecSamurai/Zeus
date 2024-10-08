@@ -2,9 +2,9 @@
 
 #include "EditorCamera.hpp"
 
-#include <math/definitions.hpp>
-#include <math/transformations.hpp>
-#include <math/trigonometric.hpp>
+#include "math/definitions.hpp"
+#include "math/transformations.hpp"
+#include "math/trigonometric.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -59,7 +59,7 @@ public:
 
     void Move(CameraMovement cameraMovement, float deltaTime)
     {
-        float velocity = deltaTime * m_movementSpeed;
+        float velocity{ deltaTime * m_movementSpeed };
 
         switch (cameraMovement)
         {
@@ -79,7 +79,7 @@ public:
             m_position = m_position + m_up * velocity;
             break;
         case CameraMovement::DOWN:
-            m_position = m_position + m_up * velocity;
+            m_position = m_position - m_up * velocity;
             break;
         }
     };
@@ -105,10 +105,10 @@ public:
 
     void Update()
     {
-        Vector3f direction;
-        direction.x = std::cos(radians(m_yaw)) * std::cos(radians(m_pitch));
-        direction.y = std::sin(radians(m_pitch));
-        direction.z = std::sin(radians(m_yaw)) * std::cos(radians(m_pitch));
+        Vector3f direction(
+            std::cos(radians(m_yaw)) * std::cos(radians(m_pitch)),
+            std::sin(radians(m_pitch)),
+            std::sin(radians(m_yaw)) * std::cos(radians(m_pitch)));
 
         m_direction = normalize(direction);
         m_right = normalize(cross(m_direction, WORLD_UP));

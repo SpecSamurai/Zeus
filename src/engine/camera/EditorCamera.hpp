@@ -1,6 +1,6 @@
 #pragma once
 
-#include <math/definitions.hpp>
+#include "math/definitions.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -48,7 +48,7 @@ public:
 
     virtual const Matrix4x4f& GetViewProjection() const = 0;
 
-    constexpr bool IsType(CameraType cameraType) const
+    inline constexpr bool IsType(CameraType cameraType) const
     {
         return m_cameraType == cameraType;
     };

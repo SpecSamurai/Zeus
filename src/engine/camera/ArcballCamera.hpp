@@ -2,9 +2,9 @@
 
 #include "EditorCamera.hpp"
 
-#include <math/definitions.hpp>
-#include <math/transformations.hpp>
-#include <math/trigonometric.hpp>
+#include "math/definitions.hpp"
+#include "math/transformations.hpp"
+#include "math/trigonometric.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -62,7 +62,7 @@ public:
 
     void Move(CameraMovement cameraMovement, float deltaTime)
     {
-        float velocity = deltaTime * m_movementSpeed;
+        float velocity{ deltaTime * m_movementSpeed };
 
         switch (cameraMovement)
         {
@@ -82,15 +82,15 @@ public:
             m_target = m_target + m_up * velocity;
             break;
         case CameraMovement::DOWN:
-            m_target = m_target + m_up * velocity;
+            m_target = m_target - m_up * velocity;
             break;
         }
     };
 
     void OnMouse(float xOffset, float yOffset, bool constrainPitch = true)
     {
-        m_yaw += yOffset * m_mouseSensitivity;
-        m_pitch += xOffset * m_mouseSensitivity;
+        m_yaw += xOffset * m_mouseSensitivity;
+        m_pitch += yOffset * m_mouseSensitivity;
 
         if (constrainPitch)
         {
