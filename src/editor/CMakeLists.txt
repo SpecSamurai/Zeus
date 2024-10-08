@@ -1,10 +1,7 @@
 find_package(Vulkan REQUIRED)
 
 add_executable(Editor
-    main.cpp
-
-    Application.cpp
-    Application.hpp
+    EditorApp.cpp
 
     ui/IUndoableCommand.hpp
     ui/UIManager.cpp

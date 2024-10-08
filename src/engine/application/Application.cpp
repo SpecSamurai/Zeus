@@ -1,4 +1,5 @@
 #include "Application.hpp"
+
 #include "math/Matrix4x4.hpp"
 #include "renderer/Scene.hpp"
 #include "vulkan/DescriptorWriter.hpp"
@@ -51,7 +52,7 @@ void Application::Init()
     InitCompute();
     InitMesh();
 
-    uiManager.Init(m_window, m_vkContext);
+    // uiManager.Init(m_window, m_vkContext);
 }
 
 void Application::Run()
@@ -75,7 +76,7 @@ void Application::Run()
             m_renderer.ResizeDrawObjects(m_window.extent);
         }
 
-        uiManager.ConfigureFrame();
+        // uiManager.ConfigureFrame();
 
         // imgui commands
         // updateScene();
@@ -93,7 +94,7 @@ void Application::Shutdown()
     debug("Shutting down application");
     vkDeviceWaitIdle(m_vkContext.GetDevice().logicalDevice);
 
-    uiManager.Destroy(m_vkContext.GetDevice().logicalDevice);
+    // uiManager.Destroy(m_vkContext.GetDevice().logicalDevice);
 
     m_renderer.Destroy();
     m_vkContext.Destroy();
@@ -151,32 +152,32 @@ void Application::Draw()
         m_renderer.drawExtent,
         m_vkContext.GetSwapchain().extent);
 
+    // transitionImageLayout(
+    //     m_renderer.CurrentFrame().mainCommandBuffer,
+    //     m_vkContext.GetSwapchain()
+    //         .images[m_renderer.CurrentSwapchainImageIndex()],
+    //     m_vkContext.GetSwapchain().imageFormat,
+    //     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    //
+    // VkRenderingAttachmentInfo colorAttachment{
+    //     createColorAttachmentInfo(
+    //         m_vkContext.GetSwapchain()
+    //             .imageViews[m_renderer.CurrentSwapchainImageIndex()],
+    //         VK_IMAGE_LAYOUT_GENERAL),
+    // };
+
+    // uiManager.Draw(
+    //     m_renderer.CurrentFrame().mainCommandBuffer,
+    //     colorAttachment,
+    //     m_vkContext.GetSwapchain().extent);
+
     transitionImageLayout(
         m_renderer.CurrentFrame().mainCommandBuffer,
         m_vkContext.GetSwapchain()
             .images[m_renderer.CurrentSwapchainImageIndex()],
         m_vkContext.GetSwapchain().imageFormat,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-    VkRenderingAttachmentInfo colorAttachment{
-        createColorAttachmentInfo(
-            m_vkContext.GetSwapchain()
-                .imageViews[m_renderer.CurrentSwapchainImageIndex()],
-            VK_IMAGE_LAYOUT_GENERAL),
-    };
-
-    uiManager.Draw(
-        m_renderer.CurrentFrame().mainCommandBuffer,
-        colorAttachment,
-        m_vkContext.GetSwapchain().extent);
-
-    transitionImageLayout(
-        m_renderer.CurrentFrame().mainCommandBuffer,
-        m_vkContext.GetSwapchain()
-            .images[m_renderer.CurrentSwapchainImageIndex()],
-        m_vkContext.GetSwapchain().imageFormat,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
     m_renderer.EndFrame();
@@ -375,12 +376,12 @@ void Application::InitMesh()
 
 void Application::DrawTriangle()
 {
-    transitionImageLayout(
-        m_renderer.CurrentFrame().mainCommandBuffer,
-        m_renderer.drawImage.image,
-        m_renderer.drawImage.imageFormat,
-        VK_IMAGE_LAYOUT_GENERAL,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    // transitionImageLayout(
+    //     m_renderer.CurrentFrame().mainCommandBuffer,
+    //     m_renderer.drawImage.image,
+    //     m_renderer.drawImage.imageFormat,
+    //     VK_IMAGE_LAYOUT_GENERAL,
+    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     VkRenderingAttachmentInfo colorAttachmentInfo = createColorAttachmentInfo(
         m_renderer.drawImage.imageView,

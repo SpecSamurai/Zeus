@@ -17,6 +17,11 @@ FetchContent_MakeAvailable(fastgltf)
 
 add_library(Engine
     defines.hpp
+    entry_point.cpp
+    entry_point.hpp
+
+    application/Application.cpp
+    application/Application.hpp
 
     core/logger.hpp
     core/Timer.hpp

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "renderer/Scene.hpp"
-#include "ui/UIManager.hpp"
+// #include "ui/UIManager.hpp"
 
 #include <renderer/Renderer.hpp>
 #include <span>
@@ -51,7 +51,7 @@ private:
     Zeus::VulkanContext m_vkContext;
     Zeus::Renderer m_renderer;
 
-    UIManager uiManager;
+    // UIManager uiManager;
 
     // COMPUTE ******************
     DescriptorAllocator computeDescriptorAllocator;
