@@ -17,7 +17,7 @@ VkRenderingAttachmentInfo createColorAttachmentInfo(
 
 void cmdBeginRendering(
     VkCommandBuffer commandBuffer,
-    VkExtent2D renderExtent,
+    const VkExtent2D& renderExtent,
     std::uint32_t colorAttachmentCount,
     const VkRenderingAttachmentInfo* pColorAttachments,
     const VkRenderingAttachmentInfo* pDepthAttachment = nullptr,
