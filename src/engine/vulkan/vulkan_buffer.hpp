@@ -21,5 +21,13 @@ VkResult createBuffer(
     VkMemoryPropertyFlags memoryPropertyFlags,
     bool map = false);
 
+void cmdCopyBuffer(
+    VkCommandBuffer commandBuffer,
+    VkBuffer srcBuffer,
+    VkBuffer dstBuffer,
+    VkDeviceSize srcOffset,
+    VkDeviceSize dstOffset,
+    VkDeviceSize size);
+
 VkDeviceAddress getBufferDeviceAddress(VkDevice device, VkBuffer& buffer);
 }
