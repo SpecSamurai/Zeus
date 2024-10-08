@@ -234,7 +234,7 @@ void VulkanContext::InitCommands()
     createVkCommandPool(
         m_device.logicalDevice,
         VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        m_device.graphicsFamily,
+        m_device.transferFamily,
         m_ImmediateSubmitCommandPool);
 
     allocateVkCommandBuffer(
