@@ -2,52 +2,28 @@
 
 #include "Device.hpp"
 #include "Instance.hpp"
-#include "SwapchainBuilder.hpp"
 #include "vulkan_memory.hpp"
 #include "window/Window.hpp"
 
 #include <vulkan/vulkan_core.h>
-
-#include <functional>
 
 namespace Zeus
 {
 class VulkanContext
 {
 public:
-    VulkanContext(const Window& window);
-
-    void Init();
+    void Init(const Window& window);
     void Destroy();
-    void ResizeSwapchain(const VkExtent2D& extent);
-
-    void CmdImmediateSubmit(
-        std::function<void(VkCommandBuffer cmd)>&& function);
-
-    Instance& GetInstance();
-    Device& GetDevice();
-    VmaAllocator& GetAllocator();
-    Swapchain& GetSwapchain();
 
 private:
-    void InitInstance();
-    void InitDevice();
+    void InitInstance(const Window& window);
+    void InitDevice(const Window& window);
     void InitMemoryAllocator();
-    void InitSwapchain();
-    void InitSyncObjects();
-    void InitCommands();
 
-private:
-    const Window& m_window;
-    SwapchainBuilder m_swapchainBuilder;
-    Instance m_instance;
-    Device m_device;
-    VmaAllocator m_allocator{ VK_NULL_HANDLE };
-    VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
-    Swapchain m_swapchain;
-
-    VkFence m_ImmediateSubmitFence{ VK_NULL_HANDLE };
-    VkCommandPool m_ImmediateSubmitCommandPool{ VK_NULL_HANDLE };
-    VkCommandBuffer m_ImmediateSubmitCommandBuffer{ VK_NULL_HANDLE };
+public:
+    Instance instance;
+    Device device;
+    VmaAllocator allocator{ VK_NULL_HANDLE };
+    VkSurfaceKHR surface{ VK_NULL_HANDLE };
 };
 }
