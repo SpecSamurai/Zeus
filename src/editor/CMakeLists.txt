@@ -1,16 +1,9 @@
-find_package(Vulkan REQUIRED)
-
 add_executable(Editor
     EditorApp.cpp
-
-    ui/IUndoableCommand.hpp
-    ui/UIManager.cpp
-    ui/UIManager.hpp
-    ui/UndoRedoStack.hpp
 )
 
 target_link_libraries(Editor
-    PRIVATE Engine Vulkan::Vulkan glfw imgui
+    PRIVATE Engine
 )
 
 target_compile_options(Editor PRIVATE
