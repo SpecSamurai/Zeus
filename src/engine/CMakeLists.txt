@@ -5,14 +5,13 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/glfw/glfw.git
     GIT_TAG 3.4
 )
+FetchContent_MakeAvailable(glfw)
 
 FetchContent_Declare(
     fastgltf
     GIT_REPOSITORY https://github.com/spnda/fastgltf.git
     GIT_TAG v0.8.0
 )
-
-FetchContent_MakeAvailable(glfw)
 FetchContent_MakeAvailable(fastgltf)
 
 add_library(Engine
@@ -61,8 +60,6 @@ add_library(Engine
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
 
-    renderer/Material.hpp
-    renderer/Scene.hpp
     renderer/Renderer.cpp
     renderer/Renderer.hpp
 
@@ -131,7 +128,13 @@ target_include_directories(Engine
 )
 
 target_link_libraries(Engine
-    PUBLIC Vulkan::Vulkan glfw VulkanMemoryAllocator stb fastgltf imgui
+    PUBLIC
+        Vulkan::Vulkan
+        VulkanMemoryAllocator
+        glfw
+        imgui
+        stb
+        fastgltf
 )
 
 target_compile_options(Engine PRIVATE
