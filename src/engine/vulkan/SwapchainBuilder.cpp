@@ -1,6 +1,6 @@
 #include "SwapchainBuilder.hpp"
 
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 #include "vulkan_debug.hpp"
 #include "vulkan_device.hpp"
 #include "vulkan_memory.hpp"
@@ -81,7 +81,7 @@ std::optional<Swapchain> SwapchainBuilder::build()
     if ((surfaceDetails.capabilities.supportedUsageFlags &
          info.imageUsageFlags) == 0)
     {
-        error("Image usage not supported.");
+        LOG_ERROR("Image usage not supported.");
         return std::nullopt;
     }
 
@@ -191,8 +191,8 @@ std::optional<Swapchain> SwapchainBuilder::build()
 #endif
     }
 
-    debug("Swapchain created images count {}", swapchain.imageCount);
-    debug("Max Concurrent Frames {}.", swapchain.maxConcurrentFrames);
+    LOG_DEBUG("Swapchain created images count {}", swapchain.imageCount);
+    LOG_DEBUG("Max Concurrent Frames {}.", swapchain.maxConcurrentFrames);
 
     assert(swapchain.imageCount == imageCount);
     assert(swapchain.images.size() == imageCount);
@@ -280,37 +280,37 @@ bool SwapchainBuilder::validate()
     if (info.device == VK_NULL_HANDLE)
     {
         isValid = false;
-        error("Device not set.");
+        LOG_ERROR("Device not set.");
     }
 
     if (info.physicalDevice == VK_NULL_HANDLE)
     {
         isValid = false;
-        error("Physical device not set.");
+        LOG_ERROR("Physical device not set.");
     }
 
     if (info.surface == VK_NULL_HANDLE)
     {
         isValid = false;
-        error("Surface not set.");
+        LOG_ERROR("Surface not set.");
     }
 
     if (info.graphicsFamily == UINT32_MAX)
     {
         isValid = false;
-        error("Graphics family not set.");
+        LOG_ERROR("Graphics family not set.");
     }
 
     if (info.presentFamily == UINT32_MAX)
     {
         isValid = false;
-        error("Present family not set.");
+        LOG_ERROR("Present family not set.");
     }
 
     if (info.desiredExtent.width == 0 || info.desiredExtent.height == 0)
     {
         isValid = false;
-        error("Extent not set.");
+        LOG_ERROR("Extent not set.");
     }
 
     if (info.desiredSurfaceFormats.empty())
@@ -327,7 +327,7 @@ bool SwapchainBuilder::validate()
 
         info.desiredSurfaceFormats.emplace_back(surfaceFormatUNORM);
         info.desiredSurfaceFormats.emplace_back(surfaceFormatSRGB);
-        warning("Desired formats not set. Used default.");
+        LOG_WARNING("Desired formats not set. Used default.");
     }
 
     return isValid;

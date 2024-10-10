@@ -1,7 +1,7 @@
 #define VMA_IMPLEMENTATION
 #include "vulkan_memory.hpp"
 
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -15,7 +15,7 @@ void* allocationFunction(
     [[maybe_unused]] std::size_t alignment,
     [[maybe_unused]] VkSystemAllocationScope allocationScope)
 {
-    debug("allocationFunction");
+    LOG_DEBUG("allocationFunction");
     return nullptr;
 }
 
@@ -23,7 +23,7 @@ void freeFunction(
     [[maybe_unused]] void* pUserData,
     [[maybe_unused]] void* pMemory)
 {
-    debug("freeFunction");
+    LOG_DEBUG("freeFunction");
 }
 
 void internalAllocationNotification(
@@ -32,7 +32,7 @@ void internalAllocationNotification(
     [[maybe_unused]] VkInternalAllocationType allocationType,
     [[maybe_unused]] VkSystemAllocationScope allocationScope)
 {
-    debug("internalAllocationNotification");
+    LOG_DEBUG("internalAllocationNotification");
 }
 
 void internalFreeNotification(
@@ -41,7 +41,7 @@ void internalFreeNotification(
     [[maybe_unused]] VkInternalAllocationType allocationType,
     [[maybe_unused]] VkSystemAllocationScope allocationScope)
 {
-    debug("internalFreeNotification");
+    LOG_DEBUG("internalFreeNotification");
 }
 
 void* reallocationFunction(
@@ -51,7 +51,7 @@ void* reallocationFunction(
     [[maybe_unused]] std::size_t alignment,
     [[maybe_unused]] VkSystemAllocationScope allocationScope)
 {
-    debug("reallocationFunction");
+    LOG_DEBUG("reallocationFunction");
     return nullptr;
 }
 }

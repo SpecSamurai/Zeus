@@ -2,7 +2,7 @@
 
 #include "PhysicalDevice.hpp"
 
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 #include "vulkan_device.hpp"
 
 #include <vulkan/vulkan.h>
@@ -25,7 +25,7 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
 
     if (physicalDeviceCount == 0)
     {
-        error("Failed to find GPUs with Vulkan support");
+        LOG_ERROR("Failed to find GPUs with Vulkan support");
         return std::nullopt;
     }
 
@@ -48,8 +48,8 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
     if (candidates.rbegin()->first > 0)
     {
         const auto& device = candidates.rbegin()->second;
-        debug("Selected physical device: {}", device.name);
-        debug(
+        LOG_DEBUG("Selected physical device: {}", device.name);
+        LOG_DEBUG(
             "GRAPHICS: {} | PRESENT: {} | COMPUTE: {} | TRANSFER: {}",
             device.queueFamilies.graphicsFamily.value(),
             device.queueFamilies.presentFamily.value(),
@@ -60,7 +60,7 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
     }
     else
     {
-        error("Failed to find a suitable physical device");
+        LOG_ERROR("Failed to find a suitable physical device");
         return std::nullopt;
     }
 }
@@ -71,19 +71,19 @@ bool PhysicalDeviceSelector::validate()
 
     if (instance == VK_NULL_HANDLE)
     {
-        error("Instance not set.");
+        LOG_ERROR("Instance not set.");
         isValid = false;
     }
 
     if (criteria.requirePresent && surface == VK_NULL_HANDLE)
     {
-        error("Present is required but Surface is not set.");
+        LOG_ERROR("Present is required but Surface is not set.");
         isValid = false;
     }
 
     if (criteria.extensions.empty())
     {
-        warning("Extensions are not set. Use default.");
+        LOG_WARNING("Extensions are not set. Use default.");
         criteria.extensions = {
             // VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
             // VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
@@ -98,7 +98,8 @@ bool PhysicalDeviceSelector::validate()
              criteria.extensions.end(),
              VK_KHR_SWAPCHAIN_EXTENSION_NAME) == criteria.extensions.end()))
     {
-        warning("Present is required but extension is not set. Use default.");
+        LOG_WARNING(
+            "Present is required but extension is not set. Use default.");
         criteria.extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
     }
 
@@ -263,51 +264,51 @@ bool PhysicalDeviceSelector::checkPhysicalDeviceFeatures(
     if (criteria.features2.features.samplerAnisotropy &&
         !deviceFeatures2.features.samplerAnisotropy)
     {
-        error("Device doesn't support samplerAnisotropy.");
+        LOG_ERROR("Device doesn't support samplerAnisotropy.");
         isValid = false;
     }
 
     if (criteria.features2.features.fillModeNonSolid &&
         !deviceFeatures2.features.fillModeNonSolid)
     {
-        error("Device doesn't support fillModeNonSolid.");
+        LOG_ERROR("Device doesn't support fillModeNonSolid.");
         isValid = false;
     }
 
     if (criteria.features2.features.sampleRateShading &&
         !deviceFeatures2.features.sampleRateShading)
     {
-        error("Device doesn't support sampleRateShading.");
+        LOG_ERROR("Device doesn't support sampleRateShading.");
         isValid = false;
     }
 
     if (criteria.features1_2.bufferDeviceAddress &&
         !features1_2.bufferDeviceAddress)
     {
-        error("Device doesn't support VkPhysicalDeviceVulkan12Features "
-              "bufferDeviceAddress.");
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "bufferDeviceAddress.");
         isValid = false;
     }
 
     if (criteria.features1_2.descriptorIndexing &&
         !features1_2.descriptorIndexing)
     {
-        error("Device doesn't support VkPhysicalDeviceVulkan12Features "
-              "descriptorIndexing.");
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "descriptorIndexing.");
         isValid = false;
     }
 
     if (criteria.features1_3.dynamicRendering && !features1_3.dynamicRendering)
     {
-        error("Device doesn't support VkPhysicalDeviceVulkan13Features "
-              "dynamicRendering.");
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan13Features "
+                  "dynamicRendering.");
         isValid = false;
     }
 
     if (criteria.features1_3.synchronization2 && !features1_3.synchronization2)
     {
-        error("Device doesn't support VkPhysicalDeviceVulkan13Features "
-              "synchronization2.");
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan13Features "
+                  "synchronization2.");
         isValid = false;
     }
 

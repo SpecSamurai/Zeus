@@ -1,6 +1,6 @@
 #include "InstanceBuilder.hpp"
 
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 #include "vulkan_debug.hpp"
 #include "vulkan_memory.hpp"
 
@@ -104,7 +104,7 @@ bool InstanceBuilder::validate()
 #ifndef NDEBUG
     if (info.validationLayers.empty())
     {
-        warning("Validation layers not set. Used default.");
+        LOG_WARNING("Validation layers not set. Used default.");
         info.validationLayers = VALIDATION_LAYERS;
     }
 
@@ -129,63 +129,63 @@ bool InstanceBuilder::validate()
 
         if (!layerFound)
         {
-            error("{} validation layer not supported", layerName);
+            LOG_ERROR("{} validation layer not supported", layerName);
             isValid = false;
         }
     }
 
     if (info.debugCallback == nullptr)
     {
-        warning("Debug callback not set. Used default.");
+        LOG_WARNING("Debug callback not set. Used default.");
         info.debugCallback = defaultDebugCallback;
     }
 
     if (info.debugMessageType == 0)
     {
-        warning("Debug Message Type not set. Used default.");
+        LOG_WARNING("Debug Message Type not set. Used default.");
         info.debugMessageType = DEBUG_MESSAGE.MESSAGE_TYPE;
     }
 
     if (info.debugMessageSeverity == 0)
     {
-        warning("Debug Message Severity not set. Used default.");
+        LOG_WARNING("Debug Message Severity not set. Used default.");
         info.debugMessageSeverity = DEBUG_MESSAGE.MESSAGE_SEVERITY;
     }
 #endif
 
     if (info.extensions.empty())
     {
-        error("Extensions not set");
+        LOG_ERROR("Extensions not set");
         isValid = false;
     }
 
     if (info.applicationName == nullptr)
     {
-        error("Application name not set");
+        LOG_ERROR("Application name not set");
         isValid = false;
     }
 
     if (info.engineName == nullptr)
     {
-        error("Engine name not set");
+        LOG_ERROR("Engine name not set");
         isValid = false;
     }
 
     if (info.applicationVersion == 0)
     {
-        error("Application version not set");
+        LOG_ERROR("Application version not set");
         isValid = false;
     }
 
     if (info.engineVersion == 0)
     {
-        error("Engine version not set");
+        LOG_ERROR("Engine version not set");
         isValid = false;
     }
 
     if (info.apiVersion == 0)
     {
-        warning("Api version not set");
+        LOG_WARNING("Api version not set");
         info.apiVersion = VK_API_VERSION_1_3;
     }
 

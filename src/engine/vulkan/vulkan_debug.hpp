@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 #include "math/definitions.hpp"
 
 #include <vulkan/vk_enum_string_helper.h>
@@ -30,7 +30,7 @@ const static Vector4f GREEN{ Vector4f(0.f, 1.f, 0.f, 1.f) };
         VkResult checkVkResult{ expression };                                  \
         if (checkVkResult != VK_SUCCESS)                                       \
         {                                                                      \
-            fatal("{} {}", msg, string_VkResult(checkVkResult));               \
+            LOG_FATAL("{} {}", msg, string_VkResult(checkVkResult));           \
             assert(checkVkResult == VK_SUCCESS);                               \
         }                                                                      \
     } while (0)

@@ -1,6 +1,6 @@
 #include "glfw_utils.hpp"
 
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
@@ -13,7 +13,7 @@ namespace Zeus
 {
 void glfwErrorCallback(int error, const char* description)
 {
-    Zeus::error("Error {}: {}", error, description);
+    LOG_ERROR("Error {}: {}", error, description);
 }
 
 GLFWwindow* createGlfwWindow(int width, int height, const char* title)
@@ -24,7 +24,7 @@ GLFWwindow* createGlfwWindow(int width, int height, const char* title)
 
     if (!glfwInit())
     {
-        error("GLFW initialization failed");
+        LOG_ERROR("GLFW initialization failed");
         return nullptr;
     }
 
@@ -35,7 +35,7 @@ GLFWwindow* createGlfwWindow(int width, int height, const char* title)
 
     if (!window)
     {
-        error("GLFW Window creation failed");
+        LOG_ERROR("GLFW Window creation failed");
         glfwTerminate();
         return nullptr;
     }

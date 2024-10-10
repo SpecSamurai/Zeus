@@ -15,7 +15,8 @@ VkDescriptorSetLayout DescriptorLayoutBuilder::Build(
     VkDescriptorSetLayoutCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     createInfo.flags = flags;
-    createInfo.bindingCount = static_cast<std::uint32_t>(m_layoutBindings.size());
+    createInfo.bindingCount =
+        static_cast<std::uint32_t>(m_layoutBindings.size());
     createInfo.pBindings = m_layoutBindings.data();
 
     VkResult result{ vkCreateDescriptorSetLayout(

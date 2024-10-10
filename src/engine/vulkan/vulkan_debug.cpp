@@ -1,6 +1,6 @@
 #include "vulkan_debug.hpp"
 
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 #include "math/definitions.hpp"
 
 #include <vulkan/vulkan.h>
@@ -27,13 +27,13 @@ VKAPI_ATTR VkBool32 VKAPI_CALL defaultDebugCallback(
     {
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-        info("{}", pCallbackData->pMessage);
+        LOG_INFO("{}", pCallbackData->pMessage);
         break;
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-        warning("{}", pCallbackData->pMessage);
+        LOG_WARNING("{}", pCallbackData->pMessage);
         break;
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-        error("{}", pCallbackData->pMessage);
+        LOG_ERROR("{}", pCallbackData->pMessage);
         break;
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT:
         break;

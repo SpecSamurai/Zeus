@@ -1,6 +1,12 @@
 find_package(Vulkan REQUIRED)
 
 FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt
+    GIT_TAG 11.0.2)
+FetchContent_MakeAvailable(fmt)
+
+FetchContent_Declare(
     glfw
     GIT_REPOSITORY https://github.com/glfw/glfw.git
     GIT_TAG 3.4
@@ -22,7 +28,6 @@ add_library(Engine
     application/Application.cpp
     application/Application.hpp
 
-    core/logger.hpp
     core/Timer.hpp
 
     camera/camera_utils.cpp
@@ -35,6 +40,8 @@ add_library(Engine
 
     gltf/utility.cpp
     gltf/utility.hpp
+
+    logging/logger.hpp
 
     math/definitions.hpp
     math/geometric.hpp
@@ -60,8 +67,8 @@ add_library(Engine
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
 
-    renderer/Renderer.cpp
-    renderer/Renderer.hpp
+    rendering/Renderer.cpp
+    rendering/Renderer.hpp
 
     vulkan/DescriptorAllocator.cpp
     vulkan/DescriptorAllocator.hpp
@@ -133,6 +140,7 @@ target_link_libraries(Engine
         VulkanMemoryAllocator
         glfw
         imgui
+        fmt::fmt
         stb
         fastgltf
 )

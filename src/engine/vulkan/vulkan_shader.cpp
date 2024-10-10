@@ -1,6 +1,6 @@
 #include "vulkan_shader.hpp"
 
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 #include "vulkan_debug.hpp"
 #include "vulkan_memory.hpp"
 
@@ -45,7 +45,7 @@ VkResult loadShader(
 
     if (!file.is_open())
     {
-        error("Failed to open file: {}", filename);
+        LOG_ERROR("Failed to open file: {}", filename);
         assert(file.is_open());
 
         return VK_ERROR_INITIALIZATION_FAILED;

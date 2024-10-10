@@ -1,6 +1,6 @@
 #include "Window.hpp"
 
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 #include "window/glfw_utils.hpp"
 
 #define GLFW_INCLUDE_NONE
@@ -32,7 +32,7 @@ void Window::Init()
 
 void Window::Destroy()
 {
-    debug("Destroying window: {}", title);
+    LOG_DEBUG("Destroying window: {}", title);
 
     glfwDestroyWindow(handle);
     glfwTerminate();

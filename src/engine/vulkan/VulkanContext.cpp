@@ -5,7 +5,7 @@
 #include "Instance.hpp"
 #include "InstanceBuilder.hpp"
 #include "PhysicalDeviceSelector.hpp"
-#include "core/logger.hpp"
+#include "logging/logger.hpp"
 #include "vulkan_memory.hpp"
 #include "vulkan_surface.hpp"
 #include "window/Window.hpp"
@@ -24,7 +24,7 @@ void VulkanContext::Init(const Window& window)
 
 void VulkanContext::Destroy()
 {
-    debug("Destroying VulkanContext");
+    LOG_DEBUG("Destroying VulkanContext");
 
     vmaDestroyAllocator(allocator);
     destroyDevice(device);
