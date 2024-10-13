@@ -28,13 +28,16 @@ add_library(Engine
     application/Application.cpp
     application/Application.hpp
 
-    core/Timer.hpp
-
     camera/camera_utils.cpp
     camera/camera_utils.hpp
     camera/ArcballCamera.hpp
     camera/EditorCamera.hpp
     camera/FreeflyCamera.hpp
+
+    commands/CommandStack.hpp
+    commands/ICommand.hpp
+
+    core/Timer.hpp
 
     input/InputManager.hpp
 
