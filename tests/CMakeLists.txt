@@ -14,6 +14,8 @@ enable_testing()
 add_executable(Tests
     engine/commands/CommandStackTest.cpp
 
+    engine/events/EventTest.cpp
+
     engine/math/GeometricTest.cpp
     engine/math/Matrix3x3Test.cpp
     engine/math/Matrix4x4Test.cpp
