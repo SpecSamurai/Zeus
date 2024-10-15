@@ -10,6 +10,7 @@ namespace Zeus
 template <typename... EventTypes>
 class EventDispatcher
 {
+private:
     template <typename EventType>
     struct RegisteredEventHandler
     {
