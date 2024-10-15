@@ -4,7 +4,7 @@
 
 namespace Zeus
 {
-extern Application* CreateApplication();
+[[nodiscard]] extern Application* CreateApplication(CommandLineArgs args);
 }
 
-int main(int argc, char* argv[]);
+int main(int argc, char** argv);

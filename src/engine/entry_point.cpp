@@ -2,15 +2,17 @@
 
 #include <cstdlib>
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
+int main(int argc, char** argv)
 {
-    auto app{ Zeus::CreateApplication() };
+    auto app{ Zeus::CreateApplication(Zeus::CommandLineArgs(argv, argc)) };
 
     app->Init();
 
     app->Run();
 
     app->Shutdown();
+
+    delete app;
 
     return EXIT_SUCCESS;
 }
