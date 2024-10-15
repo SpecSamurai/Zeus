@@ -11,6 +11,8 @@
 
 namespace Zeus
 {
+static bool s_isGLFWInitialzied{ false };
+
 void glfwErrorCallback(int error, const char* description)
 {
     LOG_ERROR("Error {}: {}", error, description);
@@ -18,17 +20,22 @@ void glfwErrorCallback(int error, const char* description)
 
 GLFWwindow* createGlfwWindow(int width, int height, const char* title)
 {
+    if (!s_isGLFWInitialzied)
+    {
 #ifndef NDEBUG
-    glfwSetErrorCallback(glfwErrorCallback);
+        glfwSetErrorCallback(glfwErrorCallback);
 #endif
 
-    if (!glfwInit())
-    {
-        LOG_ERROR("GLFW initialization failed");
-        return nullptr;
+        if (!glfwInit())
+        {
+            LOG_ERROR("GLFW initialization failed");
+            return nullptr;
+        }
+        s_isGLFWInitialzied = true;
+
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     GLFWwindow* window{
         glfwCreateWindow(width, height, title, nullptr, nullptr)
     };
