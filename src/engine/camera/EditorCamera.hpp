@@ -31,6 +31,8 @@ public:
     {
     }
 
+    virtual ~EditorCamera() = default;
+
     virtual void Reset() = 0;
 
     virtual void Move(CameraMovement cameraMovement, float deltaTime) = 0;
