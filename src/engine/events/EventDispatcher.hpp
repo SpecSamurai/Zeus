@@ -2,7 +2,6 @@
 
 #include "Event.hpp"
 
-#include <algorithm>
 #include <tuple>
 #include <vector>
 
@@ -11,58 +10,89 @@ namespace Zeus
 template <typename... EventTypes>
 class EventDispatcher
 {
-    template <typename T>
-    using EventListenerPool = std::vector<EventListener<T>>;
+    template <typename EventType>
+    struct RegisteredEventHandler
+    {
+        const char* name;
+        EventHandler<EventType> eventHandler;
+    };
+
+    template <typename EventType>
+    using EventHandlerPool = std::vector<RegisteredEventHandler<EventType>>;
 
 public:
-    EventDispatcher(std::uint64_t poolCapacity)
+    EventDispatcher(std::uint64_t capacity)
     {
-        (std::get<EventListenerPool<EventTypes>>(m_listenerPools)
-             .reserve(poolCapacity),
+        (std::get<EventHandlerPool<EventTypes>>(m_eventHandlers)
+             .reserve(capacity),
          ...);
     }
 
     template <typename EventType>
-    void Register(EventListener<EventType> listener)
+    void Register(
+        const char* name,
+        bool (*eventHandler)(const EventType& event))
     {
-        EventListenerPool<EventType>& pool{
-            std::get<EventListenerPool<EventType>>(m_listenerPools)
+        EventHandlerPool<EventType>& pool{
+            std::get<EventHandlerPool<EventType>>(m_eventHandlers)
         };
 
-        pool.emplace_back(listener);
+        pool.emplace_back(RegisteredEventHandler{
+            .name = name,
+            .eventHandler = std::forward<EventHandler<EventType>>(eventHandler),
+        });
     }
 
     template <typename EventType>
-    void Unregister(EventListener<EventType> listener)
+    void Register(const char* name, EventHandler<EventType>&& eventHandler)
     {
-        EventListenerPool<EventType>& pool{
-            std::get<EventListenerPool<EventType>>(m_listenerPools)
+        EventHandlerPool<EventType>& pool{
+            std::get<EventHandlerPool<EventType>>(m_eventHandlers)
         };
 
-        auto item{ std::find(pool.begin(), pool.end(), listener) };
-        if (item != pool.end())
+        pool.emplace_back(RegisteredEventHandler{
+            .name = name,
+            .eventHandler = std::forward<EventHandler<EventType>>(eventHandler),
+        });
+    }
+
+    template <typename EventType>
+    void Unregister(const char* name)
+    {
+        EventHandlerPool<EventType>& pool{
+            std::get<EventHandlerPool<EventType>>(m_eventHandlers)
+        };
+
+        for (std::size_t i{ 0 }; i < pool.size(); ++i)
         {
-            pool.erase(item);
+            if (strcmp(pool[i].name, name) == 0)
+            {
+                auto item{ pool.begin() + static_cast<std::int64_t>(i) };
+                pool.erase(item);
+            }
         }
     }
 
     template <typename EventType>
     bool Dispatch(const EventType& event)
     {
-        EventListenerPool<EventType>& pool{
-            std::get<EventListenerPool<EventType>>(m_listenerPools)
+        EventHandlerPool<EventType>& pool{
+            std::get<EventHandlerPool<EventType>>(m_eventHandlers)
         };
 
-        bool isHandeled{ true };
-        for (EventListener<EventType> listener : pool)
+        if (pool.size() == 0)
+            return false;
+
+        bool isHandled{ true };
+        for (const RegisteredEventHandler<EventType>& listener : pool)
         {
-            isHandeled &= listener(event);
+            isHandled &= listener.eventHandler(event);
         }
 
-        return isHandeled;
+        return isHandled;
     }
 
 private:
-    std::tuple<EventListenerPool<EventTypes>...> m_listenerPools;
+    std::tuple<EventHandlerPool<EventTypes>...> m_eventHandlers;
 };
 }

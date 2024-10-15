@@ -39,6 +39,9 @@ add_library(Engine
 
     core/Timer.hpp
 
+    events/Event.hpp
+    events/EventDispatcher.hpp
+
     input/InputManager.hpp
 
     gltf/utility.cpp
