@@ -38,7 +38,7 @@ void VulkanContext::InitInstance(const Window& window)
     instanceBuilder.setApiVersion(VK_API_VERSION_1_3);
     instanceBuilder.setEngineName("Zeus");
     instanceBuilder.setEngineVersion(VK_MAKE_VERSION(0, 0, 1));
-    instanceBuilder.setAppName(window.title);
+    instanceBuilder.setAppName(window.GetTitle());
     instanceBuilder.setApplicationVersion(VK_MAKE_VERSION(0, 0, 1));
     instanceBuilder.setExtensions(getRequiredGlobalExtensions());
 
@@ -47,7 +47,7 @@ void VulkanContext::InitInstance(const Window& window)
 
 void VulkanContext::InitDevice(const Window& window)
 {
-    createVkSurfaceKHR(instance.handle, window.handle, surface);
+    createVkSurfaceKHR(instance.handle, window.GetHandle(), surface);
 
     VkPhysicalDeviceFeatures requestedFeatures{};
     requestedFeatures.sampleRateShading = VK_TRUE;
