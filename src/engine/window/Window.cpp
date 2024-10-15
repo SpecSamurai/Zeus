@@ -3,6 +3,7 @@
 #include "events/KeyEvent.hpp"
 #include "events/MouseEvent.hpp"
 #include "events/WindowEvent.hpp"
+#include "input/KeyCode.hpp"
 #include "input/MouseButtonCode.hpp"
 #include "logging/logger.hpp"
 #include "math/definitions.hpp"
@@ -61,26 +62,23 @@ void Window::Init()
            [[maybe_unused]] int mods) {
             switch (action)
             {
-            case GLFW_PRESS: {
+            case GLFW_PRESS:
                 // EventDispatcher.Dispatch(KeyPressedEvent{
                 //     .keyCode = static_cast<KeyCode>(key),
                 //     .isRepeated = false,
                 // });
                 break;
-            }
-            case GLFW_RELEASE: {
+            case GLFW_RELEASE:
                 // EventDispatcher.Dispatch(KeyReleasedEvent{
                 //     .keyCode = static_cast<KeyCode>(key),
                 // });
                 break;
-            }
-            case GLFW_REPEAT: {
+            case GLFW_REPEAT:
                 // EventDispatcher.Dispatch(KeyPressedEvent{
                 //     .keyCode = static_cast<KeyCode>(key),
                 //     .isRepeated = true,
                 // });
                 break;
-            }
             }
         });
 
@@ -100,18 +98,16 @@ void Window::Init()
            [[maybe_unused]] int mods) {
             switch (action)
             {
-            case GLFW_PRESS: {
+            case GLFW_PRESS:
                 // EventDispatcher.Dispatch(MouseButtonPressedEvent{
                 //     .buttonCode = static_cast<MouseButtonCode>(button),
                 // });
                 break;
-            }
-            case GLFW_RELEASE: {
+            case GLFW_RELEASE:
                 // EventDispatcher.Dispatch(MouseButtonReleasedEvent{
                 //     .buttonCode = static_cast<MouseButtonCode>(button),
                 // });
                 break;
-            }
             }
         });
 
