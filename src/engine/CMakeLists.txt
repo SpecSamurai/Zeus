@@ -27,6 +27,8 @@ add_library(Engine
 
     application/Application.cpp
     application/Application.hpp
+    application/CommandLineArgs.cpp
+    application/CommandLineArgs.hpp
 
     camera/camera_utils.cpp
     camera/camera_utils.hpp
@@ -153,7 +155,6 @@ target_link_libraries(Engine
         Vulkan::Vulkan
         VulkanMemoryAllocator
         glfw
-        imgui
         fmt::fmt
         stb
         fastgltf
