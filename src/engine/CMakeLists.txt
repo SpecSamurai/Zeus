@@ -46,6 +46,8 @@ add_library(Engine
     events/WindowEvent.hpp
 
     input/InputManager.hpp
+    input/KeyCode.hpp
+    input/MouseButtonCode.hpp
 
     gltf/utility.cpp
     gltf/utility.hpp
@@ -79,6 +81,7 @@ add_library(Engine
     rendering/Renderer.cpp
     rendering/Renderer.hpp
 
+    time/Timer.cpp
     time/Timer.hpp
 
     vulkan/DescriptorAllocator.cpp
