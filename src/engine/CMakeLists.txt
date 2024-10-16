@@ -47,12 +47,13 @@ add_library(Engine
     events/MouseEvent.hpp
     events/WindowEvent.hpp
 
-    input/InputManager.hpp
-    input/KeyCode.hpp
-    input/MouseButtonCode.hpp
-
     gltf/utility.cpp
     gltf/utility.hpp
+
+    input/Input.cpp
+    input/Input.hpp
+    input/KeyCode.hpp
+    input/MouseButtonCode.hpp
 
     logging/logger.hpp
 
