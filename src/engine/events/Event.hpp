@@ -1,9 +1,36 @@
 #pragma once
 
-#include <functional>
+#include "events/EventDispatcher.hpp"
+#include "events/EventQueue.hpp"
+#include "events/KeyEvent.hpp"
+#include "events/MouseEvent.hpp"
+#include "events/WindowEvent.hpp"
 
-namespace Zeus
+namespace Zeus::Event
 {
-template <typename EventType>
-using EventHandler = std::function<bool(const EventType& event)>;
+inline EventDispatcher<
+    KeyPressedEvent,
+    KeyReleasedEvent,
+    KeyTypedEvent,
+    MouseButtonPressedEvent,
+    MouseButtonReleasedEvent,
+    MouseScrolledEvent,
+    MouseMovedEvent,
+    WindowResizedEvent,
+    WindowFullscreenToggledEvent,
+    WindowClosedEvent>
+    Dispatcher(10);
+
+inline EventQueue<
+    KeyPressedEvent,
+    KeyReleasedEvent,
+    KeyTypedEvent,
+    MouseButtonPressedEvent,
+    MouseButtonReleasedEvent,
+    MouseScrolledEvent,
+    MouseMovedEvent,
+    WindowResizedEvent,
+    WindowFullscreenToggledEvent,
+    WindowClosedEvent>
+    Queue(10, 100);
 }
