@@ -1,5 +1,7 @@
 #include "entry_point.hpp"
 
+#include "application/Application.hpp"
+
 #include <cstdlib>
 
 int main(int argc, char** argv)
