@@ -37,10 +37,13 @@ add_library(Engine
     commands/CommandStack.hpp
     commands/ICommand.hpp
 
-    core/Timer.hpp
-
     events/Event.hpp
     events/EventDispatcher.hpp
+    events/EventHandler.hpp
+    events/EventQueue.hpp
+    events/KeyEvent.hpp
+    events/MouseEvent.hpp
+    events/WindowEvent.hpp
 
     input/InputManager.hpp
 
@@ -75,6 +78,8 @@ add_library(Engine
 
     rendering/Renderer.cpp
     rendering/Renderer.hpp
+
+    time/Timer.hpp
 
     vulkan/DescriptorAllocator.cpp
     vulkan/DescriptorAllocator.hpp

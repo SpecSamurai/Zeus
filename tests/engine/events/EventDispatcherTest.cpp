@@ -1,21 +1,15 @@
+#include "EventTest_types.hpp"
+
 #include <events/Event.hpp>
 #include <events/EventDispatcher.hpp>
 
 #include <gtest/gtest.h>
 
-struct TestEvent1
-{
-};
-
-struct TestEvent2
-{
-    float value;
-};
-
-class TestClass
+class EventDispatcherTestClass
 {
 public:
-    TestClass(Zeus::EventDispatcher<TestEvent1, TestEvent2>& dispatcher)
+    EventDispatcherTestClass(
+        Zeus::EventDispatcher<TestEvent1, TestEvent2>& dispatcher)
         : dispatcher{ dispatcher }
     {
         dispatcher.Register<TestEvent1>(
@@ -128,7 +122,7 @@ TEST(EventDispatcherTest, DispatchStatic_AfterUnregistration_False)
 TEST(EventDispatcherTest, DispatchClassMember_OneEvent)
 {
     Zeus::EventDispatcher<TestEvent1, TestEvent2> sut(2);
-    TestClass testObj(sut);
+    EventDispatcherTestClass testObj(sut);
 
     auto result2 = sut.Dispatch(TestEvent2{ .value = 10 });
 
@@ -140,7 +134,7 @@ TEST(EventDispatcherTest, DispatchClassMember_OneEvent)
 TEST(EventDispatcherTest, DispatchClassMember_MultipleEvents)
 {
     Zeus::EventDispatcher<TestEvent1, TestEvent2> sut(2);
-    TestClass testObj(sut);
+    EventDispatcherTestClass testObj(sut);
 
     auto result1 = sut.Dispatch(TestEvent1{});
     auto result2 = sut.Dispatch(TestEvent2{ .value = 10 });
@@ -154,7 +148,7 @@ TEST(EventDispatcherTest, DispatchClassMember_MultipleEvents)
 TEST(EventDispatcherTest, DispatchClassMember_AfterUnregistration_False)
 {
     Zeus::EventDispatcher<TestEvent1, TestEvent2> sut(2);
-    TestClass testObj(sut);
+    EventDispatcherTestClass testObj(sut);
 
     sut.Unregister<TestEvent1>("TestClass::TestEvent1");
 
@@ -170,7 +164,7 @@ TEST(EventDispatcherTest, DispatchClassMember_AfterUnregistration_False)
 TEST(EventDispatcherTest, DispatchStaticAndClassMembers)
 {
     Zeus::EventDispatcher<TestEvent1, TestEvent2> sut(2);
-    TestClass testObj(sut);
+    EventDispatcherTestClass testObj(sut);
     IsHandled = false;
     TestValue = 0;
 

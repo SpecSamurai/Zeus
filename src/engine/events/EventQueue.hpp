@@ -1,43 +1,123 @@
 #pragma once
 
+#include "EventHandler.hpp"
+
 #include <tuple>
 #include <vector>
 
 namespace Zeus
 {
-template <typename... Type>
+template <typename... EventTypes>
 class EventQueue
 {
+private:
+    template <typename EventType>
+    struct RegisteredEventHandler
+    {
+        const char* name;
+        EventHandler<EventType> eventHandler;
+    };
+
+    template <typename EventType>
+    using EventHandlerPool = std::vector<RegisteredEventHandler<EventType>>;
+
+    template <typename EventType>
+    using EventPool = std::vector<EventType>;
+
 public:
-    EventQueue()
+    EventQueue(std::uint64_t handlersCapacity, std::uint64_t eventsCapacity)
     {
-        (std::get<std::vector<Type>>(m_eventPools).reserve(10), ...);
+        (std::get<EventHandlerPool<EventTypes>>(m_eventHandlers)
+             .reserve(handlersCapacity),
+         ...);
+
+        (std::get<EventPool<EventTypes>>(m_eventPools).reserve(eventsCapacity),
+         ...);
     }
 
-    template <typename T, typename... Args>
-    void Publish(Args&&... args)
+    template <typename EventType>
+    void Register(
+        const char* name,
+        bool (*eventHandler)(const EventType& event))
     {
-        T event(std::forward<Args>(args)...);
-        std::vector<T>& pool{ std::get<std::vector<T>>(m_eventPools) };
+        EventHandlerPool<EventType>& pool{
+            std::get<EventHandlerPool<EventType>>(m_eventHandlers)
+        };
 
-        pool.emplace_back(event);
+        pool.emplace_back(RegisteredEventHandler{
+            .name = name,
+            .eventHandler = std::forward<EventHandler<EventType>>(eventHandler),
+        });
     }
 
-    template <typename T>
-    void Publish(const T& event)
+    template <typename EventType>
+    void Register(const char* name, EventHandler<EventType>&& eventHandler)
     {
-        std::get<std::vector<T>>(m_eventPools).push_back(event);
+        EventHandlerPool<EventType>& pool{
+            std::get<EventHandlerPool<EventType>>(m_eventHandlers)
+        };
+
+        pool.emplace_back(RegisteredEventHandler{
+            .name = name,
+            .eventHandler = std::forward<EventHandler<EventType>>(eventHandler),
+        });
     }
 
-    template <typename T>
+    template <typename EventType>
+    void Unregister(const char* name)
+    {
+        EventHandlerPool<EventType>& pool{
+            std::get<EventHandlerPool<EventType>>(m_eventHandlers)
+        };
+
+        for (std::size_t i{ 0 }; i < pool.size(); ++i)
+        {
+            if (strcmp(pool[i].name, name) == 0)
+            {
+                auto item{ pool.begin() + static_cast<std::int64_t>(i) };
+                pool.erase(item);
+            }
+        }
+    }
+
+    template <typename EventType>
+    void Publish(EventType&& event)
+    {
+        EventPool<EventType>& pool{ std::get<EventPool<EventType>>(
+            m_eventPools) };
+
+        pool.emplace_back(std::forward<EventType>(event));
+    }
+
     void Dispatch()
     {
-        auto pool{ std::get<std::vector<T>>(m_eventPools) };
+        (Dispatch<EventTypes>(), ...);
+    }
 
-        // for (auto& event)
+    template <typename EventType>
+    void Dispatch()
+    {
+        EventPool<EventType>& eventPool{ std::get<EventPool<EventType>>(
+            m_eventPools) };
+
+        if (eventPool.size() == 0)
+            return;
+
+        EventHandlerPool<EventType>& handlerPool{
+            std::get<EventHandlerPool<EventType>>(m_eventHandlers)
+        };
+
+        for (const RegisteredEventHandler<EventType>& handler : handlerPool)
+        {
+            for (const EventType& event : eventPool)
+            {
+                handler.eventHandler(event);
+            }
+        }
     }
 
 private:
-    std::tuple<std::vector<Type>...> m_eventPools;
+    std::tuple<EventHandlerPool<EventTypes>...> m_eventHandlers;
+    std::tuple<EventPool<EventTypes>...> m_eventPools;
 };
 }

@@ -15,6 +15,8 @@ add_executable(Tests
     engine/commands/CommandStackTest.cpp
 
     engine/events/EventDispatcherTest.cpp
+    engine/events/EventQueueTest.cpp
+    engine/events/EventTest_types.hpp
 
     engine/math/GeometricTest.cpp
     engine/math/Matrix3x3Test.cpp
