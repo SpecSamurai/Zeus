@@ -1,13 +1,14 @@
 #include "Window.hpp"
 
+#include "events/Event.hpp"
 #include "events/KeyEvent.hpp"
 #include "events/MouseEvent.hpp"
 #include "events/WindowEvent.hpp"
+#include "glfw_utils.hpp"
 #include "input/KeyCode.hpp"
 #include "input/MouseButtonCode.hpp"
 #include "logging/logger.hpp"
 #include "math/definitions.hpp"
-#include "window/glfw_utils.hpp"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -41,16 +42,16 @@ void Window::Init()
             windowData->width = static_cast<std::uint32_t>(width);
             windowData->height = static_cast<std::uint32_t>(height);
 
-            // EventDispatcher.Dispatch(WindowResizedEvent{
-            //     .width = windowData->width,
-            //     .height = windowData->height,
-            // });
+            Event::Dispatcher.Dispatch(WindowResizedEvent{
+                .width = windowData->width,
+                .height = windowData->height,
+            });
         });
 
     glfwSetWindowCloseCallback(
         m_handle,
         []([[maybe_unused]] GLFWwindow* window) {
-            // EventDispatcher.Dispatch(WindowClosedEvent{});
+            Event::Dispatcher.Dispatch(WindowClosedEvent{});
         });
 
     glfwSetKeyCallback(
@@ -63,21 +64,21 @@ void Window::Init()
             switch (action)
             {
             case GLFW_PRESS:
-                // EventDispatcher.Dispatch(KeyPressedEvent{
-                //     .keyCode = static_cast<KeyCode>(key),
-                //     .isRepeated = false,
-                // });
+                Event::Dispatcher.Dispatch(KeyPressedEvent{
+                    .keyCode = static_cast<KeyCode>(key),
+                    .isRepeated = false,
+                });
                 break;
             case GLFW_RELEASE:
-                // EventDispatcher.Dispatch(KeyReleasedEvent{
-                //     .keyCode = static_cast<KeyCode>(key),
-                // });
+                Event::Dispatcher.Dispatch(KeyReleasedEvent{
+                    .keyCode = static_cast<KeyCode>(key),
+                });
                 break;
             case GLFW_REPEAT:
-                // EventDispatcher.Dispatch(KeyPressedEvent{
-                //     .keyCode = static_cast<KeyCode>(key),
-                //     .isRepeated = true,
-                // });
+                Event::Dispatcher.Dispatch(KeyPressedEvent{
+                    .keyCode = static_cast<KeyCode>(key),
+                    .isRepeated = true,
+                });
                 break;
             }
         });
@@ -85,9 +86,9 @@ void Window::Init()
     glfwSetCharCallback(
         m_handle,
         []([[maybe_unused]] GLFWwindow* window, unsigned int codepoint) {
-            // EventDispatcher.Dispatch(KeyTypedEvent{
-            //     .keyCode = static_cast<KeyCode>(codepoint),
-            // });
+            Event::Dispatcher.Dispatch(KeyTypedEvent{
+                .keyCode = static_cast<KeyCode>(codepoint),
+            });
         });
 
     glfwSetMouseButtonCallback(
@@ -99,14 +100,14 @@ void Window::Init()
             switch (action)
             {
             case GLFW_PRESS:
-                // EventDispatcher.Dispatch(MouseButtonPressedEvent{
-                //     .buttonCode = static_cast<MouseButtonCode>(button),
-                // });
+                Event::Dispatcher.Dispatch(MouseButtonPressedEvent{
+                    .buttonCode = static_cast<MouseButtonCode>(button),
+                });
                 break;
             case GLFW_RELEASE:
-                // EventDispatcher.Dispatch(MouseButtonReleasedEvent{
-                //     .buttonCode = static_cast<MouseButtonCode>(button),
-                // });
+                Event::Dispatcher.Dispatch(MouseButtonReleasedEvent{
+                    .buttonCode = static_cast<MouseButtonCode>(button),
+                });
                 break;
             }
         });
@@ -116,21 +117,21 @@ void Window::Init()
         []([[maybe_unused]] GLFWwindow* window,
            double xOffset,
            double yOffset) {
-            // EventDispatcher.Dispatch(MouseScrolledEvent{
-            //     .offset = Vector2f(
-            //         static_cast<float>(xOffset),
-            //         static_cast<float>(yOffset)),
-            // });
+            Event::Dispatcher.Dispatch(MouseScrolledEvent{
+                .offset = Vector2f(
+                    static_cast<float>(xOffset),
+                    static_cast<float>(yOffset)),
+            });
         });
 
     glfwSetCursorPosCallback(
         m_handle,
         []([[maybe_unused]] GLFWwindow* window, double xPos, double yPos) {
-            // EventDispatcher.Dispatch(MouseMovedEvent{
-            //     .position = Vector2f(
-            //         static_cast<float>(xPos),
-            //         static_cast<float>(yPos)),
-            // });
+            Event::Dispatcher.Dispatch(MouseMovedEvent{
+                .position = Vector2f(
+                    static_cast<float>(xPos),
+                    static_cast<float>(yPos)),
+            });
         });
 }
 
