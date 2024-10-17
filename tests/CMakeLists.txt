@@ -9,6 +9,13 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+set_target_properties(
+    gmock
+    gmock_main
+    gtest
+    gtest_main
+    PROPERTIES FOLDER "Libraries")
+
 enable_testing()
 
 add_executable(Tests

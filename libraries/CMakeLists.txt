@@ -10,6 +10,12 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glfw)
 
+set_target_properties(
+    glfw
+    uninstall
+    update_mappings
+    PROPERTIES FOLDER "Libraries")
+
 add_library(imgui STATIC
     imgui/imconfig.h
     imgui/imgui.cpp
@@ -29,6 +35,8 @@ add_library(imgui STATIC
     imgui/backends/imgui_impl_glfw.h
 )
 
+set_target_properties(imgui PROPERTIES FOLDER "Libraries")
+
 target_include_directories(imgui PUBLIC imgui)
 target_link_libraries(imgui PRIVATE Vulkan::Vulkan glfw)
 
@@ -39,6 +47,8 @@ add_library(stb
     stb/stb_image.h
     stb/stb_image.c
 )
+
+set_target_properties(stb PROPERTIES FOLDER "Libraries")
 
 target_include_directories(stb
     INTERFACE stb

@@ -6,6 +6,8 @@ FetchContent_Declare(
     GIT_TAG 11.0.2)
 FetchContent_MakeAvailable(fmt)
 
+set_target_properties(fmt PROPERTIES FOLDER "Libraries")
+
 FetchContent_Declare(
     glfw
     GIT_REPOSITORY https://github.com/glfw/glfw.git
@@ -19,6 +21,8 @@ FetchContent_Declare(
     GIT_TAG v0.8.0
 )
 FetchContent_MakeAvailable(fastgltf)
+
+set_target_properties(fastgltf PROPERTIES FOLDER "Libraries")
 
 add_library(Engine
     defines.hpp
@@ -168,6 +172,7 @@ target_compile_options(Engine PRIVATE
 find_program(GLSLANG_VALIDATOR glslangValidator HINTS $ENV{VULKAN_SDK}/Bin/)
 
 file(GLOB_RECURSE SHADER_SOURCE_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.glsl"
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert"
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.tesc"
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.tese"
@@ -176,9 +181,20 @@ file(GLOB_RECURSE SHADER_SOURCE_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.comp"
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.mesh"
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.task"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.rgen"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.rint"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.rahit"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.rchit"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.rmiss"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.rcall"
 )
 
 foreach(SHADER_FILE ${SHADER_SOURCE_FILES})
+    get_filename_component(FILE_EXT ${SHADER_FILE} EXT)
+    if(${FILE_EXT} STREQUAL ".glsl")
+        continue()
+    endif()
+
     get_filename_component(FILE_NAME ${SHADER_FILE} NAME)
 
     set(SPIRV "${CMAKE_CURRENT_BINARY_DIR}/shaders/${FILE_NAME}.spv")
@@ -192,4 +208,6 @@ foreach(SHADER_FILE ${SHADER_SOURCE_FILES})
     list(APPEND SPIRV_BINARY_FILES ${SPIRV})
 endforeach(SHADER_FILE)
 
-add_custom_target(Shaders ALL DEPENDS ${SPIRV_BINARY_FILES})
+add_custom_target(Shaders ALL
+    DEPENDS ${SPIRV_BINARY_FILES}
+    SOURCES ${SHADER_SOURCE_FILES})
