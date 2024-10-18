@@ -34,20 +34,16 @@ public:
     virtual ~EditorCamera() = default;
 
     virtual void Reset() = 0;
-
     virtual void Move(CameraMovement cameraMovement, float deltaTime) = 0;
+    virtual void Update() = 0;
 
     virtual void OnMouse(
         float xOffset,
         float yOffset,
         bool constrainPitch = true) = 0;
-
     virtual void OnScroll(float yOffset) = 0;
 
-    virtual void Update() = 0;
-
     virtual Vector3f& GetPosition() = 0;
-
     virtual const Matrix4x4f& GetViewProjection() const = 0;
 
     inline constexpr bool IsType(CameraType cameraType) const

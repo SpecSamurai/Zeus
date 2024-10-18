@@ -36,8 +36,10 @@ add_library(Engine
 
     camera/camera_utils.cpp
     camera/camera_utils.hpp
+    camera/ArcballCamera.cpp
     camera/ArcballCamera.hpp
     camera/EditorCamera.hpp
+    camera/FreeflyCamera.cpp
     camera/FreeflyCamera.hpp
 
     commands/CommandStack.hpp
