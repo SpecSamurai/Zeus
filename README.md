@@ -15,6 +15,7 @@
     - Memory Corruption Detection
     - Priority
 - UI Render with orthographic projection
+- Middlewares
 
 ## Math
 - Column-Major matrices to maintain consistency with both GLSL and SPIR-V.
