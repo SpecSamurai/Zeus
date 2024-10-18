@@ -118,34 +118,34 @@ add_library(Engine
     vulkan/VulkanContext.cpp
     vulkan/VulkanContext.hpp
 
-    vulkan/vulkan_buffer.cpp
-    vulkan/vulkan_buffer.hpp
-    vulkan/vulkan_command.cpp
-    vulkan/vulkan_command.hpp
-    vulkan/vulkan_debug.cpp
-    vulkan/vulkan_debug.hpp
-    vulkan/vulkan_descriptors.cpp
-    vulkan/vulkan_descriptors.hpp
-    vulkan/vulkan_device.cpp
-    vulkan/vulkan_device.hpp
-    vulkan/vulkan_dynamic_rendering.cpp
-    vulkan/vulkan_dynamic_rendering.hpp
-    vulkan/vulkan_framebuffer.cpp
-    vulkan/vulkan_framebuffer.hpp
-    vulkan/vulkan_image.hpp
-    vulkan/vulkan_image.cpp
-    vulkan/vulkan_memory.cpp
-    vulkan/vulkan_memory.hpp
-    vulkan/vulkan_pipeline.cpp
-    vulkan/vulkan_pipeline.hpp
-    vulkan/vulkan_renderpass.cpp
-    vulkan/vulkan_renderpass.hpp
-    vulkan/vulkan_shader.cpp
-    vulkan/vulkan_shader.hpp
-    vulkan/vulkan_surface.cpp
-    vulkan/vulkan_surface.hpp
-    vulkan/vulkan_sync.cpp
-    vulkan/vulkan_sync.hpp
+    vulkan/api/vulkan_buffer.cpp
+    vulkan/api/vulkan_buffer.hpp
+    vulkan/api/vulkan_command.cpp
+    vulkan/api/vulkan_command.hpp
+    vulkan/api/vulkan_debug.cpp
+    vulkan/api/vulkan_debug.hpp
+    vulkan/api/vulkan_descriptors.cpp
+    vulkan/api/vulkan_descriptors.hpp
+    vulkan/api/vulkan_device.cpp
+    vulkan/api/vulkan_device.hpp
+    vulkan/api/vulkan_dynamic_rendering.cpp
+    vulkan/api/vulkan_dynamic_rendering.hpp
+    vulkan/api/vulkan_framebuffer.cpp
+    vulkan/api/vulkan_framebuffer.hpp
+    vulkan/api/vulkan_image.hpp
+    vulkan/api/vulkan_image.cpp
+    vulkan/api/vulkan_memory.cpp
+    vulkan/api/vulkan_memory.hpp
+    vulkan/api/vulkan_pipeline.cpp
+    vulkan/api/vulkan_pipeline.hpp
+    vulkan/api/vulkan_renderpass.cpp
+    vulkan/api/vulkan_renderpass.hpp
+    vulkan/api/vulkan_shader.cpp
+    vulkan/api/vulkan_shader.hpp
+    vulkan/api/vulkan_surface.cpp
+    vulkan/api/vulkan_surface.hpp
+    vulkan/api/vulkan_sync.cpp
+    vulkan/api/vulkan_sync.hpp
 
     window/glfw_utils.cpp
     window/glfw_utils.hpp
