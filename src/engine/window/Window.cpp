@@ -145,6 +145,9 @@ void Window::Destroy()
 
 void Window::Update()
 {
-    glfwPollEvents();
+    if (m_data.width == 0 || m_data.height == 0)
+        glfwWaitEvents();
+    else
+        glfwPollEvents();
 }
 }

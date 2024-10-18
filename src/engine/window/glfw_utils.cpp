@@ -36,6 +36,12 @@ GLFWwindow* createGlfwWindow(int width, int height, const char* title)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 
+    if (!glfwVulkanSupported())
+    {
+        LOG_FATAL("GLFW: Vulkan Not Supported");
+        return nullptr;
+    }
+
     GLFWwindow* window{
         glfwCreateWindow(width, height, title, nullptr, nullptr)
     };
