@@ -87,62 +87,47 @@ inline void log(
 }
 }
 
-#ifdef NDEBUG
-#define LOG_TRACE(message, ...)
-#else
+#ifdef ZDEBUG
 #define LOG_TRACE(message, ...)                                                \
     log(Zeus::LogLevel::Trace,                                                 \
         message,                                                               \
         std::source_location::current(),                                       \
         __VA_ARGS__)
-#endif
 
-#ifdef NDEBUG
-#define LOG_DEBUG(message, ...)
-#else
 #define LOG_DEBUG(message, ...)                                                \
     log(Zeus::LogLevel::Debug,                                                 \
         message,                                                               \
         std::source_location::current(),                                       \
         __VA_ARGS__)
-#endif
 
-#ifdef NDEBUG
-#define LOG_INFO(message, ...)
-#else
 #define LOG_INFO(message, ...)                                                 \
     log(Zeus::LogLevel::Info,                                                  \
         message,                                                               \
         std::source_location::current(),                                       \
         __VA_ARGS__)
-#endif
 
-#ifdef NDEBUG
-#define LOG_WARNING(message, ...)
-#else
 #define LOG_WARNING(message, ...)                                              \
     log(Zeus::LogLevel::Warning,                                               \
         message,                                                               \
         std::source_location::current(),                                       \
         __VA_ARGS__)
-#endif
 
-#ifdef NDEBUG
-#define LOG_ERROR(message, ...)
-#else
 #define LOG_ERROR(message, ...)                                                \
     log(Zeus::LogLevel::Error,                                                 \
         message,                                                               \
         std::source_location::current(),                                       \
         __VA_ARGS__)
-#endif
 
-#ifdef NDEBUG
-#define LOG_FATAL(message, ...)
-#else
 #define LOG_FATAL(message, ...)                                                \
     log(Zeus::LogLevel::Fatal,                                                 \
         message,                                                               \
         std::source_location::current(),                                       \
         __VA_ARGS__)
+#else
+#define LOG_TRACE(message, ...)
+#define LOG_DEBUG(message, ...)
+#define LOG_INFO(message, ...)
+#define LOG_WARNING(message, ...)
+#define LOG_ERROR(message, ...)
+#define LOG_FATAL(message, ...)
 #endif
