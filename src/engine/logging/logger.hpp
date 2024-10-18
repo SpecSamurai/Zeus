@@ -87,7 +87,7 @@ inline void log(
 }
 }
 
-#ifdef ZDEBUG
+#ifndef NDEBUG
 #define LOG_TRACE(message, ...)                                                \
     log(Zeus::LogLevel::Trace,                                                 \
         message,                                                               \

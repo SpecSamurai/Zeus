@@ -171,10 +171,6 @@ target_compile_options(Engine PRIVATE
     $<$<CONFIG:Debug>:${CXX_DEBUG_COMPILE_FLAGS}>
     $<$<CONFIG:Release>:${CXX_RELEASE_COMPILE_FLAGS}>)
 
-target_compile_definitions(Engine PRIVATE
-    $<$<CONFIG:Debug>:ZDEBUG>
-)
-
 find_program(GLSLANG_VALIDATOR glslangValidator HINTS $ENV{VULKAN_SDK}/Bin/)
 
 file(GLOB_RECURSE SHADER_SOURCE_FILES
