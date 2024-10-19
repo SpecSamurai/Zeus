@@ -54,17 +54,17 @@ public:
         --m_undone;
     }
 
-    std::uint64_t Count()
+    std::uint64_t Count() const
     {
         return m_count;
     }
 
-    std::uint64_t Undone()
+    std::uint64_t Undone() const
     {
         return m_undone;
     }
 
-    bool Empty()
+    bool Empty() const
     {
         return m_count == 0;
     }
