@@ -93,6 +93,15 @@ add_library(Engine
     time/Timer.cpp
     time/Timer.hpp
 
+    vulkan/Definitions.hpp
+    vulkan/DeletionQueue.cpp
+    vulkan/DeletionQueue.hpp
+    vulkan/Fence.cpp
+    vulkan/Fence.hpp
+    vulkan/Handle.hpp
+    vulkan/Semaphore.cpp
+    vulkan/Semaphore.hpp
+
     vulkan/DescriptorAllocator.cpp
     vulkan/DescriptorAllocator.hpp
     vulkan/DescriptorLayoutBuilder.cpp
