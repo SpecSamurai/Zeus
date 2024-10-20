@@ -1,27 +1,27 @@
 #include "PhysicalDeviceSelector.hpp"
 
+#include "Definitions.hpp"
 #include "PhysicalDevice.hpp"
-
+#include "api/vulkan_device.hpp"
 #include "logging/logger.hpp"
-#include "vulkan_device.hpp"
 
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
 #include <map>
 #include <optional>
-#include <string>
 #include <vector>
 
 namespace Zeus
 {
-std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
+std::optional<PhysicalDevice> PhysicalDeviceSelector::Select(
+    const PhysicalDeviceSelectorInfo& info)
 {
-    if (!validate())
+    if (!Validate(info))
         return std::nullopt;
 
     std::uint32_t physicalDeviceCount{ 0 };
-    vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+    vkEnumeratePhysicalDevices(info.instance, &physicalDeviceCount, nullptr);
 
     if (physicalDeviceCount == 0)
     {
@@ -30,17 +30,20 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
     }
 
     std::vector<VkPhysicalDevice> devices(physicalDeviceCount);
-    vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, devices.data());
+    vkEnumeratePhysicalDevices(
+        info.instance,
+        &physicalDeviceCount,
+        devices.data());
 
     std::multimap<int, PhysicalDevice> candidates;
 
     for (const auto& device : devices)
     {
-        auto physicalDevice = createIfValid(device);
+        auto physicalDevice = CreateIfValid(info, device);
 
         if (physicalDevice.has_value())
         {
-            int score{ ratePhysicalDevice(physicalDevice.value()) };
+            int score{ RatePhysicalDevice(info, physicalDevice.value()) };
             candidates.insert(std::make_pair(score, physicalDevice.value()));
         }
     }
@@ -48,13 +51,13 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
     if (candidates.rbegin()->first > 0)
     {
         const auto& device = candidates.rbegin()->second;
-        LOG_DEBUG("Selected physical device: {}", device.name);
+        LOG_DEBUG("Selected physical device: {}", device.GetName());
         LOG_DEBUG(
             "GRAPHICS: {} | PRESENT: {} | COMPUTE: {} | TRANSFER: {}",
-            device.queueFamilies.graphicsFamily.value(),
-            device.queueFamilies.presentFamily.value(),
-            device.queueFamilies.computeFamily.value(),
-            device.queueFamilies.transferFamily.value());
+            device.GetQueueFamily(QueueType::Graphics),
+            device.GetQueueFamily(QueueType::Present),
+            device.GetQueueFamily(QueueType::Compute),
+            device.GetQueueFamily(QueueType::Transfer));
 
         return device;
     }
@@ -65,66 +68,51 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::select()
     }
 }
 
-bool PhysicalDeviceSelector::validate()
+bool PhysicalDeviceSelector::Validate(const PhysicalDeviceSelectorInfo& info)
 {
     bool isValid{ true };
 
-    if (instance == VK_NULL_HANDLE)
+    if (info.instance == VK_NULL_HANDLE)
     {
         LOG_ERROR("Instance not set.");
         isValid = false;
     }
 
-    if (criteria.requirePresent && surface == VK_NULL_HANDLE)
+    if (info.requirePresent && info.surface == VK_NULL_HANDLE)
     {
         LOG_ERROR("Present is required but Surface is not set.");
         isValid = false;
     }
 
-    if (criteria.extensions.empty())
+    if (info.extensions.empty())
     {
-        LOG_WARNING("Extensions are not set. Use default.");
-        criteria.extensions = {
-            // VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-            // VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-            // VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-            // VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
-        };
+        LOG_WARNING("Extensions are not set.");
     }
 
-    if (criteria.requirePresent &&
+    if (info.requirePresent &&
         (std::find(
-             criteria.extensions.begin(),
-             criteria.extensions.end(),
-             VK_KHR_SWAPCHAIN_EXTENSION_NAME) == criteria.extensions.end()))
+             info.extensions.begin(),
+             info.extensions.end(),
+             VK_KHR_SWAPCHAIN_EXTENSION_NAME) == info.extensions.end()))
     {
-        LOG_WARNING(
-            "Present is required but extension is not set. Use default.");
-        criteria.extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        LOG_ERROR("Present is required but extension is not set. "
+                  "VK_KHR_SWAPCHAIN_EXTENSION_NAME");
+        isValid = false;
     }
 
     return isValid;
 }
 
-std::optional<PhysicalDevice> PhysicalDeviceSelector::createIfValid(
+std::optional<PhysicalDevice> PhysicalDeviceSelector::CreateIfValid(
+    const PhysicalDeviceSelectorInfo& info,
     const VkPhysicalDevice& physicalDevice)
 {
-    PhysicalDevice output{};
-
-    if (!areDeviceExtensionSupported(physicalDevice, criteria.extensions))
+    if (!areDeviceExtensionSupported(physicalDevice, info.extensions))
     {
         return std::nullopt;
     }
 
-    VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
-
-    output.name = std::string(deviceProperties.deviceName);
-    output.handle = physicalDevice;
-    output.surface = surface;
-    output.extensions = criteria.extensions;
-
-    PhysicalDevice::QueueFamiliesInfo queueFamiliesInfo{};
+    SelectedQueueFamiliesInfo queueFamiliesInfo{};
 
     std::uint32_t queueFamilyCount{ 0 };
     vkGetPhysicalDeviceQueueFamilyProperties(
@@ -146,13 +134,13 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::createIfValid(
     {
         if ((queueFamilies[index].queueFlags & graphicsFlags) == graphicsFlags)
         {
-            if (criteria.requirePresent)
+            if (info.requirePresent)
             {
                 VkBool32 surfaceSupport{ false };
                 vkGetPhysicalDeviceSurfaceSupportKHR(
                     physicalDevice,
                     index,
-                    surface,
+                    info.surface,
                     &surfaceSupport);
 
                 if (!surfaceSupport)
@@ -172,10 +160,10 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::createIfValid(
     if (!queueFamiliesInfo.graphicsFamily.has_value())
         return std::nullopt;
 
-    if (criteria.requirePresent && !queueFamiliesInfo.presentFamily.has_value())
+    if (info.requirePresent && !queueFamiliesInfo.presentFamily.has_value())
         return std::nullopt;
 
-    if (criteria.dedicatedTransferQueue)
+    if (info.dedicatedTransferQueue)
     {
         for (std::uint32_t index{ 0 }; index < queueFamilies.size(); ++index)
         {
@@ -194,7 +182,7 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::createIfValid(
     if (!queueFamiliesInfo.transferFamily.has_value())
         return std::nullopt;
 
-    if (criteria.dedicatedComputeQueue)
+    if (info.dedicatedComputeQueue)
     {
         for (std::uint32_t index{ 0 }; index < queueFamilies.size(); ++index)
         {
@@ -212,38 +200,49 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::createIfValid(
     if (!queueFamiliesInfo.computeFamily.has_value())
         return std::nullopt;
 
-    output.queueFamilies = queueFamiliesInfo;
-
-    criteria.features1_2.pNext = &criteria.features1_3;
-    criteria.features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    criteria.features2.pNext = &criteria.features1_2;
-    if (!checkPhysicalDeviceFeatures(physicalDevice))
+    if (!CheckPhysicalDeviceFeatures(info, physicalDevice))
     {
         return std::nullopt;
     }
 
-    output.features = criteria.features;
-    output.features2 = criteria.features2;
-    output.properties = deviceProperties;
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+
+    QueueFamilies queues{
+        .graphicsFamily = queueFamiliesInfo.graphicsFamily.value(),
+        .presentFamily = queueFamiliesInfo.presentFamily.value(),
+        .transferFamily = queueFamiliesInfo.transferFamily.value(),
+        .computeFamily = queueFamiliesInfo.computeFamily.value(),
+    };
+
+    PhysicalDevice output(
+        physicalDevice,
+        deviceProperties.deviceType,
+        queues,
+        deviceProperties.deviceName);
 
     return output;
 }
 
-int PhysicalDeviceSelector::ratePhysicalDevice(
+std::int32_t PhysicalDeviceSelector::RatePhysicalDevice(
+    const PhysicalDeviceSelectorInfo& info,
     const PhysicalDevice& physicalDevice)
 {
     int score{ 0 };
 
     VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(physicalDevice.handle, &deviceProperties);
+    vkGetPhysicalDeviceProperties(
+        physicalDevice.GetHandle(),
+        &deviceProperties);
 
-    if (deviceProperties.deviceType == criteria.preferredType)
+    if (deviceProperties.deviceType == info.preferredType)
         score += 1000;
 
     return score;
 }
 
-bool PhysicalDeviceSelector::checkPhysicalDeviceFeatures(
+bool PhysicalDeviceSelector::CheckPhysicalDeviceFeatures(
+    const PhysicalDeviceSelectorInfo& info,
     VkPhysicalDevice physicalDevice)
 {
     bool isValid{ true };
@@ -261,28 +260,28 @@ bool PhysicalDeviceSelector::checkPhysicalDeviceFeatures(
 
     vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
 
-    if (criteria.features2.features.samplerAnisotropy &&
+    if (info.features2.features.samplerAnisotropy &&
         !deviceFeatures2.features.samplerAnisotropy)
     {
         LOG_ERROR("Device doesn't support samplerAnisotropy.");
         isValid = false;
     }
 
-    if (criteria.features2.features.fillModeNonSolid &&
+    if (info.features2.features.fillModeNonSolid &&
         !deviceFeatures2.features.fillModeNonSolid)
     {
         LOG_ERROR("Device doesn't support fillModeNonSolid.");
         isValid = false;
     }
 
-    if (criteria.features2.features.sampleRateShading &&
+    if (info.features2.features.sampleRateShading &&
         !deviceFeatures2.features.sampleRateShading)
     {
         LOG_ERROR("Device doesn't support sampleRateShading.");
         isValid = false;
     }
 
-    if (criteria.features1_2.bufferDeviceAddress &&
+    if (info.features1_2.bufferDeviceAddress &&
         !features1_2.bufferDeviceAddress)
     {
         LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
@@ -290,22 +289,21 @@ bool PhysicalDeviceSelector::checkPhysicalDeviceFeatures(
         isValid = false;
     }
 
-    if (criteria.features1_2.descriptorIndexing &&
-        !features1_2.descriptorIndexing)
+    if (info.features1_2.descriptorIndexing && !features1_2.descriptorIndexing)
     {
         LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
                   "descriptorIndexing.");
         isValid = false;
     }
 
-    if (criteria.features1_3.dynamicRendering && !features1_3.dynamicRendering)
+    if (info.features1_3.dynamicRendering && !features1_3.dynamicRendering)
     {
         LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan13Features "
                   "dynamicRendering.");
         isValid = false;
     }
 
-    if (criteria.features1_3.synchronization2 && !features1_3.synchronization2)
+    if (info.features1_3.synchronization2 && !features1_3.synchronization2)
     {
         LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan13Features "
                   "synchronization2.");
@@ -313,64 +311,5 @@ bool PhysicalDeviceSelector::checkPhysicalDeviceFeatures(
     }
 
     return isValid;
-}
-
-PhysicalDeviceSelector::PhysicalDeviceSelector(const VkInstance& instance)
-{
-    this->instance = instance;
-}
-
-void PhysicalDeviceSelector::setSurface(const VkSurfaceKHR& surface)
-{
-    this->surface = surface;
-}
-
-void PhysicalDeviceSelector::setPreferredType(
-    VkPhysicalDeviceType preferredType)
-{
-    criteria.preferredType = preferredType;
-}
-
-void PhysicalDeviceSelector::requirePresent(bool require)
-{
-    criteria.requirePresent = require;
-}
-
-void PhysicalDeviceSelector::dedicatedTransferQueue(bool dedicated)
-{
-    criteria.dedicatedTransferQueue = dedicated;
-}
-
-void PhysicalDeviceSelector::dedicatedComputeQueue(bool dedicated)
-{
-    criteria.dedicatedComputeQueue = dedicated;
-}
-
-void PhysicalDeviceSelector::addExtensions(
-    const std::vector<const char*>& extensions)
-{
-    for (const auto& extension : extensions)
-    {
-        criteria.extensions.push_back(extension);
-    }
-}
-
-void PhysicalDeviceSelector::setFeatures(
-    const VkPhysicalDeviceFeatures& features)
-{
-    criteria.features2.features = features;
-    criteria.features = features;
-}
-
-void PhysicalDeviceSelector::setFeatures1_2(
-    const VkPhysicalDeviceVulkan12Features& features)
-{
-    criteria.features1_2 = features;
-}
-
-void PhysicalDeviceSelector::setFeatures1_3(
-    const VkPhysicalDeviceVulkan13Features& features)
-{
-    criteria.features1_3 = features;
 }
 }

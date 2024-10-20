@@ -4,58 +4,57 @@
 
 #include <vulkan/vulkan.h>
 
+#include <cstdint>
 #include <optional>
 #include <vector>
 
 namespace Zeus
 {
+struct PhysicalDeviceSelectorInfo
+{
+    std::vector<const char*> extensions;
+    VkInstance instance;
+    VkSurfaceKHR surface;
+
+    VkPhysicalDeviceType preferredType;
+
+    VkPhysicalDeviceFeatures2 features2;
+    VkPhysicalDeviceFeatures features;
+    VkPhysicalDeviceVulkan12Features features1_2;
+    VkPhysicalDeviceVulkan13Features features1_3;
+
+    bool requirePresent;
+    bool dedicatedTransferQueue;
+    bool dedicatedComputeQueue;
+};
+
+struct SelectedQueueFamiliesInfo
+{
+    std::optional<std::uint32_t> graphicsFamily;
+    std::optional<std::uint32_t> presentFamily;
+    std::optional<std::uint32_t> transferFamily;
+    std::optional<std::uint32_t> computeFamily;
+};
+
 class PhysicalDeviceSelector
 {
 public:
-    PhysicalDeviceSelector(const VkInstance& instance);
-
-    std::optional<PhysicalDevice> select();
-
-    void setSurface(const VkSurfaceKHR& surface);
-    void setPreferredType(VkPhysicalDeviceType preferredType);
-    void requirePresent(bool require = true);
-    void dedicatedTransferQueue(bool dedicated = true);
-    void dedicatedComputeQueue(bool dedicated = true);
-    void addExtensions(const std::vector<const char*>& extensions);
-    void setFeatures(const VkPhysicalDeviceFeatures& features);
-    void setFeatures1_2(const VkPhysicalDeviceVulkan12Features& features);
-    void setFeatures1_3(const VkPhysicalDeviceVulkan13Features& features);
+    static std::optional<PhysicalDevice> Select(
+        const PhysicalDeviceSelectorInfo& info);
 
 private:
-    bool validate();
+    static bool Validate(const PhysicalDeviceSelectorInfo& info);
 
-    std::optional<PhysicalDevice> createIfValid(
+    static std::optional<PhysicalDevice> CreateIfValid(
+        const PhysicalDeviceSelectorInfo& info,
         const VkPhysicalDevice& physicalDevice);
 
-    int ratePhysicalDevice(const PhysicalDevice& physicalDevice);
+    static std::int32_t RatePhysicalDevice(
+        const PhysicalDeviceSelectorInfo& info,
+        const PhysicalDevice& physicalDevice);
 
-    bool checkPhysicalDeviceFeatures(VkPhysicalDevice physicalDevice);
-
-    VkInstance instance{};
-    VkSurfaceKHR surface{ VK_NULL_HANDLE };
-
-    struct SelectionCriteria
-    {
-        VkPhysicalDeviceType preferredType{
-            VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-        };
-
-        bool requirePresent{ false };
-
-        bool dedicatedTransferQueue{ false };
-        bool dedicatedComputeQueue{ false };
-
-        std::vector<const char*> extensions{};
-
-        VkPhysicalDeviceFeatures2 features2{};
-        VkPhysicalDeviceFeatures features{};
-        VkPhysicalDeviceVulkan12Features features1_2{};
-        VkPhysicalDeviceVulkan13Features features1_3{};
-    } criteria;
+    static bool CheckPhysicalDeviceFeatures(
+        const PhysicalDeviceSelectorInfo& info,
+        VkPhysicalDevice physicalDevice);
 };
 }
