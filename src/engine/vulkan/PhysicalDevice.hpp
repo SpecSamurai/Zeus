@@ -1,33 +1,38 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "Definitions.hpp"
+#include "Handle.hpp"
 
-#include <optional>
-#include <string>
-#include <vector>
+#include <vulkan/vulkan_core.h>
+
+#include <cstdint>
 
 namespace Zeus
 {
-struct PhysicalDevice
+struct QueueFamilies
 {
-    struct QueueFamiliesInfo
-    {
-        std::optional<std::uint32_t> graphicsFamily;
-        std::optional<std::uint32_t> presentFamily;
-        std::optional<std::uint32_t> transferFamily;
-        std::optional<std::uint32_t> computeFamily;
-    } queueFamilies;
+    std::uint32_t graphicsFamily;
+    std::uint32_t presentFamily;
+    std::uint32_t transferFamily;
+    std::uint32_t computeFamily;
+};
 
-    std::string name{};
+class PhysicalDevice : public Handle
+{
+public:
+    PhysicalDevice(
+        VkPhysicalDevice handle,
+        VkPhysicalDeviceType deviceType,
+        const QueueFamilies& queueFamilies,
+        const char* name = nullptr);
 
-    VkPhysicalDevice handle{ VK_NULL_HANDLE };
-    VkSurfaceKHR surface{ VK_NULL_HANDLE };
+    std::uint32_t GetQueueFamily(const QueueType type) const;
+    VkPhysicalDevice GetHandle() const;
+    VkPhysicalDeviceType GetDeviceType() const;
 
-    // Requested features
-    VkPhysicalDeviceFeatures features{};
-    VkPhysicalDeviceFeatures2 features2{};
-    VkPhysicalDeviceProperties properties{};
-
-    std::vector<const char*> extensions{};
+private:
+    VkPhysicalDevice m_handle{ VK_NULL_HANDLE };
+    VkPhysicalDeviceType m_deviceType;
+    QueueFamilies m_queueFamilies;
 };
 }

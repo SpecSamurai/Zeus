@@ -101,6 +101,8 @@ add_library(Engine
     vulkan/Handle.hpp
     vulkan/Semaphore.cpp
     vulkan/Semaphore.hpp
+    vulkan/Queue.cpp
+    vulkan/Queue.hpp
 
     vulkan/DescriptorAllocator.cpp
     vulkan/DescriptorAllocator.hpp
@@ -117,6 +119,7 @@ add_library(Engine
     vulkan/Instance.hpp
     vulkan/InstanceBuilder.cpp
     vulkan/InstanceBuilder.hpp
+    vulkan/PhysicalDevice.cpp
     vulkan/PhysicalDevice.hpp
     vulkan/PhysicalDeviceSelector.cpp
     vulkan/PhysicalDeviceSelector.hpp
