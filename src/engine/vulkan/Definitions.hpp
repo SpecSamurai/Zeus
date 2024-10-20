@@ -8,4 +8,12 @@ enum class ResourceType
     Semaphore,
     Count,
 };
+
+enum class QueueType
+{
+    Graphics,
+    Present,
+    Transfer,
+    Compute,
+};
 }
