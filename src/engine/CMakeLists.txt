@@ -99,6 +99,12 @@ add_library(Engine
     vulkan/Fence.cpp
     vulkan/Fence.hpp
     vulkan/Handle.hpp
+    vulkan/PhysicalDevice.cpp
+    vulkan/PhysicalDevice.hpp
+    vulkan/PhysicalDeviceSelector.cpp
+    vulkan/PhysicalDeviceSelector.hpp
+    vulkan/Pipeline.cpp
+    vulkan/Pipeline.hpp
     vulkan/Semaphore.cpp
     vulkan/Semaphore.hpp
     vulkan/Queue.cpp
@@ -110,6 +116,7 @@ add_library(Engine
     vulkan/DescriptorLayoutBuilder.hpp
     vulkan/DescriptorWriter.cpp
     vulkan/DescriptorWriter.hpp
+    vulkan/Device.cpp
     vulkan/Device.hpp
     vulkan/DeviceBuilder.cpp
     vulkan/DeviceBuilder.hpp
@@ -119,10 +126,7 @@ add_library(Engine
     vulkan/Instance.hpp
     vulkan/InstanceBuilder.cpp
     vulkan/InstanceBuilder.hpp
-    vulkan/PhysicalDevice.cpp
-    vulkan/PhysicalDevice.hpp
-    vulkan/PhysicalDeviceSelector.cpp
-    vulkan/PhysicalDeviceSelector.hpp
+
     vulkan/PipelineBuilder.cpp
     vulkan/PipelineBuilder.hpp
     vulkan/SwapchainBuilder.cpp
