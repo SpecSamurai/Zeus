@@ -1,29 +1,47 @@
 #include "DeviceBuilder.hpp"
 
-#include "Device.hpp"
+#include "PhysicalDeviceSelector.hpp"
+#include "api/vulkan_debug.hpp"
+#include "api/vulkan_memory.hpp"
 
-#include "vulkan_debug.hpp"
-#include "vulkan_memory.hpp"
+#include <vulkan/vulkan_core.h>
 
 #include <set>
 
 namespace Zeus
 {
-Device DeviceBuilder::build()
+DeviceInfo DeviceBuilder::Build()
 {
-    Device device{};
+    PhysicalDeviceSelectorInfo info{
+        .extensions = m_info.extensions,
+        .instance = m_info.instance,
+        .surface = m_info.surface,
 
+        .preferredType = m_info.preferredType,
+
+        .features2 = m_info.features2,
+        .features = m_info.features,
+        .features1_2 = m_info.features1_2,
+        .features1_3 = m_info.features1_3,
+
+        .requirePresent = m_info.requirePresent,
+        .dedicatedTransferQueue = m_info.dedicatedTransferQueue,
+        .dedicatedComputeQueue = m_info.dedicatedComputeQueue,
+    };
+
+    auto selectedDevice{ PhysicalDeviceSelector::Select(info) };
+    if (!selectedDevice.has_value())
+    {
+        assert(false && "Physical Device not found.");
+    }
+
+    PhysicalDevice physicalDevice{ selectedDevice.value() };
+    DeviceInfo device{};
     device.physicalDevice = physicalDevice.handle;
-    device.properties = physicalDevice.properties;
-
-    device.graphicsFamily =
-        physicalDevice.queueFamilies.graphicsFamily.value_or(0);
-    device.presentFamily =
-        physicalDevice.queueFamilies.presentFamily.value_or(0);
-    device.transferFamily =
-        physicalDevice.queueFamilies.transferFamily.value_or(0);
-    device.computeFamily =
-        physicalDevice.queueFamilies.computeFamily.value_or(0);
+    device.graphicsFamily = physicalDevice.queueFamilies.graphicsFamily.value();
+    device.presentFamily = physicalDevice.queueFamilies.presentFamily.value();
+    device.transferFamily = physicalDevice.queueFamilies.transferFamily.value();
+    device.computeFamily = physicalDevice.queueFamilies.computeFamily.value();
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<std::uint32_t> uniqueQueueFamilies{
@@ -53,10 +71,10 @@ Device DeviceBuilder::build()
     createInfo.enabledLayerCount = 0;
     createInfo.ppEnabledLayerNames = nullptr;
     createInfo.enabledExtensionCount =
-        static_cast<std::uint32_t>(physicalDevice.extensions.size());
-    createInfo.ppEnabledExtensionNames = physicalDevice.extensions.data();
+        static_cast<std::uint32_t>(m_info.extensions.size());
+    createInfo.ppEnabledExtensionNames = m_info.extensions.data();
     // createInfo.pEnabledFeatures = &physicalDevice.features;
-    createInfo.pNext = &physicalDevice.features2;
+    createInfo.pNext = &m_info.features2;
 
 #ifndef NDEBUG
     // Deprecated but set for backwards compatibility
@@ -79,7 +97,7 @@ Device DeviceBuilder::build()
         0,
         &device.graphicsQueue);
 
-    if (physicalDevice.queueFamilies.presentFamily.has_value())
+    if (m_info.requirePresent)
     {
         vkGetDeviceQueue(
             device.logicalDevice,
@@ -103,8 +121,63 @@ Device DeviceBuilder::build()
     return device;
 }
 
-DeviceBuilder::DeviceBuilder(const PhysicalDevice& physicalDevice)
-    : physicalDevice{ physicalDevice }
+void DeviceBuilder::SetInstance(const VkInstance& instance)
 {
+    m_info.instance = instance;
+}
+
+void DeviceBuilder::SetSurface(const VkSurfaceKHR& surface)
+{
+    m_info.surface = surface;
+}
+
+void DeviceBuilder::SetPreferredType(VkPhysicalDeviceType preferredType)
+{
+    m_info.preferredType = preferredType;
+}
+
+void DeviceBuilder::RequirePresent(bool require)
+{
+    m_info.requirePresent = require;
+}
+
+void DeviceBuilder::DedicatedTransferQueue(bool dedicated)
+{
+    m_info.dedicatedTransferQueue = dedicated;
+}
+
+void DeviceBuilder::DedicatedComputeQueue(bool dedicated)
+{
+    m_info.dedicatedComputeQueue = dedicated;
+}
+
+void DeviceBuilder::AddExtensions(const std::vector<const char*>& extensions)
+{
+    for (const auto& extension : extensions)
+    {
+        m_info.extensions.emplace_back(extension);
+    }
+}
+
+void DeviceBuilder::SetFeatures(const VkPhysicalDeviceFeatures& features)
+{
+    m_info.features2.features = features;
+    m_info.features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    m_info.features2.pNext = &m_info.features1_2;
+
+    m_info.features = features;
+}
+
+void DeviceBuilder::SetFeatures1_2(
+    const VkPhysicalDeviceVulkan12Features& features)
+{
+    m_info.features1_2 = features;
+    m_info.features1_2.pNext = &m_info.features1_3;
+}
+
+void DeviceBuilder::SetFeatures1_3(
+    const VkPhysicalDeviceVulkan13Features& features)
+{
+    m_info.features1_3 = features;
 }
 }
