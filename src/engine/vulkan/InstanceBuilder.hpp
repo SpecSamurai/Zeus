@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Instance.hpp"
-
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
@@ -9,27 +7,33 @@
 
 namespace Zeus
 {
+struct Instance
+{
+    VkInstance handle;
+    VkDebugUtilsMessengerEXT debugUtilsMessenger;
+};
+
 class InstanceBuilder
 {
 public:
-    Instance build();
+    Instance Build();
 
-    void setAppName(const char* name);
-    void setEngineName(const char* name);
-    void setApplicationVersion(std::uint32_t applicationVersion);
-    void setEngineVersion(std::uint32_t engineVersion);
-    void setApiVersion(std::uint32_t apiVersion);
-    void setExtensions(const std::vector<const char*>& extensions);
+    void SetAppName(const char* name);
+    void SetEngineName(const char* name);
+    void SetApplicationVersion(std::uint32_t applicationVersion);
+    void SetEngineVersion(std::uint32_t engineVersion);
+    void SetApiVersion(std::uint32_t apiVersion);
+    void SetExtensions(const std::vector<const char*>& extensions);
 
-    void setValidationLayers(const std::vector<const char*>& validationLayers);
-    void setDebugCallback(PFN_vkDebugUtilsMessengerCallbackEXT callback);
-    void setDebugMessageSeverity(
+    void SetValidationLayers(const std::vector<const char*>& validationLayers);
+    void SetDebugCallback(PFN_vkDebugUtilsMessengerCallbackEXT callback);
+    void SetDebugMessageSeverity(
         VkDebugUtilsMessageSeverityFlagsEXT messageSeverity);
-    void setDebugMessageType(VkDebugUtilsMessageTypeFlagsEXT messageType);
-    void setUserData(void* userData);
+    void SetDebugMessageType(VkDebugUtilsMessageTypeFlagsEXT messageType);
+    void SetUserData(void* userData);
 
 private:
-    bool validate();
+    bool Validate();
 
     struct InstanceInfo
     {

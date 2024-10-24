@@ -1,10 +1,10 @@
 #include "InstanceBuilder.hpp"
 
+#include "api/vulkan_debug.hpp"
+#include "api/vulkan_memory.hpp"
 #include "logging/logger.hpp"
-#include "vulkan_debug.hpp"
-#include "vulkan_memory.hpp"
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <cstdint>
 #include <vector>
@@ -31,9 +31,10 @@ constexpr struct DebugMessage
     };
 } DEBUG_MESSAGE;
 
-Instance InstanceBuilder::build()
+Instance InstanceBuilder::Build()
 {
-    assert(validate());
+    if (!Validate())
+        return {};
 
     VkApplicationInfo applicationInfo{};
     applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -67,13 +68,12 @@ Instance InstanceBuilder::build()
     instanceCreateInfo.pNext = &instanceDebugCreateInfo;
 #endif
 
-    Instance instance{};
-
+    VkInstance instance{ VK_NULL_HANDLE };
     VKCHECK(
         vkCreateInstance(
             &instanceCreateInfo,
             allocationCallbacks.get(),
-            &instance.handle),
+            &instance),
         "Instance failed to create.");
 
 #ifndef NDEBUG
@@ -85,19 +85,23 @@ Instance InstanceBuilder::build()
     debugCreateInfo.pfnUserCallback = info.debugCallback;
     debugCreateInfo.pUserData = info.userData;
 
+    VkDebugUtilsMessengerEXT debugUtilsMessenger{ VK_NULL_HANDLE };
     VKCHECK(
         createDebugUtilsMessengerEXT(
-            instance.handle,
+            instance,
             &debugCreateInfo,
             allocationCallbacks.get(),
-            &instance.debugUtilsMessenger),
+            &debugUtilsMessenger),
         "Failed to create debug messenger.");
 #endif
 
-    return instance;
+    return Instance{
+        .handle = instance,
+        .debugUtilsMessenger = debugUtilsMessenger,
+    };
 }
 
-bool InstanceBuilder::validate()
+bool InstanceBuilder::Validate()
 {
     bool isValid{ true };
 
@@ -192,32 +196,32 @@ bool InstanceBuilder::validate()
     return isValid;
 }
 
-void InstanceBuilder::setAppName(const char* name)
+void InstanceBuilder::SetAppName(const char* name)
 {
     info.applicationName = name;
 }
 
-void InstanceBuilder::setEngineName(const char* name)
+void InstanceBuilder::SetEngineName(const char* name)
 {
     info.engineName = name;
 }
 
-void InstanceBuilder::setApplicationVersion(std::uint32_t applicationVersion)
+void InstanceBuilder::SetApplicationVersion(std::uint32_t applicationVersion)
 {
     info.applicationVersion = applicationVersion;
 }
 
-void InstanceBuilder::setEngineVersion(std::uint32_t engineVersion)
+void InstanceBuilder::SetEngineVersion(std::uint32_t engineVersion)
 {
     info.engineVersion = engineVersion;
 }
 
-void InstanceBuilder::setApiVersion(std::uint32_t apiVersion)
+void InstanceBuilder::SetApiVersion(std::uint32_t apiVersion)
 {
     info.apiVersion = apiVersion;
 }
 
-void InstanceBuilder::setExtensions(const std::vector<const char*>& extensions)
+void InstanceBuilder::SetExtensions(const std::vector<const char*>& extensions)
 {
     for (const auto& extension : extensions)
     {
@@ -225,7 +229,7 @@ void InstanceBuilder::setExtensions(const std::vector<const char*>& extensions)
     }
 }
 
-void InstanceBuilder::setValidationLayers(
+void InstanceBuilder::SetValidationLayers(
     const std::vector<const char*>& validationLayers)
 {
     for (const auto& layer : validationLayers)
@@ -234,25 +238,25 @@ void InstanceBuilder::setValidationLayers(
     }
 }
 
-void InstanceBuilder::setDebugCallback(
+void InstanceBuilder::SetDebugCallback(
     PFN_vkDebugUtilsMessengerCallbackEXT callback)
 {
     info.debugCallback = callback;
 }
 
-void InstanceBuilder::setDebugMessageSeverity(
+void InstanceBuilder::SetDebugMessageSeverity(
     VkDebugUtilsMessageSeverityFlagsEXT debugMessageSeverity)
 {
     info.debugMessageSeverity = debugMessageSeverity;
 }
 
-void InstanceBuilder::setDebugMessageType(
+void InstanceBuilder::SetDebugMessageType(
     VkDebugUtilsMessageTypeFlagsEXT debugMessageType)
 {
     info.debugMessageType = debugMessageType;
 }
 
-void InstanceBuilder::setUserData(void* userData)
+void InstanceBuilder::SetUserData(void* userData)
 {
     info.userData = userData;
 }
