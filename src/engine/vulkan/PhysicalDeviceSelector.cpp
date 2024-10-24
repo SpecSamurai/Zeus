@@ -1,7 +1,5 @@
 #include "PhysicalDeviceSelector.hpp"
 
-#include "Definitions.hpp"
-#include "PhysicalDevice.hpp"
 #include "api/vulkan_device.hpp"
 #include "logging/logger.hpp"
 
@@ -51,13 +49,13 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::Select(
     if (candidates.rbegin()->first > 0)
     {
         const auto& device = candidates.rbegin()->second;
-        LOG_DEBUG("Selected physical device: {}", device.GetName());
+        LOG_DEBUG("Selected physical device: {}", device.name);
         LOG_DEBUG(
             "GRAPHICS: {} | PRESENT: {} | COMPUTE: {} | TRANSFER: {}",
-            device.GetQueueFamily(QueueType::Graphics),
-            device.GetQueueFamily(QueueType::Present),
-            device.GetQueueFamily(QueueType::Compute),
-            device.GetQueueFamily(QueueType::Transfer));
+            device.queueFamilies.graphicsFamily.value_or(-1),
+            device.queueFamilies.presentFamily.value_or(-1),
+            device.queueFamilies.computeFamily.value_or(-1),
+            device.queueFamilies.transferFamily.value_or(-1));
 
         return device;
     }
@@ -112,7 +110,7 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::CreateIfValid(
         return std::nullopt;
     }
 
-    SelectedQueueFamiliesInfo queueFamiliesInfo{};
+    QueueFamiliesInfo queueFamiliesInfo{};
 
     std::uint32_t queueFamilyCount{ 0 };
     vkGetPhysicalDeviceQueueFamilyProperties(
@@ -208,20 +206,19 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::CreateIfValid(
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 
-    QueueFamilies queues{
+    QueueFamiliesInfo queues{
         .graphicsFamily = queueFamiliesInfo.graphicsFamily.value(),
         .presentFamily = queueFamiliesInfo.presentFamily.value(),
         .transferFamily = queueFamiliesInfo.transferFamily.value(),
         .computeFamily = queueFamiliesInfo.computeFamily.value(),
     };
 
-    PhysicalDevice output(
-        physicalDevice,
-        deviceProperties.deviceType,
-        queues,
-        deviceProperties.deviceName);
-
-    return output;
+    return PhysicalDevice{
+        .name = deviceProperties.deviceName,
+        .handle = physicalDevice,
+        .deviceType = deviceProperties.deviceType,
+        .queueFamilies = queues,
+    };
 }
 
 std::int32_t PhysicalDeviceSelector::RatePhysicalDevice(
@@ -231,9 +228,7 @@ std::int32_t PhysicalDeviceSelector::RatePhysicalDevice(
     int score{ 0 };
 
     VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(
-        physicalDevice.GetHandle(),
-        &deviceProperties);
+    vkGetPhysicalDeviceProperties(physicalDevice.handle, &deviceProperties);
 
     if (deviceProperties.deviceType == info.preferredType)
         score += 1000;

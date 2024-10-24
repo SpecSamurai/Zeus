@@ -1,11 +1,10 @@
 #pragma once
 
-#include "PhysicalDevice.hpp"
-
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace Zeus
@@ -28,12 +27,20 @@ struct PhysicalDeviceSelectorInfo
     bool dedicatedComputeQueue;
 };
 
-struct SelectedQueueFamiliesInfo
+struct QueueFamiliesInfo
 {
     std::optional<std::uint32_t> graphicsFamily;
     std::optional<std::uint32_t> presentFamily;
     std::optional<std::uint32_t> transferFamily;
     std::optional<std::uint32_t> computeFamily;
+};
+
+struct PhysicalDevice
+{
+    std::string name;
+    VkPhysicalDevice handle;
+    VkPhysicalDeviceType deviceType;
+    QueueFamiliesInfo queueFamilies;
 };
 
 class PhysicalDeviceSelector
