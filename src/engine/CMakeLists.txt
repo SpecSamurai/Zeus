@@ -93,20 +93,10 @@ add_library(Engine
     time/Timer.cpp
     time/Timer.hpp
 
+    vulkan/Buffer.hpp
     vulkan/Definitions.hpp
     vulkan/DeletionQueue.cpp
     vulkan/DeletionQueue.hpp
-    vulkan/Fence.cpp
-    vulkan/Fence.hpp
-    vulkan/Handle.hpp
-    vulkan/PhysicalDeviceSelector.cpp
-    vulkan/PhysicalDeviceSelector.hpp
-    vulkan/Pipeline.cpp
-    vulkan/Pipeline.hpp
-    vulkan/Semaphore.cpp
-    vulkan/Semaphore.hpp
-    vulkan/Queue.cpp
-    vulkan/Queue.hpp
 
     vulkan/DescriptorAllocator.cpp
     vulkan/DescriptorAllocator.hpp
@@ -114,16 +104,30 @@ add_library(Engine
     vulkan/DescriptorLayoutBuilder.hpp
     vulkan/DescriptorWriter.cpp
     vulkan/DescriptorWriter.hpp
+
     vulkan/Device.cpp
     vulkan/Device.hpp
     vulkan/DeviceBuilder.cpp
     vulkan/DeviceBuilder.hpp
     vulkan/DynamicDescriptorAllocator.cpp
     vulkan/DynamicDescriptorAllocator.hpp
+    vulkan/Fence.cpp
+    vulkan/Fence.hpp
     vulkan/InstanceBuilder.cpp
     vulkan/InstanceBuilder.hpp
+    vulkan/PhysicalDeviceSelector.cpp
+    vulkan/PhysicalDeviceSelector.hpp
+    vulkan/Pipeline.cpp
+    vulkan/Pipeline.hpp
     vulkan/PipelineBuilder.cpp
     vulkan/PipelineBuilder.hpp
+    vulkan/Queue.cpp
+    vulkan/Queue.hpp
+    vulkan/Sampler.hpp
+    vulkan/Semaphore.cpp
+    vulkan/Semaphore.hpp
+    vulkan/Shader.hpp
+    vulkan/Swapchain.hpp
     vulkan/SwapchainBuilder.cpp
     vulkan/SwapchainBuilder.hpp
     vulkan/VkContext.cpp
