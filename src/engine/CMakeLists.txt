@@ -94,6 +94,7 @@ add_library(Engine
     time/Timer.hpp
 
     vulkan/Buffer.hpp
+    vulkan/CommandBuffer.hpp
     vulkan/Definitions.hpp
     vulkan/DeletionQueue.cpp
     vulkan/DeletionQueue.hpp
