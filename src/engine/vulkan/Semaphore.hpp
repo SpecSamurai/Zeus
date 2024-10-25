@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Handle.hpp"
-
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
@@ -9,7 +7,7 @@
 
 namespace Zeus
 {
-class Semaphore : public Handle
+class Semaphore
 {
 public:
     Semaphore(bool isTimeline = false, const char* name = nullptr);
@@ -23,7 +21,7 @@ public:
     void Signal(const std::uint64_t value);
 
     std::uint64_t GetValue() const;
-    VkSemaphore GetHandle() const;
+    const VkSemaphore& GetHandle() const;
 
 private:
     VkSemaphore m_handle{ VK_NULL_HANDLE };

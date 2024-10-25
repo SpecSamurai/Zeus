@@ -1,7 +1,6 @@
 #include "Fence.hpp"
 
-#include "Handle.hpp"
-#include "VulkanContext.hpp"
+#include "VkContext.hpp"
 #include "api/vulkan_debug.hpp"
 #include "api/vulkan_sync.hpp"
 
@@ -11,21 +10,18 @@
 
 namespace Zeus
 {
-Fence::Fence(bool signaled, const char* name) : Handle(name)
+Fence::Fence(bool signaled, const char* name)
 {
-    createVkFence(
-        VulkanContext::Get().GetDevice().logicalDevice,
-        signaled,
-        m_handle);
+    createVkFence(VkContext::GetLogicalDevice(), signaled, m_handle);
 
 #ifndef NDEBUG
-    if (m_name != nullptr)
+    if (name != nullptr)
     {
         setDebugUtilsObjectNameEXT(
-            VulkanContext::Get().GetDevice().logicalDevice,
+            VkContext::GetLogicalDevice(),
             VK_OBJECT_TYPE_FENCE,
             reinterpret_cast<std::uint64_t>(m_handle),
-            m_name);
+            name);
     }
 #endif
 }
@@ -35,7 +31,7 @@ Fence::~Fence()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VulkanContext::Get().GetDevice().deletionQueue.Add(
+    VkContext::GetDevice().GetDeletionQueue().Add(
         ResourceType::Fence,
         m_handle);
 
@@ -45,7 +41,7 @@ Fence::~Fence()
 bool Fence::Wait(std::uint64_t timeout_ns)
 {
     return vkWaitForFences(
-               VulkanContext::Get().GetDevice().logicalDevice,
+               VkContext::GetLogicalDevice(),
                1,
                &m_handle,
                VK_TRUE,
@@ -55,22 +51,18 @@ bool Fence::Wait(std::uint64_t timeout_ns)
 void Fence::Reset()
 {
     VKCHECK(
-        vkResetFences(
-            VulkanContext::Get().GetDevice().logicalDevice,
-            1,
-            &m_handle),
+        vkResetFences(VkContext::GetLogicalDevice(), 1, &m_handle),
         "Failed to reset fence");
 }
 
-VkFence Fence::GetHandle() const
+const VkFence& Fence::GetHandle() const
 {
     return m_handle;
 }
 
 bool Fence::Signaled() const
 {
-    return vkGetFenceStatus(
-               VulkanContext::Get().GetDevice().logicalDevice,
-               m_handle) == VK_SUCCESS;
+    return vkGetFenceStatus(VkContext::GetLogicalDevice(), m_handle) ==
+           VK_SUCCESS;
 }
 }

@@ -1,10 +1,8 @@
 #include "Semaphore.hpp"
 
-#include "Handle.hpp"
-#include "VulkanContext.hpp"
+#include "VkContext.hpp"
 #include "api/vulkan_debug.hpp"
 #include "api/vulkan_sync.hpp"
-#include "vulkan/Definitions.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -14,22 +12,18 @@
 namespace Zeus
 {
 Semaphore::Semaphore(bool isTimeline, const char* name)
-    : Handle(name),
-      m_isTimeline{ isTimeline }
+    : m_isTimeline{ isTimeline }
 {
-    createVkSemaphore(
-        VulkanContext::Get().GetDevice().logicalDevice,
-        m_handle,
-        m_isTimeline);
+    createVkSemaphore(VkContext::GetLogicalDevice(), m_handle, m_isTimeline);
 
 #ifndef NDEBUG
-    if (m_name != nullptr)
+    if (name != nullptr)
     {
         setDebugUtilsObjectNameEXT(
-            VulkanContext::Get().GetDevice().logicalDevice,
+            VkContext::GetLogicalDevice(),
             VK_OBJECT_TYPE_SEMAPHORE,
             reinterpret_cast<std::uint64_t>(m_handle),
-            m_name);
+            name);
     }
 #endif
 }
@@ -39,7 +33,7 @@ Semaphore::~Semaphore()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VulkanContext::Get().GetDevice().deletionQueue.Add(
+    VkContext::GetDevice().GetDeletionQueue().Add(
         ResourceType::Semaphore,
         m_handle);
 
@@ -51,7 +45,7 @@ void Semaphore::Wait(const std::uint64_t value, const std::uint64_t timeout_ns)
     assert(m_isTimeline);
 
     waitVkSemaphores(
-        VulkanContext::Get().GetDevice().logicalDevice,
+        VkContext::GetLogicalDevice(),
         m_handle,
         value,
         timeout_ns);
@@ -61,10 +55,7 @@ void Semaphore::Signal(const std::uint64_t value)
 {
     assert(m_isTimeline);
 
-    signalVkSemaphores(
-        VulkanContext::Get().GetDevice().logicalDevice,
-        m_handle,
-        value);
+    signalVkSemaphores(VkContext::GetLogicalDevice(), m_handle, value);
 }
 
 std::uint64_t Semaphore::GetValue() const
@@ -75,7 +66,7 @@ std::uint64_t Semaphore::GetValue() const
 
     VKCHECK(
         vkGetSemaphoreCounterValue(
-            VulkanContext::Get().GetDevice().logicalDevice,
+            VkContext::GetLogicalDevice(),
             m_handle,
             &value),
         "Failed to get Semaphore counter value");
@@ -83,7 +74,7 @@ std::uint64_t Semaphore::GetValue() const
     return value;
 }
 
-VkSemaphore Semaphore::GetHandle() const
+const VkSemaphore& Semaphore::GetHandle() const
 {
     return m_handle;
 }

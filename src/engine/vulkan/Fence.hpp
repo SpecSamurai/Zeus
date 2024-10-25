@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Handle.hpp"
-
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
@@ -9,7 +7,7 @@
 
 namespace Zeus
 {
-class Fence : public Handle
+class Fence
 {
 public:
     Fence(bool signaled = false, const char* name = nullptr);
@@ -20,7 +18,7 @@ public:
         std::uint64_t timeout_ns = std::numeric_limits<std::uint64_t>::max());
     void Reset();
 
-    VkFence GetHandle() const;
+    const VkFence& GetHandle() const;
     bool Signaled() const;
 
 private:
