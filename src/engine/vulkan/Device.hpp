@@ -1,17 +1,38 @@
 #pragma once
 
-#include "vulkan_memory.hpp"
+#include "Definitions.hpp"
+#include "DeletionQueue.hpp"
+#include "DeviceBuilder.hpp"
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <cstdint>
 
 namespace Zeus
 {
-struct Device
+class Device
 {
-    VkDevice logicalDevice;
-    VkPhysicalDevice physicalDevice;
+public:
+    void Init(const DeviceInfo& deviceInfo);
+    void Destroy();
+
+    void Wait();
+    void WaitAll();
+
+    // CommandBuffer* CmdImmediateBegin(const QueueType queue_type);
+    // void CmdImmediateSubmit(CommandBuffer* cmd);
+
+    VkQueue GetQueue(QueueType type) const;
+    std::uint32_t GetQueueFamily(QueueType type) const;
+
+    const VkDevice& GetLogicalDevice() const;
+    const VkPhysicalDevice& GetPhysicalDevice() const;
+    DeletionQueue& GetDeletionQueue();
+
+private:
+    VkDevice m_logicalDevice{ VK_NULL_HANDLE };
+    VkPhysicalDevice m_physicalDevice{ VK_NULL_HANDLE };
+    DeletionQueue m_deletionQueue;
 
     VkPhysicalDeviceProperties properties;
     VkPhysicalDeviceFeatures features;
@@ -26,9 +47,4 @@ struct Device
     VkQueue transferQueue;
     VkQueue computeQueue;
 };
-
-inline void destroyDevice(Device& device)
-{
-    vkDestroyDevice(device.logicalDevice, allocationCallbacks.get());
-}
 }

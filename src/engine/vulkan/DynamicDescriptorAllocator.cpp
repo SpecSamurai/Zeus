@@ -1,8 +1,8 @@
 #include "DynamicDescriptorAllocator.hpp"
 
-#include "vulkan_debug.hpp"
-#include "vulkan_descriptors.hpp"
-#include "vulkan_memory.hpp"
+#include "api/vulkan_debug.hpp"
+#include "api/vulkan_descriptors.hpp"
+#include "api/vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 

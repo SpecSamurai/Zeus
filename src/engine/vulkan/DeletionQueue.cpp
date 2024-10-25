@@ -12,13 +12,15 @@
 
 namespace Zeus
 {
-DeletionQueue::DeletionQueue(VkDevice device) : m_device{ device }
+void DeletionQueue::Init(const VkDevice& device)
 {
+    m_device = device;
     m_resources.reserve(static_cast<std::size_t>(ResourceType::Count));
 }
 
 void DeletionQueue::Add(const ResourceType type, void* handle)
 {
+    assert(m_device != VK_NULL_HANDLE);
     if (handle == nullptr)
     {
         LOG_WARNING("Added uninitialized handle to Deletion Queue");
@@ -31,6 +33,7 @@ void DeletionQueue::Add(const ResourceType type, void* handle)
 
 void DeletionQueue::Clear()
 {
+    assert(m_device != VK_NULL_HANDLE);
     std::lock_guard<std::mutex> lock(m_mutex);
 
     for (auto& pair : m_resources)

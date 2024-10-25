@@ -49,7 +49,7 @@ void VkContext::Destroy()
     s_debugUtilsMessenger = VK_NULL_HANDLE;
 }
 
-const Device& VkContext::GetDevice()
+Device& VkContext::GetDevice()
 {
     return s_device;
 }
@@ -57,6 +57,16 @@ const Device& VkContext::GetDevice()
 const VkDevice& VkContext::GetLogicalDevice()
 {
     return s_device.GetLogicalDevice();
+}
+
+const VkSurfaceKHR& VkContext::GetSurface()
+{
+    return s_surface;
+}
+
+const VmaAllocator& VkContext::GetAllocator()
+{
+    return s_allocator;
 }
 
 void VkContext::InitInstance(const Window& window)

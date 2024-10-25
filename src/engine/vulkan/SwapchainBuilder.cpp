@@ -1,9 +1,9 @@
 #include "SwapchainBuilder.hpp"
 
+#include "api/vulkan_debug.hpp"
+#include "api/vulkan_device.hpp"
+#include "api/vulkan_memory.hpp"
 #include "logging/logger.hpp"
-#include "vulkan_debug.hpp"
-#include "vulkan_device.hpp"
-#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -20,13 +20,13 @@ void destroySwapchain(const Device& device, const Swapchain& swapchain)
     for (auto& imageView : swapchain.imageViews)
     {
         vkDestroyImageView(
-            device.logicalDevice,
+            device.GetLogicalDevice(),
             imageView,
             allocationCallbacks.get());
     }
 
     vkDestroySwapchainKHR(
-        device.logicalDevice,
+        device.GetLogicalDevice(),
         swapchain.handle,
         allocationCallbacks.get());
 }
@@ -337,12 +337,12 @@ void SwapchainBuilder::setDevice(
     const Device& device,
     const VkSurfaceKHR& surface)
 {
-    info.device = device.logicalDevice;
-    info.physicalDevice = device.physicalDevice;
+    info.device = device.GetLogicalDevice();
+    info.physicalDevice = device.GetPhysicalDevice();
     info.surface = surface;
 
-    info.graphicsFamily = device.graphicsFamily;
-    info.presentFamily = device.presentFamily;
+    info.graphicsFamily = device.GetQueueFamily(QueueType::Graphics);
+    info.presentFamily = device.GetQueueFamily(QueueType::Present);
 }
 
 void SwapchainBuilder::setOldSwapchain(VkSwapchainKHR oldSwapchain)

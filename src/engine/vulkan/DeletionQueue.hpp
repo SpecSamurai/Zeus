@@ -14,13 +14,12 @@ namespace Zeus
 class DeletionQueue
 {
 public:
-    DeletionQueue(VkDevice device);
-
+    void Init(const VkDevice& device);
     void Add(const ResourceType type, void* handle);
     void Clear();
 
 private:
-    VkDevice m_device;
+    VkDevice m_device{ VK_NULL_HANDLE };
     std::unordered_map<ResourceType, std::vector<void*>> m_resources;
     std::mutex m_mutex;
 };
