@@ -49,6 +49,11 @@ void VkContext::Destroy()
     s_debugUtilsMessenger = VK_NULL_HANDLE;
 }
 
+const VkInstance& VkContext::GetInstance()
+{
+    return s_instance;
+}
+
 Device& VkContext::GetDevice()
 {
     return s_device;

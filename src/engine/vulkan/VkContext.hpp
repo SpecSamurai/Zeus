@@ -14,6 +14,7 @@ public:
     static void Init(const Window& window);
     static void Destroy();
 
+    static const VkInstance& GetInstance();
     static Device& GetDevice();
     static const VkDevice& GetLogicalDevice();
     static const VkSurfaceKHR& GetSurface();
