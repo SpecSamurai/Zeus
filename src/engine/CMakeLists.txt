@@ -128,6 +128,7 @@ add_library(Engine
     vulkan/Semaphore.cpp
     vulkan/Semaphore.hpp
     vulkan/Shader.hpp
+    vulkan/Swapchain.cpp
     vulkan/Swapchain.hpp
     vulkan/SwapchainBuilder.cpp
     vulkan/SwapchainBuilder.hpp

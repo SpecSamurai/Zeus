@@ -14,16 +14,16 @@ struct Swapchain
 {
     VkSwapchainKHR handle;
 
-    std::uint32_t imageCount;
-    std::uint32_t maxConcurrentFrames;
+    std::uint32_t m_imageCount;
+    std::uint32_t m_maxConcurrentFrames;
 
-    VkFormat imageFormat;
-    VkImageUsageFlags imageUsageFlags;
+    VkFormat m_imageFormat;
+    VkImageUsageFlags m_imageUsageFlags;
 
     VkExtent2D extent;
 
-    std::vector<VkImage> images;
-    std::vector<VkImageView> imageViews;
+    std::vector<VkImage> m_images;
+    std::vector<VkImageView> m_imageViews;
 };
 
 void destroySwapchain(const Device& device, const Swapchain& swapchain);

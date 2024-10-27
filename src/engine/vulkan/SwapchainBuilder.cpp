@@ -17,7 +17,7 @@ namespace Zeus
 {
 void destroySwapchain(const Device& device, const Swapchain& swapchain)
 {
-    for (auto& imageView : swapchain.imageViews)
+    for (auto& imageView : swapchain.m_imageViews)
     {
         vkDestroyImageView(
             device.GetLogicalDevice(),
@@ -125,36 +125,36 @@ std::optional<Swapchain> SwapchainBuilder::build()
 
     VKCHECK(result, "Failed to create swap chain.");
 
-    swapchain.imageFormat = surfaceFormat.format;
+    swapchain.m_imageFormat = surfaceFormat.format;
     swapchain.extent = extent;
-    swapchain.imageUsageFlags = info.imageUsageFlags;
+    swapchain.m_imageUsageFlags = info.imageUsageFlags;
 
     vkGetSwapchainImagesKHR(
         info.device,
         swapchain.handle,
-        &swapchain.imageCount,
+        &swapchain.m_imageCount,
         nullptr);
 
-    swapchain.images.resize(swapchain.imageCount);
+    swapchain.m_images.resize(swapchain.m_imageCount);
 
     vkGetSwapchainImagesKHR(
         info.device,
         swapchain.handle,
-        &swapchain.imageCount,
-        swapchain.images.data());
+        &swapchain.m_imageCount,
+        swapchain.m_images.data());
 
-    swapchain.maxConcurrentFrames = swapchain.imageCount - 1;
-    swapchain.imageViews.resize(swapchain.imageCount);
+    swapchain.m_maxConcurrentFrames = swapchain.m_imageCount - 1;
+    swapchain.m_imageViews.resize(swapchain.m_imageCount);
 
-    for (std::uint32_t i{ 0 }; i < swapchain.images.size(); ++i)
+    for (std::uint32_t i{ 0 }; i < swapchain.m_images.size(); ++i)
     {
         VkImageViewCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        createInfo.image = swapchain.images[i];
+        createInfo.image = swapchain.m_images[i];
         createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.format = swapchain.imageFormat;
+        createInfo.format = swapchain.m_imageFormat;
         createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
         createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
         createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -170,7 +170,7 @@ std::optional<Swapchain> SwapchainBuilder::build()
                 info.device,
                 &createInfo,
                 allocationCallbacks.get(),
-                &swapchain.imageViews[i]),
+                &swapchain.m_imageViews[i]),
             "Failed to create swapchain image view.");
 
 #ifndef NDEBUG
@@ -178,7 +178,7 @@ std::optional<Swapchain> SwapchainBuilder::build()
         setDebugUtilsObjectNameEXT(
             info.device,
             VK_OBJECT_TYPE_IMAGE,
-            reinterpret_cast<std::uint64_t>(swapchain.images[i]),
+            reinterpret_cast<std::uint64_t>(swapchain.m_images[i]),
             imageName.c_str());
 
         std::string imageViewName{ "Image View Swapchain " +
@@ -186,16 +186,16 @@ std::optional<Swapchain> SwapchainBuilder::build()
         setDebugUtilsObjectNameEXT(
             info.device,
             VK_OBJECT_TYPE_IMAGE_VIEW,
-            reinterpret_cast<std::uint64_t>(swapchain.imageViews[i]),
+            reinterpret_cast<std::uint64_t>(swapchain.m_imageViews[i]),
             imageViewName.c_str());
 #endif
     }
 
-    LOG_DEBUG("Swapchain created images count {}", swapchain.imageCount);
-    LOG_DEBUG("Max Concurrent Frames {}.", swapchain.maxConcurrentFrames);
+    LOG_DEBUG("Swapchain created images count {}", swapchain.m_imageCount);
+    LOG_DEBUG("Max Concurrent Frames {}.", swapchain.m_maxConcurrentFrames);
 
-    assert(swapchain.imageCount == imageCount);
-    assert(swapchain.images.size() == imageCount);
+    assert(swapchain.m_imageCount == imageCount);
+    assert(swapchain.m_images.size() == imageCount);
 
     return swapchain;
 }
