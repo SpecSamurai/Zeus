@@ -15,10 +15,10 @@
 namespace Zeus
 {
 VkResult createVkShaderModule(
-    const VkDevice& device,
+    VkDevice device,
     std::size_t codeSize,
     const std::uint32_t* pCode,
-    VkShaderModule& shaderModule)
+    VkShaderModule* shaderModule)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -29,7 +29,7 @@ VkResult createVkShaderModule(
         device,
         &createInfo,
         allocationCallbacks.get(),
-        &shaderModule) };
+        shaderModule) };
 
     VKCHECK(result, "Failed to create shader module.");
 
@@ -37,7 +37,7 @@ VkResult createVkShaderModule(
 }
 
 VkResult loadShader(
-    VkShaderModule& shaderModule,
+    VkShaderModule* shaderModule,
     VkDevice device,
     const char* filename)
 {

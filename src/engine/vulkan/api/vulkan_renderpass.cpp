@@ -10,9 +10,9 @@
 namespace Zeus
 {
 VkResult createVkRenderPass(
-    const VkDevice& device,
+    VkDevice device,
     const RenderPassConfig& config,
-    VkRenderPass& renderPass)
+    VkRenderPass* renderPass)
 {
     VkAttachmentDescription colorAttachmentDescription{};
     colorAttachmentDescription.format = config.colorAttachmentFormat;
@@ -103,7 +103,7 @@ VkResult createVkRenderPass(
     createInfo.pDependencies = &subpassDependency;
 
     VkResult result{
-        vkCreateRenderPass(device, &createInfo, nullptr, &renderPass)
+        vkCreateRenderPass(device, &createInfo, nullptr, renderPass)
     };
 
     VKCHECK(result, "Failed to create render pass.");

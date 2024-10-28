@@ -5,7 +5,7 @@
 namespace Zeus
 {
 VkResult createVkSurfaceKHR(
-    const VkInstance& instance,
+    VkInstance instance,
     void* windowHandle,
-    VkSurfaceKHR& surface);
+    VkSurfaceKHR* surface);
 }

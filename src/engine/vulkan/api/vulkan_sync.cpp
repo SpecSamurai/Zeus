@@ -10,8 +10,8 @@
 namespace Zeus
 {
 VkResult createVkSemaphore(
-    const VkDevice& device,
-    VkSemaphore& semaphore,
+    VkDevice device,
+    VkSemaphore* semaphore,
     bool isTimeline)
 {
     VkSemaphoreTypeCreateInfo typeCreateInfo{};
@@ -29,14 +29,14 @@ VkResult createVkSemaphore(
         device,
         &createInfo,
         allocationCallbacks.get(),
-        &semaphore) };
+        semaphore) };
 
     VKCHECK(result, "Failed to create Semaphore.");
 
     return result;
 }
 
-VkResult createVkFence(const VkDevice& device, bool signaled, VkFence& fence)
+VkResult createVkFence(VkDevice device, bool signaled, VkFence* fence)
 {
     VkFenceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -47,7 +47,7 @@ VkResult createVkFence(const VkDevice& device, bool signaled, VkFence& fence)
     }
 
     VkResult result{
-        vkCreateFence(device, &createInfo, allocationCallbacks.get(), &fence)
+        vkCreateFence(device, &createInfo, allocationCallbacks.get(), fence)
     };
 
     VKCHECK(result, "Failed to create Fence.");
@@ -56,8 +56,8 @@ VkResult createVkFence(const VkDevice& device, bool signaled, VkFence& fence)
 }
 
 VkResult waitVkSemaphores(
-    const VkDevice& device,
-    VkSemaphore& semaphore,
+    VkDevice device,
+    VkSemaphore* semaphore,
     std::uint64_t value,
     std::uint64_t timeout_ns)
 {
@@ -66,7 +66,7 @@ VkResult waitVkSemaphores(
     waitInfo.pNext = nullptr;
     waitInfo.flags = 0;
     waitInfo.semaphoreCount = 1;
-    waitInfo.pSemaphores = &semaphore;
+    waitInfo.pSemaphores = semaphore;
     waitInfo.pValues = &value;
 
     VkResult result{ vkWaitSemaphores(device, &waitInfo, timeout_ns) };
@@ -77,8 +77,8 @@ VkResult waitVkSemaphores(
 }
 
 VkResult signalVkSemaphores(
-    const VkDevice& device,
-    VkSemaphore& semaphore,
+    VkDevice device,
+    VkSemaphore semaphore,
     std::uint64_t value)
 {
     VkSemaphoreSignalInfo signalInfo{};

@@ -7,7 +7,7 @@
 namespace Zeus
 {
 VkResult createComputePipeline(
-    VkPipeline& pipeline,
+    VkPipeline* pipeline,
     VkDevice device,
     VkPipelineLayout layout,
     VkShaderModule module,
@@ -16,7 +16,7 @@ VkResult createComputePipeline(
     std::int32_t basePipelineIndex = -1);
 
 VkResult createVkPipelineLayout(
-    VkPipelineLayout& pipelineLayout,
+    VkPipelineLayout* pipelineLayout,
     VkDevice device,
     std::uint32_t setLayoutCount = 0,
     const VkDescriptorSetLayout* pSetLayouts = nullptr,

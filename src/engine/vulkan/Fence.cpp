@@ -12,7 +12,7 @@ namespace Zeus
 {
 Fence::Fence(bool signaled, const char* name)
 {
-    createVkFence(VkContext::GetLogicalDevice(), signaled, m_handle);
+    createVkFence(VkContext::GetLogicalDevice(), signaled, &m_handle);
 
 #ifndef NDEBUG
     if (name != nullptr)

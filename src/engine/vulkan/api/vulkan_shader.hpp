@@ -8,13 +8,13 @@
 namespace Zeus
 {
 VkResult createVkShaderModule(
-    const VkDevice& device,
+    VkDevice device,
     std::size_t codeSize,
     const std::uint32_t* pCode,
-    VkShaderModule& shaderModule);
+    VkShaderModule* shaderModule);
 
 VkResult loadShader(
-    VkShaderModule& shaderModule,
+    VkShaderModule* shaderModule,
     VkDevice device,
     const char* filename);
 }

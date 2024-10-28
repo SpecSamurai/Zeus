@@ -12,7 +12,7 @@ struct RenderPassConfig
 };
 
 VkResult createVkRenderPass(
-    const VkDevice& device,
+    VkDevice device,
     const RenderPassConfig& config,
-    VkRenderPass& renderPass);
+    VkRenderPass* renderPass);
 }

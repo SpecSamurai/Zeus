@@ -14,7 +14,7 @@ namespace Zeus
 Semaphore::Semaphore(bool isTimeline, const char* name)
     : m_isTimeline{ isTimeline }
 {
-    createVkSemaphore(VkContext::GetLogicalDevice(), m_handle, m_isTimeline);
+    createVkSemaphore(VkContext::GetLogicalDevice(), &m_handle, m_isTimeline);
 
 #ifndef NDEBUG
     if (name != nullptr)
@@ -46,7 +46,7 @@ void Semaphore::Wait(const std::uint64_t value, const std::uint64_t timeout_ns)
 
     waitVkSemaphores(
         VkContext::GetLogicalDevice(),
-        m_handle,
+        &m_handle,
         value,
         timeout_ns);
 }

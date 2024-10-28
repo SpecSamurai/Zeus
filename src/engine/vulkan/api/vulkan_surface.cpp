@@ -11,15 +11,15 @@
 namespace Zeus
 {
 VkResult createVkSurfaceKHR(
-    const VkInstance& instance,
+    VkInstance instance,
     void* windowHandle,
-    VkSurfaceKHR& surface)
+    VkSurfaceKHR* surface)
 {
     VkResult result{ glfwCreateWindowSurface(
         instance,
         reinterpret_cast<GLFWwindow*>(windowHandle),
         allocationCallbacks.get(),
-        &surface) };
+        surface) };
 
     VKCHECK(result, "Failed to create window surface.");
 
