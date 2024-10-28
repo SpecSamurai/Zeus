@@ -11,10 +11,10 @@
 namespace Zeus
 {
 VkResult createVkFramebuffer(
-    VkFramebuffer& framebuffer,
-    const VkDevice& device,
+    VkFramebuffer* framebuffer,
+    VkDevice device,
     const std::vector<VkImageView>& attachments,
-    const VkRenderPass& renderPass,
+    VkRenderPass renderPass,
     const VkExtent2D& extent,
     std::uint32_t layers)
 {
@@ -31,7 +31,7 @@ VkResult createVkFramebuffer(
         device,
         &createInfo,
         allocationCallbacks.get(),
-        &framebuffer) };
+        framebuffer) };
 
     VKCHECK(result, "Failed to create Framebuffer.");
 

@@ -14,13 +14,12 @@ struct SurfaceDetails
 };
 
 const SurfaceDetails getSurfaceDetails(
-    const VkPhysicalDevice& physicalDevice,
-    const VkSurfaceKHR& surface);
+    VkPhysicalDevice physicalDevice,
+    VkSurfaceKHR surface);
 
-VkSampleCountFlagBits getMaxUsableSampleCount(
-    const VkPhysicalDevice& physicalDevice);
+VkSampleCountFlagBits getMaxUsableSampleCount(VkPhysicalDevice physicalDevice);
 
 bool areDeviceExtensionSupported(
-    const VkPhysicalDevice& device,
+    VkPhysicalDevice device,
     const std::vector<const char*>& deviceExtensions);
 }

@@ -10,8 +10,8 @@
 namespace Zeus
 {
 const SurfaceDetails getSurfaceDetails(
-    const VkPhysicalDevice& physicalDevice,
-    const VkSurfaceKHR& surface)
+    VkPhysicalDevice physicalDevice,
+    VkSurfaceKHR surface)
 {
     SurfaceDetails details{};
 
@@ -57,8 +57,7 @@ const SurfaceDetails getSurfaceDetails(
     return details;
 }
 
-VkSampleCountFlagBits getMaxUsableSampleCount(
-    const VkPhysicalDevice& physicalDevice)
+VkSampleCountFlagBits getMaxUsableSampleCount(VkPhysicalDevice physicalDevice)
 {
     VkPhysicalDeviceProperties physicalDeviceProperties{};
     vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
@@ -97,7 +96,7 @@ VkSampleCountFlagBits getMaxUsableSampleCount(
 }
 
 bool areDeviceExtensionSupported(
-    const VkPhysicalDevice& device,
+    VkPhysicalDevice device,
     const std::vector<const char*>& deviceExtensions)
 {
     std::uint32_t extensionCount{ 0 };

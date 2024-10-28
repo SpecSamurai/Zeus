@@ -11,8 +11,8 @@
 namespace Zeus
 {
 VkResult createDescriptorPool(
-    VkDescriptorPool& descriptorPool,
-    const VkDevice& device,
+    VkDescriptorPool* descriptorPool,
+    VkDevice device,
     std::uint32_t maxSets,
     std::uint32_t poolSizeCount,
     const VkDescriptorPoolSize* pPoolSizes,
@@ -29,7 +29,7 @@ VkResult createDescriptorPool(
         device,
         &createInfo,
         allocationCallbacks.get(),
-        &descriptorPool) };
+        descriptorPool) };
 
     VKCHECK(result, "Failed to create descriptor pool.");
 
@@ -65,7 +65,7 @@ VkResult allocateVkDescriptorSets(
 }
 
 VkResult allocateVkDescriptorSet(
-    VkDescriptorSet& descriptorSet,
+    VkDescriptorSet* descriptorSet,
     VkDevice device,
     VkDescriptorPool descriptorPool,
     VkDescriptorSetLayout descriptorSetLayout)
@@ -76,7 +76,7 @@ VkResult allocateVkDescriptorSet(
     allocateInfo.descriptorSetCount = 1;
     allocateInfo.pSetLayouts = &descriptorSetLayout;
 
-    return vkAllocateDescriptorSets(device, &allocateInfo, &descriptorSet);
+    return vkAllocateDescriptorSets(device, &allocateInfo, descriptorSet);
 }
 
 VkDescriptorPoolSize createVkDescriptorPoolSize(
