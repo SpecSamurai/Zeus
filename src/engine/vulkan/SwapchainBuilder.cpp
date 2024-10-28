@@ -15,7 +15,7 @@
 
 namespace Zeus
 {
-void destroySwapchain(const Device& device, const Swapchain& swapchain)
+void destroySwapchain(const Device& device, const SwapchainResult& swapchain)
 {
     for (auto& imageView : swapchain.m_imageViews)
     {
@@ -43,7 +43,7 @@ VkExtent2D selectExtent(
     const VkSurfaceCapabilitiesKHR& surfaceCapabilities,
     const VkExtent2D& desiredExtent);
 
-std::optional<Swapchain> SwapchainBuilder::build()
+std::optional<SwapchainResult> SwapchainBuilder::build()
 {
     if (!validate())
         return std::nullopt;
@@ -116,7 +116,7 @@ std::optional<Swapchain> SwapchainBuilder::build()
     else
         createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
 
-    Swapchain swapchain{};
+    SwapchainResult swapchain{};
     VkResult result{ vkCreateSwapchainKHR(
         info.device,
         &createInfo,

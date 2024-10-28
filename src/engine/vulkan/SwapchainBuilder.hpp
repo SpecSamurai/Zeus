@@ -10,7 +10,7 @@
 
 namespace Zeus
 {
-struct Swapchain
+struct SwapchainResult
 {
     VkSwapchainKHR handle;
 
@@ -26,12 +26,12 @@ struct Swapchain
     std::vector<VkImageView> m_imageViews;
 };
 
-void destroySwapchain(const Device& device, const Swapchain& swapchain);
+void destroySwapchain(const Device& device, const SwapchainResult& swapchain);
 
 class SwapchainBuilder
 {
 public:
-    std::optional<Swapchain> build();
+    std::optional<SwapchainResult> build();
 
     void setDevice(const Device& device, const VkSurfaceKHR& surface);
     void setOldSwapchain(VkSwapchainKHR oldSwapchain);
