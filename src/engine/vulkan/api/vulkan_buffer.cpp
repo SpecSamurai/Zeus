@@ -89,7 +89,7 @@ void cmdCopyBuffer(
     vkCmdCopyBuffer2(commandBuffer, &vertexBufferCopyInfo);
 }
 
-VkDeviceAddress getBufferDeviceAddress(VkDevice device, VkBuffer& buffer)
+VkDeviceAddress getBufferDeviceAddress(VkDevice device, VkBuffer buffer)
 {
     VkBufferDeviceAddressInfo info{};
     info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;

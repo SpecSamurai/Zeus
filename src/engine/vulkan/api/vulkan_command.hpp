@@ -8,33 +8,33 @@
 namespace Zeus
 {
 VkResult createVkCommandPool(
-    const VkDevice& device,
+    VkDevice device,
     VkCommandPoolCreateFlagBits createFlags,
     std::uint32_t queueFamilyIndex,
-    VkCommandPool& commandPool);
+    VkCommandPool* commandPool);
 
 VkResult allocateVkCommandBuffers(
     std::vector<VkCommandBuffer>& commandBuffers,
-    const VkDevice& device,
-    const VkCommandPool& commandPool,
+    VkDevice device,
+    VkCommandPool commandPool,
     VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
 VkResult allocateVkCommandBuffer(
-    VkCommandBuffer& commandBuffers,
-    const VkDevice& device,
-    const VkCommandPool& commandPool,
+    VkCommandBuffer* commandBuffers,
+    VkDevice device,
+    VkCommandPool commandPool,
     VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
 VkResult beginVkCommandBuffer(
-    VkCommandBuffer& commandBuffer,
+    VkCommandBuffer commandBuffer,
     VkCommandBufferUsageFlags flags = 0,
     const VkCommandBufferInheritanceInfo* pInheritanceInfo = nullptr);
 
 void cmdBeginVkRenderPass(
-    VkCommandBuffer& commandBuffer,
-    const VkRenderPass& renderPass,
+    VkCommandBuffer commandBuffer,
+    VkRenderPass renderPass,
     const VkExtent2D& extent,
-    const VkFramebuffer& framebuffer,
+    VkFramebuffer framebuffer,
     const std::vector<VkClearValue>& clearValues,
     VkOffset2D offset = { .x = 0, .y = 0 },
     VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
@@ -77,7 +77,7 @@ VkResult cmdVkQueuePresentKHR(
     VkResult* pResults = nullptr);
 
 void cmdSetVkViewport(
-    VkCommandBuffer& commandBuffer,
+    VkCommandBuffer commandBuffer,
     float width,
     float height,
     float x = 0.0f,
@@ -86,7 +86,7 @@ void cmdSetVkViewport(
     float maxDepth = 1.0f);
 
 void cmdSetVkScissor(
-    VkCommandBuffer& commandBuffer,
+    VkCommandBuffer commandBuffer,
     VkExtent2D extent,
     VkOffset2D offset = { .x = 0, .y = 0 });
 }

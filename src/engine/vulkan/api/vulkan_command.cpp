@@ -11,10 +11,10 @@
 namespace Zeus
 {
 VkResult createVkCommandPool(
-    const VkDevice& device,
+    VkDevice device,
     VkCommandPoolCreateFlagBits createFlags,
     std::uint32_t queueFamilyIndex,
-    VkCommandPool& commandPool)
+    VkCommandPool* commandPool)
 {
     VkCommandPoolCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -25,7 +25,7 @@ VkResult createVkCommandPool(
         device,
         &createInfo,
         allocationCallbacks.get(),
-        &commandPool) };
+        commandPool) };
 
     VKCHECK(result, "Failed to create command pool.");
 
@@ -34,8 +34,8 @@ VkResult createVkCommandPool(
 
 VkResult allocateVkCommandBuffers(
     std::vector<VkCommandBuffer>& commandBuffers,
-    const VkDevice& device,
-    const VkCommandPool& commandPool,
+    VkDevice device,
+    VkCommandPool commandPool,
     VkCommandBufferLevel level)
 {
     VkCommandBufferAllocateInfo allocateInfo{};
@@ -55,9 +55,9 @@ VkResult allocateVkCommandBuffers(
 }
 
 VkResult allocateVkCommandBuffer(
-    VkCommandBuffer& commandBuffers,
-    const VkDevice& device,
-    const VkCommandPool& commandPool,
+    VkCommandBuffer* commandBuffers,
+    VkDevice device,
+    VkCommandPool commandPool,
     VkCommandBufferLevel level)
 {
     VkCommandBufferAllocateInfo allocateInfo{};
@@ -67,7 +67,7 @@ VkResult allocateVkCommandBuffer(
     allocateInfo.commandBufferCount = 1;
 
     VkResult result{
-        vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffers)
+        vkAllocateCommandBuffers(device, &allocateInfo, commandBuffers)
     };
 
     VKCHECK(result, "Failed to allocate command buffers.");
@@ -76,7 +76,7 @@ VkResult allocateVkCommandBuffer(
 }
 
 VkResult beginVkCommandBuffer(
-    VkCommandBuffer& commandBuffer,
+    VkCommandBuffer commandBuffer,
     VkCommandBufferUsageFlags flags,
     const VkCommandBufferInheritanceInfo* pInheritanceInfo)
 {
@@ -93,10 +93,10 @@ VkResult beginVkCommandBuffer(
 }
 
 void cmdBeginVkRenderPass(
-    VkCommandBuffer& commandBuffer,
-    const VkRenderPass& renderPass,
+    VkCommandBuffer commandBuffer,
+    VkRenderPass renderPass,
     const VkExtent2D& extent,
-    const VkFramebuffer& framebuffer,
+    VkFramebuffer framebuffer,
     const std::vector<VkClearValue>& clearValues,
     VkOffset2D offset,
     VkSubpassContents contents)
@@ -246,7 +246,7 @@ VkResult cmdVkQueuePresentKHR(
 }
 
 void cmdSetVkViewport(
-    VkCommandBuffer& commandBuffer,
+    VkCommandBuffer commandBuffer,
     float width,
     float height,
     float x,
@@ -266,7 +266,7 @@ void cmdSetVkViewport(
 }
 
 void cmdSetVkScissor(
-    VkCommandBuffer& commandBuffer,
+    VkCommandBuffer commandBuffer,
     VkExtent2D extent,
     VkOffset2D offset)
 {

@@ -29,5 +29,5 @@ void cmdCopyBuffer(
     VkDeviceSize dstOffset,
     VkDeviceSize size);
 
-VkDeviceAddress getBufferDeviceAddress(VkDevice device, VkBuffer& buffer);
+VkDeviceAddress getBufferDeviceAddress(VkDevice device, VkBuffer buffer);
 }
