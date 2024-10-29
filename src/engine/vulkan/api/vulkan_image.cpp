@@ -225,7 +225,7 @@ VkFormat findSupportedImageFormat(
 
 void transitionImageLayout(
     VkCommandBuffer commandBuffer,
-    VkImage& image,
+    VkImage image,
     VkFormat format,
     VkImageLayout currentLayout,
     VkImageLayout newLayout)

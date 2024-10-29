@@ -93,7 +93,9 @@ add_library(Engine
     time/Timer.cpp
     time/Timer.hpp
 
+    vulkan/Buffer.cpp
     vulkan/Buffer.hpp
+    vulkan/CommandBuffer.cpp
     vulkan/CommandBuffer.hpp
     vulkan/Definitions.hpp
     vulkan/DeletionQueue.cpp
@@ -124,9 +126,11 @@ add_library(Engine
     vulkan/PipelineBuilder.hpp
     vulkan/Queue.cpp
     vulkan/Queue.hpp
+    vulkan/Sampler.cpp
     vulkan/Sampler.hpp
     vulkan/Semaphore.cpp
     vulkan/Semaphore.hpp
+    vulkan/Shader.cpp
     vulkan/Shader.hpp
     vulkan/Swapchain.cpp
     vulkan/Swapchain.hpp

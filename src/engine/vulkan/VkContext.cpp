@@ -32,8 +32,12 @@ void VkContext::Destroy()
     LOG_DEBUG("Destroying VulkanContext");
 
     vmaDestroyAllocator(s_allocator);
+    s_allocator = VK_NULL_HANDLE;
+
     s_device.Destroy();
+
     vkDestroySurfaceKHR(s_instance, s_surface, allocationCallbacks.get());
+    s_surface = VK_NULL_HANDLE;
 
     if (s_debugUtilsMessenger != VK_NULL_HANDLE)
     {
@@ -41,12 +45,11 @@ void VkContext::Destroy()
             s_instance,
             s_debugUtilsMessenger,
             allocationCallbacks.get());
+        s_debugUtilsMessenger = VK_NULL_HANDLE;
     }
 
     vkDestroyInstance(s_instance, allocationCallbacks.get());
-
     s_instance = VK_NULL_HANDLE;
-    s_debugUtilsMessenger = VK_NULL_HANDLE;
 }
 
 const VkInstance& VkContext::GetInstance()
@@ -92,7 +95,7 @@ void VkContext::InitInstance(const Window& window)
 
 void VkContext::InitDevice(const Window& window)
 {
-    createVkSurfaceKHR(s_instance, window.GetHandle(), s_surface);
+    createVkSurfaceKHR(s_instance, window.GetHandle(), &s_surface);
 
     VkPhysicalDeviceFeatures requestedFeatures{};
     requestedFeatures.sampleRateShading = VK_TRUE;

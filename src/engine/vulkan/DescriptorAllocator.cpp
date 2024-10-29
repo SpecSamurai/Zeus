@@ -1,7 +1,7 @@
 #include "DescriptorAllocator.hpp"
 
-#include "vulkan_descriptors.hpp"
-#include "vulkan_memory.hpp"
+#include "api/vulkan_descriptors.hpp"
+#include "api/vulkan_memory.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -15,7 +15,7 @@ VkDescriptorSet DescriptorAllocator::allocate(
     VkDescriptorSet descriptorSet;
 
     allocateVkDescriptorSet(
-        descriptorSet,
+        &descriptorSet,
         device,
         descriptorPool,
         descriptorSetLayout);
@@ -30,7 +30,7 @@ void DescriptorAllocator::init(
     VkDescriptorPoolCreateFlags flags)
 {
     createDescriptorPool(
-        descriptorPool,
+        &descriptorPool,
         device,
         maxSets,
         static_cast<std::uint32_t>(poolSizes.size()),

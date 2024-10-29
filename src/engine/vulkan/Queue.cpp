@@ -3,23 +3,20 @@
 #include "Definitions.hpp"
 #include "Fence.hpp"
 #include "Semaphore.hpp"
-#include "SwapchainBuilder.hpp"
-#include "VulkanContext.hpp"
+#include "Swapchain.hpp"
+#include "VkContext.hpp"
 #include "api/vulkan_command.hpp"
 #include "api/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
-#include <vector>
 
 namespace Zeus
 {
-Queue::Queue(const QueueType type, const char* name)
-    : Handle(name),
-      m_type{ type }
+Queue::Queue(const QueueType type, const char* name) : m_type{ type }
 {
-    auto device{ VulkanContext::Get().GetDevice() };
+    auto& device{ VkContext::GetDevice() };
     m_family = device.GetQueueFamily(m_type);
     m_handle = device.GetQueue(type);
 
@@ -89,7 +86,7 @@ void Queue::Present(
         1,
         &waitSemaphores.GetHandle(),
         1,
-        &swapchain.handle,
+        &swapchain.GetHandle(),
         &swapchainImageIndex) };
 
     // send event?

@@ -1,7 +1,7 @@
 #include "DescriptorLayoutBuilder.hpp"
 
-#include "vulkan_debug.hpp"
-#include "vulkan_memory.hpp"
+#include "api/vulkan_debug.hpp"
+#include "api/vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 

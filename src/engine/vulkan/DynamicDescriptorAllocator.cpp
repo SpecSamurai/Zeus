@@ -28,7 +28,7 @@ void DynamicDescriptorAllocator::Init(
 
     VkDescriptorPool descriptorPool;
     createDescriptorPool(
-        descriptorPool,
+        &descriptorPool,
         device,
         m_maxSetsPerPool,
         static_cast<std::uint32_t>(m_poolSizes.size()),
@@ -46,7 +46,7 @@ VkDescriptorSet DynamicDescriptorAllocator::Allocate(
 
     VkDescriptorSet descriptorSet;
     VkResult result{ allocateVkDescriptorSet(
-        descriptorSet,
+        &descriptorSet,
         device,
         descriptorPool,
         descriptorSetLayout) };
@@ -60,7 +60,7 @@ VkDescriptorSet DynamicDescriptorAllocator::Allocate(
 
         VKCHECK(
             allocateVkDescriptorSet(
-                descriptorSet,
+                &descriptorSet,
                 device,
                 descriptorPool,
                 descriptorSetLayout),
@@ -116,7 +116,7 @@ VkDescriptorPool DynamicDescriptorAllocator::GetOrCreatePool(VkDevice device)
     else
     {
         createDescriptorPool(
-            descriptorPool,
+            &descriptorPool,
             device,
             m_maxSetsPerPool,
             static_cast<std::uint32_t>(m_poolSizes.size()),

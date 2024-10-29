@@ -37,11 +37,11 @@ Swapchain::Swapchain(
 
     Create();
 
-    Event::Dispatcher.Register<WindowResizedEvent>(
-        "Swapchain::WindowResizedEvent",
-        [this](const WindowResizedEvent& event) -> bool {
-            return OnWindowResized(event);
-        });
+    // Event::Dispatcher.Register<WindowResizedEvent>(
+    //     "Swapchain::WindowResizedEvent",
+    //     [this](const WindowResizedEvent& event) -> bool {
+    //         return OnWindowResized(event);
+    //     });
 }
 
 void Swapchain::Create()

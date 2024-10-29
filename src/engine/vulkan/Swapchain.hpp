@@ -1,10 +1,12 @@
 #pragma once
 
 #include "events/WindowEvent.hpp"
+#include "vulkan/CommandBuffer.hpp"
 #include "window/Window.hpp"
 
 #include <vulkan/vulkan_core.h>
 
+#include <array>
 #include <cstdint>
 #include <limits>
 #include <vector>
@@ -54,24 +56,25 @@ public:
     std::uint32_t GetImageCount() const;
     std::uint32_t GetImageIndex() const;
 
-    // RHI_Image_Layout GetLayout() const;
-    // void SetLayout(const RHI_Image_Layout& layout, RHI_CommandList* cmd_list)
-    // {
-    //     if (m_layouts[m_image_index] == layout)
-    //         return;
-    //
-    //     cmd_list->InsertBarrierTexture(
-    //         m_rhi_rt[m_image_index],
-    //         VK_IMAGE_ASPECT_COLOR_BIT,
-    //         0,
-    //         1,
-    //         1,
-    //         m_layouts[m_image_index],
-    //         layout,
-    //         false);
-    //
-    //     m_layouts[m_image_index] = layout;
-    // }
+    VkImageLayout GetLayout() const;
+    void SetLayout(VkImageLayout layout, CommandBuffer& commandBuffer)
+    {
+        // if (m_layouts[m_image_index] == layout)
+        //     return;
+
+        commandBuffer.InsertImageLayoutBarrier(layout);
+        // commandBuffer.InsertBarrierTexture(
+        //     m_rhi_rt[m_image_index],
+        //     VK_IMAGE_ASPECT_COLOR_BIT,
+        //     0,
+        //     1,
+        //     1,
+        //     m_layouts[m_image_index],
+        //     layout,
+        //     false);
+        //
+        // m_layouts[m_image_index] = layout;
+    }
 
 private:
     bool OnWindowResized(const WindowResizedEvent& event);
@@ -97,22 +100,21 @@ private:
     const Window& m_window;
     VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
     VkSwapchainKHR m_handle{ VK_NULL_HANDLE };
-    VkSwapchainKHR m_oldHandle{ VK_NULL_HANDLE };
 
     std::vector<VkImage> m_images;
     std::vector<VkImageView> m_imageViews;
     std::vector<FrameData> m_frames;
 
-    // std::array<RHI_Image_Layout, max_buffer_count> m_layouts = {
-    //     RHI_Image_Layout::Max,
-    //     RHI_Image_Layout::Max,
-    //     RHI_Image_Layout::Max
+    // std::array<VkImageLayout, 3> m_layouts = {
+    //     VK_IMAGE_LAYOUT_UNDEFINED,
+    //     VK_IMAGE_LAYOUT_UNDEFINED,
+    //     VK_IMAGE_LAYOUT_UNDEFINED,
     // };
-    // std::array<std::shared_ptr<RHI_Semaphore>, max_buffer_count>
+    // std::array<std::shared_ptr<Semaphore>, max_buffer_count>
     //     m_image_acquired_semaphore;
-    // std::array<std::shared_ptr<RHI_Fence>, max_buffer_count>
+    // std::array<std::shared_ptr<Fence>, max_buffer_count>
     //     m_image_acquired_fence;
-    // std::vector<RHI_Semaphore*> m_wait_semaphores;
+    // std::vector<Semaphore*> m_wait_semaphores;
 
     std::uint32_t m_imageIndex{ std::numeric_limits<std::uint32_t>::max() };
     std::uint32_t m_imageCount;

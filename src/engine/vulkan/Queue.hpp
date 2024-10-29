@@ -2,9 +2,8 @@
 
 #include "Definitions.hpp"
 #include "Fence.hpp"
-#include "Handle.hpp"
 #include "Semaphore.hpp"
-#include "SwapchainBuilder.hpp"
+#include "Swapchain.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -12,11 +11,10 @@
 
 namespace Zeus
 {
-class Queue : public Handle
+class Queue
 {
 public:
     Queue(const QueueType type, const char* name = nullptr);
-
     ~Queue();
 
     void Wait();
