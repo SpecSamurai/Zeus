@@ -110,8 +110,6 @@ add_library(Engine
 
     vulkan/Device.cpp
     vulkan/Device.hpp
-    vulkan/DeviceBuilder.cpp
-    vulkan/DeviceBuilder.hpp
     vulkan/DynamicDescriptorAllocator.cpp
     vulkan/DynamicDescriptorAllocator.hpp
     vulkan/Fence.cpp

@@ -11,7 +11,7 @@ namespace Zeus
 {
 struct PhysicalDeviceSelectorInfo
 {
-    std::vector<const char*> extensions;
+    const std::vector<const char*>& extensions;
     VkInstance instance;
     VkSurfaceKHR surface;
 
