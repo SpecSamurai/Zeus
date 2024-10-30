@@ -5,15 +5,13 @@
 #include "api/vulkan_debug.hpp"
 #include "api/vulkan_device.hpp"
 #include "api/vulkan_sync.hpp"
-#include "events/Event.hpp"
-#include "events/WindowEvent.hpp"
 #include "logging/logger.hpp"
-#include "window/Window.hpp"
 
 #include <vulkan/vulkan_core.h>
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <limits>
 #include <vector>
@@ -21,27 +19,20 @@
 namespace Zeus
 {
 Swapchain::Swapchain(
-    const Window& window,
-    VkSurfaceKHR surface,
-    std::uint32_t width,
-    std::uint32_t height,
+    const VkSurfaceKHR surface,
+    const std::uint32_t width,
+    const std::uint32_t height,
     const VkPresentModeKHR presentMode,
-    const std::uint32_t imageCount)
-    : m_window{ window },
-      m_surface{ surface },
-      m_imageCount{ imageCount },
+    const std::uint32_t frameCount)
+    : m_surface{ surface },
+      m_framesCount{ frameCount },
       m_extent{ VkExtent2D{ .width = width, .height = height } },
       m_presentMode{ presentMode }
 {
-    assert(imageCount >= 2 && "imageCount cannot be less than 2");
+    assert(width > 0 && height > 0 && "Invalid resolution");
+    assert(frameCount >= 2 && "frameCount cannot be less than 2");
 
     Create();
-
-    // Event::Dispatcher.Register<WindowResizedEvent>(
-    //     "Swapchain::WindowResizedEvent",
-    //     [this](const WindowResizedEvent& event) -> bool {
-    //         return OnWindowResized(event);
-    //     });
 }
 
 void Swapchain::Create()
@@ -70,10 +61,10 @@ void Swapchain::Create()
     m_extent = selectExtent(surfaceDetails.capabilities, m_extent);
 
     m_imageCount =
-        m_imageCount <= surfaceDetails.capabilities.minImageCount
+        m_framesCount <= surfaceDetails.capabilities.minImageCount
             // One more image for triple buffering or for more frames in flight
             ? surfaceDetails.capabilities.minImageCount + 1
-            : m_imageCount;
+            : m_framesCount + 1;
 
     // 0 is a special value that means that there is no maximum
     if (surfaceDetails.capabilities.maxImageCount > 0 &&
@@ -164,7 +155,6 @@ void Swapchain::Create()
 
     assert(m_images.size() == m_imageCount);
 
-    m_framesCount = m_imageCount - 1;
     m_imageViews.resize(m_imageCount);
 
     for (std::uint32_t i{ 0 }; i < m_images.size(); ++i)
@@ -211,9 +201,6 @@ void Swapchain::Create()
             imageViewName.c_str());
 #endif
     }
-
-    LOG_DEBUG("Swapchain created images count {}", m_imageCount);
-    LOG_DEBUG("Max Concurrent Frames {}.", m_framesCount);
 
     m_frames.resize(m_framesCount);
     for (std::size_t i{ 0 }; i < m_framesCount; ++i)
@@ -263,40 +250,14 @@ void Swapchain::Create()
             renderSemaphoreName.c_str());
 #endif
     }
+
+    LOG_DEBUG("Swapchain created images count {}", m_imageCount);
+    LOG_DEBUG("Max Concurrent Frames {}.", m_framesCount);
 }
 
 void Swapchain::Destroy()
 {
-    VkContext::GetDevice().Wait();
-
-    for (std::size_t i{ 0 }; i < m_framesCount; ++i)
-    {
-        vkDestroyFence(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].renderFence,
-            allocationCallbacks.get());
-
-        vkDestroySemaphore(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].imageAcquiredSemaphore,
-            allocationCallbacks.get());
-
-        vkDestroySemaphore(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].renderCompleteSemaphore,
-            allocationCallbacks.get());
-    }
-
-    for (auto& imageView : m_imageViews)
-    {
-        vkDestroyImageView(
-            VkContext::GetLogicalDevice(),
-            imageView,
-            allocationCallbacks.get());
-    }
-
-    // m_rhi_rtv.fill(nullptr);
-    // m_image_acquired_semaphore.fill(nullptr);
+    DestroyResources();
 
     vkDestroySwapchainKHR(
         VkContext::GetLogicalDevice(),
@@ -304,72 +265,6 @@ void Swapchain::Destroy()
         allocationCallbacks.get());
 
     m_handle = VK_NULL_HANDLE;
-
-    // vkDestroySurfaceKHR(
-    //     VkContext::GetInstance(),
-    //     VkContext::GetSurface(),
-    //     nullptr);
-    //
-    // m_surface = VK_NULL_HANDLE;
-}
-
-void Swapchain::Resize(std::uint32_t width, std::uint32_t height)
-{
-    // SP_ASSERT(RHI_Device::IsValidResolution(width, height));
-
-    // but what about hdr to sdr
-    // if (!force)
-    // {
-    //     if (m_extent.width == width && m_extent.height == height)
-    //         return;
-    // }
-
-    m_extent = VkExtent2D{ .width = width, .height = height };
-
-    m_imageIndex = std::numeric_limits<std::uint32_t>::max();
-    m_frameIndex = std::numeric_limits<std::uint32_t>::max();
-
-    for (std::size_t i{ 0 }; i < m_framesCount; ++i)
-    {
-        vkDestroyFence(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].renderFence,
-            allocationCallbacks.get());
-
-        vkDestroySemaphore(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].imageAcquiredSemaphore,
-            allocationCallbacks.get());
-
-        vkDestroySemaphore(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].renderCompleteSemaphore,
-            allocationCallbacks.get());
-    }
-
-    for (auto& imageView : m_imageViews)
-    {
-        vkDestroyImageView(
-            VkContext::GetLogicalDevice(),
-            imageView,
-            allocationCallbacks.get());
-    }
-    m_imageViews.clear();
-    m_images.clear();
-
-    VkSwapchainKHR oldSwapchain{ m_handle };
-
-    Create();
-
-    vkDestroySwapchainKHR(
-        VkContext::GetLogicalDevice(),
-        oldSwapchain,
-        allocationCallbacks.get());
-    oldSwapchain = VK_NULL_HANDLE;
-
-    // AcquireNextImage();
-
-    LOG_DEBUG("Swapchain resized: {}x{}", m_extent.width, m_extent.height);
 }
 
 void Swapchain::Present(VkCommandBuffer cmd)
@@ -448,79 +343,48 @@ void Swapchain::Present(VkCommandBuffer cmd)
 
     // m_currentFrame = (m_currentFrame + 1) %
     // m_swapchain->GetFramesCount();
-}
 
-void Swapchain::SetVsync(const bool enable)
-{
-    if ((m_presentMode != VK_PRESENT_MODE_IMMEDIATE_KHR) != enable)
-    {
-        m_presentMode = enable ? VK_PRESENT_MODE_MAILBOX_KHR
-                               : VK_PRESENT_MODE_IMMEDIATE_KHR;
+    // VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
+    //     CurrentFrame().mainCommandBuffer) };
 
-        Resize(m_extent.width, m_extent.height);
-
-        LOG_INFO("VSync has been {}", enable ? "enabled" : "disabled");
-    }
-}
-
-bool Swapchain::IsVSync() const
-{
-    return m_presentMode != VK_PRESENT_MODE_IMMEDIATE_KHR;
-}
-
-const VkSwapchainKHR& Swapchain::GetHandle() const
-{
-    return m_handle;
-}
-
-const VkExtent2D& Swapchain::GetExtent() const
-{
-    return m_extent;
-}
-
-std::uint32_t Swapchain::GetWidth() const
-{
-    return m_extent.width;
-}
-
-std::uint32_t Swapchain::GetHeight() const
-{
-    return m_extent.height;
-}
-
-std::uint32_t Swapchain::GetFramesCount() const
-{
-    return m_framesCount;
-}
-
-std::uint32_t Swapchain::GetFrameIndex() const
-{
-    return m_frameIndex;
-}
-
-VkImage Swapchain::GetImage() const
-{
-    return m_images[m_imageIndex];
-}
-
-VkImageView Swapchain::GetImageView() const
-{
-    return m_imageViews[m_imageIndex];
-}
-
-VkFormat Swapchain::GetFormat() const
-{
-    return m_imageFormat;
-}
-
-std::uint32_t Swapchain::GetImageCount() const
-{
-    return m_imageCount;
-}
-
-std::uint32_t Swapchain::GetImageIndex() const
-{
-    return m_imageIndex;
+    // VkSemaphoreSubmitInfo waitSemaphoreInfo{ createVkSemaphoreSubmitInfo(
+    //     CurrentFrame().imageAcquiredSemaphore,
+    //     VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT) };
+    //
+    // VkSemaphoreSubmitInfo signalSemaphoreInfo{ createVkSemaphoreSubmitInfo(
+    //     CurrentFrame().renderCompleteSemaphore,
+    //     VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT) };
+    //
+    // cmdVkQueueSubmit2(
+    //     VkContext::GetDevice().GetQueue(QueueType::Graphics),
+    //     CurrentFrame().renderFence,
+    //     1,
+    //     &waitSemaphoreInfo,
+    //     1,
+    //     &submitInfo,
+    //     1,
+    //     &signalSemaphoreInfo);
+    //
+    // VkResult presentResult{ cmdVkQueuePresentKHR(
+    //     VkContext::GetDevice().GetQueue(QueueType::Present),
+    //     1,
+    //     &CurrentFrame().renderCompleteSemaphore,
+    //     1,
+    //     &m_swapchain->GetHandle(),
+    //     &m_swapchainImageIndex) };
+    //
+    // if (presentResult == VK_ERROR_OUT_OF_DATE_KHR ||
+    //     presentResult == VK_SUBOPTIMAL_KHR)
+    // {
+    //     m_swapchainRebuildRequired = true;
+    // }
+    // else if (presentResult != VK_SUCCESS)
+    // {
+    //     LOG_ERROR("Failed to present swapchain image");
+    //     return presentResult;
+    // }
+    //
+    // m_currentFrame = (m_currentFrame + 1) % m_swapchain->GetFramesCount();
 }
 
 void Swapchain::AcquireNextImage()
@@ -592,10 +456,149 @@ void Swapchain::AcquireNextImage()
         "Failed to reset fence");
 }
 
-bool Swapchain::OnWindowResized(const WindowResizedEvent& event)
+void Swapchain::Resize(std::uint32_t width, std::uint32_t height)
 {
-    Resize(event.width, event.height);
-    return true;
+    // SP_ASSERT(RHI_Device::IsValidResolution(width, height));
+    // assert(width > 0 && height > 0 && "Invalid Swapchain size");
+    // return width > 4 && width <= m_max_texture_2d_dimension && height > 4 &&
+    //        height <= m_max_texture_2d_dimension;
+
+    m_extent = VkExtent2D{ .width = width, .height = height };
+
+    m_imageIndex = std::numeric_limits<std::uint32_t>::max();
+    m_frameIndex = std::numeric_limits<std::uint32_t>::max();
+
+    DestroyResources();
+
+    VkSwapchainKHR oldSwapchain{ m_handle };
+    Create();
+
+    vkDestroySwapchainKHR(
+        VkContext::GetLogicalDevice(),
+        oldSwapchain,
+        allocationCallbacks.get());
+    oldSwapchain = VK_NULL_HANDLE;
+
+    LOG_DEBUG("Swapchain resized: {}x{}", m_extent.width, m_extent.height);
+}
+
+void Swapchain::SetVsync(const bool enable)
+{
+    if ((m_presentMode != VK_PRESENT_MODE_IMMEDIATE_KHR) != enable)
+    {
+        if (enable)
+        {
+            SurfaceDetails surfaceDetails{ getSurfaceDetails(
+                VkContext::GetDevice().GetPhysicalDevice(),
+                m_surface) };
+
+            m_presentMode = selectPresentMode(
+                surfaceDetails.presentModes,
+                VK_PRESENT_MODE_MAILBOX_KHR);
+        }
+        else
+        {
+            m_presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+        }
+
+        Resize(m_extent.width, m_extent.height);
+
+        LOG_INFO("VSync has been {}", enable ? "enabled" : "disabled");
+    }
+}
+
+bool Swapchain::IsVSync() const
+{
+    return m_presentMode != VK_PRESENT_MODE_IMMEDIATE_KHR;
+}
+
+const VkSwapchainKHR& Swapchain::GetHandle() const
+{
+    return m_handle;
+}
+
+const VkExtent2D& Swapchain::GetExtent() const
+{
+    return m_extent;
+}
+
+std::uint32_t Swapchain::GetWidth() const
+{
+    return m_extent.width;
+}
+
+std::uint32_t Swapchain::GetHeight() const
+{
+    return m_extent.height;
+}
+
+std::uint32_t Swapchain::GetFramesCount() const
+{
+    return m_framesCount;
+}
+
+std::uint32_t Swapchain::GetFrameIndex() const
+{
+    return m_frameIndex;
+}
+
+VkImage Swapchain::GetImage() const
+{
+    return m_images[m_imageIndex];
+}
+
+VkImageView Swapchain::GetImageView() const
+{
+    return m_imageViews[m_imageIndex];
+}
+
+std::uint32_t Swapchain::GetImageCount() const
+{
+    return m_imageCount;
+}
+
+std::uint32_t Swapchain::GetImageIndex() const
+{
+    return m_imageIndex;
+}
+
+VkFormat Swapchain::GetFormat() const
+{
+    return m_imageFormat;
+}
+
+void Swapchain::DestroyResources()
+{
+    for (std::size_t i{ 0 }; i < m_framesCount; ++i)
+    {
+        vkDestroyFence(
+            VkContext::GetLogicalDevice(),
+            m_frames[i].renderFence,
+            allocationCallbacks.get());
+
+        vkDestroySemaphore(
+            VkContext::GetLogicalDevice(),
+            m_frames[i].imageAcquiredSemaphore,
+            allocationCallbacks.get());
+
+        vkDestroySemaphore(
+            VkContext::GetLogicalDevice(),
+            m_frames[i].renderCompleteSemaphore,
+            allocationCallbacks.get());
+    }
+
+    m_frames.clear();
+
+    for (auto& imageView : m_imageViews)
+    {
+        vkDestroyImageView(
+            VkContext::GetLogicalDevice(),
+            imageView,
+            allocationCallbacks.get());
+    }
+
+    m_imageViews.clear();
+    m_images.clear();
 }
 
 VkSurfaceFormatKHR Swapchain::selectSurfaceFormat(
@@ -638,6 +641,8 @@ VkPresentModeKHR Swapchain::selectPresentMode(
         }
     }
 
+    LOG_WARNING("Requested present mode is not supported. Fallback to "
+                "VK_PRESENT_MODE_FIFO_KHR");
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
@@ -669,5 +674,10 @@ VkExtent2D Swapchain::selectExtent(
 
         return actualExtent;
     }
+}
+
+constexpr Swapchain::FrameData& Swapchain::CurrentFrame()
+{
+    return m_frames[m_frameIndex];
 }
 }

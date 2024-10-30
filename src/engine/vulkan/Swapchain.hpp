@@ -1,12 +1,9 @@
 #pragma once
 
-#include "events/WindowEvent.hpp"
-#include "vulkan/CommandBuffer.hpp"
-#include "window/Window.hpp"
+#include "CommandBuffer.hpp"
 
 #include <vulkan/vulkan_core.h>
 
-#include <array>
 #include <cstdint>
 #include <limits>
 #include <vector>
@@ -25,12 +22,11 @@ class Swapchain
 
 public:
     Swapchain(
-        const Window& window,
-        VkSurfaceKHR surface,
-        std::uint32_t width,
-        std::uint32_t height,
+        const VkSurfaceKHR surface,
+        const std::uint32_t width,
+        const std::uint32_t height,
         const VkPresentModeKHR presentMode,
-        const std::uint32_t imageCount);
+        const std::uint32_t frameCount);
 
     void Create();
     void Destroy();
@@ -52,9 +48,10 @@ public:
 
     VkImage GetImage() const;
     VkImageView GetImageView() const;
-    VkFormat GetFormat() const;
     std::uint32_t GetImageCount() const;
     std::uint32_t GetImageIndex() const;
+
+    VkFormat GetFormat() const;
 
     VkImageLayout GetLayout() const;
     void SetLayout(VkImageLayout layout, CommandBuffer& commandBuffer)
@@ -77,7 +74,7 @@ public:
     }
 
 private:
-    bool OnWindowResized(const WindowResizedEvent& event);
+    void DestroyResources();
 
     VkSurfaceFormatKHR selectSurfaceFormat(
         const std::vector<VkSurfaceFormatKHR>& surfaceFormats,
@@ -91,18 +88,15 @@ private:
         const VkSurfaceCapabilitiesKHR& surfaceCapabilities,
         const VkExtent2D& desiredExtent);
 
-    inline constexpr FrameData& CurrentFrame()
-    {
-        return m_frames[m_frameIndex];
-    }
+    constexpr FrameData& CurrentFrame();
 
 private:
-    const Window& m_window;
     VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
     VkSwapchainKHR m_handle{ VK_NULL_HANDLE };
 
     std::vector<VkImage> m_images;
     std::vector<VkImageView> m_imageViews;
+
     std::vector<FrameData> m_frames;
 
     // std::array<VkImageLayout, 3> m_layouts = {
@@ -125,7 +119,5 @@ private:
 
     VkPresentModeKHR m_presentMode;
     VkFormat m_imageFormat;
-
-    bool m_windowed = false;
 };
 }
