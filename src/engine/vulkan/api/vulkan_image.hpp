@@ -48,14 +48,6 @@ void cmdClearDepthStencilImage(
     const VkClearDepthStencilValue& clearValue,
     VkImageLayout imageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-VkResult createVkSampler(
-    VkDevice device,
-    VkSampler& sampler,
-    VkFilter magFilter,
-    VkFilter minFilter,
-    VkSamplerMipmapMode mipmapMode,
-    VkSamplerCreateFlags flags = 0);
-
 VkFormat findSupportedImageFormat(
     VkPhysicalDevice physicalDevice,
     const std::vector<VkFormat>& candidates,
