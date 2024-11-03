@@ -14,16 +14,11 @@ public:
     static void Init(const Window& window);
     static void Destroy();
 
-    static const VkInstance& GetInstance();
+    static VkInstance GetInstance();
     static Device& GetDevice();
-    static const VkDevice& GetLogicalDevice();
-    static const VkSurfaceKHR& GetSurface();
-    static const VmaAllocator& GetAllocator();
-
-private:
-    static void InitInstance(const Window& window);
-    static void InitDevice(const Window& window);
-    static void InitMemoryAllocator();
+    static VkDevice GetLogicalDevice();
+    static VkSurfaceKHR GetSurface();
+    static VmaAllocator GetAllocator();
 
 private:
     static VkInstance s_instance;

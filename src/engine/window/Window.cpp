@@ -141,6 +141,8 @@ void Window::Destroy()
 
     glfwDestroyWindow(m_handle);
     glfwTerminate();
+
+    m_handle = nullptr;
 }
 
 void Window::Update()
@@ -149,5 +151,25 @@ void Window::Update()
         glfwWaitEvents();
     else
         glfwPollEvents();
+}
+
+void* Window::GetHandle() const
+{
+    return m_handle;
+}
+
+const char* Window::GetTitle() const
+{
+    return m_data.title;
+}
+
+std::uint32_t Window::GetWidth() const
+{
+    return m_data.width;
+}
+
+std::uint32_t Window::GetHeight() const
+{
+    return m_data.height;
 }
 }

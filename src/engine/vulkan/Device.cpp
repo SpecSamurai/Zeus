@@ -189,6 +189,18 @@ void Device::Destroy()
         allocationCallbacks.get());
 
     vkDestroyDevice(m_logicalDevice, allocationCallbacks.get());
+
+    m_ImmediateSubmitCommandPool = VK_NULL_HANDLE;
+    m_ImmediateSubmitCommandBuffer = VK_NULL_HANDLE;
+    m_ImmediateSubmitFence = VK_NULL_HANDLE;
+
+    m_graphicsQueue = VK_NULL_HANDLE;
+    m_presentQueue = VK_NULL_HANDLE;
+    m_transferQueue = VK_NULL_HANDLE;
+    m_computeQueue = VK_NULL_HANDLE;
+
+    m_logicalDevice = VK_NULL_HANDLE;
+    m_physicalDevice = VK_NULL_HANDLE;
 }
 
 void Device::Wait()

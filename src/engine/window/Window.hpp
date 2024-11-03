@@ -18,30 +18,16 @@ class Window
 {
 public:
     Window(const WindowProperties& properties);
+
     void Init();
     void Destroy();
 
     void Update();
 
-    inline constexpr std::uint32_t GetWidth() const
-    {
-        return m_data.width;
-    }
-
-    inline constexpr std::uint32_t GetHeight() const
-    {
-        return m_data.height;
-    }
-
-    inline const char* GetTitle() const
-    {
-        return m_data.title;
-    }
-
-    inline void* GetHandle() const
-    {
-        return m_handle;
-    }
+    void* GetHandle() const;
+    const char* GetTitle() const;
+    std::uint32_t GetWidth() const;
+    std::uint32_t GetHeight() const;
 
 private:
     GLFWwindow* m_handle{ nullptr };
