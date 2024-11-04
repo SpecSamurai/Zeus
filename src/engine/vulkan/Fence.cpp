@@ -34,7 +34,6 @@ Fence::~Fence()
     VkContext::GetDevice().GetDeletionQueue().Add(
         ResourceType::Fence,
         m_handle);
-
     m_handle = VK_NULL_HANDLE;
 }
 

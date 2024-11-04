@@ -36,7 +36,6 @@ Semaphore::~Semaphore()
     VkContext::GetDevice().GetDeletionQueue().Add(
         ResourceType::Semaphore,
         m_handle);
-
     m_handle = VK_NULL_HANDLE;
 }
 

@@ -30,4 +30,12 @@ enum class QueueType : std::uint8_t
     Transfer,
     Compute,
 };
+
+enum class ShaderCompilationState : std::uint8_t
+{
+    Idle,
+    Compiling,
+    Compiled,
+    Failed
+};
 }

@@ -16,8 +16,8 @@ public:
     Pipeline(PipelineState pipelineState, const char* name = nullptr);
     ~Pipeline();
 
-    const VkPipeline& GetHandle() const;
-    const VkPipelineLayout& GetLayout() const;
+    VkPipeline GetHandle() const;
+    VkPipelineLayout GetLayout() const;
 
 private:
     VkPipeline m_handle{ VK_NULL_HANDLE };

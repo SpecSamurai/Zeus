@@ -56,6 +56,12 @@ void DeletionQueue::Clear()
                     reinterpret_cast<VkSemaphore>(handle),
                     allocationCallbacks.get());
                 break;
+            case ResourceType::Shader:
+                vkDestroyShaderModule(
+                    m_device,
+                    reinterpret_cast<VkShaderModule>(handle),
+                    allocationCallbacks.get());
+                break;
             default:
                 assert(false && "Unknown resource type");
                 break;

@@ -3,14 +3,15 @@
 #include "Definitions.hpp"
 #include "DeletionQueue.hpp"
 #include "VkContext.hpp"
-#include "vulkan/api/vulkan_debug.hpp"
+#include "api/vulkan_debug.hpp"
+
 #include <vulkan/vulkan_core.h>
 
 namespace Zeus
 {
-
 Pipeline::Pipeline(PipelineState pipelineState, const char* name)
 {
+
 #ifndef NDEBUG
     if (name != nullptr)
     {
@@ -31,11 +32,30 @@ Pipeline::Pipeline(PipelineState pipelineState, const char* name)
 
 Pipeline::~Pipeline()
 {
-    // DeletionQueue queue;
-    // queue.Add(ResourceType::Pipeline, m_handle);
-    // m_handle = VK_NULL_HANDLE;
-    //
-    // queue.Add(ResourceType::PipelineLayout, m_layout);
-    // m_layout = VK_NULL_HANDLE;
+    if (m_handle != VK_NULL_HANDLE)
+    {
+        VkContext::GetDevice().GetDeletionQueue().Add(
+            ResourceType::Pipeline,
+            m_handle);
+        m_handle = VK_NULL_HANDLE;
+    }
+
+    if (m_pipelineLayout != VK_NULL_HANDLE)
+    {
+        VkContext::GetDevice().GetDeletionQueue().Add(
+            ResourceType::PipelineLayout,
+            m_pipelineLayout);
+        m_pipelineLayout = VK_NULL_HANDLE;
+    }
+}
+
+VkPipeline Pipeline::GetHandle() const
+{
+    return m_handle;
+}
+
+VkPipelineLayout Pipeline::GetLayout() const
+{
+    return m_pipelineLayout;
 }
 }
