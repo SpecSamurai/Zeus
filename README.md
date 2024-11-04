@@ -2,7 +2,6 @@
 
 ## Todo
 - Grid
-- Runtime shaders compilation | libshaderc
 - Transfer queue
 - SIMD
 - Memory Allocator
@@ -16,6 +15,10 @@
     - Priority
 - UI Render with orthographic projection
 - Middlewares
+- Shaders
+    - Async compilation, ThreadPool
+    - Runtime shaders compilation | libshaderc
+    - Atomic
 
 ## Math
 - Column-Major matrices to maintain consistency with both GLSL and SPIR-V.

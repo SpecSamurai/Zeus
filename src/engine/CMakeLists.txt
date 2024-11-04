@@ -159,8 +159,6 @@ add_library(Engine
     vulkan/api/vulkan_pipeline.hpp
     vulkan/api/vulkan_renderpass.cpp
     vulkan/api/vulkan_renderpass.hpp
-    vulkan/api/vulkan_shader.cpp
-    vulkan/api/vulkan_shader.hpp
     vulkan/api/vulkan_surface.cpp
     vulkan/api/vulkan_surface.hpp
     vulkan/api/vulkan_sync.cpp
