@@ -45,6 +45,9 @@ add_library(Engine
     commands/CommandStack.hpp
     commands/ICommand.hpp
 
+    ecs/Definitions.hpp
+    ecs/FamilyId.hpp
+
     events/Event.hpp
     events/EventDispatcher.hpp
     events/EventHandler.hpp

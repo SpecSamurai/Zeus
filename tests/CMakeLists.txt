@@ -21,6 +21,8 @@ enable_testing()
 add_executable(Tests
     engine/commands/CommandStackTest.cpp
 
+    engine/ecs/FamilyIdTest.cpp
+
     engine/events/EventDispatcherTest.cpp
     engine/events/EventQueueTest.cpp
     engine/events/EventTest_types.hpp
