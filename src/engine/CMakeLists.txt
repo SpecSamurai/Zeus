@@ -96,6 +96,8 @@ add_library(Engine
     time/Timer.cpp
     time/Timer.hpp
 
+    vulkan/BlendState.cpp
+    vulkan/BlendState.hpp
     vulkan/Buffer.cpp
     vulkan/Buffer.hpp
     vulkan/CommandBuffer.cpp
@@ -103,18 +105,28 @@ add_library(Engine
     vulkan/Definitions.hpp
     vulkan/DeletionQueue.cpp
     vulkan/DeletionQueue.hpp
+    vulkan/DepthStencilState.cpp
+    vulkan/DepthStencilState.hpp
+    vulkan/Descriptor.cpp
+    vulkan/Descriptor.hpp
 
     vulkan/DescriptorAllocator.cpp
     vulkan/DescriptorAllocator.hpp
-    vulkan/DescriptorLayoutBuilder.cpp
-    vulkan/DescriptorLayoutBuilder.hpp
+
+    vulkan/DescriptorSet.cpp
+    vulkan/DescriptorSet.hpp
+    vulkan/DescriptorSetLayout.cpp
+    vulkan/DescriptorSetLayout.hpp
+
     vulkan/DescriptorWriter.cpp
     vulkan/DescriptorWriter.hpp
 
     vulkan/Device.cpp
     vulkan/Device.hpp
+
     vulkan/DynamicDescriptorAllocator.cpp
     vulkan/DynamicDescriptorAllocator.hpp
+
     vulkan/Fence.cpp
     vulkan/Fence.hpp
     vulkan/InstanceBuilder.cpp
@@ -125,8 +137,12 @@ add_library(Engine
     vulkan/Pipeline.hpp
     vulkan/PipelineBuilder.cpp
     vulkan/PipelineBuilder.hpp
+    vulkan/PipelineState.cpp
+    vulkan/PipelineState.hpp
     vulkan/Queue.cpp
     vulkan/Queue.hpp
+    vulkan/RasterizationState.cpp
+    vulkan/RasterizationState.hpp
     vulkan/Sampler.cpp
     vulkan/Sampler.hpp
     vulkan/Semaphore.cpp
