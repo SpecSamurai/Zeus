@@ -41,15 +41,12 @@ void Swapchain::Create()
         getSurfaceDetails(VkContext::GetDevice().GetPhysicalDevice(), m_surface)
     };
 
-    VkSurfaceFormatKHR surfaceFormatUNORM{ VK_FORMAT_B8G8R8A8_UNORM,
-                                           VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
-
-    VkSurfaceFormatKHR surfaceFormatSRGB{ VK_FORMAT_B8G8R8A8_SRGB,
-                                          VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
-
-    std::vector<VkSurfaceFormatKHR> desiredSurfaceFormats{};
-    desiredSurfaceFormats.emplace_back(surfaceFormatUNORM);
-    desiredSurfaceFormats.emplace_back(surfaceFormatSRGB);
+    std::vector<VkSurfaceFormatKHR> desiredSurfaceFormats{
+        VkSurfaceFormatKHR{ VK_FORMAT_B8G8R8A8_UNORM,
+                            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR },
+        VkSurfaceFormatKHR{ VK_FORMAT_B8G8R8A8_SRGB,
+                            VK_COLOR_SPACE_SRGB_NONLINEAR_KHR }
+    };
 
     VkSurfaceFormatKHR surfaceFormat{
         selectSurfaceFormat(surfaceDetails.formats, desiredSurfaceFormats)
@@ -106,13 +103,13 @@ void Swapchain::Create()
         VkContext::GetDevice().GetQueueFamily(QueueType::Present),
     };
 
+    std::array<std::uint32_t, 2> queueFamilyIndices{
+        graphicsFamily,
+        presentFamily,
+    };
+
     if (graphicsFamily != presentFamily)
     {
-        std::array<std::uint32_t, 2> queueFamilyIndices{
-            graphicsFamily,
-            presentFamily,
-        };
-
         createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         createInfo.queueFamilyIndexCount = queueFamilyIndices.size();
         createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
@@ -129,13 +126,13 @@ void Swapchain::Create()
     else
         createInfo.preTransform = surfaceDetails.capabilities.currentTransform;
 
-    VkResult result{ vkCreateSwapchainKHR(
-        VkContext::GetLogicalDevice(),
-        &createInfo,
-        allocationCallbacks.get(),
-        &m_handle) };
-
-    VKCHECK(result, "Failed to create swap chain.");
+    VKCHECK(
+        vkCreateSwapchainKHR(
+            VkContext::GetLogicalDevice(),
+            &createInfo,
+            allocationCallbacks.get(),
+            &m_handle),
+        "Failed to create swap chain.");
 
     m_imageFormat = surfaceFormat.format;
 
@@ -251,8 +248,8 @@ void Swapchain::Create()
 #endif
     }
 
-    LOG_DEBUG("Swapchain created images count {}", m_imageCount);
-    LOG_DEBUG("Max Concurrent Frames {}.", m_framesCount);
+    LOG_DEBUG("Swapchain: Frames count {}", m_framesCount);
+    LOG_DEBUG("Swapchain: Images count {}", m_imageCount);
 }
 
 void Swapchain::Destroy()
