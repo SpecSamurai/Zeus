@@ -109,24 +109,16 @@ add_library(Engine
     vulkan/DepthStencilState.hpp
     vulkan/Descriptor.cpp
     vulkan/Descriptor.hpp
-
-    vulkan/DescriptorAllocator.cpp
-    vulkan/DescriptorAllocator.hpp
-
+    vulkan/DescriptorPool.cpp
+    vulkan/DescriptorPool.hpp
     vulkan/DescriptorSet.cpp
     vulkan/DescriptorSet.hpp
     vulkan/DescriptorSetLayout.cpp
     vulkan/DescriptorSetLayout.hpp
-
     vulkan/DescriptorWriter.cpp
     vulkan/DescriptorWriter.hpp
-
     vulkan/Device.cpp
     vulkan/Device.hpp
-
-    vulkan/DynamicDescriptorAllocator.cpp
-    vulkan/DynamicDescriptorAllocator.hpp
-
     vulkan/Fence.cpp
     vulkan/Fence.hpp
     vulkan/InstanceBuilder.cpp
@@ -151,8 +143,6 @@ add_library(Engine
     vulkan/Shader.hpp
     vulkan/Swapchain.cpp
     vulkan/Swapchain.hpp
-    vulkan/SwapchainBuilder.cpp
-    vulkan/SwapchainBuilder.hpp
     vulkan/VkContext.cpp
     vulkan/VkContext.hpp
 
