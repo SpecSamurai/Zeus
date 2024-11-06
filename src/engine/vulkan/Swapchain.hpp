@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CommandBuffer.hpp"
+#include "Fence.hpp"
+#include "Semaphore.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -14,10 +16,10 @@ class Swapchain
 {
     struct FrameData
     {
-        VkSemaphore imageAcquiredSemaphore;
-        VkSemaphore renderCompleteSemaphore;
+        Fence renderFence;
 
-        VkFence renderFence;
+        Semaphore imageAcquiredSemaphore;
+        Semaphore renderCompleteSemaphore;
     };
 
 public:
@@ -54,26 +56,11 @@ public:
     VkFormat GetFormat() const;
 
     VkImageLayout GetLayout() const;
-    void SetLayout(VkImageLayout layout, CommandBuffer& commandBuffer)
-    {
-        // if (m_layouts[m_image_index] == layout)
-        //     return;
-
-        commandBuffer.InsertImageLayoutBarrier(layout);
-        // commandBuffer.InsertBarrierTexture(
-        //     m_rhi_rt[m_image_index],
-        //     VK_IMAGE_ASPECT_COLOR_BIT,
-        //     0,
-        //     1,
-        //     1,
-        //     m_layouts[m_image_index],
-        //     layout,
-        //     false);
-        //
-        // m_layouts[m_image_index] = layout;
-    }
+    void SetLayout(VkImageLayout layout, CommandBuffer& commandBuffer);
 
 private:
+    constexpr FrameData& CurrentFrame();
+
     void DestroyResources();
 
     VkSurfaceFormatKHR selectSurfaceFormat(
@@ -88,27 +75,15 @@ private:
         const VkSurfaceCapabilitiesKHR& surfaceCapabilities,
         const VkExtent2D& desiredExtent);
 
-    constexpr FrameData& CurrentFrame();
-
 private:
     VkSurfaceKHR m_surface{ VK_NULL_HANDLE };
     VkSwapchainKHR m_handle{ VK_NULL_HANDLE };
 
     std::vector<VkImage> m_images;
     std::vector<VkImageView> m_imageViews;
+    std::vector<VkImageLayout> m_layouts;
 
     std::vector<FrameData> m_frames;
-
-    // std::array<VkImageLayout, 3> m_layouts = {
-    //     VK_IMAGE_LAYOUT_UNDEFINED,
-    //     VK_IMAGE_LAYOUT_UNDEFINED,
-    //     VK_IMAGE_LAYOUT_UNDEFINED,
-    // };
-    // std::array<std::shared_ptr<Semaphore>, max_buffer_count>
-    //     m_image_acquired_semaphore;
-    // std::array<std::shared_ptr<Fence>, max_buffer_count>
-    //     m_image_acquired_fence;
-    // std::vector<Semaphore*> m_wait_semaphores;
 
     std::uint32_t m_imageIndex{ std::numeric_limits<std::uint32_t>::max() };
     std::uint32_t m_imageCount;
