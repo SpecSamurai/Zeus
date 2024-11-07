@@ -49,7 +49,7 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::Select(
     if (candidates.rbegin()->first > 0)
     {
         const auto& device = candidates.rbegin()->second;
-        LOG_DEBUG("Selected physical device: {}", device.name);
+        LOG_DEBUG("Physical device: {}", device.name);
         LOG_DEBUG(
             "GRAPHICS: {} | PRESENT: {} | COMPUTE: {} | TRANSFER: {}",
             device.queueFamilies.graphicsFamily.value_or(-1),
@@ -216,8 +216,8 @@ std::optional<PhysicalDevice> PhysicalDeviceSelector::CreateIfValid(
     return PhysicalDevice{
         .name = deviceProperties.deviceName,
         .handle = physicalDevice,
-        .deviceType = deviceProperties.deviceType,
         .queueFamilies = queues,
+        .properties = deviceProperties,
     };
 }
 

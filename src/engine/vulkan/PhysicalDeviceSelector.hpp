@@ -39,8 +39,8 @@ struct PhysicalDevice
 {
     std::string name;
     VkPhysicalDevice handle;
-    VkPhysicalDeviceType deviceType;
     QueueFamiliesInfo queueFamilies;
+    VkPhysicalDeviceProperties properties;
 };
 
 class PhysicalDeviceSelector

@@ -80,6 +80,7 @@ VkPipelineShaderStageCreateInfo createPipelineShaderStageInfo(
 {
     VkPipelineShaderStageCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    createInfo.flags = 0;
     createInfo.stage = stage;
     createInfo.module = module;
     createInfo.pName = pName;
