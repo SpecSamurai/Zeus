@@ -14,7 +14,8 @@ namespace Zeus
 class DeletionQueue
 {
 public:
-    void Init(const VkDevice& device);
+    ~DeletionQueue();
+    void Init(VkDevice device);
     void Add(const ResourceType type, void* handle);
     void Clear();
 

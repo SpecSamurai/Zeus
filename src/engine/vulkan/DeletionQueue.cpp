@@ -12,7 +12,12 @@
 
 namespace Zeus
 {
-void DeletionQueue::Init(const VkDevice& device)
+DeletionQueue::~DeletionQueue()
+{
+    Clear();
+}
+
+void DeletionQueue::Init(VkDevice device)
 {
     m_device = device;
     m_resources.reserve(static_cast<std::size_t>(ResourceType::Count));
@@ -44,10 +49,59 @@ void DeletionQueue::Clear()
         {
             switch (type)
             {
+            case ResourceType::Buffer:
+                // vmaDestroyBuffer(
+                //     m_vkContext.allocator,
+                //     stageBuffer.buffer,
+                //     stageBuffer.allocation);
+                break;
+            case ResourceType::CommandPool:
+                vkDestroyCommandPool(
+                    m_device,
+                    reinterpret_cast<VkCommandPool>(handle),
+                    allocationCallbacks.get());
+                break;
+            case ResourceType::DescriptorPool:
+                vkDestroyDescriptorPool(
+                    m_device,
+                    reinterpret_cast<VkDescriptorPool>(handle),
+                    allocationCallbacks.get());
+                break;
+            case ResourceType::DescriptorSetLayout:
+                vkDestroyDescriptorSetLayout(
+                    m_device,
+                    reinterpret_cast<VkDescriptorSetLayout>(handle),
+                    allocationCallbacks.get());
+                break;
             case ResourceType::Fence:
                 vkDestroyFence(
                     m_device,
                     reinterpret_cast<VkFence>(handle),
+                    allocationCallbacks.get());
+                break;
+            case ResourceType::Image:
+                // vmaDestroyImage(allocator, image.image, image.allocation);
+                vkDestroyImage(
+                    m_device,
+                    reinterpret_cast<VkImage>(handle),
+                    allocationCallbacks.get());
+                break;
+            case ResourceType::ImageView:
+                vkDestroyImageView(
+                    m_device,
+                    reinterpret_cast<VkImageView>(handle),
+                    allocationCallbacks.get());
+                break;
+            case ResourceType::Pipeline:
+                vkDestroyPipeline(
+                    m_device,
+                    reinterpret_cast<VkPipeline>(handle),
+                    allocationCallbacks.get());
+                break;
+            case ResourceType::PipelineLayout:
+                vkDestroyPipelineLayout(
+                    m_device,
+                    reinterpret_cast<VkPipelineLayout>(handle),
                     allocationCallbacks.get());
                 break;
             case ResourceType::Semaphore:
@@ -60,6 +114,12 @@ void DeletionQueue::Clear()
                 vkDestroyShaderModule(
                     m_device,
                     reinterpret_cast<VkShaderModule>(handle),
+                    allocationCallbacks.get());
+                break;
+            case ResourceType::Sampler:
+                vkDestroySampler(
+                    m_device,
+                    reinterpret_cast<VkSampler>(handle),
                     allocationCallbacks.get());
                 break;
             default:

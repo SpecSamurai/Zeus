@@ -7,16 +7,14 @@ namespace Zeus
 enum class ResourceType : std::uint8_t
 {
     Buffer,
-    CommandBuffer,
     CommandPool,
-    DescriptorSet,
+    DescriptorPool,
     DescriptorSetLayout,
     Fence,
     Image,
     ImageView,
     Pipeline,
     PipelineLayout,
-    Queue,
     Semaphore,
     Shader,
     Sampler,
