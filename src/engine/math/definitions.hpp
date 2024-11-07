@@ -16,6 +16,8 @@ using Vector2f = Vector2<float>;
 using Vector3f = Vector3<float>;
 using Vector4f = Vector4<float>;
 
+using Color = Vector4f;
+
 using Matrix3x3f = Matrix3x3<float>;
 using Matrix4x4f = Matrix4x4<float>;
 }
