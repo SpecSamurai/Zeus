@@ -32,6 +32,8 @@ public:
     VkPhysicalDevice GetPhysicalDevice() const;
     DeletionQueue& GetDeletionQueue();
 
+    const VkPhysicalDeviceProperties& GetProperties() const;
+
 private:
     VkDevice m_logicalDevice{ VK_NULL_HANDLE };
     VkPhysicalDevice m_physicalDevice{ VK_NULL_HANDLE };
@@ -50,5 +52,8 @@ private:
     std::uint32_t m_presentFamily;
     std::uint32_t m_transferFamily;
     std::uint32_t m_computeFamily;
+
+    // TODO: Limit number of used properties
+    VkPhysicalDeviceProperties m_properties;
 };
 }

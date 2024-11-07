@@ -311,4 +311,9 @@ DeletionQueue& Device::GetDeletionQueue()
 {
     return m_deletionQueue;
 }
+
+const VkPhysicalDeviceProperties& Device::GetProperties() const
+{
+    return m_properties;
+}
 }
