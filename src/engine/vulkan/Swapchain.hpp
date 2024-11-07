@@ -33,7 +33,7 @@ public:
     void Create();
     void Destroy();
 
-    void Present(VkCommandBuffer cmd);
+    void Present(VkCommandBuffer commandBuffer);
     void AcquireNextImage();
 
     void Resize(std::uint32_t width, std::uint32_t height);

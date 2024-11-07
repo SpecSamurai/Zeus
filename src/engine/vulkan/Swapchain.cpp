@@ -158,7 +158,8 @@ void Swapchain::Create()
 
     for (std::uint32_t i{ 0 }; i < m_images.size(); ++i)
     {
-        m_layouts[i] = VK_IMAGE_LAYOUT_UNDEFINED;
+        m_layouts[i] =
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // VK_IMAGE_LAYOUT_UNDEFINED;
 
         VkImageViewCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -219,51 +220,6 @@ void Swapchain::Create()
             .renderCompleteSemaphore =
                 Semaphore(false, renderSemaphoreName.c_str()),
         });
-
-        // VKCHECK(
-        //     createVkFence(
-        //         VkContext::GetLogicalDevice(),
-        //         true,
-        //         &m_frames[i].renderFence),
-        //     "Failed to create frame fence.");
-        //
-        // VKCHECK(
-        //     createVkSemaphore(
-        //         VkContext::GetLogicalDevice(),
-        //         &m_frames[i].imageAcquiredSemaphore),
-        //     "Failed to create frame semaphore.");
-        //
-        // VKCHECK(
-        //     createVkSemaphore(
-        //         VkContext::GetLogicalDevice(),
-        //         &m_frames[i].renderCompleteSemaphore),
-        //     "Failed to create frame semaphore.");
-
-        // #ifndef NDEBUG
-        //         std::string renderFenceName{ "Fence Frame " +
-        //         std::to_string(i) }; setDebugUtilsObjectNameEXT(
-        //             VkContext::GetLogicalDevice(),
-        //             VK_OBJECT_TYPE_FENCE,
-        //             reinterpret_cast<std::uint64_t>(m_frames[i].renderFence),
-        //             renderFenceName.c_str());
-        //
-        //         std::string imageSemaphoreName{ "Semaphore Frame Image " +
-        //                                         std::to_string(i) };
-        //         setDebugUtilsObjectNameEXT(
-        //             VkContext::GetLogicalDevice(),
-        //             VK_OBJECT_TYPE_SEMAPHORE,
-        //             reinterpret_cast<std::uint64_t>(m_frames[i].imageAcquiredSemaphore),
-        //             imageSemaphoreName.c_str());
-        //
-        //         std::string renderSemaphoreName{ "Semaphore Frame Render " +
-        //                                          std::to_string(i) };
-        //         setDebugUtilsObjectNameEXT(
-        //             VkContext::GetLogicalDevice(),
-        //             VK_OBJECT_TYPE_SEMAPHORE,
-        //             reinterpret_cast<std::uint64_t>(
-        //                 m_frames[i].renderCompleteSemaphore),
-        //             renderSemaphoreName.c_str());
-        // #endif
     }
 
     LOG_DEBUG("Swapchain: Frames count {}", m_framesCount);
@@ -278,21 +234,20 @@ void Swapchain::Destroy()
         VkContext::GetLogicalDevice(),
         m_handle,
         allocationCallbacks.get());
-
     m_handle = VK_NULL_HANDLE;
 }
 
-void Swapchain::Present(VkCommandBuffer cmd)
+void Swapchain::Present(VkCommandBuffer commandBuffer)
 {
-    // assert(m_layout[m_imageIndex] == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    assert(m_layouts[m_imageIndex] == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-    // RHI_Queue* queue = RHI_Device::GetQueue(RHI_Queue_Type::Graphics);
-    // RHI_CommandList* cmd_list = queue->GetCommandList();
-    // bool has_work_to_present =
-    //     cmd_list->GetState() == RHI_CommandListState::Submitted;
+    // Queue& queue = Device::GetQueue(QueueType::Graphics);
+    // CommandBuffer& cmdBuffer = queue.GetCommandBuffer();
+    // bool hasWorkToPresent = cmdBuffer.GetState() ==
+    // CommandListState::Submitted;
 
     VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
-        cmd) };
+        commandBuffer) };
 
     VkSemaphoreSubmitInfo waitSemaphoreInfo{ createVkSemaphoreSubmitInfo(
         CurrentFrame().imageAcquiredSemaphore.GetHandle(),
@@ -320,8 +275,7 @@ void Swapchain::Present(VkCommandBuffer cmd)
         &m_handle,
         &m_imageIndex) };
 
-    // present
-    // queue->Present(m_rhi_swapchain, m_image_index, m_wait_semaphores);
+    // queue->Present(m_swapchain, m_image_index, m_wait_semaphores);
 
     if (presentResult == VK_ERROR_OUT_OF_DATE_KHR ||
         presentResult == VK_SUBOPTIMAL_KHR)
@@ -342,18 +296,6 @@ void Swapchain::AcquireNextImage()
 
     CurrentFrame().renderFence.Wait();
 
-    // VKCHECK(
-    //     vkWaitForFences(
-    //         VkContext::GetLogicalDevice(),
-    //         1,
-    //         &CurrentFrame().renderFence.GetHandle(),
-    //         VK_TRUE,
-    //         UINT64_MAX),
-    //     "Failed to wait for fence");
-
-    // getCurrentFrame().deletionQueue.flush();
-    // getCurrentFrame().descriptorAllocator.Clear(vkContext.device.logicalDevice);
-
     VkResult result{ vkAcquireNextImageKHR(
         VkContext::GetLogicalDevice(),
         m_handle,
@@ -373,12 +315,6 @@ void Swapchain::AcquireNextImage()
         return;
     }
 
-    // VKCHECK(
-    //     vkResetFences(
-    //         VkContext::GetLogicalDevice(),
-    //         1,
-    //         &CurrentFrame().renderFence.GetHandle()),
-    //     "Failed to reset fence");
     CurrentFrame().renderFence.Reset();
 }
 
@@ -523,20 +459,20 @@ void Swapchain::DestroyResources()
 {
     for (std::size_t i{ 0 }; i < m_framesCount; ++i)
     {
-        // vkDestroyFence(
-        //     VkContext::GetLogicalDevice(),
-        //     m_frames[i].renderFence,
-        //     allocationCallbacks.get());
-        //
-        // vkDestroySemaphore(
-        //     VkContext::GetLogicalDevice(),
-        //     m_frames[i].imageAcquiredSemaphore,
-        //     allocationCallbacks.get());
-        //
-        // vkDestroySemaphore(
-        //     VkContext::GetLogicalDevice(),
-        //     m_frames[i].renderCompleteSemaphore,
-        //     allocationCallbacks.get());
+        vkDestroyFence(
+            VkContext::GetLogicalDevice(),
+            m_frames[i].renderFence.GetHandle(),
+            allocationCallbacks.get());
+
+        vkDestroySemaphore(
+            VkContext::GetLogicalDevice(),
+            m_frames[i].imageAcquiredSemaphore.GetHandle(),
+            allocationCallbacks.get());
+
+        vkDestroySemaphore(
+            VkContext::GetLogicalDevice(),
+            m_frames[i].renderCompleteSemaphore.GetHandle(),
+            allocationCallbacks.get());
     }
 
     m_frames.clear();
