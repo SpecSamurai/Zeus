@@ -131,6 +131,8 @@ add_library(Engine
     vulkan/PipelineBuilder.hpp
     vulkan/PipelineState.cpp
     vulkan/PipelineState.hpp
+    vulkan/PushConstants.cpp
+    vulkan/PushConstants.hpp
     vulkan/Queue.cpp
     vulkan/Queue.hpp
     vulkan/RasterizationState.cpp
