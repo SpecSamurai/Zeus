@@ -127,8 +127,6 @@ add_library(Engine
     vulkan/PhysicalDeviceSelector.hpp
     vulkan/Pipeline.cpp
     vulkan/Pipeline.hpp
-    vulkan/PipelineBuilder.cpp
-    vulkan/PipelineBuilder.hpp
     vulkan/PipelineState.cpp
     vulkan/PipelineState.hpp
     vulkan/PushConstants.cpp
@@ -145,6 +143,8 @@ add_library(Engine
     vulkan/Shader.hpp
     vulkan/Swapchain.cpp
     vulkan/Swapchain.hpp
+    vulkan/VertexInput.cpp
+    vulkan/VertexInput.hpp
     vulkan/VkContext.cpp
     vulkan/VkContext.hpp
 

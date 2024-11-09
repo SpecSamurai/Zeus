@@ -59,8 +59,10 @@ Shader::Shader(
     const char* filePath,
     VkShaderStageFlagBits shaderStage,
     const char* entryPoint,
+    const std::vector<VertexInput>& vertexInputs,
     const char* name)
-    : m_filePath(filePath),
+    : m_vertexInputs{ vertexInputs },
+      m_filePath(filePath),
       m_entryPoint(entryPoint),
       m_shaderStage{ shaderStage }
 {
@@ -116,6 +118,12 @@ VkShaderStageFlagBits Shader::GetShaderStage() const
 ShaderCompilationState Shader::GetCompilationState() const
 {
     return m_compilationState;
+}
+
+const std::vector<VertexInput>& Shader::GetVertexInputs() const
+{
+    assert(m_shaderStage == VK_SHADER_STAGE_VERTEX_BIT);
+    return m_vertexInputs;
 }
 
 const std::string& Shader::GetEntryPoint() const
