@@ -28,7 +28,10 @@ Swapchain::Swapchain(
       m_extent{ VkExtent2D{ .width = width, .height = height } },
       m_presentMode{ presentMode }
 {
-    assert(width > 0 && height > 0 && "Invalid resolution");
+    assert(width > 0 && height > 0);
+    assert(
+        width <= VkContext::GetDevice().GetMaxImageDimension2D() &&
+        height <= VkContext::GetDevice().GetMaxImageDimension2D());
     assert(frameCount >= 2 && "frameCount cannot be less than 2");
 
     Create();
@@ -320,7 +323,10 @@ void Swapchain::AcquireNextImage()
 
 void Swapchain::Resize(std::uint32_t width, std::uint32_t height)
 {
-    assert(width > 0 && height > 0 && "Invalid resolution");
+    assert(width > 0 && height > 0);
+    assert(
+        width <= VkContext::GetDevice().GetMaxImageDimension2D() &&
+        height <= VkContext::GetDevice().GetMaxImageDimension2D());
 
     m_extent = VkExtent2D{ .width = width, .height = height };
 

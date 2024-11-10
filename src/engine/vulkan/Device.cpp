@@ -74,6 +74,10 @@ void Device::Init(VkInstance instance, VkSurfaceKHR surface)
 
     PhysicalDevice physicalDevice{ selectedDevice.value() };
 
+    const auto& limits{ physicalDevice.properties.limits };
+    m_maxImageDimension2D = limits.maxImageDimension2D;
+    m_maxPushConstantsSize = limits.maxPushConstantsSize;
+
     m_physicalDevice = physicalDevice.handle;
     m_graphicsFamily = physicalDevice.queueFamilies.graphicsFamily.value();
     m_presentFamily = physicalDevice.queueFamilies.presentFamily.value();
@@ -312,8 +316,13 @@ DeletionQueue& Device::GetDeletionQueue()
     return m_deletionQueue;
 }
 
-const VkPhysicalDeviceProperties& Device::GetProperties() const
+std::uint32_t Device::GetMaxImageDimension2D() const
 {
-    return m_properties;
+    return m_maxImageDimension2D;
+}
+
+std::uint32_t Device::GetMaxPushConstantsSize() const
+{
+    return m_maxPushConstantsSize;
 }
 }

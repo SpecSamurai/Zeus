@@ -32,7 +32,8 @@ public:
     VkPhysicalDevice GetPhysicalDevice() const;
     DeletionQueue& GetDeletionQueue();
 
-    const VkPhysicalDeviceProperties& GetProperties() const;
+    std::uint32_t GetMaxImageDimension2D() const;
+    std::uint32_t GetMaxPushConstantsSize() const;
 
 private:
     VkDevice m_logicalDevice{ VK_NULL_HANDLE };
@@ -53,7 +54,7 @@ private:
     std::uint32_t m_transferFamily;
     std::uint32_t m_computeFamily;
 
-    // TODO: Limit number of used properties
-    VkPhysicalDeviceProperties m_properties;
+    std::uint32_t m_maxImageDimension2D;
+    std::uint32_t m_maxPushConstantsSize;
 };
 }
