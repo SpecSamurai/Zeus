@@ -13,10 +13,8 @@ namespace Zeus
 {
 DescriptorSetLayout::DescriptorSetLayout(
     const std::vector<Descriptor>& descriptors,
-    const std::vector<PushConstants>& pushConstants,
     const char* name)
     : m_descriptors{ descriptors },
-      m_pushConstants{ pushConstants },
       m_name{ name }
 {
     Build();
@@ -40,14 +38,6 @@ void DescriptorSetLayout::AddDescriptor(
     std::uint32_t binding)
 {
     m_descriptors.emplace_back(Descriptor(type, stageFlags, binding));
-}
-
-void DescriptorSetLayout::AddPushConstants(
-    VkShaderStageFlags stageFlags,
-    std::uint32_t offset,
-    std::uint32_t size)
-{
-    m_pushConstants.emplace_back(PushConstants(stageFlags, offset, size));
 }
 
 void DescriptorSetLayout::Build()
@@ -101,10 +91,5 @@ const VkDescriptorSetLayout& DescriptorSetLayout::GetHandle() const
 const std::vector<Descriptor>& DescriptorSetLayout::GetDescriptors() const
 {
     return m_descriptors;
-}
-
-const std::vector<PushConstants>& DescriptorSetLayout::GetPushConstants() const
-{
-    return m_pushConstants;
 }
 }

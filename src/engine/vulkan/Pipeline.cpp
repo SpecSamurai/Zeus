@@ -21,7 +21,7 @@ Pipeline::Pipeline(
     const std::vector<PushConstants>& pushConstants,
     const char* name)
     : m_state{ pipelineState },
-      m_name(name ? name : "")
+      m_name(name)
 {
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetLayouts.size());
     for (std::uint32_t i{ 0 }; i < descriptorSetLayouts.size(); ++i)
@@ -57,19 +57,19 @@ Pipeline::Pipeline(
     }
 
 #ifndef NDEBUG
-    if (name != nullptr)
+    if (m_name != nullptr)
     {
         setDebugUtilsObjectNameEXT(
             VkContext::GetLogicalDevice(),
             VK_OBJECT_TYPE_PIPELINE,
             reinterpret_cast<std::uint64_t>(m_handle),
-            name);
+            m_name);
 
         setDebugUtilsObjectNameEXT(
             VkContext::GetLogicalDevice(),
             VK_OBJECT_TYPE_PIPELINE_LAYOUT,
             reinterpret_cast<std::uint64_t>(m_pipelineLayout),
-            name);
+            m_name);
     }
 #endif
 }

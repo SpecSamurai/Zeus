@@ -35,6 +35,6 @@ private:
     VkPipeline m_handle{ VK_NULL_HANDLE };
     VkPipelineLayout m_pipelineLayout{ VK_NULL_HANDLE };
     const PipelineState& m_state;
-    std::string m_name;
+    const char* m_name;
 };
 }
