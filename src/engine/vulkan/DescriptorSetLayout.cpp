@@ -25,7 +25,7 @@ DescriptorSetLayout::~DescriptorSetLayout()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDevice().GetDeletionQueue().Add(
+    VkContext::GetDeletionQueue().Add(
         ResourceType::DescriptorSetLayout,
         m_handle);
     m_handle = VK_NULL_HANDLE;

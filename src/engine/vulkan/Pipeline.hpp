@@ -6,7 +6,6 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <string>
 #include <vector>
 
 namespace Zeus
@@ -25,7 +24,7 @@ public:
     VkPipeline GetHandle() const;
     VkPipelineLayout GetLayout() const;
     const PipelineState& GetState() const;
-    const std::string& GetName() const;
+    const char* GetName() const;
 
 private:
     void CreateGraphicsPipeline();

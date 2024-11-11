@@ -90,9 +90,7 @@ Shader::~Shader()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDevice().GetDeletionQueue().Add(
-        ResourceType::Shader,
-        m_handle);
+    VkContext::GetDeletionQueue().Add(ResourceType::Shader, m_handle);
     m_handle = VK_NULL_HANDLE;
 }
 

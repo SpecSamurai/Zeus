@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DeletionQueue.hpp"
 #include "Device.hpp"
 #include "api/vulkan_memory.hpp"
 #include "window/Window.hpp"
@@ -17,6 +18,7 @@ public:
     static VkInstance GetInstance();
     static Device& GetDevice();
     static VkDevice GetLogicalDevice();
+    static DeletionQueue& GetDeletionQueue();
     static VkSurfaceKHR GetSurface();
     static VmaAllocator GetAllocator();
 

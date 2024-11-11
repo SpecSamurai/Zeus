@@ -21,9 +21,7 @@ DescriptorPool::~DescriptorPool()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDevice().GetDeletionQueue().Add(
-        ResourceType::DescriptorPool,
-        m_handle);
+    VkContext::GetDeletionQueue().Add(ResourceType::DescriptorPool, m_handle);
     m_handle = VK_NULL_HANDLE;
 }
 

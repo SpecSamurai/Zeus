@@ -78,15 +78,13 @@ Pipeline::~Pipeline()
 {
     if (m_handle != VK_NULL_HANDLE)
     {
-        VkContext::GetDevice().GetDeletionQueue().Add(
-            ResourceType::Pipeline,
-            m_handle);
+        VkContext::GetDeletionQueue().Add(ResourceType::Pipeline, m_handle);
         m_handle = VK_NULL_HANDLE;
     }
 
     if (m_pipelineLayout != VK_NULL_HANDLE)
     {
-        VkContext::GetDevice().GetDeletionQueue().Add(
+        VkContext::GetDeletionQueue().Add(
             ResourceType::PipelineLayout,
             m_pipelineLayout);
         m_pipelineLayout = VK_NULL_HANDLE;
@@ -108,7 +106,7 @@ const PipelineState& Pipeline::GetState() const
     return m_state;
 }
 
-const std::string& Pipeline::GetName() const
+const char* Pipeline::GetName() const
 {
     return m_name;
 }

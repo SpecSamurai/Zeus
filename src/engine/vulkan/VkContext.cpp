@@ -1,5 +1,6 @@
 #include "VkContext.hpp"
 
+#include "DeletionQueue.hpp"
 #include "Device.hpp"
 #include "InstanceBuilder.hpp"
 #include "api/vulkan_debug.hpp"
@@ -86,6 +87,11 @@ Device& VkContext::GetDevice()
 VkDevice VkContext::GetLogicalDevice()
 {
     return s_device.GetLogicalDevice();
+}
+
+DeletionQueue& VkContext::GetDeletionQueue()
+{
+    return s_device.GetDeletionQueue();
 }
 
 VkSurfaceKHR VkContext::GetSurface()
