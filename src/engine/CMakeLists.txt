@@ -148,32 +148,32 @@ add_library(Engine
     vulkan/VkContext.cpp
     vulkan/VkContext.hpp
 
-    vulkan/api/vulkan_buffer.cpp
-    vulkan/api/vulkan_buffer.hpp
-    vulkan/api/vulkan_command.cpp
-    vulkan/api/vulkan_command.hpp
-    vulkan/api/vulkan_debug.cpp
-    vulkan/api/vulkan_debug.hpp
-    vulkan/api/vulkan_descriptors.cpp
-    vulkan/api/vulkan_descriptors.hpp
-    vulkan/api/vulkan_device.cpp
-    vulkan/api/vulkan_device.hpp
-    vulkan/api/vulkan_dynamic_rendering.cpp
-    vulkan/api/vulkan_dynamic_rendering.hpp
-    vulkan/api/vulkan_framebuffer.cpp
-    vulkan/api/vulkan_framebuffer.hpp
-    vulkan/api/vulkan_image.hpp
-    vulkan/api/vulkan_image.cpp
-    vulkan/api/vulkan_memory.cpp
-    vulkan/api/vulkan_memory.hpp
-    vulkan/api/vulkan_pipeline.cpp
-    vulkan/api/vulkan_pipeline.hpp
-    vulkan/api/vulkan_renderpass.cpp
-    vulkan/api/vulkan_renderpass.hpp
-    vulkan/api/vulkan_surface.cpp
-    vulkan/api/vulkan_surface.hpp
-    vulkan/api/vulkan_sync.cpp
-    vulkan/api/vulkan_sync.hpp
+    vulkan/rhi/vulkan_buffer.cpp
+    vulkan/rhi/vulkan_buffer.hpp
+    vulkan/rhi/vulkan_command.cpp
+    vulkan/rhi/vulkan_command.hpp
+    vulkan/rhi/vulkan_debug.cpp
+    vulkan/rhi/vulkan_debug.hpp
+    vulkan/rhi/vulkan_descriptors.cpp
+    vulkan/rhi/vulkan_descriptors.hpp
+    vulkan/rhi/vulkan_device.cpp
+    vulkan/rhi/vulkan_device.hpp
+    vulkan/rhi/vulkan_dynamic_rendering.cpp
+    vulkan/rhi/vulkan_dynamic_rendering.hpp
+    vulkan/rhi/vulkan_framebuffer.cpp
+    vulkan/rhi/vulkan_framebuffer.hpp
+    vulkan/rhi/vulkan_image.hpp
+    vulkan/rhi/vulkan_image.cpp
+    vulkan/rhi/vulkan_memory.cpp
+    vulkan/rhi/vulkan_memory.hpp
+    vulkan/rhi/vulkan_pipeline.cpp
+    vulkan/rhi/vulkan_pipeline.hpp
+    vulkan/rhi/vulkan_renderpass.cpp
+    vulkan/rhi/vulkan_renderpass.hpp
+    vulkan/rhi/vulkan_surface.cpp
+    vulkan/rhi/vulkan_surface.hpp
+    vulkan/rhi/vulkan_sync.cpp
+    vulkan/rhi/vulkan_sync.hpp
 
     window/glfw_utils.cpp
     window/glfw_utils.hpp
