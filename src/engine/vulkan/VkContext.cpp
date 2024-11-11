@@ -3,10 +3,10 @@
 #include "DeletionQueue.hpp"
 #include "Device.hpp"
 #include "InstanceBuilder.hpp"
-#include "api/vulkan_debug.hpp"
-#include "api/vulkan_memory.hpp"
-#include "api/vulkan_surface.hpp"
 #include "logging/logger.hpp"
+#include "rhi/vulkan_debug.hpp"
+#include "rhi/vulkan_memory.hpp"
+#include "rhi/vulkan_surface.hpp"
 #include "window/Window.hpp"
 #include "window/glfw_utils.hpp"
 

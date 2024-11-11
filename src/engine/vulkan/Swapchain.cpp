@@ -1,10 +1,10 @@
 #include "Swapchain.hpp"
 
 #include "VkContext.hpp"
-#include "api/vulkan_command.hpp"
-#include "api/vulkan_debug.hpp"
-#include "api/vulkan_device.hpp"
 #include "logging/logger.hpp"
+#include "rhi/vulkan_command.hpp"
+#include "rhi/vulkan_debug.hpp"
+#include "rhi/vulkan_device.hpp"
 
 #include <vulkan/vulkan_core.h>
 

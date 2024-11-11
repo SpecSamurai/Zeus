@@ -1,8 +1,10 @@
 #pragma once
 
-#include "api/vulkan_memory.hpp"
+#include "rhi/vulkan_memory.hpp"
 
 #include <vulkan/vulkan_core.h>
+
+#include <cstddef>
 
 namespace Zeus
 {

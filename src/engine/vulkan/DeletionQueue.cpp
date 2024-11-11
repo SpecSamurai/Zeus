@@ -2,8 +2,8 @@
 
 #include "Buffer.hpp"
 #include "Definitions.hpp"
-#include "api/vulkan_memory.hpp"
 #include "logging/logger.hpp"
+#include "rhi/vulkan_memory.hpp"
 
 #include <vulkan/vulkan_core.h>
 

@@ -5,8 +5,8 @@
 #include "Semaphore.hpp"
 #include "Swapchain.hpp"
 #include "VkContext.hpp"
-#include "api/vulkan_command.hpp"
-#include "api/vulkan_debug.hpp"
+#include "rhi/vulkan_command.hpp"
+#include "rhi/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
 

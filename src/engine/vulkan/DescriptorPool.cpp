@@ -1,8 +1,8 @@
 #include "DescriptorPool.hpp"
 
 #include "VkContext.hpp"
-#include "api/vulkan_debug.hpp"
-#include "api/vulkan_descriptors.hpp"
+#include "rhi/vulkan_debug.hpp"
+#include "rhi/vulkan_descriptors.hpp"
 
 #include <vulkan/vulkan_core.h>
 

@@ -1,7 +1,7 @@
 #include "PhysicalDeviceSelector.hpp"
 
-#include "api/vulkan_device.hpp"
 #include "logging/logger.hpp"
+#include "rhi/vulkan_device.hpp"
 
 #include <vulkan/vulkan.h>
 

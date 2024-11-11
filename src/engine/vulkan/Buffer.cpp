@@ -2,8 +2,8 @@
 
 #include "Definitions.hpp"
 #include "VkContext.hpp"
-#include "api/vulkan_buffer.hpp"
-#include "api/vulkan_debug.hpp"
+#include "rhi/vulkan_buffer.hpp"
+#include "rhi/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
 

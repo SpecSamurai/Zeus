@@ -1,8 +1,8 @@
 #include "Semaphore.hpp"
 
 #include "VkContext.hpp"
-#include "api/vulkan_debug.hpp"
-#include "api/vulkan_sync.hpp"
+#include "rhi/vulkan_debug.hpp"
+#include "rhi/vulkan_sync.hpp"
 
 #include <vulkan/vulkan_core.h>
 

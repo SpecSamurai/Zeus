@@ -3,7 +3,7 @@
 #include "Definitions.hpp"
 #include "Descriptor.hpp"
 #include "VkContext.hpp"
-#include "api/vulkan_debug.hpp"
+#include "rhi/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
 

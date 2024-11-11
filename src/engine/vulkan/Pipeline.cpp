@@ -3,8 +3,8 @@
 #include "Definitions.hpp"
 #include "DeletionQueue.hpp"
 #include "VkContext.hpp"
-#include "api/vulkan_debug.hpp"
-#include "api/vulkan_pipeline.hpp"
+#include "rhi/vulkan_debug.hpp"
+#include "rhi/vulkan_pipeline.hpp"
 
 #include <vulkan/vulkan_core.h>
 
