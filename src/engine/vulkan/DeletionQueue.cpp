@@ -1,5 +1,6 @@
 #include "DeletionQueue.hpp"
 
+#include "Buffer.hpp"
 #include "Definitions.hpp"
 #include "api/vulkan_memory.hpp"
 #include "logging/logger.hpp"
@@ -50,10 +51,7 @@ void DeletionQueue::Clear()
             switch (type)
             {
             case ResourceType::Buffer:
-                // vmaDestroyBuffer(
-                //     m_vkContext.allocator,
-                //     stageBuffer.buffer,
-                //     stageBuffer.allocation);
+                reinterpret_cast<Buffer*>(handle)->Destroy();
                 break;
             case ResourceType::CommandPool:
                 vkDestroyCommandPool(
