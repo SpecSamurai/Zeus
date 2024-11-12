@@ -11,8 +11,8 @@ enum class ResourceType : std::uint8_t
     DescriptorPool,
     DescriptorSetLayout,
     Fence,
-    Image,
     ImageView,
+    Image,
     Pipeline,
     PipelineLayout,
     Semaphore,
@@ -35,5 +35,12 @@ enum class ShaderCompilationState : std::uint8_t
     Compiling,
     Compiled,
     Failed
+};
+
+enum class ImageType : std::uint8_t
+{
+    Cube,
+    Texture2D,
+    Texture3D,
 };
 }
