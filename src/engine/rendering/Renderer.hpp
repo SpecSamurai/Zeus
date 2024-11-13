@@ -2,16 +2,18 @@
 
 #include "Renderer_definitions.hpp"
 #include "renderer_types.hpp"
-#include "vulkan/DescriptorAllocator.hpp"
-#include "vulkan/SwapchainBuilder.hpp"
-#include "vulkan/VulkanContext.hpp"
-#include "vulkan/vulkan_image.hpp"
+#include "vulkan/DescriptorPool.hpp"
+#include "vulkan/DescriptorSetLayout.hpp"
+#include "vulkan/Pipeline.hpp"
+#include "vulkan/Swapchain.hpp"
+#include "vulkan/rhi/vulkan_image.hpp"
 #include "window/Window.hpp"
 
-#include <functional>
+#include <algorithm>
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <memory>
 #include <span>
 
 namespace Zeus
@@ -19,7 +21,7 @@ namespace Zeus
 class Renderer
 {
 public:
-    Renderer(Window& window, VulkanContext& vkContext);
+    Renderer(Window& window);
 
     void Init();
     void Destroy();
@@ -37,35 +39,18 @@ public:
 
     inline constexpr bool ResizeRequired() const
     {
-        return m_window.resized || m_swapchainRebuildRequired;
+        return false; // m_window.resized || m_swapchainRebuildRequired;
     }
 
     inline constexpr FrameData& CurrentFrame()
     {
-        return m_frames[m_currentFrame];
-    }
-
-    inline constexpr std::uint32_t CurrentSwapchainImageIndex() const
-    {
-        return m_swapchainImageIndex;
-    }
-
-    inline constexpr Swapchain& GetSwapchain()
-    {
-        return m_swapchain;
+        return m_frames[m_swapchain->GetFrameIndex()];
     }
 
 private:
-    void InitSwapchain();
-    void InitSyncObjects();
     void InitCommands();
     void InitDrawObjects(const VkExtent2D& extent);
     void InitDescriptors();
-
-    void ResizeSwapchain(const VkExtent2D& extent);
-
-    void CmdImmediateSubmit(
-        std::function<void(VkCommandBuffer cmd)>&& function);
 
     void InitCompute();
     void DrawCompute();
@@ -75,27 +60,17 @@ private:
 
 private:
     Window& m_window;
-    VulkanContext& m_vkContext;
-    SwapchainBuilder m_swapchainBuilder;
-    Swapchain m_swapchain;
+    std::unique_ptr<Swapchain> m_swapchain;
 
     std::vector<FrameData> m_frames;
 
     // DrawContext m_drawContext{};
     // SceneData m_sceneData{};
 
-    VkDescriptorSetLayout m_sceneDataDescriptorSetLayout;
-
-    std::uint32_t m_currentFrame{ 0 };
-    std::uint32_t m_swapchainImageIndex;
+    DescriptorSetLayout sceneDataDescriptorSetLayout;
 
     float m_renderScale{ 1.f };
     bool m_swapchainRebuildRequired{ false };
-
-private:
-    VkFence m_ImmediateSubmitFence{ VK_NULL_HANDLE };
-    VkCommandPool m_ImmediateSubmitCommandPool{ VK_NULL_HANDLE };
-    VkCommandBuffer m_ImmediateSubmitCommandBuffer{ VK_NULL_HANDLE };
 
 public:
     VkExtent2D drawExtent;
@@ -103,12 +78,10 @@ public:
     Image depthImage;
 
     // COMPUTE ******************
-    DescriptorAllocator computeDescriptorAllocator;
+    DescriptorPool computeDescriptorAllocator;
     VkDescriptorSet _drawImageDescriptors;
     VkDescriptorSetLayout _drawImageDescriptorLayout;
-
-    // VkPipeline _computePipeline;
-    // VkPipelineLayout _computePipelineLayout;
+    DescriptorSetLayout drawImageDescriptorLayout;
 
     struct ComputePushConstants
     {
@@ -121,19 +94,14 @@ public:
     struct ComputeEffect
     {
         const char* name;
-
-        VkPipeline pipeline{ VK_NULL_HANDLE };
-        VkPipelineLayout layout{ VK_NULL_HANDLE };
-
+        std::unique_ptr<Pipeline> pipeline;
         ComputePushConstants data;
     } computeEffect;
     // COMPUTE ******************
 
     // TRAINGLE/MESH
     MeshBuffers rectangle;
-
-    VkPipelineLayout meshPipelineLayout;
-    VkPipeline meshPipeline;
+    std::unique_ptr<Pipeline> _meshPipeline;
 
     std::vector<std::shared_ptr<MeshAsset>> testMeshes;
     // TRAINGLE/MESH
