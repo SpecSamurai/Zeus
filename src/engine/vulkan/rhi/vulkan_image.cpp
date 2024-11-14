@@ -2,7 +2,6 @@
 
 #include "math/definitions.hpp"
 #include "vulkan_debug.hpp"
-#include "vulkan_memory.hpp"
 
 #include <vulkan/utility/vk_format_utils.h>
 #include <vulkan/vulkan_core.h>
@@ -13,98 +12,6 @@
 
 namespace Zeus
 {
-void destroyImage(VkDevice device, VmaAllocator allocator, Image& image)
-{
-    vkDestroyImageView(device, image.imageView, allocationCallbacks.get());
-    vmaDestroyImage(allocator, image.image, image.allocation);
-}
-
-VkResult create2DImage(
-    VmaAllocator allocator,
-    Image& image,
-    VkImageUsageFlags usage,
-    VkMemoryPropertyFlags memoryPropertyFlags,
-    std::uint32_t mipLevels,
-    VkImageTiling tiling)
-{
-    VkImageCreateInfo imageCreateInfo{};
-    imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageCreateInfo.pNext = nullptr;
-    imageCreateInfo.flags = 0;
-    imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageCreateInfo.format = image.imageFormat;
-    imageCreateInfo.extent = image.imageExtent;
-    imageCreateInfo.mipLevels = mipLevels;
-    imageCreateInfo.arrayLayers = 1;
-    imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageCreateInfo.tiling = tiling;
-    imageCreateInfo.usage = usage;
-    imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    imageCreateInfo.queueFamilyIndexCount = 0;
-    imageCreateInfo.pQueueFamilyIndices = nullptr;
-    imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-    VmaAllocationCreateInfo allocationCreateInfo{};
-    allocationCreateInfo.requiredFlags = memoryPropertyFlags;
-
-    switch (memoryPropertyFlags)
-    {
-    case VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT:
-        allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-        break;
-
-    default:
-        assert(0);
-    }
-
-    VkResult result{ vmaCreateImage(
-        allocator,
-        &imageCreateInfo,
-        &allocationCreateInfo,
-        &image.image,
-        &image.allocation,
-        &image.allocationInfo) };
-
-    VKCHECK(result, "Failed to create image.");
-
-    return result;
-}
-
-VkResult create2DImageView(
-    VkDevice device,
-    Image& image,
-    const VkImageAspectFlags aspectFlags,
-    std::uint32_t mipLevels)
-{
-    VkImageViewCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    createInfo.pNext = nullptr;
-    createInfo.flags = 0;
-    createInfo.image = image.image;
-    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    createInfo.format = image.imageFormat;
-    createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.subresourceRange.aspectMask = aspectFlags;
-    createInfo.subresourceRange.baseMipLevel = 0;
-    createInfo.subresourceRange.levelCount = mipLevels;
-    // Usage: Stereograhic 3D application
-    createInfo.subresourceRange.baseArrayLayer = 0;
-    createInfo.subresourceRange.layerCount = 1;
-
-    VkResult result{ vkCreateImageView(
-        device,
-        &createInfo,
-        allocationCallbacks.get(),
-        &image.imageView) };
-
-    VKCHECK(result, "Failed to create image view.");
-
-    return result;
-}
-
 void cmdClearColorImage(
     VkCommandBuffer commandBuffer,
     VkImage image,

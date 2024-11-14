@@ -1,7 +1,6 @@
 #pragma once
 
 #include "math/definitions.hpp"
-#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -10,32 +9,6 @@
 
 namespace Zeus
 {
-struct Image
-{
-    VkImage image;
-    VkImageView imageView;
-    VkExtent3D imageExtent;
-    VkFormat imageFormat;
-    VmaAllocation allocation;
-    VmaAllocationInfo allocationInfo;
-};
-
-void destroyImage(VkDevice device, VmaAllocator allocator, Image& image);
-
-VkResult create2DImage(
-    VmaAllocator allocator,
-    Image& image,
-    VkImageUsageFlags usage,
-    VkMemoryPropertyFlags memoryPropertyFlags,
-    std::uint32_t mipLevels = 1,
-    VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL);
-
-VkResult create2DImageView(
-    VkDevice device,
-    Image& image,
-    const VkImageAspectFlags aspectFlags,
-    std::uint32_t mipLevels = 1);
-
 void cmdClearColorImage(
     VkCommandBuffer commandBuffer,
     VkImage image,
