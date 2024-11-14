@@ -121,6 +121,8 @@ add_library(Engine
     vulkan/Device.hpp
     vulkan/Fence.cpp
     vulkan/Fence.hpp
+    vulkan/Image.cpp
+    vulkan/Image.hpp
     vulkan/InstanceBuilder.cpp
     vulkan/InstanceBuilder.hpp
     vulkan/PhysicalDeviceSelector.cpp
