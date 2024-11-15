@@ -49,7 +49,7 @@ CommandPool::~CommandPool()
     m_handle = VK_NULL_HANDLE;
 }
 
-VkCommandBuffer CommandPool::AllocateBuffer(VkCommandBufferLevel level)
+VkCommandBuffer CommandPool::AllocateBuffer(VkCommandBufferLevel level) const
 {
     VkCommandBufferAllocateInfo allocateInfo{};
     allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -70,7 +70,7 @@ VkCommandBuffer CommandPool::AllocateBuffer(VkCommandBufferLevel level)
 
 void CommandPool::AllocateBuffers(
     std::vector<VkCommandBuffer>& commandBuffers,
-    VkCommandBufferLevel level)
+    VkCommandBufferLevel level) const
 {
     VkCommandBufferAllocateInfo allocateInfo{};
     allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

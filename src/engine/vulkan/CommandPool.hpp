@@ -19,11 +19,11 @@ public:
     ~CommandPool();
 
     VkCommandBuffer AllocateBuffer(
-        VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+        VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY) const;
 
     void AllocateBuffers(
         std::vector<VkCommandBuffer>& commandBuffers,
-        VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+        VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY) const;
 
     void Reset(VkCommandPoolResetFlags flags = 0);
 
