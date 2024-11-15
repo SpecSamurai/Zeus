@@ -2,6 +2,7 @@
 
 #include "Buffer.hpp"
 #include "Definitions.hpp"
+#include "Image.hpp"
 #include "logging/logger.hpp"
 #include "rhi/vulkan_memory.hpp"
 
@@ -78,17 +79,7 @@ void DeletionQueue::Clear()
                     allocationCallbacks.get());
                 break;
             case ResourceType::Image:
-                // vmaDestroyImage(allocator, image.image, image.allocation);
-                vkDestroyImage(
-                    m_device,
-                    reinterpret_cast<VkImage>(handle),
-                    allocationCallbacks.get());
-                break;
-            case ResourceType::ImageView:
-                vkDestroyImageView(
-                    m_device,
-                    reinterpret_cast<VkImageView>(handle),
-                    allocationCallbacks.get());
+                reinterpret_cast<Image*>(handle)->Destroy();
                 break;
             case ResourceType::Pipeline:
                 vkDestroyPipeline(
