@@ -7,24 +7,6 @@
 
 namespace Zeus
 {
-VkResult createVkCommandPool(
-    VkDevice device,
-    VkCommandPoolCreateFlagBits createFlags,
-    std::uint32_t queueFamilyIndex,
-    VkCommandPool* commandPool);
-
-VkResult allocateVkCommandBuffers(
-    std::vector<VkCommandBuffer>& commandBuffers,
-    VkDevice device,
-    VkCommandPool commandPool,
-    VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-
-VkResult allocateVkCommandBuffer(
-    VkCommandBuffer* commandBuffers,
-    VkDevice device,
-    VkCommandPool commandPool,
-    VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-
 VkResult beginVkCommandBuffer(
     VkCommandBuffer commandBuffer,
     VkCommandBufferUsageFlags flags = 0,

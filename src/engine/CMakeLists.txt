@@ -102,6 +102,8 @@ add_library(Engine
     vulkan/Buffer.hpp
     vulkan/CommandBuffer.cpp
     vulkan/CommandBuffer.hpp
+    vulkan/CommandPool.cpp
+    vulkan/CommandPool.hpp
     vulkan/Definitions.hpp
     vulkan/DeletionQueue.cpp
     vulkan/DeletionQueue.hpp

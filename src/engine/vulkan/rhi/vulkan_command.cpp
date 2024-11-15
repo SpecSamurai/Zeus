@@ -1,7 +1,6 @@
 #include "vulkan_command.hpp"
 
 #include "vulkan_debug.hpp"
-#include "vulkan_memory.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -10,71 +9,6 @@
 
 namespace Zeus
 {
-VkResult createVkCommandPool(
-    VkDevice device,
-    VkCommandPoolCreateFlagBits createFlags,
-    std::uint32_t queueFamilyIndex,
-    VkCommandPool* commandPool)
-{
-    VkCommandPoolCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    createInfo.flags = createFlags;
-    createInfo.queueFamilyIndex = queueFamilyIndex;
-
-    VkResult result{ vkCreateCommandPool(
-        device,
-        &createInfo,
-        allocationCallbacks.get(),
-        commandPool) };
-
-    VKCHECK(result, "Failed to create command pool.");
-
-    return result;
-}
-
-VkResult allocateVkCommandBuffers(
-    std::vector<VkCommandBuffer>& commandBuffers,
-    VkDevice device,
-    VkCommandPool commandPool,
-    VkCommandBufferLevel level)
-{
-    VkCommandBufferAllocateInfo allocateInfo{};
-    allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocateInfo.commandPool = commandPool;
-    allocateInfo.level = level;
-    allocateInfo.commandBufferCount =
-        static_cast<std::uint32_t>(commandBuffers.size());
-
-    VkResult result{
-        vkAllocateCommandBuffers(device, &allocateInfo, commandBuffers.data())
-    };
-
-    VKCHECK(result, "Failed to allocate command buffers.");
-
-    return result;
-}
-
-VkResult allocateVkCommandBuffer(
-    VkCommandBuffer* commandBuffers,
-    VkDevice device,
-    VkCommandPool commandPool,
-    VkCommandBufferLevel level)
-{
-    VkCommandBufferAllocateInfo allocateInfo{};
-    allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocateInfo.commandPool = commandPool;
-    allocateInfo.level = level;
-    allocateInfo.commandBufferCount = 1;
-
-    VkResult result{
-        vkAllocateCommandBuffers(device, &allocateInfo, commandBuffers)
-    };
-
-    VKCHECK(result, "Failed to allocate command buffers.");
-
-    return result;
-}
-
 VkResult beginVkCommandBuffer(
     VkCommandBuffer commandBuffer,
     VkCommandBufferUsageFlags flags,
