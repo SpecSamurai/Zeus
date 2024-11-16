@@ -103,4 +103,21 @@ VmaAllocator VkContext::GetAllocator()
 {
     return s_allocator;
 }
+
+void VkContext::SetDebugName(
+    VkObjectType objectType,
+    void* handle,
+    const char* name)
+{
+#ifndef NDEBUG
+    if (name != nullptr)
+    {
+        setDebugUtilsObjectNameEXT(
+            s_device.GetLogicalDevice(),
+            objectType,
+            reinterpret_cast<std::uint64_t>(handle),
+            name);
+    }
+#endif
+}
 }

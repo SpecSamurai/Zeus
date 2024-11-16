@@ -22,6 +22,11 @@ public:
     static VkSurfaceKHR GetSurface();
     static VmaAllocator GetAllocator();
 
+    static void SetDebugName(
+        VkObjectType objectType,
+        void* handle,
+        const char* name);
+
 private:
     static VkInstance s_instance;
     static VkDebugUtilsMessengerEXT s_debugUtilsMessenger;
