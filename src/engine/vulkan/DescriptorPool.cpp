@@ -61,10 +61,7 @@ void DescriptorPool::Init(
         poolSizes.data(),
         flags);
 
-    VkContext::SetDebugName(
-        VK_OBJECT_TYPE_DESCRIPTOR_POOL,
-        m_handle,
-        m_name.c_str());
+    VkContext::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, m_handle, m_name);
 }
 
 void DescriptorPool::Reset()

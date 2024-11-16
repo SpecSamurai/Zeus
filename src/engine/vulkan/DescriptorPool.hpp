@@ -3,7 +3,6 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
-#include <string>
 #include <vector>
 
 namespace Zeus
@@ -29,6 +28,6 @@ public:
 
 private:
     VkDescriptorPool m_handle{ VK_NULL_HANDLE };
-    std::string m_name;
+    const char* m_name;
 };
 }

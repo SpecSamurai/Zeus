@@ -189,22 +189,18 @@ void Swapchain::Create()
                 &m_imageViews[i]),
             "Failed to create swapchain image view.");
 
-#ifndef NDEBUG
         std::string imageName{ "Image Swapchain " + std::to_string(i) };
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
+        VkContext::SetDebugName(
             VK_OBJECT_TYPE_IMAGE,
-            reinterpret_cast<std::uint64_t>(m_images[i]),
+            m_images[i],
             imageName.c_str());
 
         std::string imageViewName{ "Image View Swapchain " +
                                    std::to_string(i) };
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
+        VkContext::SetDebugName(
             VK_OBJECT_TYPE_IMAGE_VIEW,
-            reinterpret_cast<std::uint64_t>(m_imageViews[i]),
+            m_imageViews[i],
             imageViewName.c_str());
-#endif
     }
 
     m_frames.reserve(m_framesCount);
