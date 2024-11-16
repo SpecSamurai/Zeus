@@ -21,6 +21,8 @@ public:
         const char* name = nullptr);
     ~Shader();
 
+    void Destroy();
+
     void Compile();
 
     VkShaderModule GetHandle() const;

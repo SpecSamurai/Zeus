@@ -13,6 +13,8 @@ public:
     Semaphore(bool isTimeline = false, const char* name = nullptr);
     ~Semaphore();
 
+    void Destroy();
+
     // timeout_ns - timeout in nanoseconds
     void Wait(
         const std::uint64_t value,

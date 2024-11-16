@@ -28,16 +28,7 @@ CommandPool::CommandPool(
             &m_handle),
         "Failed to create command pool.");
 
-#ifndef NDEBUG
-    if (name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_COMMAND_POOL,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            name);
-    }
-#endif
+    VkContext::SetDebugName(VK_OBJECT_TYPE_COMMAND_POOL, m_handle, name);
 }
 
 CommandPool::~CommandPool()
@@ -46,6 +37,15 @@ CommandPool::~CommandPool()
         return;
 
     VkContext::GetDeletionQueue().Add(ResourceType::CommandPool, m_handle);
+    m_handle = VK_NULL_HANDLE;
+}
+
+void CommandPool::Destroy()
+{
+    vkDestroyCommandPool(
+        VkContext::GetLogicalDevice(),
+        m_handle,
+        allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
 }
 

@@ -73,16 +73,7 @@ Shader::Shader(
     m_compilationState = result == VK_SUCCESS ? ShaderCompilationState::Compiled
                                               : ShaderCompilationState::Failed;
 
-#ifndef NDEBUG
-    if (name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_SHADER_MODULE,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            name);
-    }
-#endif
+    VkContext::SetDebugName(VK_OBJECT_TYPE_SHADER_MODULE, m_handle, name);
 }
 
 Shader::~Shader()
@@ -91,6 +82,15 @@ Shader::~Shader()
         return;
 
     VkContext::GetDeletionQueue().Add(ResourceType::Shader, m_handle);
+    m_handle = VK_NULL_HANDLE;
+}
+
+void Shader::Destroy()
+{
+    vkDestroyShaderModule(
+        VkContext::GetLogicalDevice(),
+        m_handle,
+        allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
 }
 

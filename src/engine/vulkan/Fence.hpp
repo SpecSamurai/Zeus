@@ -10,8 +10,12 @@ namespace Zeus
 class Fence
 {
 public:
-    Fence(bool signaled = false, const char* name = nullptr);
+    Fence() = default;
+
+    Fence(bool signaled, const char* name = nullptr);
     ~Fence();
+
+    void Destroy();
 
     // timeout_ns - timeout in nanoseconds
     bool Wait(

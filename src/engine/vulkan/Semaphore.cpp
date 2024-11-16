@@ -16,16 +16,7 @@ Semaphore::Semaphore(bool isTimeline, const char* name)
 {
     createVkSemaphore(VkContext::GetLogicalDevice(), &m_handle, m_isTimeline);
 
-#ifndef NDEBUG
-    if (name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_SEMAPHORE,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            name);
-    }
-#endif
+    VkContext::SetDebugName(VK_OBJECT_TYPE_SEMAPHORE, m_handle, name);
 }
 
 Semaphore::~Semaphore()
@@ -34,6 +25,15 @@ Semaphore::~Semaphore()
         return;
 
     VkContext::GetDeletionQueue().Add(ResourceType::Semaphore, m_handle);
+    m_handle = VK_NULL_HANDLE;
+}
+
+void Semaphore::Destroy()
+{
+    vkDestroySemaphore(
+        VkContext::GetLogicalDevice(),
+        m_handle,
+        allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
 }
 

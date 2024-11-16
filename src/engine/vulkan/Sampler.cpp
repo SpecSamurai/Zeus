@@ -40,24 +40,15 @@ Sampler::Sampler(
         VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK; // VK_BORDER_COLOR_INT_OPAQUE_BLACK
     createInfo.unnormalizedCoordinates = VK_FALSE;
 
-    VkResult result{ vkCreateSampler(
-        VkContext::GetLogicalDevice(),
-        &createInfo,
-        allocationCallbacks.get(),
-        &m_handle) };
-
-    VKCHECK(result, "Failed to create sampler.");
-
-#ifndef NDEBUG
-    if (name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
+    VKCHECK(
+        vkCreateSampler(
             VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_SAMPLER,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            name);
-    }
-#endif
+            &createInfo,
+            allocationCallbacks.get(),
+            &m_handle),
+        "Failed to create sampler.");
+
+    VkContext::SetDebugName(VK_OBJECT_TYPE_SAMPLER, m_handle, name);
 }
 
 Sampler::~Sampler()
@@ -66,6 +57,15 @@ Sampler::~Sampler()
         return;
 
     VkContext::GetDeletionQueue().Add(ResourceType::Sampler, m_handle);
+    m_handle = VK_NULL_HANDLE;
+}
+
+void Sampler::Destroy()
+{
+    vkDestroySampler(
+        VkContext::GetLogicalDevice(),
+        m_handle,
+        allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
 }
 

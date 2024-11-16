@@ -41,9 +41,6 @@ Image::~Image()
 
 void Image::Destroy()
 {
-    if (m_handle == VK_NULL_HANDLE)
-        return;
-
     vkDestroyImageView(
         VkContext::GetLogicalDevice(),
         m_view,
@@ -189,16 +186,7 @@ void Image::CreateImage(
             &m_info),
         "Failed to create image.");
 
-#ifndef NDEBUG
-    if (m_name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_IMAGE,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            m_name);
-    }
-#endif
+    VkContext::SetDebugName(VK_OBJECT_TYPE_IMAGE, m_handle, m_name);
 }
 
 void Image::CreateImageView()
@@ -267,18 +255,15 @@ void Image::CreateImageView()
             &m_view),
         "Failed to create image view.");
 
-#ifndef NDEBUG
     if (m_name != nullptr)
     {
         std::string name(m_name);
         name += "_View";
 
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
+        VkContext::SetDebugName(
             VK_OBJECT_TYPE_IMAGE_VIEW,
-            reinterpret_cast<std::uint64_t>(m_view),
+            m_view,
             name.c_str());
     }
-#endif
 }
 }

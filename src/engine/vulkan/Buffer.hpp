@@ -20,6 +20,8 @@ public:
 
     ~Buffer();
 
+    void Destroy();
+
     void Update(void* data, std::size_t size, std::size_t srcOffset = 0);
     // void ResetOffset() { m_offset = 0; first_update = true; }
     void ImmediateCopyToBuffer(
@@ -34,8 +36,6 @@ public:
         std::size_t size,
         std::size_t srcOffset = 0,
         std::size_t dstOffset = 0) const;
-
-    void Destroy();
 
     void* GetData() const;
     VkBuffer GetHandle() const;

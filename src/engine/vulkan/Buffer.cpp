@@ -88,16 +88,7 @@ Buffer::Buffer(
             vkGetBufferDeviceAddress(VkContext::GetLogicalDevice(), &info);
     }
 
-#ifndef NDEBUG
-    if (name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_BUFFER,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            name);
-    }
-#endif
+    VkContext::SetDebugName(VK_OBJECT_TYPE_BUFFER, m_handle, name);
 }
 
 Buffer::~Buffer()
@@ -106,6 +97,14 @@ Buffer::~Buffer()
         return;
 
     VkContext::GetDeletionQueue().Add(ResourceType::Buffer, this);
+}
+
+void Buffer::Destroy()
+{
+    vmaDestroyBuffer(VkContext::GetAllocator(), m_handle, m_allocation);
+
+    m_handle = VK_NULL_HANDLE;
+    m_allocation = VK_NULL_HANDLE;
 }
 
 void Buffer::Update(void* data, std::size_t size, std::size_t offset)
@@ -181,17 +180,6 @@ void Buffer::CopyToBuffer(
         srcOffset,
         dstOffset,
         size);
-}
-
-void Buffer::Destroy()
-{
-    if (m_handle == VK_NULL_HANDLE)
-        return;
-
-    vmaDestroyBuffer(VkContext::GetAllocator(), m_handle, m_allocation);
-
-    m_handle = VK_NULL_HANDLE;
-    m_allocation = VK_NULL_HANDLE;
 }
 
 void* Buffer::GetData() const

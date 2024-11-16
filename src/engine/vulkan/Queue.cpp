@@ -20,16 +20,7 @@ Queue::Queue(const QueueType type, const char* name) : m_type{ type }
     m_family = device.GetQueueFamily(m_type);
     m_handle = device.GetQueue(type);
 
-#ifndef NDEBUG
-    if (name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
-            device.GetLogicalDevice(),
-            VK_OBJECT_TYPE_QUEUE,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            name);
-    }
-#endif
+    VkContext::SetDebugName(VK_OBJECT_TYPE_QUEUE, m_handle, name);
 }
 
 Queue::~Queue()

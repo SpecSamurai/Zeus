@@ -56,22 +56,11 @@ Pipeline::Pipeline(
         CreateComputePipeline();
     }
 
-#ifndef NDEBUG
-    if (m_name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_PIPELINE,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            m_name);
-
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_PIPELINE_LAYOUT,
-            reinterpret_cast<std::uint64_t>(m_pipelineLayout),
-            m_name);
-    }
-#endif
+    VkContext::SetDebugName(VK_OBJECT_TYPE_PIPELINE, m_handle, m_name);
+    VkContext::SetDebugName(
+        VK_OBJECT_TYPE_PIPELINE_LAYOUT,
+        m_pipelineLayout,
+        m_name);
 }
 
 Pipeline::~Pipeline()
@@ -89,6 +78,23 @@ Pipeline::~Pipeline()
             m_pipelineLayout);
         m_pipelineLayout = VK_NULL_HANDLE;
     }
+}
+
+void Pipeline::Destroy()
+{
+    vkDestroyPipeline(
+        VkContext::GetLogicalDevice(),
+        m_handle,
+        allocationCallbacks.get());
+    m_handle = VK_NULL_HANDLE;
+
+    vkDestroyPipelineLayout(
+        VkContext::GetLogicalDevice(),
+        m_pipelineLayout,
+        allocationCallbacks.get());
+    m_pipelineLayout = VK_NULL_HANDLE;
+
+    m_name = nullptr;
 }
 
 VkPipeline Pipeline::GetHandle() const

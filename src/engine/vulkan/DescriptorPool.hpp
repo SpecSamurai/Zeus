@@ -14,6 +14,8 @@ public:
     DescriptorPool(const char* name = "");
     ~DescriptorPool();
 
+    void Destroy();
+
     VkDescriptorSet Allocate(VkDescriptorSetLayout descriptorSetLayout);
 
     void Init(

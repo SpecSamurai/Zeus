@@ -18,6 +18,8 @@ public:
 
     ~CommandPool();
 
+    void Destroy();
+
     VkCommandBuffer AllocateBuffer(
         VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY) const;
 

@@ -25,6 +25,15 @@ DescriptorPool::~DescriptorPool()
     m_handle = VK_NULL_HANDLE;
 }
 
+void DescriptorPool::Destroy()
+{
+    vkDestroyDescriptorPool(
+        VkContext::GetLogicalDevice(),
+        m_handle,
+        allocationCallbacks.get());
+    m_handle = VK_NULL_HANDLE;
+}
+
 VkDescriptorSet DescriptorPool::Allocate(
     VkDescriptorSetLayout descriptorSetLayout)
 {
@@ -52,16 +61,10 @@ void DescriptorPool::Init(
         poolSizes.data(),
         flags);
 
-#ifndef NDEBUG
-    if (!m_name.empty())
-    {
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_DESCRIPTOR_POOL,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            m_name.c_str());
-    }
-#endif
+    VkContext::SetDebugName(
+        VK_OBJECT_TYPE_DESCRIPTOR_POOL,
+        m_handle,
+        m_name.c_str());
 }
 
 void DescriptorPool::Reset()

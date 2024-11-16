@@ -21,6 +21,8 @@ public:
 
     ~Pipeline();
 
+    void Destroy();
+
     VkPipeline GetHandle() const;
     VkPipelineLayout GetLayout() const;
     const PipelineState& GetState() const;

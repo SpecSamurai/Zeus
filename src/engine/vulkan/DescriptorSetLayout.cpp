@@ -32,6 +32,16 @@ DescriptorSetLayout::~DescriptorSetLayout()
     m_name = nullptr;
 }
 
+void DescriptorSetLayout::Destroy()
+{
+    vkDestroyDescriptorSetLayout(
+        VkContext::GetLogicalDevice(),
+        m_handle,
+        allocationCallbacks.get());
+    m_handle = VK_NULL_HANDLE;
+    m_name = nullptr;
+}
+
 void DescriptorSetLayout::AddDescriptor(
     VkDescriptorType type,
     VkShaderStageFlags stageFlags,
@@ -71,16 +81,10 @@ void DescriptorSetLayout::Build()
             &m_handle),
         "Failed to create descriptor set layout.");
 
-#ifndef NDEBUG
-    if (m_name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            m_name);
-    }
-#endif
+    VkContext::SetDebugName(
+        VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT,
+        m_handle,
+        m_name);
 }
 
 const VkDescriptorSetLayout& DescriptorSetLayout::GetHandle() const

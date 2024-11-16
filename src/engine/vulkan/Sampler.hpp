@@ -20,6 +20,8 @@ private:
 
     ~Sampler();
 
+    void Destroy();
+
     VkSampler GetHandle() const;
     VkFilter GetFilterMin() const;
     VkFilter GetFilterMag() const;

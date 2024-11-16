@@ -19,6 +19,8 @@ public:
 
     ~DescriptorSetLayout();
 
+    void Destroy();
+
     void AddDescriptor(
         VkDescriptorType type,
         VkShaderStageFlags stageFlags,

@@ -14,16 +14,7 @@ Fence::Fence(bool signaled, const char* name)
 {
     createVkFence(VkContext::GetLogicalDevice(), signaled, &m_handle);
 
-#ifndef NDEBUG
-    if (name != nullptr)
-    {
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_FENCE,
-            reinterpret_cast<std::uint64_t>(m_handle),
-            name);
-    }
-#endif
+    VkContext::SetDebugName(VK_OBJECT_TYPE_FENCE, m_handle, name);
 }
 
 Fence::~Fence()
@@ -32,6 +23,15 @@ Fence::~Fence()
         return;
 
     VkContext::GetDeletionQueue().Add(ResourceType::Fence, m_handle);
+    m_handle = VK_NULL_HANDLE;
+}
+
+void Fence::Destroy()
+{
+    vkDestroyFence(
+        VkContext::GetLogicalDevice(),
+        m_handle,
+        allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
 }
 
