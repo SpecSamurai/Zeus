@@ -11,9 +11,14 @@ class Fence
 {
 public:
     Fence() = default;
-
     Fence(bool signaled, const char* name = nullptr);
     ~Fence();
+
+    Fence(const Fence&) = delete;
+    Fence& operator=(const Fence&) = delete;
+
+    Fence(Fence&& other) noexcept;
+    Fence& operator=(Fence&& other);
 
     void Destroy();
 

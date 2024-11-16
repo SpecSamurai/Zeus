@@ -17,6 +17,11 @@ Fence::Fence(bool signaled, const char* name)
     VkContext::SetDebugName(VK_OBJECT_TYPE_FENCE, m_handle, name);
 }
 
+Fence::Fence(Fence&& other) noexcept : m_handle{ other.m_handle }
+{
+    other.m_handle = VK_NULL_HANDLE;
+}
+
 Fence::~Fence()
 {
     if (m_handle == VK_NULL_HANDLE)
@@ -24,6 +29,22 @@ Fence::~Fence()
 
     VkContext::GetDeletionQueue().Add(ResourceType::Fence, m_handle);
     m_handle = VK_NULL_HANDLE;
+}
+
+Fence& Fence::operator=(Fence&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+        other.m_handle = VK_NULL_HANDLE;
+    }
+
+    return *this;
 }
 
 void Fence::Destroy()

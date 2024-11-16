@@ -28,6 +28,31 @@ Semaphore::~Semaphore()
     m_handle = VK_NULL_HANDLE;
 }
 
+Semaphore::Semaphore(Semaphore&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_isTimeline{ other.m_isTimeline }
+{
+    other.m_handle = VK_NULL_HANDLE;
+}
+
+Semaphore& Semaphore::operator=(Semaphore&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+        m_isTimeline = other.m_isTimeline;
+
+        other.m_handle = VK_NULL_HANDLE;
+    }
+
+    return *this;
+}
+
 void Semaphore::Destroy()
 {
     vkDestroySemaphore(

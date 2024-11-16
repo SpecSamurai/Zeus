@@ -10,8 +10,15 @@ namespace Zeus
 class Semaphore
 {
 public:
-    Semaphore(bool isTimeline = false, const char* name = nullptr);
+    Semaphore() = default;
+    Semaphore(bool isTimeline, const char* name = nullptr);
     ~Semaphore();
+
+    Semaphore(const Semaphore&) = delete;
+    Semaphore& operator=(const Semaphore&) = delete;
+
+    Semaphore(Semaphore&& other) noexcept;
+    Semaphore& operator=(Semaphore&& other);
 
     void Destroy();
 
@@ -27,6 +34,6 @@ public:
 
 private:
     VkSemaphore m_handle{ VK_NULL_HANDLE };
-    bool m_isTimeline;
+    bool m_isTimeline{ false };
 };
 }
