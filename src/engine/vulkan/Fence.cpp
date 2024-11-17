@@ -22,15 +22,6 @@ Fence::Fence(Fence&& other) noexcept : m_handle{ other.m_handle }
     other.m_handle = VK_NULL_HANDLE;
 }
 
-Fence::~Fence()
-{
-    if (m_handle == VK_NULL_HANDLE)
-        return;
-
-    VkContext::GetDeletionQueue().Add(ResourceType::Fence, m_handle);
-    m_handle = VK_NULL_HANDLE;
-}
-
 Fence& Fence::operator=(Fence&& other)
 {
     if (this != &other)
@@ -45,6 +36,15 @@ Fence& Fence::operator=(Fence&& other)
     }
 
     return *this;
+}
+
+Fence::~Fence()
+{
+    if (m_handle == VK_NULL_HANDLE)
+        return;
+
+    VkContext::GetDeletionQueue().Add(ResourceType::Fence, m_handle);
+    m_handle = VK_NULL_HANDLE;
 }
 
 void Fence::Destroy()
@@ -73,14 +73,14 @@ void Fence::Reset()
         "Failed to reset fence");
 }
 
-const VkFence& Fence::GetHandle() const
-{
-    return m_handle;
-}
-
 bool Fence::Signaled() const
 {
     return vkGetFenceStatus(VkContext::GetLogicalDevice(), m_handle) ==
            VK_SUCCESS;
+}
+
+const VkFence& Fence::GetHandle() const
+{
+    return m_handle;
 }
 }

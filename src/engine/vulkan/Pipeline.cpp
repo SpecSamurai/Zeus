@@ -11,13 +11,14 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace Zeus
 {
 Pipeline::Pipeline(
     const PipelineState& pipelineState,
-    const std::vector<DescriptorSetLayout>& descriptorSetLayouts,
+    const std::vector<DescriptorSetLayout*>& descriptorSetLayouts,
     const std::vector<PushConstants>& pushConstants,
     const char* name)
     : m_state{ pipelineState },
@@ -26,7 +27,7 @@ Pipeline::Pipeline(
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetLayouts.size());
     for (std::uint32_t i{ 0 }; i < descriptorSetLayouts.size(); ++i)
     {
-        layouts[i] = descriptorSetLayouts[i].GetHandle();
+        layouts[i] = descriptorSetLayouts[i]->GetHandle();
     }
 
     std::vector<VkPushConstantRange> pushConstantRanges(pushConstants.size());
@@ -57,10 +58,13 @@ Pipeline::Pipeline(
     }
 
     VkContext::SetDebugName(VK_OBJECT_TYPE_PIPELINE, m_handle, m_name);
+
+    std::string layoutName(m_name);
+    layoutName += "_Layout";
     VkContext::SetDebugName(
         VK_OBJECT_TYPE_PIPELINE_LAYOUT,
         m_pipelineLayout,
-        m_name);
+        layoutName.c_str());
 }
 
 Pipeline::~Pipeline()
@@ -130,7 +134,7 @@ void Pipeline::CreateGraphicsPipeline()
         shaderStages.emplace_back(createPipelineShaderStageInfo(
             shader.GetShaderStage(),
             shader.GetHandle(),
-            shader.GetEntryPoint().c_str()));
+            shader.GetEntryPoint()));
 
         if (shader.GetShaderStage() == VK_SHADER_STAGE_VERTEX_BIT)
         {
@@ -323,7 +327,7 @@ void Pipeline::CreateComputePipeline()
         createPipelineShaderStageInfo(
             shader.GetShaderStage(),
             shader.GetHandle(),
-            shader.GetEntryPoint().c_str())
+            shader.GetEntryPoint())
     };
 
     VkComputePipelineCreateInfo createInfo{};

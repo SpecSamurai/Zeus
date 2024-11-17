@@ -51,7 +51,7 @@ void VkContext::Init(const Window& window)
 
 void VkContext::Destroy()
 {
-    LOG_DEBUG("Destroying VulkanContext");
+    LOG_DEBUG("Destroying VkContext");
 
     vmaDestroyAllocator(s_allocator);
     s_allocator = VK_NULL_HANDLE;

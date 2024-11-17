@@ -31,8 +31,68 @@ Image::Image(
     CreateImageView();
 }
 
+Image::Image(Image&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_view{ other.m_view },
+      m_allocation{ other.m_allocation },
+      m_info{ other.m_info },
+      m_name{ other.m_name },
+      m_type{ other.m_type },
+      m_extent{ other.m_extent },
+      m_format{ other.m_format },
+      m_layout{ other.m_layout },
+      m_mipLevels{ other.m_mipLevels },
+      m_tiling{ other.m_tiling },
+      m_usage{ other.m_usage },
+      m_memoryPropertyFlags{ other.m_memoryPropertyFlags }
+{
+    other.m_handle = VK_NULL_HANDLE;
+    other.m_view = VK_NULL_HANDLE;
+    other.m_allocation = VK_NULL_HANDLE;
+    other.m_info = {};
+    other.m_name = nullptr;
+}
+
+Image& Image::operator=(Image&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+        m_view = other.m_view;
+        m_allocation = other.m_allocation;
+        m_info = other.m_info;
+        m_name = other.m_name;
+        m_type = other.m_type;
+        m_extent = other.m_extent;
+        m_format = other.m_format;
+        m_layout = other.m_layout;
+        m_mipLevels = other.m_mipLevels;
+        m_tiling = other.m_tiling;
+        m_usage = other.m_usage;
+        m_memoryPropertyFlags = other.m_memoryPropertyFlags;
+
+        other.m_handle = VK_NULL_HANDLE;
+        other.m_view = VK_NULL_HANDLE;
+        other.m_allocation = VK_NULL_HANDLE;
+        other.m_info = {};
+        other.m_name = nullptr;
+    }
+
+    return *this;
+}
+
 Image::~Image()
 {
+    if (m_view == VK_NULL_HANDLE)
+        return;
+
+    VkContext::GetDeletionQueue().Add(ResourceType::ImageView, m_view);
+
     if (m_handle == VK_NULL_HANDLE)
         return;
 

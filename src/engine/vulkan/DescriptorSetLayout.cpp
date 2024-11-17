@@ -20,6 +20,38 @@ DescriptorSetLayout::DescriptorSetLayout(
     Build();
 }
 
+DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_descriptors{ other.m_descriptors },
+      m_name{ other.m_name }
+{
+    other.m_handle = VK_NULL_HANDLE;
+    other.m_name = nullptr;
+
+    other.m_descriptors.clear();
+}
+
+DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+        m_name = other.m_name;
+        m_descriptors = std::move(other.m_descriptors);
+
+        other.m_handle = VK_NULL_HANDLE;
+        other.m_name = nullptr;
+        other.m_descriptors.clear();
+    }
+
+    return *this;
+}
+
 DescriptorSetLayout::~DescriptorSetLayout()
 {
     if (m_handle == VK_NULL_HANDLE)
@@ -30,6 +62,7 @@ DescriptorSetLayout::~DescriptorSetLayout()
         m_handle);
     m_handle = VK_NULL_HANDLE;
     m_name = nullptr;
+    m_descriptors.clear();
 }
 
 void DescriptorSetLayout::Destroy()

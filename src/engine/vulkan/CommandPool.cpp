@@ -31,6 +31,29 @@ CommandPool::CommandPool(
     VkContext::SetDebugName(VK_OBJECT_TYPE_COMMAND_POOL, m_handle, name);
 }
 
+CommandPool::CommandPool(CommandPool&& other) noexcept
+    : m_handle{ other.m_handle }
+{
+    other.m_handle = VK_NULL_HANDLE;
+}
+
+CommandPool& CommandPool::operator=(CommandPool&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+
+        other.m_handle = VK_NULL_HANDLE;
+    }
+
+    return *this;
+}
+
 CommandPool::~CommandPool()
 {
     if (m_handle == VK_NULL_HANDLE)

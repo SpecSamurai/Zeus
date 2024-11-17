@@ -91,6 +91,49 @@ Buffer::Buffer(
     VkContext::SetDebugName(VK_OBJECT_TYPE_BUFFER, m_handle, name);
 }
 
+Buffer::Buffer(Buffer&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_allocation{ other.m_allocation },
+      m_info{ other.m_info },
+      m_deviceAddress{ other.m_deviceAddress },
+      m_usage{ other.m_usage },
+      m_memoryPropertyFlags{ other.m_memoryPropertyFlags },
+      m_mapped{ other.m_mapped },
+      m_empty{ other.m_empty }
+{
+    other.m_handle = VK_NULL_HANDLE;
+    other.m_allocation = VK_NULL_HANDLE;
+    other.m_info = {};
+    other.m_deviceAddress = {};
+}
+
+Buffer& Buffer::operator=(Buffer&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+        m_allocation = other.m_allocation;
+        m_info = other.m_info;
+        m_deviceAddress = other.m_deviceAddress;
+        m_usage = other.m_usage;
+        m_memoryPropertyFlags = other.m_memoryPropertyFlags;
+        m_mapped = other.m_mapped;
+        m_empty = other.m_empty;
+
+        other.m_handle = VK_NULL_HANDLE;
+        other.m_allocation = VK_NULL_HANDLE;
+        other.m_info = {};
+        other.m_deviceAddress = {};
+    }
+
+    return *this;
+}
+
 Buffer::~Buffer()
 {
     if (m_handle == VK_NULL_HANDLE)
@@ -131,9 +174,9 @@ void Buffer::Update(void* data, std::size_t size, std::size_t offset)
         staging.Update(data, size);
 
         VkContext::GetDevice().CmdImmediateSubmit(
-            [&](VkCommandBuffer commandBuffer) {
+            [&](const CommandBuffer& commandBuffer) {
                 cmdCopyBuffer(
-                    commandBuffer,
+                    commandBuffer.GetHandle(),
                     staging.GetHandle(),
                     m_handle,
                     0,
@@ -155,9 +198,9 @@ void Buffer::ImmediateCopyToBuffer(
     std::size_t dstOffset) const
 {
     VkContext::GetDevice().CmdImmediateSubmit(
-        [&](VkCommandBuffer commandBuffer) {
+        [&](const CommandBuffer& commandBuffer) {
             cmdCopyBuffer(
-                commandBuffer,
+                commandBuffer.GetHandle(),
                 m_handle,
                 dstBuffer.GetHandle(),
                 srcOffset,

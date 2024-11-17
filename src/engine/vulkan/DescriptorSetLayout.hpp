@@ -17,8 +17,13 @@ public:
         const std::vector<Descriptor>& descriptors,
         const char* name = nullptr);
 
-    ~DescriptorSetLayout();
+    DescriptorSetLayout(const DescriptorSetLayout&) = delete;
+    DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
 
+    DescriptorSetLayout(DescriptorSetLayout&& other) noexcept;
+    DescriptorSetLayout& operator=(DescriptorSetLayout&& other);
+
+    ~DescriptorSetLayout();
     void Destroy();
 
     void AddDescriptor(

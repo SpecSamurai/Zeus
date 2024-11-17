@@ -59,21 +59,54 @@ Shader::Shader(
     const char* filePath,
     VkShaderStageFlagBits shaderStage,
     const char* entryPoint,
-    const std::vector<VertexInput>& vertexInputs,
+    const std::vector<VertexInput>&& vertexInputs,
     const char* name)
-    : m_vertexInputs{ vertexInputs },
-      m_filePath(filePath),
+    : m_vertexInputs{ std::move(vertexInputs) },
       m_entryPoint(entryPoint),
+      m_filePath(filePath),
       m_shaderStage{ shaderStage }
 {
     VkResult result{
-        loadShader(&m_handle, VkContext::GetLogicalDevice(), m_filePath.c_str())
+        loadShader(&m_handle, VkContext::GetLogicalDevice(), m_filePath)
     };
 
     m_compilationState = result == VK_SUCCESS ? ShaderCompilationState::Compiled
                                               : ShaderCompilationState::Failed;
 
     VkContext::SetDebugName(VK_OBJECT_TYPE_SHADER_MODULE, m_handle, name);
+}
+
+Shader::Shader(Shader&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_vertexInputs{ std::move(other.m_vertexInputs) },
+      m_entryPoint{ other.m_entryPoint },
+      m_filePath{ other.m_filePath },
+      m_shaderStage{ other.m_shaderStage },
+      m_compilationState{ other.m_compilationState }
+{
+    other.m_handle = VK_NULL_HANDLE;
+}
+
+Shader& Shader::operator=(Shader&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+        m_vertexInputs = other.m_vertexInputs;
+        m_filePath = other.m_filePath;
+        m_entryPoint = other.m_entryPoint;
+        m_shaderStage = other.m_shaderStage;
+        m_compilationState = other.m_compilationState;
+
+        other.m_handle = VK_NULL_HANDLE;
+    }
+
+    return *this;
 }
 
 Shader::~Shader()
@@ -124,12 +157,12 @@ const std::vector<VertexInput>& Shader::GetVertexInputs() const
     return m_vertexInputs;
 }
 
-const std::string& Shader::GetEntryPoint() const
+const char* Shader::GetEntryPoint() const
 {
     return m_entryPoint;
 }
 
-const std::string& Shader::GetFilePath() const
+const char* Shader::GetFilePath() const
 {
     return m_filePath;
 }

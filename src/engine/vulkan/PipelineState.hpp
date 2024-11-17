@@ -15,7 +15,7 @@ class PipelineState
 {
 public:
     PipelineState(
-        const std::vector<Shader>& shaders,
+        std::vector<Shader>&& shaders,
         const RasterizationState& rasterizationState,
         const DepthStencilState& depthStencilState,
         const BlendState& blendState,

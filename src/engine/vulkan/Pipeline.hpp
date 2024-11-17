@@ -15,7 +15,7 @@ class Pipeline
 public:
     Pipeline(
         const PipelineState& pipelineState,
-        const std::vector<DescriptorSetLayout>& descriptorSetLayouts,
+        const std::vector<DescriptorSetLayout*>& descriptorSetLayouts,
         const std::vector<PushConstants>& pushConstants,
         const char* name = nullptr);
 

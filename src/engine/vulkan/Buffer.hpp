@@ -11,12 +11,19 @@ namespace Zeus
 class Buffer
 {
 public:
+    Buffer() = default;
     Buffer(
         VkBufferUsageFlags usage,
         VkDeviceSize size,
         VkMemoryPropertyFlags memoryPropertyFlags,
         bool mapped = false,
         const char* name = nullptr);
+
+    Buffer(const Buffer&) = delete;
+    Buffer& operator=(const Buffer&) = delete;
+
+    Buffer(Buffer&& other) noexcept;
+    Buffer& operator=(Buffer&& other);
 
     ~Buffer();
 

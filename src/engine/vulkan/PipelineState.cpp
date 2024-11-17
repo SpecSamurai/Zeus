@@ -1,9 +1,10 @@
 #include "PipelineState.hpp"
+#include <utility>
 
 namespace Zeus
 {
 PipelineState::PipelineState(
-    const std::vector<Shader>& shaders,
+    std::vector<Shader>&& shaders,
     const RasterizationState& rasterizationState,
     const DepthStencilState& depthStencilState,
     const BlendState& blendState,
@@ -11,7 +12,7 @@ PipelineState::PipelineState(
     const std::vector<VkFormat>& colorAttachmentFormats,
     VkFormat depthAttachmentFormat,
     VkFormat stencilAttachmentFormat)
-    : m_shaders{ shaders },
+    : m_shaders{ std::move(shaders) },
       m_rasterizationState{ rasterizationState },
       m_depthStencilState{ depthStencilState },
       m_blendState{ blendState },

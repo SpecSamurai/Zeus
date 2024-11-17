@@ -16,6 +16,12 @@ public:
         VkCommandPoolCreateFlagBits createFlags = {},
         const char* name = nullptr);
 
+    CommandPool(const CommandPool&) = delete;
+    CommandPool& operator=(const CommandPool&) = delete;
+
+    CommandPool(CommandPool&& other) noexcept;
+    CommandPool& operator=(CommandPool&& other);
+
     ~CommandPool();
 
     void Destroy();

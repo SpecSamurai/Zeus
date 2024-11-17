@@ -438,7 +438,7 @@ void Swapchain::SetLayout(VkImageLayout layout, CommandBuffer& commandBuffer)
     if (m_layouts[m_imageIndex] == layout)
         return;
 
-    commandBuffer.InsertImageLayoutBarrier(layout);
+    // commandBuffer.InsertImageLayoutBarrier(layout);
     // commandBuffer.InsertBarrierTexture(
     //     m_rhi_rt[m_image_index],
     //     VK_IMAGE_ASPECT_COLOR_BIT,
@@ -461,20 +461,9 @@ void Swapchain::DestroyResources()
 {
     for (std::size_t i{ 0 }; i < m_framesCount; ++i)
     {
-        vkDestroyFence(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].renderFence.GetHandle(),
-            allocationCallbacks.get());
-
-        vkDestroySemaphore(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].imageAcquiredSemaphore.GetHandle(),
-            allocationCallbacks.get());
-
-        vkDestroySemaphore(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].renderCompleteSemaphore.GetHandle(),
-            allocationCallbacks.get());
+        m_frames[i].renderFence.Destroy();
+        m_frames[i].imageAcquiredSemaphore.Destroy();
+        m_frames[i].renderCompleteSemaphore.Destroy();
     }
 
     m_frames.clear();

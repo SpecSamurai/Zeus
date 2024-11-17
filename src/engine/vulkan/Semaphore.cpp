@@ -19,15 +19,6 @@ Semaphore::Semaphore(bool isTimeline, const char* name)
     VkContext::SetDebugName(VK_OBJECT_TYPE_SEMAPHORE, m_handle, name);
 }
 
-Semaphore::~Semaphore()
-{
-    if (m_handle == VK_NULL_HANDLE)
-        return;
-
-    VkContext::GetDeletionQueue().Add(ResourceType::Semaphore, m_handle);
-    m_handle = VK_NULL_HANDLE;
-}
-
 Semaphore::Semaphore(Semaphore&& other) noexcept
     : m_handle{ other.m_handle },
       m_isTimeline{ other.m_isTimeline }
@@ -51,6 +42,15 @@ Semaphore& Semaphore::operator=(Semaphore&& other)
     }
 
     return *this;
+}
+
+Semaphore::~Semaphore()
+{
+    if (m_handle == VK_NULL_HANDLE)
+        return;
+
+    VkContext::GetDeletionQueue().Add(ResourceType::Semaphore, m_handle);
+    m_handle = VK_NULL_HANDLE;
 }
 
 void Semaphore::Destroy()

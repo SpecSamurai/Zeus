@@ -28,6 +28,12 @@ public:
         VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED,
         VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL);
 
+    Image(const Image&) = delete;
+    Image& operator=(const Image&) = delete;
+
+    Image(Image&& other) noexcept;
+    Image& operator=(Image&& other);
+
     ~Image();
     void Destroy();
 

@@ -5,7 +5,6 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <string>
 #include <vector>
 
 namespace Zeus
@@ -13,12 +12,20 @@ namespace Zeus
 class Shader
 {
 public:
+    Shader() = default;
     Shader(
         const char* filePath,
         VkShaderStageFlagBits shaderStage,
         const char* entryPoint = "main",
-        const std::vector<VertexInput>& vertexInputs = {},
+        const std::vector<VertexInput>&& vertexInputs = {},
         const char* name = nullptr);
+
+    Shader(const Shader&) = delete;
+    Shader& operator=(const Shader&) = delete;
+
+    Shader(Shader&& other) noexcept;
+    Shader& operator=(Shader&& other);
+
     ~Shader();
 
     void Destroy();
@@ -31,15 +38,15 @@ public:
     VkShaderStageFlagBits GetShaderStage() const;
     ShaderCompilationState GetCompilationState() const;
     const std::vector<VertexInput>& GetVertexInputs() const;
-    const std::string& GetEntryPoint() const;
-    const std::string& GetFilePath() const;
+    const char* GetEntryPoint() const;
+    const char* GetFilePath() const;
 
 private:
     VkShaderModule m_handle{ VK_NULL_HANDLE };
     std::vector<VertexInput> m_vertexInputs;
 
-    std::string m_filePath;
-    std::string m_entryPoint;
+    const char* m_entryPoint;
+    const char* m_filePath;
 
     VkShaderStageFlagBits m_shaderStage;
     ShaderCompilationState m_compilationState{ ShaderCompilationState::Idle };

@@ -12,7 +12,6 @@ class Semaphore
 public:
     Semaphore() = default;
     Semaphore(bool isTimeline, const char* name = nullptr);
-    ~Semaphore();
 
     Semaphore(const Semaphore&) = delete;
     Semaphore& operator=(const Semaphore&) = delete;
@@ -20,6 +19,7 @@ public:
     Semaphore(Semaphore&& other) noexcept;
     Semaphore& operator=(Semaphore&& other);
 
+    ~Semaphore();
     void Destroy();
 
     // timeout_ns - timeout in nanoseconds
