@@ -1,7 +1,6 @@
 #include "Renderer.hpp"
 
 #include "gltf/GltfLoader.hpp"
-#include "input/Input.hpp"
 #include "logging/logger.hpp"
 #include "math/transformations.hpp"
 #include "rendering/renderer_types.hpp"
@@ -17,11 +16,9 @@
 #include "vulkan/Shader.hpp"
 #include "vulkan/Swapchain.hpp"
 #include "vulkan/VkContext.hpp"
-#include "vulkan/rhi/vulkan_command.hpp"
 #include "vulkan/rhi/vulkan_debug.hpp"
 #include "vulkan/rhi/vulkan_dynamic_rendering.hpp"
 #include "vulkan/rhi/vulkan_image.hpp"
-#include "vulkan/rhi/vulkan_memory.hpp"
 #include "window/Window.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -62,65 +59,54 @@ void Renderer::Init()
 void Renderer::Destroy()
 {
     LOG_DEBUG("Destroying Renderer");
-    destroyImage(
-        VkContext::GetLogicalDevice(),
-        VkContext::GetAllocator(),
-        drawImage);
-
-    destroyImage(
-        VkContext::GetLogicalDevice(),
-        VkContext::GetAllocator(),
-        depthImage);
+    drawImage.Destroy();
+    depthImage.Destroy();
 
     for (std::size_t i{ 0 }; i < m_swapchain->GetFramesCount(); ++i)
     {
-        vkDestroyCommandPool(
-            VkContext::GetLogicalDevice(),
-            m_frames[i].commandPool,
-            allocationCallbacks.get());
+        m_frames[i].commandPool.Destroy();
     }
+
+    computeDescriptorAllocator.Destroy();
+    sceneDataDescriptorSetLayout.Destroy();
+    drawImageDescriptorLayout.Destroy();
 
     m_swapchain->Destroy();
 
-    // vmaDestroyBuffer(
-    //     VkContext.allocator,
-    //     rectangle.vertexBuffer.buffer,
-    //     rectangle.vertexBuffer.allocation);
-    // vmaDestroyBuffer(
-    //     VkContext.allocator,
-    //     rectangle.indexBuffer.buffer,
-    //     rectangle.indexBuffer.allocation);
+    // _meshPipeline->Destroy();
+    // computeEffect.pipeline->Destroy();
+
+    rectangle.vertexBuffer->Destroy();
+    rectangle.indexBuffer->Destroy();
+
+    for (auto& test : testMeshes)
+    {
+        test->meshBuffers.vertexBuffer->Destroy();
+        test->meshBuffers.indexBuffer->Destroy();
+    }
 }
 
-VkResult Renderer::BeginFrame()
+void Renderer::BeginFrame()
 {
     m_swapchain->AcquireNextImage();
 
     drawExtent = {
         .width = static_cast<std::uint32_t>(
-            static_cast<float>(drawImage.imageExtent.width) * m_renderScale),
+            static_cast<float>(drawImage.GetWidth()) * m_renderScale),
         .height = static_cast<std::uint32_t>(
-            static_cast<float>(drawImage.imageExtent.height) * m_renderScale),
+            static_cast<float>(drawImage.GetHeight()) * m_renderScale),
     };
 
-    VKCHECK(
-        vkResetCommandBuffer(CurrentFrame().mainCommandBuffer, 0),
-        "Failed to reset command buffer");
-
-    return beginVkCommandBuffer(
-        CurrentFrame().mainCommandBuffer,
+    CurrentFrame().mainCommandBuffer.Reset();
+    CurrentFrame().mainCommandBuffer.Begin(
         VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 }
 
-VkResult Renderer::EndFrame()
+void Renderer::EndFrame()
 {
-    VKCHECK(
-        vkEndCommandBuffer(CurrentFrame().mainCommandBuffer),
-        "Failed to record command buffer");
+    CurrentFrame().mainCommandBuffer.End();
 
-    m_swapchain->Present(CurrentFrame().mainCommandBuffer);
-
-    return VK_SUCCESS; // presentResult;
+    m_swapchain->Present(CurrentFrame().mainCommandBuffer.GetHandle());
 }
 
 MeshBuffers Renderer::UploadMesh(
@@ -194,7 +180,7 @@ MeshBuffers Renderer::UploadMesh(
     staging.Update(indices.data(), indexBufferSize, vertexBufferSize);
 
     VkContext::GetDevice().CmdImmediateSubmit(
-        [&](VkCommandBuffer commandBuffer) {
+        [&](const CommandBuffer& commandBuffer) {
             // VkBufferCopy vertexBufferCopy{};
             // vertexBufferCopy.srcOffset = 0;
             // vertexBufferCopy.dstOffset = 0;
@@ -236,12 +222,12 @@ MeshBuffers Renderer::UploadMesh(
             //     indexBufferSize);
 
             staging.CopyToBuffer(
-                commandBuffer,
+                commandBuffer.GetHandle(),
                 *meshBuffers.vertexBuffer,
                 vertexBufferSize);
 
             staging.CopyToBuffer(
-                commandBuffer,
+                commandBuffer.GetHandle(),
                 *meshBuffers.indexBuffer,
                 indexBufferSize,
                 vertexBufferSize);
@@ -262,16 +248,16 @@ void Renderer::Draw()
     BeginFrame();
 
     transitionImageLayout(
-        CurrentFrame().mainCommandBuffer,
-        drawImage.image,
-        drawImage.imageFormat,
+        CurrentFrame().mainCommandBuffer.GetHandle(),
+        drawImage.GetHandle(),
+        drawImage.GetFormat(),
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_GENERAL);
 
     transitionImageLayout(
-        CurrentFrame().mainCommandBuffer,
-        depthImage.image,
-        depthImage.imageFormat,
+        CurrentFrame().mainCommandBuffer.GetHandle(),
+        depthImage.GetHandle(),
+        depthImage.GetFormat(),
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
@@ -286,14 +272,14 @@ void Renderer::Draw()
     DrawTriangle();
 
     transitionImageLayout(
-        CurrentFrame().mainCommandBuffer,
-        drawImage.image,
-        drawImage.imageFormat,
+        CurrentFrame().mainCommandBuffer.GetHandle(),
+        drawImage.GetHandle(),
+        drawImage.GetFormat(),
         VK_IMAGE_LAYOUT_GENERAL,
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
     transitionImageLayout(
-        CurrentFrame().mainCommandBuffer,
+        CurrentFrame().mainCommandBuffer.GetHandle(),
         m_swapchain
             ->GetImage(), // m_swapchain->m_images[m_swapchain->GetImageIndex()],
         m_swapchain->GetFormat(),
@@ -301,8 +287,8 @@ void Renderer::Draw()
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
     blitImage(
-        CurrentFrame().mainCommandBuffer,
-        drawImage.image,
+        CurrentFrame().mainCommandBuffer.GetHandle(),
+        drawImage.GetHandle(),
         m_swapchain
             ->GetImage(), // m_swapchain->m_images[CurrentSwapchainImageIndex()],
         drawExtent,
@@ -329,7 +315,7 @@ void Renderer::Draw()
     //     VkContext.GetSwapchain().extent);
 
     transitionImageLayout(
-        CurrentFrame().mainCommandBuffer,
+        CurrentFrame().mainCommandBuffer.GetHandle(),
         m_swapchain
             ->GetImage(), // m_swapchain->m_images[m_swapchain->GetImageIndex()],
         m_swapchain->GetFormat(),
@@ -359,15 +345,15 @@ void Renderer::ResizeDrawObjects(const VkExtent2D& extent)
     m_swapchain->Resize(extent.width, extent.height);
     // LOG_DEBUG("Swapchain resized: {}x{}", extent.width, extent.height);
 
-    destroyImage(
-        VkContext::GetLogicalDevice(),
-        VkContext::GetAllocator(),
-        drawImage);
-
-    destroyImage(
-        VkContext::GetLogicalDevice(),
-        VkContext::GetAllocator(),
-        depthImage);
+    // destroyImage(
+    //     VkContext::GetLogicalDevice(),
+    //     VkContext::GetAllocator(),
+    //     drawImage);
+    //
+    // destroyImage(
+    //     VkContext::GetLogicalDevice(),
+    //     VkContext::GetAllocator(),
+    //     depthImage);
 
     InitDrawObjects(extent);
 
@@ -379,33 +365,16 @@ void Renderer::InitCommands()
 {
     for (std::size_t i{ 0 }; i < m_swapchain->GetFramesCount(); ++i)
     {
-        createVkCommandPool(
-            VkContext::GetLogicalDevice(),
-            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-            VkContext::GetDevice().GetQueueFamily(QueueType::Graphics),
-            &m_frames[i].commandPool);
-
-        allocateVkCommandBuffer(
-            &m_frames[i].mainCommandBuffer,
-            VkContext::GetLogicalDevice(),
-            m_frames[i].commandPool);
-
-#ifndef NDEBUG
         std::string commandPoolName{ "CommandPool Frame " + std::to_string(i) };
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_COMMAND_POOL,
-            reinterpret_cast<std::uint64_t>(m_frames[i].commandPool),
+        m_frames[i].commandPool = CommandPool(
+            VkContext::GetDevice().GetQueueFamily(QueueType::Graphics),
+            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
             commandPoolName.c_str());
 
         std::string commandBufferName{ "CommandBuffer Frame " +
                                        std::to_string(i) };
-        setDebugUtilsObjectNameEXT(
-            VkContext::GetLogicalDevice(),
-            VK_OBJECT_TYPE_COMMAND_BUFFER,
-            reinterpret_cast<std::uint64_t>(m_frames[i].mainCommandBuffer),
-            commandBufferName.c_str());
-#endif
+        m_frames[i].mainCommandBuffer =
+            CommandBuffer(m_frames[i].commandPool, commandBufferName.c_str());
     }
 }
 
@@ -417,60 +386,77 @@ void Renderer::InitDrawObjects(const VkExtent2D& extent)
         .depth = 1,
     };
 
-    drawImage.imageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-    drawImage.imageExtent = drawImageExtent;
-
-    create2DImage(
-        VkContext::GetAllocator(),
-        drawImage,
+    drawImage = Image(
+        ImageType::Texture2D,
+        drawImageExtent,
+        VK_FORMAT_R16G16B16A16_SFLOAT,
         VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT |
             VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        "Image Color Draw");
 
-    create2DImageView(
-        VkContext::GetLogicalDevice(),
-        drawImage,
-        VK_IMAGE_ASPECT_COLOR_BIT);
+    // drawImage.imageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+    // drawImage.imageExtent = drawImageExtent;
 
-    depthImage.imageFormat = VK_FORMAT_D32_SFLOAT;
-    depthImage.imageExtent = drawImageExtent;
+    // create2DImage(
+    //     VkContext::GetAllocator(),
+    //     drawImage,
+    //     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT |
+    //         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    create2DImage(
-        VkContext::GetAllocator(),
-        depthImage,
+    // create2DImageView(
+    //     VkContext::GetLogicalDevice(),
+    //     drawImage,
+    //     VK_IMAGE_ASPECT_COLOR_BIT);
+
+    depthImage = Image(
+        ImageType::Texture2D,
+        drawImageExtent,
+        VK_FORMAT_D32_SFLOAT,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        "Image Depth Draw");
 
-    create2DImageView(
-        VkContext::GetLogicalDevice(),
-        depthImage,
-        VK_IMAGE_ASPECT_DEPTH_BIT);
+    // depthImage.imageFormat = VK_FORMAT_D32_SFLOAT;
+    // depthImage.imageExtent = drawImageExtent;
+    //
+    // create2DImage(
+    //     VkContext::GetAllocator(),
+    //     depthImage,
+    //     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-#ifndef NDEBUG
-    setDebugUtilsObjectNameEXT(
-        VkContext::GetLogicalDevice(),
-        VK_OBJECT_TYPE_IMAGE,
-        reinterpret_cast<std::uint64_t>(drawImage.image),
-        "Image Draw Color");
+    // create2DImageView(
+    //     VkContext::GetLogicalDevice(),
+    //     depthImage,
+    //     VK_IMAGE_ASPECT_DEPTH_BIT);
 
-    setDebugUtilsObjectNameEXT(
-        VkContext::GetLogicalDevice(),
-        VK_OBJECT_TYPE_IMAGE,
-        reinterpret_cast<std::uint64_t>(depthImage.image),
-        "Image Draw Depth");
-
-    setDebugUtilsObjectNameEXT(
-        VkContext::GetLogicalDevice(),
-        VK_OBJECT_TYPE_IMAGE_VIEW,
-        reinterpret_cast<std::uint64_t>(drawImage.imageView),
-        "Image View Draw Color");
-
-    setDebugUtilsObjectNameEXT(
-        VkContext::GetLogicalDevice(),
-        VK_OBJECT_TYPE_IMAGE_VIEW,
-        reinterpret_cast<std::uint64_t>(depthImage.imageView),
-        "Image View Draw Depth");
-#endif
+    // #ifndef NDEBUG
+    //     setDebugUtilsObjectNameEXT(
+    //         VkContext::GetLogicalDevice(),
+    //         VK_OBJECT_TYPE_IMAGE,
+    //         reinterpret_cast<std::uint64_t>(drawImage.image),
+    //         "Image Draw Color");
+    //
+    //     setDebugUtilsObjectNameEXT(
+    //         VkContext::GetLogicalDevice(),
+    //         VK_OBJECT_TYPE_IMAGE,
+    //         reinterpret_cast<std::uint64_t>(depthImage.image),
+    //         "Image Draw Depth");
+    //
+    //     setDebugUtilsObjectNameEXT(
+    //         VkContext::GetLogicalDevice(),
+    //         VK_OBJECT_TYPE_IMAGE_VIEW,
+    //         reinterpret_cast<std::uint64_t>(drawImage.imageView),
+    //         "Image View Draw Color");
+    //
+    //     setDebugUtilsObjectNameEXT(
+    //         VkContext::GetLogicalDevice(),
+    //         VK_OBJECT_TYPE_IMAGE_VIEW,
+    //         reinterpret_cast<std::uint64_t>(depthImage.imageView),
+    //         "Image View Draw Depth");
+    // #endif
 }
 
 void Renderer::InitDescriptors()
@@ -495,36 +481,15 @@ void Renderer::InitDescriptors()
 
 void Renderer::DrawCompute()
 {
-    // vkCmdBindPipeline(
-    //     CurrentFrame().mainCommandBuffer,
-    //     VK_PIPELINE_BIND_POINT_COMPUTE,
-    //     computeEffect.pipeline);
-    //
-    // vkCmdBindDescriptorSets(
-    //     CurrentFrame().mainCommandBuffer,
-    //     VK_PIPELINE_BIND_POINT_COMPUTE,
-    //     computeEffect.layout,
-    //     0,
-    //     1,
-    //     &_drawImageDescriptors,
-    //     0,
-    //     nullptr);
-    //
-    // vkCmdPushConstants(
-    //     CurrentFrame().mainCommandBuffer,
-    //     computeEffect.layout,
-    //     VK_SHADER_STAGE_COMPUTE_BIT,
-    //     0,
-    //     sizeof(ComputePushConstants),
-    //     &computeEffect.data);
+    auto& cmd{ CurrentFrame().mainCommandBuffer };
 
     vkCmdBindPipeline(
-        CurrentFrame().mainCommandBuffer,
+        cmd.GetHandle(),
         VK_PIPELINE_BIND_POINT_COMPUTE,
         computeEffect.pipeline->GetHandle());
 
     vkCmdBindDescriptorSets(
-        CurrentFrame().mainCommandBuffer,
+        cmd.GetHandle(),
         VK_PIPELINE_BIND_POINT_COMPUTE,
         computeEffect.pipeline->GetLayout(),
         0,
@@ -533,19 +498,16 @@ void Renderer::DrawCompute()
         0,
         nullptr);
 
-    vkCmdPushConstants(
-        CurrentFrame().mainCommandBuffer,
+    cmd.PushConstants(
         computeEffect.pipeline->GetLayout(),
         VK_SHADER_STAGE_COMPUTE_BIT,
         0,
-        sizeof(ComputePushConstants),
-        &computeEffect.data);
+        computeEffect.data);
 
     // 16x16 workgroup size so we need to divide by it
-    vkCmdDispatch(
-        CurrentFrame().mainCommandBuffer,
-        std::ceil(drawExtent.width / 16.0),
-        std::ceil(drawExtent.height / 16.0),
+    cmd.Dispatch(
+        static_cast<std::uint32_t>(std::ceil(drawExtent.width / 16.0)),
+        static_cast<std::uint32_t>(std::ceil(drawExtent.height / 16.0)),
         1);
 }
 
@@ -557,27 +519,15 @@ void Renderer::InitCompute()
 
     computeDescriptorAllocator.Init(10, poolSizes);
 
-    {
-        // DescriptorLayoutBuilder descriptorLayoutBuilder;
-        // descriptorLayoutBuilder.AddBinding(
-        //     0,
-        //     VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-        //     VK_SHADER_STAGE_COMPUTE_BIT);
-        // _drawImageDescriptorLayout =
-        //     descriptorLayoutBuilder.Build(VkContext::GetLogicalDevice());
+    drawImageDescriptorLayout = DescriptorSetLayout(
+        {
+            Descriptor(
+                VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                VK_SHADER_STAGE_COMPUTE_BIT,
+                0),
+        },
+        "DesciptorSetLayout Compute");
 
-        std::vector<Descriptor> descriptors{ Descriptor(
-            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            VK_SHADER_STAGE_COMPUTE_BIT,
-            0) };
-
-        drawImageDescriptorLayout =
-            DescriptorSetLayout(descriptors, "DesciptorSetLayout Compute");
-    }
-
-    // _drawImageDescriptors = computeDescriptorAllocator.allocate(
-    //     VkContext::GetLogicalDevice(),
-    //     _drawImageDescriptorLayout);
     _drawImageDescriptors = computeDescriptorAllocator.Allocate(
         drawImageDescriptorLayout.GetHandle());
 
@@ -586,7 +536,7 @@ void Renderer::InitCompute()
         descriptorWriter.writeDescriptorImage(
             VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
             0,
-            drawImage.imageView,
+            drawImage.GetView(),
             VK_NULL_HANDLE,
             VK_IMAGE_LAYOUT_GENERAL);
 
@@ -595,57 +545,33 @@ void Renderer::InitCompute()
             _drawImageDescriptors);
     }
 
-    Shader computeShader(
+    std::vector<Shader> shaders{};
+
+    shaders.emplace_back(Shader(
         "../engine/shaders/gradient_color.comp.spv",
-        VK_SHADER_STAGE_COMPUTE_BIT);
-    // VkShaderModule computeShader;
-    // loadShader(
-    //     &computeShader,
-    //     VkContext::GetLogicalDevice(),
-    //     "../engine/shaders/gradient_color.comp.spv");
+        VK_SHADER_STAGE_COMPUTE_BIT));
 
     VkPushConstantRange pushConstant;
     pushConstant.offset = 0;
     pushConstant.size = sizeof(ComputePushConstants);
-    pushConstant.stageFlags =
-        computeShader.GetShaderStage(); // VK_SHADER_STAGE_COMPUTE_BIT;
+    pushConstant.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 
     computeEffect.data = {};
     computeEffect.data.data1 = Vector4f(1, 0, 0, 1);
     computeEffect.data.data2 = Vector4f(0, 0, 1, 1);
 
-    // createVkPipelineLayout(
-    //     &computeEffect.layout,
-    //     VkContext::GetLogicalDevice(),
-    //     1,
-    //     &_drawImageDescriptorLayout,
-    //     1,
-    //     &pushConstant);
-
-    // createVkPipelineLayout(
-    //     &computeEffect.layout,
-    //     VkContext::GetLogicalDevice(),
-    //     1,
-    //     &drawImageDescriptorLayout.GetHandle(),
-    //     1,
-    //     &pushConstant);
-
-    // createComputePipeline(
-    //     &computeEffect.pipeline,
-    //     VkContext::GetLogicalDevice(),
-    //     computeEffect.layout,
-    //     computeShader.GetHandle());
-
     PipelineState state(
-        { computeShader },
+        std::move(shaders),
         RasterizationState::Default,
         DepthStencilState::Enabled,
         BlendState::AlphaBlending,
         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 
+    std::vector<DescriptorSetLayout> layout;
+
     computeEffect.pipeline = std::make_unique<Pipeline>(Pipeline(
         state,
-        { drawImageDescriptorLayout },
+        { &drawImageDescriptorLayout },
         {
             PushConstants(
                 VK_SHADER_STAGE_COMPUTE_BIT,
@@ -665,70 +591,21 @@ void Renderer::InitMesh()
     testMeshes =
         loadGltfMeshes(this, "D:\\Code\\Zeus\\assets\\basicmesh.glb").value();
 
-    Shader vertShader(
-        "../engine/shaders/basic.vert.spv",
-        VK_SHADER_STAGE_VERTEX_BIT);
-    // VkShaderModule vertShader;
-    // loadShader(
-    //     &vertShader,
-    //     VkContext::GetLogicalDevice(),
-    //     "../engine/shaders/basic.vert.spv");
-
-    Shader fragShader(
+    std::vector<Shader> shaders{};
+    shaders.emplace_back(
+        Shader("../engine/shaders/basic.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
+    shaders.emplace_back(Shader(
         "../engine/shaders/basic.frag.spv",
-        VK_SHADER_STAGE_FRAGMENT_BIT);
-    // VkShaderModule fragShader;
-    // loadShader(
-    //     &fragShader,
-    //     VkContext::GetLogicalDevice(),
-    //     "../engine/shaders/basic.frag.spv");
-
-    VkPushConstantRange pushConstantRange{};
-    pushConstantRange.offset = 0;
-    pushConstantRange.size = sizeof(MeshPushConstants);
-    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-    // createVkPipelineLayout(
-    //     &meshPipelineLayout,
-    //     VkContext::GetLogicalDevice(),
-    //     0,
-    //     nullptr,
-    //     1,
-    //     &pushConstantRange);
-    //
-    // {
-    //     PipelineBuilder builder;
-    //     builder.addShaderStage(
-    //         VK_SHADER_STAGE_VERTEX_BIT,
-    //         vertShader.GetHandle());
-    //     builder.addShaderStage(
-    //         VK_SHADER_STAGE_FRAGMENT_BIT,
-    //         fragShader.GetHandle());
-    //     builder.setPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-    //     builder.setPolygonMode(VK_POLYGON_MODE_FILL);
-    //     builder.setCullMode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE);
-    //     builder.disableBlending();
-    //     builder.enableDepthTest(true, VK_COMPARE_OP_GREATER_OR_EQUAL);
-    //     builder.disableMiltisampling();
-    //     builder.setDynamicStates(
-    //         { VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_VIEWPORT });
-    //
-    //     builder.dynamicRendering();
-    //     builder.setColorAttachmentFormat(drawImage.imageFormat);
-    //     builder.setDepthFormat(depthImage.imageFormat);
-    //
-    //     meshPipeline =
-    //         builder.build(VkContext::GetLogicalDevice(), meshPipelineLayout);
-    // }
+        VK_SHADER_STAGE_FRAGMENT_BIT));
 
     PipelineState state(
-        { vertShader, fragShader },
+        std::move(shaders), //{ vertShader, fragShader },
         RasterizationState::Default,
         DepthStencilState::Enabled,
         BlendState::AlphaBlending,
         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-        { drawImage.imageFormat },
-        depthImage.imageFormat);
+        { drawImage.GetFormat() },
+        depthImage.GetFormat());
 
     _meshPipeline = std::make_unique<Pipeline>(Pipeline(
         state,
@@ -776,6 +653,7 @@ void Renderer::InitMesh()
 
 void Renderer::DrawTriangle()
 {
+    auto& cmd{ CurrentFrame().mainCommandBuffer };
     // InputManager::handleKeyboard();
     // InputManager::camera->Update();
     // transitionImageLayout(
@@ -786,30 +664,37 @@ void Renderer::DrawTriangle()
     //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     VkRenderingAttachmentInfo colorAttachmentInfo =
-        createColorAttachmentInfo(drawImage.imageView, VK_IMAGE_LAYOUT_GENERAL);
+        createColorAttachmentInfo(drawImage.GetView(), VK_IMAGE_LAYOUT_GENERAL);
 
     VkRenderingAttachmentInfo depthAttachmentInfo = createDepthAttachmentInfo(
-        depthImage.imageView,
+        depthImage.GetView(),
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
     cmdBeginRendering(
-        CurrentFrame().mainCommandBuffer,
+        cmd.GetHandle(),
         drawExtent,
         1,
         &colorAttachmentInfo,
         &depthAttachmentInfo);
 
     vkCmdBindPipeline(
-        CurrentFrame().mainCommandBuffer,
+        cmd.GetHandle(),
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         _meshPipeline->GetHandle());
 
-    cmdSetVkViewport(
-        CurrentFrame().mainCommandBuffer,
-        drawExtent.width,
-        drawExtent.height);
+    cmd.SetViewport({
+        .x = 0.f,
+        .y = 0.f,
+        .width = static_cast<float>(drawExtent.width),
+        .height = static_cast<float>(drawExtent.height),
+        .minDepth = 0.f,
+        .maxDepth = 1.f,
+    });
 
-    cmdSetVkScissor(CurrentFrame().mainCommandBuffer, drawExtent);
+    cmd.SetScissor({
+        .offset = { .x = 0, .y = 0 },
+        .extent = drawExtent,
+    });
 
     MeshPushConstants push_constants;
     push_constants.modelMatrix = identity<float>();
@@ -820,34 +705,22 @@ void Renderer::DrawTriangle()
     push_constants.vertexBufferAddress =
         testMeshes[2]->meshBuffers.vertexBuffer->GetDeviceAddress();
 
-    vkCmdPushConstants(
-        CurrentFrame().mainCommandBuffer,
+    cmd.PushConstants(
         _meshPipeline->GetLayout(),
         VK_SHADER_STAGE_VERTEX_BIT,
         0,
-        sizeof(MeshPushConstants),
-        &push_constants);
-
-    // vkCmdBindIndexBuffer(
-    //     CurrentFrame().mainCommandBuffer,
-    //     testMeshes[2]->meshBuffers.indexBuffer.buffer,
-    //     0,
-    //     VK_INDEX_TYPE_UINT32);
+        push_constants);
 
     vkCmdBindIndexBuffer(
-        CurrentFrame().mainCommandBuffer,
+        cmd.GetHandle(),
         testMeshes[2]->meshBuffers.indexBuffer->GetHandle(),
         0,
         VK_INDEX_TYPE_UINT32);
 
-    vkCmdDrawIndexed(
-        CurrentFrame().mainCommandBuffer,
+    cmd.DrawIndexed(
         testMeshes[2]->surfaces[0].count,
-        1,
-        testMeshes[2]->surfaces[0].startIndex,
-        0,
-        0);
+        testMeshes[2]->surfaces[0].startIndex);
 
-    vkCmdEndRendering(CurrentFrame().mainCommandBuffer);
+    cmd.EndRendering();
 }
 }

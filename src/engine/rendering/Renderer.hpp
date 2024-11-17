@@ -4,6 +4,7 @@
 #include "renderer_types.hpp"
 #include "vulkan/DescriptorPool.hpp"
 #include "vulkan/DescriptorSetLayout.hpp"
+#include "vulkan/Image.hpp"
 #include "vulkan/Pipeline.hpp"
 #include "vulkan/Swapchain.hpp"
 #include "vulkan/rhi/vulkan_image.hpp"
@@ -26,8 +27,8 @@ public:
     void Init();
     void Destroy();
 
-    VkResult BeginFrame();
-    VkResult EndFrame();
+    void BeginFrame();
+    void EndFrame();
 
     MeshBuffers UploadMesh(
         std::span<Vertex> vertices,
