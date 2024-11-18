@@ -27,6 +27,7 @@ public:
     VkPipelineLayout GetLayout() const;
     const PipelineState& GetState() const;
     const char* GetName() const;
+    VkPipelineBindPoint GetBindPoint() const;
 
 private:
     void CreateGraphicsPipeline();
@@ -37,5 +38,6 @@ private:
     VkPipelineLayout m_pipelineLayout{ VK_NULL_HANDLE };
     const PipelineState& m_state;
     const char* m_name;
+    VkPipelineBindPoint m_bindPoint;
 };
 }

@@ -152,8 +152,6 @@ add_library(Engine
     vulkan/VkContext.cpp
     vulkan/VkContext.hpp
 
-    vulkan/rhi/vulkan_buffer.cpp
-    vulkan/rhi/vulkan_buffer.hpp
     vulkan/rhi/vulkan_command.cpp
     vulkan/rhi/vulkan_command.hpp
     vulkan/rhi/vulkan_debug.cpp

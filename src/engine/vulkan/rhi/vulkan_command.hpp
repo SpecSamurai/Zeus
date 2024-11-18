@@ -3,24 +3,9 @@
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
-#include <vector>
 
 namespace Zeus
 {
-VkResult beginVkCommandBuffer(
-    VkCommandBuffer commandBuffer,
-    VkCommandBufferUsageFlags flags = 0,
-    const VkCommandBufferInheritanceInfo* pInheritanceInfo = nullptr);
-
-void cmdBeginVkRenderPass(
-    VkCommandBuffer commandBuffer,
-    VkRenderPass renderPass,
-    const VkExtent2D& extent,
-    VkFramebuffer framebuffer,
-    const std::vector<VkClearValue>& clearValues,
-    VkOffset2D offset = { .x = 0, .y = 0 },
-    VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
-
 VkResult cmdVkQueueSubmit(
     VkQueue queue,
     std::uint32_t commandBufferCount,
@@ -57,18 +42,4 @@ VkResult cmdVkQueuePresentKHR(
     const VkSwapchainKHR* pSwapchains,
     const std::uint32_t* pImageIndices,
     VkResult* pResults = nullptr);
-
-void cmdSetVkViewport(
-    VkCommandBuffer commandBuffer,
-    float width,
-    float height,
-    float x = 0.0f,
-    float y = 0.0f,
-    float minDepth = 0.0f,
-    float maxDepth = 1.0f);
-
-void cmdSetVkScissor(
-    VkCommandBuffer commandBuffer,
-    VkExtent2D extent,
-    VkOffset2D offset = { .x = 0, .y = 0 });
 }

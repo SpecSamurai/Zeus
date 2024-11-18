@@ -5,50 +5,9 @@
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
-#include <vector>
 
 namespace Zeus
 {
-VkResult beginVkCommandBuffer(
-    VkCommandBuffer commandBuffer,
-    VkCommandBufferUsageFlags flags,
-    const VkCommandBufferInheritanceInfo* pInheritanceInfo)
-{
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = flags;
-    beginInfo.pInheritanceInfo = pInheritanceInfo;
-
-    VkResult result{ vkBeginCommandBuffer(commandBuffer, &beginInfo) };
-
-    VKCHECK(result, "Failed to begin recording command buffer.");
-
-    return result;
-}
-
-void cmdBeginVkRenderPass(
-    VkCommandBuffer commandBuffer,
-    VkRenderPass renderPass,
-    const VkExtent2D& extent,
-    VkFramebuffer framebuffer,
-    const std::vector<VkClearValue>& clearValues,
-    VkOffset2D offset,
-    VkSubpassContents contents)
-{
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = renderPass;
-    renderPassInfo.framebuffer = framebuffer;
-    renderPassInfo.renderArea.offset = offset;
-    renderPassInfo.renderArea.extent = extent;
-
-    renderPassInfo.clearValueCount =
-        static_cast<std::uint32_t>(clearValues.size());
-    renderPassInfo.pClearValues = clearValues.data();
-
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, contents);
-}
-
 VkResult cmdVkQueueSubmit(
     VkQueue queue,
     std::uint32_t commandBufferCount,
@@ -84,40 +43,37 @@ VkSemaphoreSubmitInfo createVkSemaphoreSubmitInfo(
     VkSemaphore semaphore,
     VkPipelineStageFlags2 stageMask)
 {
-    VkSemaphoreSubmitInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-    info.semaphore = semaphore;
-
-    // value is either the value used to signal semaphore or the value waited on
-    // by semaphore, if semaphore is a timeline semaphore. Otherwise it is
-    // ignored.
-    // value is used for timeline semaphores, which are a special type of
-    // semaphore where they work through a counter intead of a binary state.
-    info.value = 1;
-    info.stageMask = stageMask;
-
-    // deviceIndex is the index of the device within a device group that
-    // executes the semaphore wait or signal operation.
-    // device index parameter is used for multi-gpu semaphore usage.
-    info.deviceIndex = 0;
-
-    return info;
+    return VkSemaphoreSubmitInfo{
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+        .pNext = nullptr,
+        .semaphore = semaphore,
+        // value is either the value used to signal semaphore or the value
+        // waited on by semaphore, if semaphore is a timeline semaphore.
+        // Otherwise it is ignored.
+        // value is used for timeline semaphores, which are a special type of
+        // semaphore where they work through a counter intead of a binary state.
+        .value = 1,
+        .stageMask = stageMask,
+        // deviceIndex is the index of the device within a device group that
+        // executes the semaphore wait or signal operation.
+        // device index parameter is used for multi-gpu semaphore usage.
+        .deviceIndex = 0,
+    };
 }
 
 VkCommandBufferSubmitInfo createVkCommandBufferSubmitInfo(
     VkCommandBuffer commandBuffer)
 {
-    VkCommandBufferSubmitInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-    info.commandBuffer = commandBuffer;
-
     // deviceMask is a bitmask indicating which devices in a device group
     // execute the command buffer.
     // A deviceMask of 0 is equivalent to setting all bits corresponding to
     // valid devices in the group to 1
-    info.deviceMask = 0;
-
-    return info;
+    return VkCommandBufferSubmitInfo{
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+        .pNext = nullptr,
+        .commandBuffer = commandBuffer,
+        .deviceMask = 0,
+    };
 }
 
 VkResult cmdVkQueueSubmit2(
@@ -177,37 +133,5 @@ VkResult cmdVkQueuePresentKHR(
     presentInfo.pResults = pResults;
 
     return vkQueuePresentKHR(presentQueue, &presentInfo);
-}
-
-void cmdSetVkViewport(
-    VkCommandBuffer commandBuffer,
-    float width,
-    float height,
-    float x,
-    float y,
-    float minDepth,
-    float maxDepth)
-{
-    VkViewport viewport{};
-    viewport.x = x;
-    viewport.y = y;
-    viewport.width = width;
-    viewport.height = height;
-    viewport.minDepth = minDepth;
-    viewport.maxDepth = maxDepth;
-
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-}
-
-void cmdSetVkScissor(
-    VkCommandBuffer commandBuffer,
-    VkExtent2D extent,
-    VkOffset2D offset)
-{
-    VkRect2D scissor{};
-    scissor.offset = offset;
-    scissor.extent = extent;
-
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 }

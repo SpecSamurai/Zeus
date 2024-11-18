@@ -2,14 +2,12 @@
 
 #include "Definitions.hpp"
 #include "VkContext.hpp"
-#include "rhi/vulkan_buffer.hpp"
 #include "rhi/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
 #include <cstddef>
-#include <cstring>
 
 namespace Zeus
 {
@@ -22,7 +20,6 @@ Buffer::Buffer(
     : m_usage{ usage },
       m_mapped{ mapped }
 {
-    // set
     // m_type = type;
     // m_stride_unaligned = static_cast<uint32_t>(stride);
     // m_stride = m_stride_unaligned;
@@ -79,13 +76,14 @@ Buffer::Buffer(
 
     if (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
     {
-        VkBufferDeviceAddressInfo info{};
-        info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
-        info.pNext = nullptr;
-        info.buffer = m_handle;
+        VkBufferDeviceAddressInfo deviceAddressInfo{};
+        deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+        deviceAddressInfo.pNext = nullptr;
+        deviceAddressInfo.buffer = m_handle;
 
-        m_deviceAddress =
-            vkGetBufferDeviceAddress(VkContext::GetLogicalDevice(), &info);
+        m_deviceAddress = vkGetBufferDeviceAddress(
+            VkContext::GetLogicalDevice(),
+            &deviceAddressInfo);
     }
 
     VkContext::SetDebugName(VK_OBJECT_TYPE_BUFFER, m_handle, name);
@@ -97,9 +95,7 @@ Buffer::Buffer(Buffer&& other) noexcept
       m_info{ other.m_info },
       m_deviceAddress{ other.m_deviceAddress },
       m_usage{ other.m_usage },
-      m_memoryPropertyFlags{ other.m_memoryPropertyFlags },
-      m_mapped{ other.m_mapped },
-      m_empty{ other.m_empty }
+      m_mapped{ other.m_mapped }
 {
     other.m_handle = VK_NULL_HANDLE;
     other.m_allocation = VK_NULL_HANDLE;
@@ -121,9 +117,7 @@ Buffer& Buffer::operator=(Buffer&& other)
         m_info = other.m_info;
         m_deviceAddress = other.m_deviceAddress;
         m_usage = other.m_usage;
-        m_memoryPropertyFlags = other.m_memoryPropertyFlags;
         m_mapped = other.m_mapped;
-        m_empty = other.m_empty;
 
         other.m_handle = VK_NULL_HANDLE;
         other.m_allocation = VK_NULL_HANDLE;
@@ -148,81 +142,48 @@ void Buffer::Destroy()
 
     m_handle = VK_NULL_HANDLE;
     m_allocation = VK_NULL_HANDLE;
+    m_info = {};
+    m_deviceAddress = {};
 }
 
-void Buffer::Update(void* data, std::size_t size, std::size_t offset)
+void Buffer::Update(void* data, std::size_t dataSize, std::size_t dstOffset)
 {
+    assert(m_handle != VK_NULL_HANDLE);
     assert(data != nullptr && "Invalid data");
-    assert(size > 0 && (size + offset) <= m_info.size && "Invalid size");
+    assert(
+        dataSize > 0 && (dataSize + dstOffset) <= m_info.size &&
+        "Invalid size");
 
     if (m_mapped)
     {
         memcpy(
-            reinterpret_cast<std::byte*>(m_info.pMappedData) + offset,
+            reinterpret_cast<std::byte*>(m_info.pMappedData) + dstOffset,
             data,
-            size);
+            dataSize);
     }
     else
     {
         Buffer staging(
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            size,
+            dataSize,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             true);
 
-        staging.Update(data, size);
+        staging.Update(data, dataSize);
 
         VkContext::GetDevice().CmdImmediateSubmit(
             [&](const CommandBuffer& commandBuffer) {
-                cmdCopyBuffer(
-                    commandBuffer.GetHandle(),
+                commandBuffer.CopyBuffer(
                     staging.GetHandle(),
                     m_handle,
+                    staging.GetSize(),
                     0,
-                    offset,
-                    size);
+                    dstOffset);
             });
 
-        vmaDestroyBuffer(
-            VkContext::GetAllocator(),
-            staging.GetHandle(),
-            staging.GetAllocation());
+        staging.Destroy();
     }
-}
-
-void Buffer::ImmediateCopyToBuffer(
-    const Buffer& dstBuffer,
-    std::size_t size,
-    std::size_t srcOffset,
-    std::size_t dstOffset) const
-{
-    VkContext::GetDevice().CmdImmediateSubmit(
-        [&](const CommandBuffer& commandBuffer) {
-            cmdCopyBuffer(
-                commandBuffer.GetHandle(),
-                m_handle,
-                dstBuffer.GetHandle(),
-                srcOffset,
-                dstOffset,
-                size);
-        });
-}
-
-void Buffer::CopyToBuffer(
-    VkCommandBuffer commandBuffer,
-    const Buffer& dstBuffer,
-    std::size_t size,
-    std::size_t srcOffset,
-    std::size_t dstOffset) const
-{
-    cmdCopyBuffer(
-        commandBuffer,
-        m_handle,
-        dstBuffer.GetHandle(),
-        srcOffset,
-        dstOffset,
-        size);
 }
 
 void* Buffer::GetData() const

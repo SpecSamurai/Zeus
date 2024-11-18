@@ -31,18 +31,6 @@ public:
 
     void Update(void* data, std::size_t size, std::size_t srcOffset = 0);
     // void ResetOffset() { m_offset = 0; first_update = true; }
-    void ImmediateCopyToBuffer(
-        const Buffer& dstBuffer,
-        std::size_t size,
-        std::size_t srcOffset = 0,
-        std::size_t dstOffset = 0) const;
-
-    void CopyToBuffer(
-        VkCommandBuffer commandBuffer,
-        const Buffer& dstBuffer,
-        std::size_t size,
-        std::size_t srcOffset = 0,
-        std::size_t dstOffset = 0) const;
 
     void* GetData() const;
     VkBuffer GetHandle() const;
@@ -65,9 +53,7 @@ private:
     VkDeviceAddress m_deviceAddress{};
 
     VkBufferUsageFlags m_usage{};
-    VkMemoryPropertyFlags m_memoryPropertyFlags{};
 
-    bool m_mapped{};
-    bool m_empty{ true };
+    bool m_mapped;
 };
 }

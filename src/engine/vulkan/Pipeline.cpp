@@ -121,6 +121,11 @@ const char* Pipeline::GetName() const
     return m_name;
 }
 
+VkPipelineBindPoint Pipeline::GetBindPoint() const
+{
+    return m_bindPoint;
+}
+
 void Pipeline::CreateGraphicsPipeline()
 {
     assert(m_state.IsGraphics());
@@ -316,6 +321,8 @@ void Pipeline::CreateGraphicsPipeline()
             allocationCallbacks.get(),
             &m_handle),
         "Failed to create pipeline.");
+
+    m_bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 }
 
 void Pipeline::CreateComputePipeline()
@@ -347,5 +354,7 @@ void Pipeline::CreateComputePipeline()
             allocationCallbacks.get(),
             &m_handle),
         "Failed to create compute pipeline layout.");
+
+    m_bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
 }
 }
