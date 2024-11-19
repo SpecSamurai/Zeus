@@ -32,6 +32,10 @@ public:
 private:
     void CreateGraphicsPipeline();
     void CreateComputePipeline();
+    VkPipelineShaderStageCreateInfo CreatePipelineShaderStageInfo(
+        VkShaderStageFlagBits stage,
+        VkShaderModule module,
+        const char* pName) const;
 
 private:
     VkPipeline m_handle{ VK_NULL_HANDLE };

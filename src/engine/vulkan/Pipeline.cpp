@@ -4,7 +4,6 @@
 #include "DeletionQueue.hpp"
 #include "VkContext.hpp"
 #include "rhi/vulkan_debug.hpp"
-#include "rhi/vulkan_pipeline.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -40,13 +39,21 @@ Pipeline::Pipeline(
         };
     }
 
-    createVkPipelineLayout(
-        &m_pipelineLayout,
-        VkContext::GetLogicalDevice(),
-        static_cast<std::uint32_t>(layouts.size()),
-        layouts.data(),
-        static_cast<std::uint32_t>(pushConstantRanges.size()),
-        pushConstantRanges.data());
+    VkPipelineLayoutCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    createInfo.setLayoutCount = static_cast<std::uint32_t>(layouts.size());
+    createInfo.pSetLayouts = layouts.data();
+    createInfo.pushConstantRangeCount =
+        static_cast<std::uint32_t>(pushConstantRanges.size());
+    createInfo.pPushConstantRanges = pushConstantRanges.data();
+
+    VKCHECK(
+        vkCreatePipelineLayout(
+            VkContext::GetLogicalDevice(),
+            &createInfo,
+            allocationCallbacks.get(),
+            &m_pipelineLayout),
+        "Failed to create pipeline layout.");
 
     if (m_state.IsGraphics())
     {
@@ -136,7 +143,7 @@ void Pipeline::CreateGraphicsPipeline()
 
     for (const auto& shader : m_state.GetShaders())
     {
-        shaderStages.emplace_back(createPipelineShaderStageInfo(
+        shaderStages.emplace_back(CreatePipelineShaderStageInfo(
             shader.GetShaderStage(),
             shader.GetHandle(),
             shader.GetEntryPoint()));
@@ -330,8 +337,9 @@ void Pipeline::CreateComputePipeline()
     assert(m_state.IsCompute());
 
     const auto& shader{ m_state.GetShaders().front() };
+
     VkPipelineShaderStageCreateInfo stageCreateInfo{
-        createPipelineShaderStageInfo(
+        CreatePipelineShaderStageInfo(
             shader.GetShaderStage(),
             shader.GetHandle(),
             shader.GetEntryPoint())
@@ -356,5 +364,21 @@ void Pipeline::CreateComputePipeline()
         "Failed to create compute pipeline layout.");
 
     m_bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
+}
+
+VkPipelineShaderStageCreateInfo Pipeline::CreatePipelineShaderStageInfo(
+    VkShaderStageFlagBits stage,
+    VkShaderModule module,
+    const char* pName) const
+{
+    return VkPipelineShaderStageCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = {},
+        .stage = stage,
+        .module = module,
+        .pName = pName,
+        .pSpecializationInfo = nullptr,
+    };
 }
 }

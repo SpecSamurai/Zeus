@@ -168,8 +168,6 @@ add_library(Engine
     vulkan/rhi/vulkan_image.cpp
     vulkan/rhi/vulkan_memory.cpp
     vulkan/rhi/vulkan_memory.hpp
-    vulkan/rhi/vulkan_pipeline.cpp
-    vulkan/rhi/vulkan_pipeline.hpp
     vulkan/rhi/vulkan_renderpass.cpp
     vulkan/rhi/vulkan_renderpass.hpp
     vulkan/rhi/vulkan_surface.cpp
