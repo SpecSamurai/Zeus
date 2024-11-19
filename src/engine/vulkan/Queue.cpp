@@ -11,21 +11,45 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
+#include <cstdint>
 
 namespace Zeus
 {
-Queue::Queue(const QueueType type, const char* name) : m_type{ type }
+Queue::Queue(const QueueType type, std::uint32_t family, const char* name)
+    : m_type{ type },
+      m_family{ family }
 {
-    auto& device{ VkContext::GetDevice() };
-    m_family = device.GetQueueFamily(m_type);
-    m_handle = device.GetQueue(type);
+    vkGetDeviceQueue(VkContext::GetLogicalDevice(), family, 0, &m_handle);
 
     VkContext::SetDebugName(VK_OBJECT_TYPE_QUEUE, m_handle, name);
 }
 
 Queue::~Queue()
 {
-    Wait();
+    if (m_handle != VK_NULL_HANDLE)
+        Wait();
+}
+
+Queue::Queue(Queue&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_type{ other.m_type },
+      m_family{ other.m_family }
+{
+    other.m_handle = VK_NULL_HANDLE;
+}
+
+Queue& Queue::operator=(Queue&& other)
+{
+    if (this != &other)
+    {
+        m_handle = other.m_handle;
+        m_type = other.m_type;
+        m_family = other.m_family;
+
+        other.m_handle = VK_NULL_HANDLE;
+    }
+
+    return *this;
 }
 
 void Queue::Wait()

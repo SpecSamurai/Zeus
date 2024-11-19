@@ -14,8 +14,18 @@ namespace Zeus
 class Queue
 {
 public:
-    Queue(const QueueType type, const char* name = nullptr);
+    Queue() = default;
+    Queue(
+        const QueueType type,
+        std::uint32_t family,
+        const char* name = nullptr);
     ~Queue();
+
+    Queue(const Queue&) = delete;
+    Queue& operator=(const Queue&) = delete;
+
+    Queue(Queue&& other) noexcept;
+    Queue& operator=(Queue&& other);
 
     void Wait();
 
