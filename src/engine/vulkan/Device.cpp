@@ -5,7 +5,6 @@
 #include "rhi/vulkan_command.hpp"
 #include "rhi/vulkan_debug.hpp"
 #include "rhi/vulkan_memory.hpp"
-#include "rhi/vulkan_sync.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -132,71 +131,32 @@ void Device::Init(VkInstance instance, VkSurfaceKHR surface)
             &m_logicalDevice),
         "Failed to create logical device.");
 
+    m_deletionQueue.Init(m_logicalDevice);
+
     vkGetDeviceQueue(m_logicalDevice, m_graphicsFamily, 0, &m_graphicsQueue);
     vkGetDeviceQueue(m_logicalDevice, m_presentFamily, 0, &m_presentQueue);
     vkGetDeviceQueue(m_logicalDevice, m_transferFamily, 0, &m_transferQueue);
     vkGetDeviceQueue(m_logicalDevice, m_computeFamily, 0, &m_computeQueue);
 
-    m_deletionQueue.Init(m_logicalDevice);
-
-    createVkCommandPool(
-        VkContext::GetLogicalDevice(),
-        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+    m_ImmediateSubmitCommandPool = CommandPool(
         VkContext::GetDevice().GetQueueFamily(QueueType::Transfer),
-        &m_ImmediateSubmitCommandPool);
-
-    allocateVkCommandBuffer(
-        &m_ImmediateSubmitCommandBuffer,
-        VkContext::GetLogicalDevice(),
-        m_ImmediateSubmitCommandPool);
-
-#ifndef NDEBUG
-    setDebugUtilsObjectNameEXT(
-        VkContext::GetLogicalDevice(),
-        VK_OBJECT_TYPE_COMMAND_POOL,
-        reinterpret_cast<std::uint64_t>(m_ImmediateSubmitCommandPool),
+        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
         "CommandPool Immediate");
 
-    setDebugUtilsObjectNameEXT(
-        VkContext::GetLogicalDevice(),
-        VK_OBJECT_TYPE_COMMAND_BUFFER,
-        reinterpret_cast<std::uint64_t>(m_ImmediateSubmitCommandBuffer),
-        "CommandBuffer Immediate");
-#endif
+    m_ImmediateSubmitCommandBuffer =
+        CommandBuffer(m_ImmediateSubmitCommandPool, "CommandBuffer Immediate");
 
-    VKCHECK(
-        createVkFence(
-            VkContext::GetLogicalDevice(),
-            true,
-            &m_ImmediateSubmitFence),
-        "Failed to create fence.");
-
-#ifndef NDEBUG
-    setDebugUtilsObjectNameEXT(
-        VkContext::GetLogicalDevice(),
-        VK_OBJECT_TYPE_FENCE,
-        reinterpret_cast<std::uint64_t>(m_ImmediateSubmitFence),
-        "Fence Immediate Submit");
-#endif
+    m_ImmediateSubmitFence = Fence(true, "Fence Immediate Submit");
 }
 
 void Device::Destroy()
 {
-    vkDestroyCommandPool(
-        VkContext::GetLogicalDevice(),
-        m_ImmediateSubmitCommandPool,
-        allocationCallbacks.get());
+    m_deletionQueue.Clear();
 
-    vkDestroyFence(
-        VkContext::GetLogicalDevice(),
-        m_ImmediateSubmitFence,
-        allocationCallbacks.get());
+    m_ImmediateSubmitCommandPool.Destroy();
+    m_ImmediateSubmitFence.Destroy();
 
     vkDestroyDevice(m_logicalDevice, allocationCallbacks.get());
-
-    m_ImmediateSubmitCommandPool = VK_NULL_HANDLE;
-    m_ImmediateSubmitCommandBuffer = VK_NULL_HANDLE;
-    m_ImmediateSubmitFence = VK_NULL_HANDLE;
 
     m_graphicsQueue = VK_NULL_HANDLE;
     m_presentQueue = VK_NULL_HANDLE;
@@ -221,35 +181,24 @@ void Device::WaitAll()
 }
 
 void Device::CmdImmediateSubmit(
-    std::function<void(VkCommandBuffer cmd)>&& function)
+    std::function<void(const CommandBuffer& cmd)>&& function)
 {
-    VKCHECK(
-        vkResetFences(
-            VkContext::GetLogicalDevice(),
-            1,
-            &m_ImmediateSubmitFence),
-        "Failed to reset fence");
+    m_ImmediateSubmitFence.Reset();
+    m_ImmediateSubmitCommandBuffer.Reset();
 
-    VKCHECK(
-        vkResetCommandBuffer(m_ImmediateSubmitCommandBuffer, 0),
-        "Failed to reset command buffer");
-
-    beginVkCommandBuffer(
-        m_ImmediateSubmitCommandBuffer,
+    m_ImmediateSubmitCommandBuffer.Begin(
         VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
     function(m_ImmediateSubmitCommandBuffer);
 
-    VKCHECK(
-        vkEndCommandBuffer(m_ImmediateSubmitCommandBuffer),
-        "Failed to end command buffer");
+    m_ImmediateSubmitCommandBuffer.End();
 
     VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
-        m_ImmediateSubmitCommandBuffer) };
+        m_ImmediateSubmitCommandBuffer.GetHandle()) };
 
     cmdVkQueueSubmit2(
         VkContext::GetDevice().GetQueue(QueueType::Transfer),
-        m_ImmediateSubmitFence,
+        m_ImmediateSubmitFence.GetHandle(),
         0,
         nullptr,
         1,
@@ -257,14 +206,7 @@ void Device::CmdImmediateSubmit(
         0,
         nullptr);
 
-    VKCHECK(
-        vkWaitForFences(
-            VkContext::GetLogicalDevice(),
-            1,
-            &m_ImmediateSubmitFence,
-            VK_TRUE,
-            UINT64_MAX),
-        "Failed to wait for fence");
+    m_ImmediateSubmitFence.Wait();
 }
 
 VkQueue Device::GetQueue(QueueType type) const

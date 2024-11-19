@@ -1,7 +1,10 @@
 #pragma once
 
+#include "CommandBuffer.hpp"
+#include "CommandPool.hpp"
 #include "Definitions.hpp"
 #include "DeletionQueue.hpp"
+#include "Fence.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -20,10 +23,7 @@ public:
     void WaitAll();
 
     void CmdImmediateSubmit(
-        std::function<void(VkCommandBuffer cmd)>&& function);
-
-    // CommandBuffer* CmdImmediateBegin(const QueueType queue_type);
-    // void CmdImmediateSubmit(CommandBuffer* cmd);
+        std::function<void(const CommandBuffer& cmd)>&& function);
 
     VkQueue GetQueue(QueueType type) const;
     std::uint32_t GetQueueFamily(QueueType type) const;
@@ -40,9 +40,9 @@ private:
     VkPhysicalDevice m_physicalDevice{ VK_NULL_HANDLE };
     DeletionQueue m_deletionQueue;
 
-    VkFence m_ImmediateSubmitFence{ VK_NULL_HANDLE };
-    VkCommandPool m_ImmediateSubmitCommandPool{ VK_NULL_HANDLE };
-    VkCommandBuffer m_ImmediateSubmitCommandBuffer{ VK_NULL_HANDLE };
+    Fence m_ImmediateSubmitFence;
+    CommandPool m_ImmediateSubmitCommandPool;
+    CommandBuffer m_ImmediateSubmitCommandBuffer;
 
     VkQueue m_graphicsQueue{ VK_NULL_HANDLE };
     VkQueue m_presentQueue{ VK_NULL_HANDLE };
