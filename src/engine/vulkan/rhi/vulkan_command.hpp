@@ -6,6 +6,7 @@
 
 namespace Zeus
 {
+[[deprecated("Use vkQueueSubmit2 instead.")]]
 VkResult cmdVkQueueSubmit(
     VkQueue queue,
     std::uint32_t commandBufferCount,
@@ -23,23 +24,4 @@ VkSemaphoreSubmitInfo createVkSemaphoreSubmitInfo(
 
 VkCommandBufferSubmitInfo createVkCommandBufferSubmitInfo(
     VkCommandBuffer commandBuffer);
-
-VkResult cmdVkQueueSubmit2(
-    VkQueue queue,
-    VkFence fence,
-    std::uint32_t waitSemaphoreInfoCount,
-    const VkSemaphoreSubmitInfo* pWaitSemaphoreInfos,
-    std::uint32_t commandBufferInfoCount,
-    const VkCommandBufferSubmitInfo* pCommandBufferInfos,
-    std::uint32_t signalSemaphoreInfoCount,
-    const VkSemaphoreSubmitInfo* pSignalSemaphoreInfos);
-
-VkResult cmdVkQueuePresentKHR(
-    VkQueue presentQueue,
-    std::uint32_t waitSemaphoreCount,
-    const VkSemaphore* pWaitSemaphores,
-    std::uint32_t swapchainCount,
-    const VkSwapchainKHR* pSwapchains,
-    const std::uint32_t* pImageIndices,
-    VkResult* pResults = nullptr);
 }

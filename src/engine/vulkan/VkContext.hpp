@@ -1,11 +1,14 @@
 #pragma once
 
+#include "Definitions.hpp"
 #include "DeletionQueue.hpp"
 #include "Device.hpp"
 #include "rhi/vulkan_memory.hpp"
 #include "window/Window.hpp"
 
 #include <vulkan/vulkan_core.h>
+
+#include <cstdint>
 
 namespace Zeus
 {
@@ -21,6 +24,9 @@ public:
     static DeletionQueue& GetDeletionQueue();
     static VkSurfaceKHR GetSurface();
     static VmaAllocator GetAllocator();
+
+    static VkQueue GetQueue(QueueType type);
+    static std::uint32_t GetQueueFamily(QueueType type);
 
     static void SetDebugName(
         VkObjectType objectType,

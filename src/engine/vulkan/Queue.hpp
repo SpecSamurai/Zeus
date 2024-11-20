@@ -1,9 +1,6 @@
 #pragma once
 
 #include "Definitions.hpp"
-#include "Fence.hpp"
-#include "Semaphore.hpp"
-#include "Swapchain.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -30,18 +27,16 @@ public:
     void Wait();
 
     void Submit(
-        VkCommandBuffer commandBuffer,
-        const Semaphore& waitSemaphore,
-        const Semaphore& signalSemaphore,
-        const Fence& fence);
+        VkFence fence,
+        std::uint32_t waitSemaphoreInfoCount = 0,
+        const VkSemaphoreSubmitInfo* pWaitSemaphoreInfos = nullptr,
+        std::uint32_t commandBufferInfoCount = 0,
+        const VkCommandBufferSubmitInfo* pCommandBufferInfos = nullptr,
+        std::uint32_t signalSemaphoreInfoCount = 0,
+        const VkSemaphoreSubmitInfo* pSignalSemaphoreInfos = nullptr) const;
 
-    void Present(
-        const Swapchain& swapchain,
-        std::uint32_t swapchainImageIndex,
-        const Semaphore& waitSemaphores);
-
-    const VkQueue& GetHandle() const;
     QueueType GetType() const;
+    VkQueue GetHandle() const;
     std::uint32_t GetFamilyIndex() const;
 
 private:

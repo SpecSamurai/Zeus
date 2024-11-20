@@ -1,11 +1,7 @@
 #include "Queue.hpp"
 
 #include "Definitions.hpp"
-#include "Fence.hpp"
-#include "Semaphore.hpp"
-#include "Swapchain.hpp"
 #include "VkContext.hpp"
-#include "rhi/vulkan_command.hpp"
 #include "rhi/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -58,74 +54,41 @@ void Queue::Wait()
 }
 
 void Queue::Submit(
-    VkCommandBuffer commandBuffer,
-    const Semaphore& waitSemaphore,
-    const Semaphore& signalSemaphore,
-    const Fence& fence)
+    VkFence fence,
+    std::uint32_t waitSemaphoreInfoCount,
+    const VkSemaphoreSubmitInfo* pWaitSemaphoreInfos,
+    std::uint32_t commandBufferInfoCount,
+    const VkCommandBufferSubmitInfo* pCommandBufferInfos,
+    std::uint32_t signalSemaphoreInfoCount,
+    const VkSemaphoreSubmitInfo* pSignalSemaphoreInfos) const
 {
     assert(m_type == QueueType::Graphics || m_type == QueueType::Transfer);
 
-    VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
-        commandBuffer) };
+    VkSubmitInfo2 submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
 
-    VkSemaphoreSubmitInfo waitSemaphoreInfo{
-        createVkSemaphoreSubmitInfo(
-            waitSemaphore.GetHandle(),
-            VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT)
-    }; // todo: adjust based on the queue
+    submitInfo.waitSemaphoreInfoCount = waitSemaphoreInfoCount;
+    submitInfo.pWaitSemaphoreInfos = pWaitSemaphoreInfos;
 
-    VkSemaphoreSubmitInfo signalSemaphoreInfo{ createVkSemaphoreSubmitInfo(
-        signalSemaphore.GetHandle(),
-        VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT) };
+    submitInfo.commandBufferInfoCount = commandBufferInfoCount;
+    submitInfo.pCommandBufferInfos = pCommandBufferInfos;
 
-    cmdVkQueueSubmit2(
-        m_handle,
-        fence.GetHandle(),
-        1,
-        &waitSemaphoreInfo,
-        1,
-        &submitInfo,
-        1,
-        &signalSemaphoreInfo);
-}
+    submitInfo.signalSemaphoreInfoCount = signalSemaphoreInfoCount;
+    submitInfo.pSignalSemaphoreInfos = pSignalSemaphoreInfos;
 
-void Queue::Present(
-    const Swapchain& swapchain,
-    std::uint32_t swapchainImageIndex,
-    const Semaphore& waitSemaphores)
-{
-    assert(m_type == QueueType::Present);
-
-    VkResult presentResult{ cmdVkQueuePresentKHR(
-        m_handle,
-        1,
-        &waitSemaphores.GetHandle(),
-        1,
-        &swapchain.GetHandle(),
-        &swapchainImageIndex) };
-
-    // send event?
-
-    // if (presentResult == VK_ERROR_OUT_OF_DATE_KHR ||
-    //     presentResult == VK_SUBOPTIMAL_KHR)
-    // {
-    //     m_swapchainRebuildRequired = true;
-    // }
-    // else if (presentResult != VK_SUCCESS)
-    // {
-    //     LOG_ERROR("Failed to present swapchain image");
-    //     return presentResult;
-    // }
-}
-
-const VkQueue& Queue::GetHandle() const
-{
-    return m_handle;
+    VKCHECK(
+        vkQueueSubmit2(m_handle, 1, &submitInfo, fence),
+        "Failed to submit command buffer.");
 }
 
 QueueType Queue::GetType() const
 {
     return m_type;
+}
+
+VkQueue Queue::GetHandle() const
+{
+    return m_handle;
 }
 
 std::uint32_t Queue::GetFamilyIndex() const

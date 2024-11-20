@@ -1,5 +1,6 @@
 #include "VkContext.hpp"
 
+#include "Definitions.hpp"
 #include "DeletionQueue.hpp"
 #include "Device.hpp"
 #include "InstanceBuilder.hpp"
@@ -11,6 +12,8 @@
 #include "window/glfw_utils.hpp"
 
 #include <vulkan/vulkan_core.h>
+
+#include <cstdint>
 
 namespace Zeus
 {
@@ -102,6 +105,16 @@ VkSurfaceKHR VkContext::GetSurface()
 VmaAllocator VkContext::GetAllocator()
 {
     return s_allocator;
+}
+
+VkQueue VkContext::GetQueue(QueueType type)
+{
+    return s_device.GetQueue(type).GetHandle();
+}
+
+std::uint32_t VkContext::GetQueueFamily(QueueType type)
+{
+    return s_device.GetQueue(type).GetFamilyIndex();
 }
 
 void VkContext::SetDebugName(

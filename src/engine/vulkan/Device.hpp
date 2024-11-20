@@ -5,6 +5,7 @@
 #include "Definitions.hpp"
 #include "DeletionQueue.hpp"
 #include "Fence.hpp"
+#include "Queue.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -25,8 +26,7 @@ public:
     void CmdImmediateSubmit(
         std::function<void(const CommandBuffer& cmd)>&& function);
 
-    VkQueue GetQueue(QueueType type) const;
-    std::uint32_t GetQueueFamily(QueueType type) const;
+    const Queue& GetQueue(QueueType type) const;
 
     VkDevice GetLogicalDevice() const;
     VkPhysicalDevice GetPhysicalDevice() const;
@@ -44,15 +44,10 @@ private:
     CommandPool m_ImmediateSubmitCommandPool;
     CommandBuffer m_ImmediateSubmitCommandBuffer;
 
-    VkQueue m_graphicsQueue{ VK_NULL_HANDLE };
-    VkQueue m_presentQueue{ VK_NULL_HANDLE };
-    VkQueue m_transferQueue{ VK_NULL_HANDLE };
-    VkQueue m_computeQueue{ VK_NULL_HANDLE };
-
-    std::uint32_t m_graphicsFamily;
-    std::uint32_t m_presentFamily;
-    std::uint32_t m_transferFamily;
-    std::uint32_t m_computeFamily;
+    Queue m_graphicsQueue;
+    Queue m_presentQueue;
+    Queue m_transferQueue;
+    Queue m_computeQueue;
 
     std::uint32_t m_maxImageDimension2D;
     std::uint32_t m_maxPushConstantsSize;

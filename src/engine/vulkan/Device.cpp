@@ -1,7 +1,7 @@
 #include "Device.hpp"
 
+#include "Definitions.hpp"
 #include "PhysicalDeviceSelector.hpp"
-#include "VkContext.hpp"
 #include "rhi/vulkan_command.hpp"
 #include "rhi/vulkan_debug.hpp"
 #include "rhi/vulkan_memory.hpp"
@@ -78,17 +78,21 @@ void Device::Init(VkInstance instance, VkSurfaceKHR surface)
     m_maxPushConstantsSize = limits.maxPushConstantsSize;
 
     m_physicalDevice = physicalDevice.handle;
-    m_graphicsFamily = physicalDevice.queueFamilies.graphicsFamily.value();
-    m_presentFamily = physicalDevice.queueFamilies.presentFamily.value();
-    m_transferFamily = physicalDevice.queueFamilies.transferFamily.value();
-    m_computeFamily = physicalDevice.queueFamilies.computeFamily.value();
+    std::uint32_t graphicsFamily =
+        physicalDevice.queueFamilies.graphicsFamily.value();
+    std::uint32_t presentFamily =
+        physicalDevice.queueFamilies.presentFamily.value();
+    std::uint32_t transferFamily =
+        physicalDevice.queueFamilies.transferFamily.value();
+    std::uint32_t computeFamily =
+        physicalDevice.queueFamilies.computeFamily.value();
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<std::uint32_t> uniqueQueueFamilies{
-        m_graphicsFamily,
-        m_presentFamily,
-        m_transferFamily,
-        m_computeFamily,
+        graphicsFamily,
+        presentFamily,
+        transferFamily,
+        computeFamily,
     };
 
     float queuePriority{ 1.0f };
@@ -131,15 +135,18 @@ void Device::Init(VkInstance instance, VkSurfaceKHR surface)
             &m_logicalDevice),
         "Failed to create logical device.");
 
+    // Initialization below relies on an initialized logical device
     m_deletionQueue.Init(m_logicalDevice);
 
-    vkGetDeviceQueue(m_logicalDevice, m_graphicsFamily, 0, &m_graphicsQueue);
-    vkGetDeviceQueue(m_logicalDevice, m_presentFamily, 0, &m_presentQueue);
-    vkGetDeviceQueue(m_logicalDevice, m_transferFamily, 0, &m_transferQueue);
-    vkGetDeviceQueue(m_logicalDevice, m_computeFamily, 0, &m_computeQueue);
+    m_graphicsQueue =
+        Queue(QueueType::Graphics, graphicsFamily, "Queue Graphics");
+    m_presentQueue = Queue(QueueType::Present, presentFamily, "Queue Present");
+    m_transferQueue =
+        Queue(QueueType::Transfer, transferFamily, "Queue Transfer");
+    m_computeQueue = Queue(QueueType::Compute, computeFamily, "Queue Compute");
 
     m_ImmediateSubmitCommandPool = CommandPool(
-        VkContext::GetDevice().GetQueueFamily(QueueType::Transfer),
+        transferFamily,
         VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
         "CommandPool Immediate");
 
@@ -158,11 +165,6 @@ void Device::Destroy()
 
     vkDestroyDevice(m_logicalDevice, allocationCallbacks.get());
 
-    m_graphicsQueue = VK_NULL_HANDLE;
-    m_presentQueue = VK_NULL_HANDLE;
-    m_transferQueue = VK_NULL_HANDLE;
-    m_computeQueue = VK_NULL_HANDLE;
-
     m_logicalDevice = VK_NULL_HANDLE;
     m_physicalDevice = VK_NULL_HANDLE;
 }
@@ -174,10 +176,10 @@ void Device::Wait()
 
 void Device::WaitAll()
 {
-    // for (uint32_t i = 0; i < 2; i++)
-    // {
-    //     queues::regular[i]->Wait();
-    // }
+    m_graphicsQueue.Wait();
+    m_presentQueue.Wait();
+    m_transferQueue.Wait();
+    m_computeQueue.Wait();
 }
 
 void Device::CmdImmediateSubmit(
@@ -196,8 +198,7 @@ void Device::CmdImmediateSubmit(
     VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
         m_ImmediateSubmitCommandBuffer.GetHandle()) };
 
-    cmdVkQueueSubmit2(
-        VkContext::GetDevice().GetQueue(QueueType::Transfer),
+    m_transferQueue.Submit(
         m_ImmediateSubmitFence.GetHandle(),
         0,
         nullptr,
@@ -209,7 +210,7 @@ void Device::CmdImmediateSubmit(
     m_ImmediateSubmitFence.Wait();
 }
 
-VkQueue Device::GetQueue(QueueType type) const
+const Queue& Device::GetQueue(QueueType type) const
 {
     switch (type)
     {
@@ -221,23 +222,6 @@ VkQueue Device::GetQueue(QueueType type) const
         return m_transferQueue;
     case QueueType::Compute:
         return m_computeQueue;
-    default:
-        assert(false && "Queue type not supported");
-    }
-}
-
-std::uint32_t Device::GetQueueFamily(QueueType type) const
-{
-    switch (type)
-    {
-    case QueueType::Graphics:
-        return m_graphicsFamily;
-    case QueueType::Present:
-        return m_presentFamily;
-    case QueueType::Transfer:
-        return m_transferFamily;
-    case QueueType::Compute:
-        return m_computeFamily;
     default:
         assert(false && "Queue type not supported");
     }
