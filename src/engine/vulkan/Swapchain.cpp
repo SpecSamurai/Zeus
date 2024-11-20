@@ -1,5 +1,6 @@
 #include "Swapchain.hpp"
 
+#include "Definitions.hpp"
 #include "VkContext.hpp"
 #include "logging/logger.hpp"
 #include "rhi/vulkan_command.hpp"
@@ -98,11 +99,11 @@ void Swapchain::Create()
     createInfo.imageUsage = imageUsageFlags;
 
     std::uint32_t graphicsFamily{
-        VkContext::GetDevice().GetQueueFamily(QueueType::Graphics),
+        VkContext::GetQueueFamily(QueueType::Graphics),
     };
 
     std::uint32_t presentFamily{
-        VkContext::GetDevice().GetQueueFamily(QueueType::Present),
+        VkContext::GetQueueFamily(QueueType::Present),
     };
 
     std::array<std::uint32_t, 2> queueFamilyIndices{
@@ -161,8 +162,7 @@ void Swapchain::Create()
 
     for (std::uint32_t i{ 0 }; i < m_images.size(); ++i)
     {
-        m_layouts[i] =
-            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // VK_IMAGE_LAYOUT_UNDEFINED;
+        m_layouts[i] = VK_IMAGE_LAYOUT_UNDEFINED;
 
         VkImageViewCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -240,11 +240,6 @@ void Swapchain::Present(VkCommandBuffer commandBuffer)
 {
     assert(m_layouts[m_imageIndex] == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-    // Queue& queue = Device::GetQueue(QueueType::Graphics);
-    // CommandBuffer& cmdBuffer = queue.GetCommandBuffer();
-    // bool hasWorkToPresent = cmdBuffer.GetState() ==
-    // CommandListState::Submitted;
-
     VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
         commandBuffer) };
 
@@ -256,26 +251,41 @@ void Swapchain::Present(VkCommandBuffer commandBuffer)
         CurrentFrame().renderCompleteSemaphore.GetHandle(),
         VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT) };
 
-    cmdVkQueueSubmit2(
-        VkContext::GetDevice().GetQueue(QueueType::Graphics),
-        CurrentFrame().renderFence.GetHandle(),
-        1,
-        &waitSemaphoreInfo,
-        1,
-        &submitInfo,
-        1,
-        &signalSemaphoreInfo);
+    VkContext::GetDevice()
+        .GetQueue(QueueType::Graphics)
+        .Submit(
+            CurrentFrame().renderFence.GetHandle(),
+            1,
+            &waitSemaphoreInfo,
+            1,
+            &submitInfo,
+            1,
+            &signalSemaphoreInfo);
 
-    VkResult presentResult{ cmdVkQueuePresentKHR(
-        VkContext::GetDevice().GetQueue(QueueType::Present),
-        1,
-        &CurrentFrame().renderCompleteSemaphore.GetHandle(),
-        1,
-        &m_handle,
-        &m_imageIndex) };
+    VkPresentInfoKHR presentInfo{};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
-    // queue->Present(m_swapchain, m_image_index, m_wait_semaphores);
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores =
+        &CurrentFrame().renderCompleteSemaphore.GetHandle();
 
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = &m_handle;
+
+    presentInfo.pImageIndices = &m_imageIndex;
+
+    // A pointer to an array of at least swapchainCount element.
+    // The result of the presenting operation will be stored in each of its
+    // elements, for each swap chain respectively.
+    // A single value returned by the whole function is the same as the worst
+    // result value from all swapchains.
+    // presentInfo.pResults = pResults;
+
+    VkResult presentResult{
+        vkQueuePresentKHR(VkContext::GetQueue(QueueType::Present), &presentInfo)
+    };
+
+    // send event?
     if (presentResult == VK_ERROR_OUT_OF_DATE_KHR ||
         presentResult == VK_SUBOPTIMAL_KHR)
     {
@@ -433,10 +443,15 @@ VkImageLayout Swapchain::GetLayout() const
     return m_layouts[m_imageIndex];
 }
 
-void Swapchain::SetLayout(VkImageLayout layout, CommandBuffer& commandBuffer)
+void Swapchain::SetLayout(
+    const CommandBuffer& commandBuffer,
+    VkImageLayout layout)
 {
     if (m_layouts[m_imageIndex] == layout)
         return;
+
+    commandBuffer
+        .TransitionImageLayout(GetImage(), GetFormat(), GetLayout(), layout);
 
     // commandBuffer.InsertImageLayoutBarrier(layout);
     // commandBuffer.InsertBarrierTexture(

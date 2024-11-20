@@ -58,6 +58,7 @@ public:
     VkFormat GetFormat() const;
     VkImageLayout GetLayout() const;
     std::uint32_t GetMipLevels() const;
+    VkImageAspectFlags GetAspectMask() const;
 
 private:
     void CreateImage(
@@ -82,5 +83,6 @@ private:
     VkImageTiling m_tiling;
     VkImageUsageFlags m_usage;
     VkMemoryPropertyFlags m_memoryPropertyFlags;
+    VkImageAspectFlags m_aspectMask;
 };
 }

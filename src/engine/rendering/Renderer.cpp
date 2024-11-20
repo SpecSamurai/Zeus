@@ -16,9 +16,7 @@
 #include "vulkan/Shader.hpp"
 #include "vulkan/Swapchain.hpp"
 #include "vulkan/VkContext.hpp"
-#include "vulkan/rhi/vulkan_debug.hpp"
 #include "vulkan/rhi/vulkan_dynamic_rendering.hpp"
-#include "vulkan/rhi/vulkan_image.hpp"
 #include "window/Window.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -130,36 +128,6 @@ MeshBuffers Renderer::UploadMesh(
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)),
     };
 
-    // createBuffer(
-    //     VkContext::GetAllocator(),
-    //     meshBuffers.vertexBuffer,
-    //     vertexBufferSize,
-    //     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-    //     |
-    //         VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    //
-    // meshBuffers.vertexBufferAddress = getBufferDeviceAddress(
-    //     VkContext::GetLogicalDevice(),
-    //     meshBuffers.vertexBuffer.buffer);
-    //
-    // createBuffer(
-    //     VkContext::GetAllocator(),
-    //     meshBuffers.indexBuffer,
-    //     indexBufferSize,
-    //     VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    // Buffer staging{};
-    // createBuffer(
-    //     VkContext::GetAllocator(),
-    //     staging,
-    //     vertexBufferSize + indexBufferSize,
-    //     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-    //     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-    //         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    //     true);
-
     Buffer staging(
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         vertexBufferSize + indexBufferSize,
@@ -167,76 +135,28 @@ MeshBuffers Renderer::UploadMesh(
             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         true);
 
-    // void* data{ staging.info.pMappedData };
-
     // memcpy(data, vertices.data(), vertexBufferSize);
     // memcpy(
     //     reinterpret_cast<char*>(data) + vertexBufferSize,
     //     indices.data(),
     //     indexBufferSize);
-    // memcpy((char*)data + vertexBufferSize, indices.data(), indexBufferSize);
 
     staging.Update(vertices.data(), vertexBufferSize);
     staging.Update(indices.data(), indexBufferSize, vertexBufferSize);
 
     VkContext::GetDevice().CmdImmediateSubmit(
         [&](const CommandBuffer& commandBuffer) {
-            // VkBufferCopy vertexBufferCopy{};
-            // vertexBufferCopy.srcOffset = 0;
-            // vertexBufferCopy.dstOffset = 0;
-            // vertexBufferCopy.size = vertexBufferSize;
-            //
-            // vkCmdCopyBuffer(
-            //     commandBuffer,
-            //     staging.buffer,
-            //     meshBuffers.vertexBuffer.buffer,
-            //     1,
-            //     &vertexBufferCopy);
-
-            // VkBufferCopy indexBufferCopy{};
-            // indexBufferCopy.srcOffset = vertexBufferSize;
-            // indexBufferCopy.dstOffset = 0;
-            // indexBufferCopy.size = indexBufferSize;
-            //
-            // vkCmdCopyBuffer(
-            //     commandBuffer,
-            //     staging.buffer,
-            //     meshBuffers.indexBuffer.buffer,
-            //     1,
-            //     &indexBufferCopy);
-
-            // cmdCopyBuffer(
-            //     commandBuffer,
-            //     staging.buffer,
-            //     meshBuffers.vertexBuffer.buffer,
-            //     0,
-            //     0,
-            //     vertexBufferSize);
-            //
-            // cmdCopyBuffer(
-            //     commandBuffer,
-            //     staging.buffer,
-            //     meshBuffers.indexBuffer.buffer,
-            //     vertexBufferSize,
-            //     0,
-            //     indexBufferSize);
-
-            staging.CopyToBuffer(
-                commandBuffer.GetHandle(),
-                *meshBuffers.vertexBuffer,
+            commandBuffer.CopyBuffer(
+                staging.GetHandle(),
+                meshBuffers.vertexBuffer->GetHandle(),
                 vertexBufferSize);
 
-            staging.CopyToBuffer(
-                commandBuffer.GetHandle(),
-                *meshBuffers.indexBuffer,
+            commandBuffer.CopyBuffer(
+                staging.GetHandle(),
+                meshBuffers.indexBuffer->GetHandle(),
                 indexBufferSize,
                 vertexBufferSize);
         });
-
-    // vmaDestroyBuffer(
-    //     VkContext::GetAllocator(),
-    //     staging.buffer,
-    //     staging.allocation);
 
     staging.Destroy();
 
@@ -246,16 +166,15 @@ MeshBuffers Renderer::UploadMesh(
 void Renderer::Draw()
 {
     BeginFrame();
+    auto& cmd{ CurrentFrame().mainCommandBuffer };
 
-    transitionImageLayout(
-        CurrentFrame().mainCommandBuffer.GetHandle(),
+    cmd.TransitionImageLayout(
         drawImage.GetHandle(),
         drawImage.GetFormat(),
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_GENERAL);
 
-    transitionImageLayout(
-        CurrentFrame().mainCommandBuffer.GetHandle(),
+    cmd.TransitionImageLayout(
         depthImage.GetHandle(),
         depthImage.GetFormat(),
         VK_IMAGE_LAYOUT_UNDEFINED,
@@ -271,28 +190,17 @@ void Renderer::Draw()
 
     DrawTriangle();
 
-    transitionImageLayout(
-        CurrentFrame().mainCommandBuffer.GetHandle(),
+    cmd.TransitionImageLayout(
         drawImage.GetHandle(),
         drawImage.GetFormat(),
         VK_IMAGE_LAYOUT_GENERAL,
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
-    transitionImageLayout(
-        CurrentFrame().mainCommandBuffer.GetHandle(),
-        m_swapchain
-            ->GetImage(), // m_swapchain->m_images[m_swapchain->GetImageIndex()],
-        m_swapchain->GetFormat(),
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    m_swapchain->SetLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-    blitImage(
-        CurrentFrame().mainCommandBuffer.GetHandle(),
-        drawImage.GetHandle(),
-        m_swapchain
-            ->GetImage(), // m_swapchain->m_images[CurrentSwapchainImageIndex()],
-        drawExtent,
-        m_swapchain->GetExtent());
+    cmd.BlitImage(drawImage, *m_swapchain);
+    //  drawExtent,
+    //  m_swapchain->GetExtent());
 
     // transitionImageLayout(
     //     m_renderer.CurrentFrame().mainCommandBuffer,
@@ -314,15 +222,7 @@ void Renderer::Draw()
     //     colorAttachment,
     //     VkContext.GetSwapchain().extent);
 
-    transitionImageLayout(
-        CurrentFrame().mainCommandBuffer.GetHandle(),
-        m_swapchain
-            ->GetImage(), // m_swapchain->m_images[m_swapchain->GetImageIndex()],
-        m_swapchain->GetFormat(),
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-
-    // m_swapchain->SetLayout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    m_swapchain->SetLayout(cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
     EndFrame();
 }
@@ -367,7 +267,7 @@ void Renderer::InitCommands()
     {
         std::string commandPoolName{ "CommandPool Frame " + std::to_string(i) };
         m_frames[i].commandPool = CommandPool(
-            VkContext::GetDevice().GetQueueFamily(QueueType::Graphics),
+            VkContext::GetQueueFamily(QueueType::Graphics),
             VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
             commandPoolName.c_str());
 
@@ -395,21 +295,6 @@ void Renderer::InitDrawObjects(const VkExtent2D& extent)
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         "Image Color Draw");
 
-    // drawImage.imageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-    // drawImage.imageExtent = drawImageExtent;
-
-    // create2DImage(
-    //     VkContext::GetAllocator(),
-    //     drawImage,
-    //     VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT |
-    //         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    // create2DImageView(
-    //     VkContext::GetLogicalDevice(),
-    //     drawImage,
-    //     VK_IMAGE_ASPECT_COLOR_BIT);
-
     depthImage = Image(
         ImageType::Texture2D,
         drawImageExtent,
@@ -417,60 +302,10 @@ void Renderer::InitDrawObjects(const VkExtent2D& extent)
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         "Image Depth Draw");
-
-    // depthImage.imageFormat = VK_FORMAT_D32_SFLOAT;
-    // depthImage.imageExtent = drawImageExtent;
-    //
-    // create2DImage(
-    //     VkContext::GetAllocator(),
-    //     depthImage,
-    //     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    // create2DImageView(
-    //     VkContext::GetLogicalDevice(),
-    //     depthImage,
-    //     VK_IMAGE_ASPECT_DEPTH_BIT);
-
-    // #ifndef NDEBUG
-    //     setDebugUtilsObjectNameEXT(
-    //         VkContext::GetLogicalDevice(),
-    //         VK_OBJECT_TYPE_IMAGE,
-    //         reinterpret_cast<std::uint64_t>(drawImage.image),
-    //         "Image Draw Color");
-    //
-    //     setDebugUtilsObjectNameEXT(
-    //         VkContext::GetLogicalDevice(),
-    //         VK_OBJECT_TYPE_IMAGE,
-    //         reinterpret_cast<std::uint64_t>(depthImage.image),
-    //         "Image Draw Depth");
-    //
-    //     setDebugUtilsObjectNameEXT(
-    //         VkContext::GetLogicalDevice(),
-    //         VK_OBJECT_TYPE_IMAGE_VIEW,
-    //         reinterpret_cast<std::uint64_t>(drawImage.imageView),
-    //         "Image View Draw Color");
-    //
-    //     setDebugUtilsObjectNameEXT(
-    //         VkContext::GetLogicalDevice(),
-    //         VK_OBJECT_TYPE_IMAGE_VIEW,
-    //         reinterpret_cast<std::uint64_t>(depthImage.imageView),
-    //         "Image View Draw Depth");
-    // #endif
 }
 
 void Renderer::InitDescriptors()
 {
-    // DescriptorLayoutBuilder descriptorLayoutBuilder;
-    //
-    // descriptorLayoutBuilder.AddBinding(
-    //     0,
-    //     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-    //     VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
-    //
-    // m_sceneDataDescriptorSetLayout =
-    //     descriptorLayoutBuilder.Build(VkContext::GetLogicalDevice());
-
     sceneDataDescriptorSetLayout = DescriptorSetLayout(
         { Descriptor(
             VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -483,20 +318,9 @@ void Renderer::DrawCompute()
 {
     auto& cmd{ CurrentFrame().mainCommandBuffer };
 
-    vkCmdBindPipeline(
-        cmd.GetHandle(),
-        VK_PIPELINE_BIND_POINT_COMPUTE,
-        computeEffect.pipeline->GetHandle());
+    cmd.BindPipeline(*computeEffect.pipeline);
 
-    vkCmdBindDescriptorSets(
-        cmd.GetHandle(),
-        VK_PIPELINE_BIND_POINT_COMPUTE,
-        computeEffect.pipeline->GetLayout(),
-        0,
-        1,
-        &_drawImageDescriptors,
-        0,
-        nullptr);
+    cmd.BindDescriptorSets(_drawImageDescriptors, *computeEffect.pipeline);
 
     cmd.PushConstants(
         computeEffect.pipeline->GetLayout(),
@@ -551,11 +375,6 @@ void Renderer::InitCompute()
         "../engine/shaders/gradient_color.comp.spv",
         VK_SHADER_STAGE_COMPUTE_BIT));
 
-    VkPushConstantRange pushConstant;
-    pushConstant.offset = 0;
-    pushConstant.size = sizeof(ComputePushConstants);
-    pushConstant.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-
     computeEffect.data = {};
     computeEffect.data.data1 = Vector4f(1, 0, 0, 1);
     computeEffect.data.data2 = Vector4f(0, 0, 1, 1);
@@ -579,11 +398,6 @@ void Renderer::InitCompute()
                 sizeof(ComputePushConstants)),
         },
         "Pipeline Compute"));
-
-    // vkDestroyShaderModule(
-    //     VkContext::GetLogicalDevice(),
-    //     computeShader,
-    //     allocationCallbacks.get());
 }
 
 void Renderer::InitMesh()
@@ -615,16 +429,6 @@ void Renderer::InitMesh()
             0,
             sizeof(MeshPushConstants)) },
         "Pipeline Mesh"));
-
-    // vkDestroyShaderModule(
-    //     VkContext::GetLogicalDevice(),
-    //     vertShader,
-    //     allocationCallbacks.get());
-    //
-    // vkDestroyShaderModule(
-    //     VkContext::GetLogicalDevice(),
-    //     fragShader,
-    //     allocationCallbacks.get());
 
     std::array<Vertex, 4> rect_vertices;
 
@@ -670,17 +474,13 @@ void Renderer::DrawTriangle()
         depthImage.GetView(),
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
-    cmdBeginRendering(
-        cmd.GetHandle(),
+    cmd.BeginRendering(
         drawExtent,
         1,
         &colorAttachmentInfo,
         &depthAttachmentInfo);
 
-    vkCmdBindPipeline(
-        cmd.GetHandle(),
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        _meshPipeline->GetHandle());
+    cmd.BindPipeline(*_meshPipeline);
 
     cmd.SetViewport({
         .x = 0.f,
@@ -711,11 +511,7 @@ void Renderer::DrawTriangle()
         0,
         push_constants);
 
-    vkCmdBindIndexBuffer(
-        cmd.GetHandle(),
-        testMeshes[2]->meshBuffers.indexBuffer->GetHandle(),
-        0,
-        VK_INDEX_TYPE_UINT32);
+    cmd.BindIndexBuffer(*testMeshes[2]->meshBuffers.indexBuffer);
 
     cmd.DrawIndexed(
         testMeshes[2]->surfaces[0].count,

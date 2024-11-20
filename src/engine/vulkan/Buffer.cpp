@@ -20,14 +20,6 @@ Buffer::Buffer(
     : m_usage{ usage },
       m_mapped{ mapped }
 {
-    // m_type = type;
-    // m_stride_unaligned = static_cast<uint32_t>(stride);
-    // m_stride = m_stride_unaligned;
-    // m_element_count = element_count;
-    // m_object_size = stride * element_count;
-    // m_mappable = mappable;
-    // m_object_name = name;
-
     VkBufferCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     createInfo.pNext = nullptr;
@@ -188,6 +180,7 @@ void Buffer::Update(void* data, std::size_t dataSize, std::size_t dstOffset)
 
 void* Buffer::GetData() const
 {
+    assert(m_mapped);
     return m_info.pMappedData;
 }
 
@@ -215,5 +208,10 @@ VkDeviceAddress Buffer::GetDeviceAddress() const
 {
     assert(m_usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT);
     return m_deviceAddress;
+}
+
+VkBufferUsageFlags Buffer::GetUsage() const
+{
+    return m_usage;
 }
 }

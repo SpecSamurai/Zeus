@@ -14,6 +14,7 @@
 namespace Zeus
 {
 class Swapchain;
+class Buffer;
 
 class CommandBuffer
 {
@@ -33,16 +34,6 @@ public:
     void Begin(VkCommandBufferUsageFlags flags = {});
     void End();
     void Reset();
-    // RHI_Queue* queue, const uint64_t swapchain_id
-    void Submit(
-        VkQueue queue,
-        VkFence fence,
-        std::uint32_t waitSemaphoreInfoCount,
-        const VkSemaphoreSubmitInfo* pWaitSemaphoreInfos,
-        std::uint32_t commandBufferInfoCount,
-        const VkCommandBufferSubmitInfo* pCommandBufferInfos,
-        std::uint32_t signalSemaphoreInfoCount,
-        const VkSemaphoreSubmitInfo* pSignalSemaphoreInfos);
 
     void BindPipeline(const Pipeline& pipeline);
 
@@ -110,8 +101,8 @@ public:
         VkDescriptorSet descriptorSet,
         const Pipeline& pipeline) const;
 
-    void BindVertexBuffers(VkBuffer buffer) const;
-    void BindIndexBuffer(VkBuffer buffer) const;
+    void BindVertexBuffers(const Buffer& buffer) const;
+    void BindIndexBuffer(const Buffer& buffer) const;
 
     template <typename T>
     void PushConstants(

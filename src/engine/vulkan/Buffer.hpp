@@ -30,7 +30,6 @@ public:
     void Destroy();
 
     void Update(void* data, std::size_t size, std::size_t srcOffset = 0);
-    // void ResetOffset() { m_offset = 0; first_update = true; }
 
     void* GetData() const;
     VkBuffer GetHandle() const;
@@ -39,12 +38,7 @@ public:
     VkDeviceSize GetSize() const;
     VkDeviceAddress GetDeviceAddress() const;
 
-    // TODO
-    // Add minimumAllignment
-    // Add offset
-    // Add DataCount
-    // uint32_t GetElementCount() const;
-    // uint32_t GetOffset() const;
+    VkBufferUsageFlags GetUsage() const;
 
 private:
     VkBuffer m_handle{ VK_NULL_HANDLE };

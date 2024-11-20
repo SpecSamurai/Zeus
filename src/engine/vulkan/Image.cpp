@@ -44,7 +44,8 @@ Image::Image(Image&& other) noexcept
       m_mipLevels{ other.m_mipLevels },
       m_tiling{ other.m_tiling },
       m_usage{ other.m_usage },
-      m_memoryPropertyFlags{ other.m_memoryPropertyFlags }
+      m_memoryPropertyFlags{ other.m_memoryPropertyFlags },
+      m_aspectMask{ other.m_aspectMask }
 {
     other.m_handle = VK_NULL_HANDLE;
     other.m_view = VK_NULL_HANDLE;
@@ -75,6 +76,7 @@ Image& Image::operator=(Image&& other)
         m_tiling = other.m_tiling;
         m_usage = other.m_usage;
         m_memoryPropertyFlags = other.m_memoryPropertyFlags;
+        m_aspectMask = other.m_aspectMask;
 
         other.m_handle = VK_NULL_HANDLE;
         other.m_view = VK_NULL_HANDLE;
@@ -203,6 +205,11 @@ std::uint32_t Image::GetMipLevels() const
     return m_mipLevels;
 }
 
+VkImageAspectFlags Image::GetAspectMask() const
+{
+    return m_aspectMask;
+}
+
 void Image::CreateImage(
     VkMemoryPropertyFlags memoryPropertyFlags,
     VkImageTiling tiling)
@@ -314,6 +321,8 @@ void Image::CreateImageView()
             allocationCallbacks.get(),
             &m_view),
         "Failed to create image view.");
+
+    m_aspectMask = aspectMask;
 
     if (m_name != nullptr)
     {

@@ -56,7 +56,7 @@ public:
     VkFormat GetFormat() const;
 
     VkImageLayout GetLayout() const;
-    void SetLayout(VkImageLayout layout, CommandBuffer& commandBuffer);
+    void SetLayout(const CommandBuffer& commandBuffer, VkImageLayout layout);
 
 private:
     constexpr FrameData& CurrentFrame();

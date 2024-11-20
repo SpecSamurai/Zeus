@@ -1,5 +1,6 @@
 #include "CommandBuffer.hpp"
 
+#include "Buffer.hpp"
 #include "Swapchain.hpp"
 #include "VkContext.hpp"
 #include "math/definitions.hpp"
@@ -74,34 +75,6 @@ void CommandBuffer::Reset()
     VKCHECK(
         vkResetCommandBuffer(m_handle, 0),
         "Failed to reset command buffer");
-}
-
-// RHI_Queue* queue, const uint64_t swapchain_id
-void CommandBuffer::Submit(
-    VkQueue queue,
-    VkFence fence,
-    std::uint32_t waitSemaphoreInfoCount,
-    const VkSemaphoreSubmitInfo* pWaitSemaphoreInfos,
-    std::uint32_t commandBufferInfoCount,
-    const VkCommandBufferSubmitInfo* pCommandBufferInfos,
-    std::uint32_t signalSemaphoreInfoCount,
-    const VkSemaphoreSubmitInfo* pSignalSemaphoreInfos)
-{
-    VkSubmitInfo2 submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
-
-    submitInfo.waitSemaphoreInfoCount = waitSemaphoreInfoCount;
-    submitInfo.pWaitSemaphoreInfos = pWaitSemaphoreInfos;
-
-    submitInfo.commandBufferInfoCount = commandBufferInfoCount;
-    submitInfo.pCommandBufferInfos = pCommandBufferInfos;
-
-    submitInfo.signalSemaphoreInfoCount = signalSemaphoreInfoCount;
-    submitInfo.pSignalSemaphoreInfos = pSignalSemaphoreInfos;
-
-    VkResult result{ vkQueueSubmit2(queue, 1, &submitInfo, fence) };
-
-    VKCHECK(result, "Failed to submit command buffer.");
 }
 
 // push pipeline state
@@ -407,21 +380,23 @@ void CommandBuffer::BindDescriptorSets(
         nullptr);
 }
 
-void CommandBuffer::BindVertexBuffers(VkBuffer buffer) const
+void CommandBuffer::BindVertexBuffers(const Buffer& buffer) const
 {
-    VkBuffer vertexBuffers[] = { buffer };
+    assert(buffer.GetUsage() & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    VkBuffer vertexBuffers[] = { buffer.GetHandle() };
     VkDeviceSize offsets[] = { 0 };
 
     vkCmdBindVertexBuffers(m_handle, 0, 1, vertexBuffers, offsets);
 }
 
-void CommandBuffer::BindIndexBuffer(VkBuffer buffer) const
+void CommandBuffer::BindIndexBuffer(const Buffer& buffer) const
 {
+    assert(buffer.GetUsage() & VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
     bool isInt16 = false; // buffer->GetStride() == sizeof(uint16_t);
 
     vkCmdBindIndexBuffer(
         m_handle,
-        buffer,
+        buffer.GetHandle(),
         0,
         isInt16 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32);
 }
