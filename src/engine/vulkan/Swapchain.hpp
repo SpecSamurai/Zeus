@@ -58,6 +58,8 @@ public:
     VkImageLayout GetLayout() const;
     void SetLayout(const CommandBuffer& commandBuffer, VkImageLayout layout);
 
+    bool IsResizeRequired() const;
+
 private:
     constexpr FrameData& CurrentFrame();
 
@@ -94,5 +96,7 @@ private:
 
     VkPresentModeKHR m_presentMode;
     VkFormat m_imageFormat;
+
+    bool m_resizeRequired{};
 };
 }

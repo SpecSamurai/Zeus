@@ -285,18 +285,17 @@ void Swapchain::Present(VkCommandBuffer commandBuffer)
         vkQueuePresentKHR(VkContext::GetQueue(QueueType::Present), &presentInfo)
     };
 
-    // send event?
     if (presentResult == VK_ERROR_OUT_OF_DATE_KHR ||
         presentResult == VK_SUBOPTIMAL_KHR)
     {
-        // m_swapchainRebuildRequired = true;
+        m_resizeRequired = true;
+        return;
     }
     else if (presentResult != VK_SUCCESS)
     {
         LOG_ERROR("Failed to present swapchain image");
+        return;
     }
-
-    // AcquireNextImage();
 }
 
 void Swapchain::AcquireNextImage()
@@ -315,7 +314,7 @@ void Swapchain::AcquireNextImage()
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-        // m_swapchainRebuildRequired = true;
+        m_resizeRequired = true;
         return;
     }
     else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
@@ -349,6 +348,8 @@ void Swapchain::Resize(std::uint32_t width, std::uint32_t height)
         oldSwapchain,
         allocationCallbacks.get());
     oldSwapchain = VK_NULL_HANDLE;
+
+    m_resizeRequired = false;
 
     LOG_DEBUG("Swapchain resized: {}x{}", m_extent.width, m_extent.height);
 }
@@ -465,6 +466,11 @@ void Swapchain::SetLayout(
     //     false);
 
     m_layouts[m_imageIndex] = layout;
+}
+
+bool Swapchain::IsResizeRequired() const
+{
+    return m_resizeRequired;
 }
 
 constexpr Swapchain::FrameData& Swapchain::CurrentFrame()
