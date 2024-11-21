@@ -117,8 +117,6 @@ add_library(Engine
     vulkan/DescriptorSet.hpp
     vulkan/DescriptorSetLayout.cpp
     vulkan/DescriptorSetLayout.hpp
-    vulkan/DescriptorWriter.cpp
-    vulkan/DescriptorWriter.hpp
     vulkan/Device.cpp
     vulkan/Device.hpp
     vulkan/Fence.cpp
@@ -156,8 +154,6 @@ add_library(Engine
     vulkan/rhi/vulkan_command.hpp
     vulkan/rhi/vulkan_debug.cpp
     vulkan/rhi/vulkan_debug.hpp
-    vulkan/rhi/vulkan_descriptors.cpp
-    vulkan/rhi/vulkan_descriptors.hpp
     vulkan/rhi/vulkan_device.cpp
     vulkan/rhi/vulkan_device.hpp
     vulkan/rhi/vulkan_dynamic_rendering.cpp
