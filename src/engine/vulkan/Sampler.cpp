@@ -51,6 +51,45 @@ Sampler::Sampler(
     VkContext::SetDebugName(VK_OBJECT_TYPE_SAMPLER, m_handle, name);
 }
 
+Sampler::Sampler(Sampler&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_magFilter{ other.m_magFilter },
+      m_minFilter{ other.m_minFilter },
+      m_mipmapMode{ other.m_mipmapMode },
+      m_addressMode{ other.m_addressMode },
+      m_mipLodBias{ other.m_mipLodBias },
+      m_maxAnisotropy{ other.m_maxAnisotropy },
+      m_compareEnable{ other.m_compareEnable },
+      m_compareOp{ other.m_compareOp }
+{
+    other.m_handle = VK_NULL_HANDLE;
+}
+
+Sampler& Sampler::operator=(Sampler&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+        m_magFilter = other.m_magFilter;
+        m_minFilter = other.m_minFilter;
+        m_mipmapMode = other.m_mipmapMode;
+        m_addressMode = other.m_addressMode;
+        m_mipLodBias = other.m_mipLodBias;
+        m_maxAnisotropy = other.m_maxAnisotropy;
+        m_compareEnable = other.m_compareEnable;
+        m_compareOp = other.m_compareOp;
+
+        other.m_handle = VK_NULL_HANDLE;
+    }
+
+    return *this;
+}
+
 Sampler::~Sampler()
 {
     if (m_handle == VK_NULL_HANDLE)

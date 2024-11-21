@@ -6,7 +6,7 @@ namespace Zeus
 {
 class Sampler
 {
-private:
+public:
     Sampler(
         VkFilter magFilter = VK_FILTER_NEAREST,
         VkFilter minFilter = VK_FILTER_NEAREST,
@@ -17,6 +17,12 @@ private:
         VkBool32 compareEnable = VK_FALSE,
         VkCompareOp compareOp = VK_COMPARE_OP_NEVER,
         const char* name = nullptr);
+
+    Sampler(const Sampler&) = delete;
+    Sampler& operator=(const Sampler&) = delete;
+
+    Sampler(Sampler&& other) noexcept;
+    Sampler& operator=(Sampler&& other);
 
     ~Sampler();
 
