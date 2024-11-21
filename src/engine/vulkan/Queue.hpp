@@ -16,7 +16,6 @@ public:
         const QueueType type,
         std::uint32_t family,
         const char* name = nullptr);
-    ~Queue();
 
     Queue(const Queue&) = delete;
     Queue& operator=(const Queue&) = delete;

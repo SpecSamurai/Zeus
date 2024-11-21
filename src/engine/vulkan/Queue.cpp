@@ -20,12 +20,6 @@ Queue::Queue(const QueueType type, std::uint32_t family, const char* name)
     VkContext::SetDebugName(VK_OBJECT_TYPE_QUEUE, m_handle, name);
 }
 
-Queue::~Queue()
-{
-    if (m_handle != VK_NULL_HANDLE)
-        Wait();
-}
-
 Queue::Queue(Queue&& other) noexcept
     : m_handle{ other.m_handle },
       m_type{ other.m_type },
