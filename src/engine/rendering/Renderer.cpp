@@ -8,8 +8,9 @@
 #include "vulkan/Buffer.hpp"
 #include "vulkan/CommandBuffer.hpp"
 #include "vulkan/Definitions.hpp"
+#include "vulkan/Descriptor.hpp"
+#include "vulkan/DescriptorSet.hpp"
 #include "vulkan/DescriptorSetLayout.hpp"
-#include "vulkan/DescriptorWriter.hpp"
 #include "vulkan/Pipeline.hpp"
 #include "vulkan/PipelineState.hpp"
 #include "vulkan/RasterizationState.hpp"
@@ -46,8 +47,7 @@ void Renderer::Init()
     m_frames.resize(m_swapchain->GetFramesCount());
 
     InitCommands();
-    VkExtent2D e{ m_window.GetWidth(), m_window.GetHeight() };
-    InitDrawObjects(e);
+    InitDrawObjects(m_window.GetWidth(), m_window.GetHeight());
     InitDescriptors();
 
     InitCompute();
@@ -165,6 +165,11 @@ MeshBuffers Renderer::UploadMesh(
 
 void Renderer::Draw()
 {
+    if (m_swapchain->IsResizeRequired())
+    {
+        ResizeDrawObjects();
+    }
+
     BeginFrame();
     auto& cmd{ CurrentFrame().mainCommandBuffer };
 
@@ -227,40 +232,6 @@ void Renderer::Draw()
     EndFrame();
 }
 
-void Renderer::ResizeDrawObjects(const VkExtent2D& extent)
-{
-    vkDeviceWaitIdle(VkContext::GetLogicalDevice());
-
-    VkExtent2D e{ m_window.GetWidth(), m_window.GetHeight() };
-    // ResizeSwapchain(e);
-
-    // m_swapchainBuilder.setOldSwapchain(m_swapchain->GetHandle());
-    // m_swapchainBuilder.setDesiredExtent(extent.width, extent.height);
-    //
-    // const auto& result{ m_swapchainBuilder.build() };
-
-    // destroySwapchain(VkContext::GetDevice(), m_swapchain);
-    // m_swapchain = result.value();
-
-    m_swapchain->Resize(extent.width, extent.height);
-    // LOG_DEBUG("Swapchain resized: {}x{}", extent.width, extent.height);
-
-    // destroyImage(
-    //     VkContext::GetLogicalDevice(),
-    //     VkContext::GetAllocator(),
-    //     drawImage);
-    //
-    // destroyImage(
-    //     VkContext::GetLogicalDevice(),
-    //     VkContext::GetAllocator(),
-    //     depthImage);
-
-    InitDrawObjects(extent);
-
-    m_swapchainRebuildRequired = false;
-    // m_window.resized = false;
-}
-
 void Renderer::InitCommands()
 {
     for (std::size_t i{ 0 }; i < m_swapchain->GetFramesCount(); ++i)
@@ -278,11 +249,11 @@ void Renderer::InitCommands()
     }
 }
 
-void Renderer::InitDrawObjects(const VkExtent2D& extent)
+void Renderer::InitDrawObjects(std::uint32_t width, std::uint32_t height)
 {
-    VkExtent3D drawImageExtent = {
-        .width = extent.width,
-        .height = extent.height,
+    VkExtent3D drawImageExtent{
+        .width = width,
+        .height = height,
         .depth = 1,
     };
 
@@ -304,10 +275,21 @@ void Renderer::InitDrawObjects(const VkExtent2D& extent)
         "Image Depth Draw");
 }
 
+void Renderer::ResizeDrawObjects()
+{
+    VkContext::GetDevice().Wait();
+    m_swapchain->Resize(m_window.GetWidth(), m_window.GetHeight());
+    // drawImage.Destroy();
+    // depthImage.Destroy();
+    //
+    // InitDrawObjects({ m_window.GetWidth(), m_window.GetHeight() });
+}
+
 void Renderer::InitDescriptors()
 {
     sceneDataDescriptorSetLayout = DescriptorSetLayout(
         { Descriptor(
+            nullptr,
             VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             0) },
@@ -320,7 +302,9 @@ void Renderer::DrawCompute()
 
     cmd.BindPipeline(*computeEffect.pipeline);
 
-    cmd.BindDescriptorSets(_drawImageDescriptors, *computeEffect.pipeline);
+    cmd.BindDescriptorSets(
+        _drawImageDescriptors.GetHandle(),
+        *computeEffect.pipeline);
 
     cmd.PushConstants(
         computeEffect.pipeline->GetLayout(),
@@ -341,33 +325,30 @@ void Renderer::InitCompute()
         { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10 }
     };
 
-    computeDescriptorAllocator.Init(10, poolSizes);
-
+    computeDescriptorAllocator = DescriptorPool(10, poolSizes);
     drawImageDescriptorLayout = DescriptorSetLayout(
         {
             Descriptor(
+                &drawImage,
                 VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                 VK_SHADER_STAGE_COMPUTE_BIT,
                 0),
         },
         "DesciptorSetLayout Compute");
 
-    _drawImageDescriptors = computeDescriptorAllocator.Allocate(
-        drawImageDescriptorLayout.GetHandle());
+    _drawImageDescriptors = DescriptorSet(
+        {},
+        drawImageDescriptorLayout,
+        computeDescriptorAllocator);
 
-    {
-        DescriptorWriter descriptorWriter;
-        descriptorWriter.writeDescriptorImage(
+    _drawImageDescriptors.Update({
+        Descriptor(
+            &drawImage,
             VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            VK_SHADER_STAGE_COMPUTE_BIT,
             0,
-            drawImage.GetView(),
-            VK_NULL_HANDLE,
-            VK_IMAGE_LAYOUT_GENERAL);
-
-        descriptorWriter.updateDescriptorSet(
-            VkContext::GetLogicalDevice(),
-            _drawImageDescriptors);
-    }
+            VK_IMAGE_LAYOUT_GENERAL),
+    });
 
     std::vector<Shader> shaders{};
 

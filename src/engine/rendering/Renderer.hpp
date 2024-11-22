@@ -3,14 +3,13 @@
 #include "Renderer_definitions.hpp"
 #include "renderer_types.hpp"
 #include "vulkan/DescriptorPool.hpp"
+#include "vulkan/DescriptorSet.hpp"
 #include "vulkan/DescriptorSetLayout.hpp"
 #include "vulkan/Image.hpp"
 #include "vulkan/Pipeline.hpp"
 #include "vulkan/Swapchain.hpp"
-#include "vulkan/rhi/vulkan_image.hpp"
 #include "window/Window.hpp"
 
-#include <algorithm>
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
@@ -36,21 +35,10 @@ public:
 
     void Draw();
 
-    void ResizeDrawObjects(const VkExtent2D& extent);
-
-    inline constexpr bool ResizeRequired() const
-    {
-        return false; // m_window.resized || m_swapchainRebuildRequired;
-    }
-
-    inline constexpr FrameData& CurrentFrame()
-    {
-        return m_frames[m_swapchain->GetFrameIndex()];
-    }
-
 private:
     void InitCommands();
-    void InitDrawObjects(const VkExtent2D& extent);
+    void InitDrawObjects(std::uint32_t width, std::uint32_t height);
+    void ResizeDrawObjects();
     void InitDescriptors();
 
     void InitCompute();
@@ -58,6 +46,11 @@ private:
 
     void InitMesh();
     void DrawTriangle();
+
+    inline constexpr FrameData& CurrentFrame()
+    {
+        return m_frames[m_swapchain->GetFrameIndex()];
+    }
 
 private:
     Window& m_window;
@@ -71,17 +64,14 @@ private:
     DescriptorSetLayout sceneDataDescriptorSetLayout;
 
     float m_renderScale{ 1.f };
-    bool m_swapchainRebuildRequired{ false };
 
-public:
     VkExtent2D drawExtent;
     Image drawImage;
     Image depthImage;
 
     // COMPUTE ******************
     DescriptorPool computeDescriptorAllocator;
-    VkDescriptorSet _drawImageDescriptors;
-    VkDescriptorSetLayout _drawImageDescriptorLayout;
+    DescriptorSet _drawImageDescriptors;
     DescriptorSetLayout drawImageDescriptorLayout;
 
     struct ComputePushConstants
