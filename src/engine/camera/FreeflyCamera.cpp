@@ -45,7 +45,7 @@ void FreeflyCamera::Reset()
         m_aspectRatio,
         m_near,
         m_far);
-};
+}
 
 void FreeflyCamera::Move(CameraMovement cameraMovement, float deltaTime)
 {
@@ -72,7 +72,7 @@ void FreeflyCamera::Move(CameraMovement cameraMovement, float deltaTime)
         m_position = m_position - m_up * velocity;
         break;
     }
-};
+}
 
 void FreeflyCamera::OnMouse(float xOffset, float yOffset, bool constrainPitch)
 {
@@ -83,7 +83,7 @@ void FreeflyCamera::OnMouse(float xOffset, float yOffset, bool constrainPitch)
     {
         m_pitch = std::clamp(m_pitch, -89.f, 89.f);
     }
-};
+}
 
 void FreeflyCamera::OnScroll(float yOffset)
 {
@@ -91,7 +91,7 @@ void FreeflyCamera::OnScroll(float yOffset)
         m_position = m_position + m_direction;
     else if (yOffset < 0)
         m_position = m_position - m_direction;
-};
+}
 
 void FreeflyCamera::Update()
 {
@@ -108,15 +108,15 @@ void FreeflyCamera::Update()
 
     m_view = lookAt(m_position, m_target, WORLD_UP);
     m_viewProjection = m_projection * m_view;
-};
+}
 
 Vector3f& FreeflyCamera::GetPosition()
 {
     return m_position;
-};
+}
 
 const Matrix4x4f& FreeflyCamera::GetViewProjection() const
 {
     return m_viewProjection;
-};
+}
 }

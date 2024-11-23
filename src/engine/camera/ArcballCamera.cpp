@@ -51,7 +51,7 @@ void ArcballCamera::Reset()
         m_aspectRatio,
         m_near,
         m_far);
-};
+}
 
 void ArcballCamera::Move(CameraMovement cameraMovement, float deltaTime)
 {
@@ -78,7 +78,7 @@ void ArcballCamera::Move(CameraMovement cameraMovement, float deltaTime)
         m_target = m_target - m_up * velocity;
         break;
     }
-};
+}
 
 void ArcballCamera::OnMouse(float xOffset, float yOffset, bool constrainPitch)
 {
@@ -89,12 +89,12 @@ void ArcballCamera::OnMouse(float xOffset, float yOffset, bool constrainPitch)
     {
         m_pitch = std::clamp(m_pitch, -89.f, 89.f);
     }
-};
+}
 
 void ArcballCamera::OnScroll(float yOffset)
 {
     m_radius = std::clamp(m_radius - yOffset, 1.0f, 100.0f);
-};
+}
 
 void ArcballCamera::Update()
 {
@@ -111,15 +111,15 @@ void ArcballCamera::Update()
 
     m_view = lookAt(m_position, m_target, WORLD_UP);
     m_viewProjection = m_projection * m_view;
-};
+}
 
 Vector3f& ArcballCamera::GetPosition()
 {
     return m_position;
-};
+}
 
 const Matrix4x4f& ArcballCamera::GetViewProjection() const
 {
     return m_viewProjection;
-};
+}
 }

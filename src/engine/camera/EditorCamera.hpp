@@ -49,7 +49,7 @@ public:
     inline constexpr bool IsType(CameraType cameraType) const
     {
         return m_cameraType == cameraType;
-    };
+    }
 
     inline static constexpr float DEFAULT_MOVEMENT_SPEED{ 1.f };
     inline static constexpr float DEFAULT_MOUSE_SENSITIVITY{ 0.05f };
