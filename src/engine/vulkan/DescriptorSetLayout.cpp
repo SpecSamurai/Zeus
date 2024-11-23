@@ -14,80 +14,10 @@ namespace Zeus
 DescriptorSetLayout::DescriptorSetLayout(
     const std::vector<Descriptor>& descriptors,
     const char* name)
-    : m_descriptors{ descriptors },
-      m_name{ name }
+    : m_descriptors{ descriptors }
 {
-    Build();
-}
-
-DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept
-    : m_handle{ other.m_handle },
-      m_descriptors{ other.m_descriptors },
-      m_name{ other.m_name }
-{
-    other.m_handle = VK_NULL_HANDLE;
-    other.m_name = nullptr;
-
-    other.m_descriptors.clear();
-}
-
-DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other)
-{
-    if (this != &other)
-    {
-        if (m_handle != VK_NULL_HANDLE)
-        {
-            Destroy();
-        }
-
-        m_handle = other.m_handle;
-        m_name = other.m_name;
-        m_descriptors = std::move(other.m_descriptors);
-
-        other.m_handle = VK_NULL_HANDLE;
-        other.m_name = nullptr;
-        other.m_descriptors.clear();
-    }
-
-    return *this;
-}
-
-DescriptorSetLayout::~DescriptorSetLayout()
-{
-    if (m_handle == VK_NULL_HANDLE)
-        return;
-
-    VkContext::GetDeletionQueue().Add(
-        ResourceType::DescriptorSetLayout,
-        m_handle);
-    m_handle = VK_NULL_HANDLE;
-    m_name = nullptr;
-    m_descriptors.clear();
-}
-
-void DescriptorSetLayout::Destroy()
-{
-    vkDestroyDescriptorSetLayout(
-        VkContext::GetLogicalDevice(),
-        m_handle,
-        allocationCallbacks.get());
-    m_handle = VK_NULL_HANDLE;
-    m_name = nullptr;
-}
-
-void DescriptorSetLayout::AddDescriptor(
-    VkDescriptorType type,
-    VkShaderStageFlags stageFlags,
-    std::uint32_t binding)
-{
-    m_descriptors.emplace_back(Descriptor(type, stageFlags, binding));
-}
-
-void DescriptorSetLayout::Build()
-{
-    assert(m_handle == VK_NULL_HANDLE && "DescriptorSetLayout already built.");
-
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings{};
+    layoutBindings.reserve(m_descriptors.size());
 
     for (const Descriptor& descriptor : m_descriptors)
     {
@@ -117,7 +47,55 @@ void DescriptorSetLayout::Build()
     VkContext::SetDebugName(
         VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT,
         m_handle,
-        m_name);
+        name);
+}
+
+DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_descriptors{ other.m_descriptors }
+{
+    other.m_handle = VK_NULL_HANDLE;
+    other.m_descriptors.clear();
+}
+
+DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+        m_descriptors = std::move(other.m_descriptors);
+
+        other.m_handle = VK_NULL_HANDLE;
+        other.m_descriptors.clear();
+    }
+
+    return *this;
+}
+
+DescriptorSetLayout::~DescriptorSetLayout()
+{
+    if (m_handle == VK_NULL_HANDLE)
+        return;
+
+    VkContext::GetDeletionQueue().Add(
+        ResourceType::DescriptorSetLayout,
+        m_handle);
+    m_handle = VK_NULL_HANDLE;
+    m_descriptors.clear();
+}
+
+void DescriptorSetLayout::Destroy()
+{
+    vkDestroyDescriptorSetLayout(
+        VkContext::GetLogicalDevice(),
+        m_handle,
+        allocationCallbacks.get());
+    m_handle = VK_NULL_HANDLE;
 }
 
 const VkDescriptorSetLayout& DescriptorSetLayout::GetHandle() const

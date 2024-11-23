@@ -24,14 +24,8 @@ public:
     DescriptorSetLayout& operator=(DescriptorSetLayout&& other);
 
     ~DescriptorSetLayout();
+
     void Destroy();
-
-    void AddDescriptor(
-        VkDescriptorType type,
-        VkShaderStageFlags stageFlags,
-        std::uint32_t binding);
-
-    void Build();
 
     const VkDescriptorSetLayout& GetHandle() const;
     const std::vector<Descriptor>& GetDescriptors() const;
@@ -39,7 +33,5 @@ public:
 private:
     VkDescriptorSetLayout m_handle{ VK_NULL_HANDLE };
     std::vector<Descriptor> m_descriptors;
-
-    const char* m_name{ nullptr };
 };
 }
