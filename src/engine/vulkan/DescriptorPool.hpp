@@ -31,10 +31,6 @@ public:
 
     VkDescriptorPool GetHandle() const;
 
-    static VkDescriptorPoolSize CreatePoolSize(
-        VkDescriptorType type,
-        std::uint32_t descriptorCount);
-
 private:
     VkDescriptorPool m_handle{ VK_NULL_HANDLE };
 };

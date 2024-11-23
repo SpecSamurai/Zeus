@@ -106,14 +106,4 @@ VkDescriptorPool DescriptorPool::GetHandle() const
 {
     return m_handle;
 }
-
-VkDescriptorPoolSize DescriptorPool::CreatePoolSize(
-    VkDescriptorType type,
-    std::uint32_t descriptorCount)
-{
-    return VkDescriptorPoolSize{
-        .type = type,
-        .descriptorCount = descriptorCount,
-    };
-}
 }
