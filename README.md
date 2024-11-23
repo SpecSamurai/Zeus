@@ -73,3 +73,4 @@ ctest --preset test
 
 ## Environment variables
 - `VULKAN_SDK` specifies the location of the Vulkan SDK root directory
+- `LLDB_USE_NATIVE_PDB_READER` set to `yes` or `1` workaround for console LLDB on windows not loading symbols.
