@@ -145,6 +145,7 @@ add_library(Engine
     vulkan/Shader.hpp
     vulkan/Swapchain.cpp
     vulkan/Swapchain.hpp
+    vulkan/Vertex.hpp
     vulkan/VertexInput.cpp
     vulkan/VertexInput.hpp
     vulkan/VkContext.cpp
