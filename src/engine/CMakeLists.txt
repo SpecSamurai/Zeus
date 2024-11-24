@@ -92,11 +92,11 @@ add_library(Engine
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
 
+    profiling/Timer.cpp
+    profiling/Timer.hpp
+
     rendering/Renderer.cpp
     rendering/Renderer.hpp
-
-    time/Timer.cpp
-    time/Timer.hpp
 
     vulkan/BlendState.cpp
     vulkan/BlendState.hpp
