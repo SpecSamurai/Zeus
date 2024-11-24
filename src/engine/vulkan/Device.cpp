@@ -14,7 +14,7 @@
 
 namespace Zeus
 {
-void Device::Init(VkInstance instance, VkSurfaceKHR surface)
+void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
 {
     VkPhysicalDeviceFeatures requestedFeatures{};
     requestedFeatures.sampleRateShading = VK_TRUE;
@@ -136,7 +136,7 @@ void Device::Init(VkInstance instance, VkSurfaceKHR surface)
         "Failed to create logical device.");
 
     // Initialization below relies on an initialized logical device
-    m_deletionQueue.Init(m_logicalDevice);
+    m_deletionQueue.Initialize(m_logicalDevice);
 
     m_graphicsQueue =
         Queue(QueueType::Graphics, graphicsFamily, "Queue Graphics");

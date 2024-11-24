@@ -25,14 +25,12 @@ FetchContent_MakeAvailable(fastgltf)
 set_target_properties(fastgltf PROPERTIES FOLDER "Libraries")
 
 add_library(Engine
-    defines.hpp
-    entry_point.cpp
-    entry_point.hpp
-
     application/Application.cpp
     application/Application.hpp
     application/CommandLineArgs.cpp
     application/CommandLineArgs.hpp
+    application/entry_point.cpp
+    application/entry_point.hpp
 
     camera/camera_utils.cpp
     camera/camera_utils.hpp
@@ -44,6 +42,10 @@ add_library(Engine
 
     commands/CommandStack.hpp
     commands/ICommand.hpp
+
+    core/defines.hpp
+    core/Engine.cpp
+    core/Engine.hpp
 
     ecs/Definitions.hpp
     ecs/FamilyId.hpp

@@ -19,7 +19,7 @@ class Window
 public:
     Window(const WindowProperties& properties);
 
-    void Init();
+    void Initialize();
     void Destroy();
 
     void Update();

@@ -24,7 +24,7 @@ Window::Window(const WindowProperties& properties)
 {
 }
 
-void Window::Init()
+void Window::Initialize()
 {
     m_handle = createGlfwWindow(
         static_cast<int>(m_data.width),

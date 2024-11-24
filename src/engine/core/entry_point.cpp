@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 {
     auto app{ Zeus::CreateApplication(Zeus::CommandLineArgs(argv, argc)) };
 
-    app->Init();
+    app->Initialize();
 
     app->Run();
 

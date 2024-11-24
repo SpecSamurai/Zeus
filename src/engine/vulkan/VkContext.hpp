@@ -15,7 +15,7 @@ namespace Zeus
 class VkContext
 {
 public:
-    static void Init(const Window& window);
+    static void Initialize(const Window& window);
     static void Destroy();
 
     static VkInstance GetInstance();

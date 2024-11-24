@@ -19,7 +19,7 @@ DeletionQueue::~DeletionQueue()
     Clear();
 }
 
-void DeletionQueue::Init(VkDevice device)
+void DeletionQueue::Initialize(VkDevice device)
 {
     m_device = device;
     m_resources.reserve(static_cast<std::size_t>(ResourceType::Count));

@@ -23,7 +23,7 @@ VkSurfaceKHR VkContext::s_surface{ VK_NULL_HANDLE };
 Device VkContext::s_device{};
 VmaAllocator VkContext::s_allocator{ VK_NULL_HANDLE };
 
-void VkContext::Init(const Window& window)
+void VkContext::Initialize(const Window& window)
 {
     InstanceBuilder instanceBuilder;
     instanceBuilder.SetApiVersion(VK_API_VERSION_1_3);
@@ -39,7 +39,7 @@ void VkContext::Init(const Window& window)
     s_debugUtilsMessenger = instance.debugUtilsMessenger;
 
     createVkSurfaceKHR(s_instance, window.GetHandle(), &s_surface);
-    s_device.Init(s_instance, s_surface);
+    s_device.Initialize(s_instance, s_surface);
 
     VmaAllocatorCreateInfo createInfo{};
     createInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;

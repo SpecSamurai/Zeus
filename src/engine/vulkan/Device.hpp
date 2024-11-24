@@ -17,7 +17,7 @@ namespace Zeus
 class Device
 {
 public:
-    void Init(VkInstance instance, VkSurfaceKHR surface);
+    void Initialize(VkInstance instance, VkSurfaceKHR surface);
     void Destroy();
 
     void Wait();

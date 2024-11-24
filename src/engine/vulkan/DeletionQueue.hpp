@@ -15,7 +15,7 @@ class DeletionQueue
 {
 public:
     ~DeletionQueue();
-    void Init(VkDevice device);
+    void Initialize(VkDevice device);
     void Add(const ResourceType type, void* handle);
     void Clear();
 
