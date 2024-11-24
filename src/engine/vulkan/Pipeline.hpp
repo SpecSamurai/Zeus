@@ -19,6 +19,12 @@ public:
         const std::vector<PushConstants>& pushConstants,
         const char* name = nullptr);
 
+    Pipeline(const Pipeline&) = delete;
+    Pipeline& operator=(const Pipeline&) = delete;
+
+    Pipeline(Pipeline&& other) noexcept;
+    Pipeline& operator=(Pipeline&& other);
+
     ~Pipeline();
 
     void Destroy();

@@ -74,6 +74,41 @@ Pipeline::Pipeline(
         layoutName.c_str());
 }
 
+Pipeline::Pipeline(Pipeline&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_pipelineLayout{ other.m_pipelineLayout },
+      m_state{ other.m_state },
+      m_name{ other.m_name },
+      m_bindPoint{ other.m_bindPoint }
+{
+    other.m_handle = VK_NULL_HANDLE;
+    other.m_pipelineLayout = VK_NULL_HANDLE;
+    other.m_name = nullptr;
+}
+
+Pipeline& Pipeline::operator=(Pipeline&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_handle = other.m_handle;
+        m_pipelineLayout = other.m_pipelineLayout;
+        // m_state = other.m_state;
+        m_name = other.m_name;
+        m_bindPoint = other.m_bindPoint;
+
+        other.m_handle = VK_NULL_HANDLE;
+        other.m_pipelineLayout = VK_NULL_HANDLE;
+        other.m_name = nullptr;
+    }
+
+    return *this;
+}
+
 Pipeline::~Pipeline()
 {
     if (m_handle != VK_NULL_HANDLE)

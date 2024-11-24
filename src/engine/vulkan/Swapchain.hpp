@@ -23,12 +23,21 @@ class Swapchain
     };
 
 public:
+    Swapchain() = default;
     Swapchain(
         const VkSurfaceKHR surface,
         const std::uint32_t width,
         const std::uint32_t height,
         const VkPresentModeKHR presentMode,
         const std::uint32_t frameCount);
+
+    Swapchain(const Swapchain&) = delete;
+    Swapchain& operator=(const Swapchain&) = delete;
+
+    Swapchain(Swapchain&& other) noexcept;
+    Swapchain& operator=(Swapchain&& other);
+
+    ~Swapchain();
 
     void Create();
     void Destroy();
@@ -97,6 +106,6 @@ private:
     VkPresentModeKHR m_presentMode;
     VkFormat m_imageFormat;
 
-    bool m_resizeRequired{};
+    bool m_resizeRequired{ false };
 };
 }

@@ -38,6 +38,65 @@ Swapchain::Swapchain(
     Create();
 }
 
+Swapchain::Swapchain(Swapchain&& other) noexcept
+    : m_surface{ other.m_surface },
+      m_handle{ other.m_handle },
+      m_images{ std::move(other.m_images) },
+      m_imageViews{ std::move(other.m_imageViews) },
+      m_layouts{ std::move(other.m_layouts) },
+      m_frames{ std::move(other.m_frames) },
+      m_imageIndex{ other.m_imageIndex },
+      m_imageCount{ other.m_imageCount },
+      m_frameIndex{ other.m_frameIndex },
+      m_framesCount{ other.m_framesCount },
+      m_extent{ other.m_extent },
+      m_presentMode{ other.m_presentMode },
+      m_imageFormat{ other.m_imageFormat },
+      m_resizeRequired{ other.m_resizeRequired }
+{
+    other.m_surface = VK_NULL_HANDLE;
+    other.m_handle = VK_NULL_HANDLE;
+}
+
+Swapchain& Swapchain::operator=(Swapchain&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            Destroy();
+        }
+
+        m_surface = other.m_surface;
+        m_handle = other.m_handle;
+        m_images = std::move(other.m_images);
+        m_imageViews = std::move(other.m_imageViews);
+        m_layouts = std::move(other.m_layouts);
+        m_frames = std::move(other.m_frames);
+        m_imageIndex = other.m_imageIndex;
+        m_imageCount = other.m_imageCount;
+        m_frameIndex = other.m_frameIndex;
+        m_framesCount = other.m_framesCount;
+        m_extent = other.m_extent;
+        m_presentMode = other.m_presentMode;
+        m_imageFormat = other.m_imageFormat;
+        m_resizeRequired = other.m_resizeRequired;
+
+        other.m_surface = VK_NULL_HANDLE;
+        other.m_handle = VK_NULL_HANDLE;
+    }
+
+    return *this;
+}
+
+Swapchain::~Swapchain()
+{
+    if (m_handle == VK_NULL_HANDLE)
+        return;
+
+    Destroy();
+}
+
 void Swapchain::Create()
 {
     SurfaceDetails surfaceDetails{
