@@ -7,9 +7,11 @@ namespace Zeus
 class Sampler
 {
 public:
+    Sampler() = default;
+
     Sampler(
-        VkFilter magFilter = VK_FILTER_NEAREST,
-        VkFilter minFilter = VK_FILTER_NEAREST,
+        VkFilter magFilter,
+        VkFilter minFilter,
         VkSamplerMipmapMode mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST,
         VkSamplerAddressMode addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
         float mipLodBias = 0.f,
