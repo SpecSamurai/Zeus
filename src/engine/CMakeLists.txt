@@ -97,6 +97,8 @@ add_library(Engine
 
     rendering/Renderer.cpp
     rendering/Renderer.hpp
+    rendering/Renderer_resources.cpp
+    rendering/Renderer_resources.hpp
 
     vulkan/BlendState.cpp
     vulkan/BlendState.hpp
@@ -240,3 +242,15 @@ endforeach(SHADER_FILE)
 add_custom_target(Shaders ALL
     DEPENDS ${SPIRV_BINARY_FILES}
     SOURCES ${SHADER_SOURCE_FILES})
+
+file(GLOB_RECURSE ASSETS_SOURCE_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/assets/*"
+)
+
+foreach(ASSET_FILE ${ASSETS_SOURCE_FILES})
+    get_filename_component(FILE_NAME ${ASSET_FILE} NAME)
+
+    configure_file(
+        ${ASSET_FILE} "${CMAKE_CURRENT_BINARY_DIR}/assets/${FILE_NAME}"
+        COPYONLY)
+endforeach(ASSET_FILE)

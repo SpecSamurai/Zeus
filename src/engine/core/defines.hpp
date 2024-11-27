@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #if defined(_WIN32)
 #define PLATFORM_WINDOWS
 #ifndef _WIN64
@@ -26,3 +28,8 @@
 #define API
 #endif
 #endif
+
+namespace Zeus
+{
+inline const std::string AssetsFolderPath{ "../engine/assets" };
+}
