@@ -66,12 +66,15 @@ Pipeline::Pipeline(
 
     VkContext::SetDebugName(VK_OBJECT_TYPE_PIPELINE, m_handle, m_name);
 
-    std::string layoutName(m_name);
-    layoutName += "_Layout";
-    VkContext::SetDebugName(
-        VK_OBJECT_TYPE_PIPELINE_LAYOUT,
-        m_pipelineLayout,
-        layoutName.c_str());
+    if (m_name)
+    {
+        std::string layoutName(m_name);
+        layoutName += "_Layout";
+        VkContext::SetDebugName(
+            VK_OBJECT_TYPE_PIPELINE_LAYOUT,
+            m_pipelineLayout,
+            layoutName.c_str());
+    }
 }
 
 Pipeline::Pipeline(Pipeline&& other) noexcept
