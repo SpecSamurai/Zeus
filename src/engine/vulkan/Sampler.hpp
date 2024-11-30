@@ -2,6 +2,8 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <string_view>
+
 namespace Zeus
 {
 class Sampler
@@ -18,7 +20,7 @@ public:
         float maxAnisotropy = 0.f,
         VkBool32 compareEnable = VK_FALSE,
         VkCompareOp compareOp = VK_COMPARE_OP_NEVER,
-        const char* name = nullptr);
+        std::string_view name = "");
 
     Sampler(const Sampler&) = delete;
     Sampler& operator=(const Sampler&) = delete;

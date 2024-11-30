@@ -5,6 +5,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <string_view>
 
 namespace Zeus
 {
@@ -15,7 +16,7 @@ public:
     Queue(
         const QueueType type,
         std::uint32_t family,
-        const char* name = nullptr);
+        std::string_view name = "");
 
     Queue(const Queue&) = delete;
     Queue& operator=(const Queue&) = delete;

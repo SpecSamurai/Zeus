@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <string_view>
 
 namespace Zeus
 {
@@ -11,7 +12,7 @@ class Semaphore
 {
 public:
     Semaphore() = default;
-    Semaphore(bool isTimeline, const char* name = nullptr);
+    Semaphore(bool isTimeline, std::string_view name = "");
 
     Semaphore(const Semaphore&) = delete;
     Semaphore& operator=(const Semaphore&) = delete;

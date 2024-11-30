@@ -6,6 +6,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -13,7 +14,7 @@ namespace Zeus
 CommandPool::CommandPool(
     std::uint32_t queueFamilyIndex,
     VkCommandPoolCreateFlagBits createFlags,
-    const char* name)
+    std::string_view name)
 {
     VkCommandPoolCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

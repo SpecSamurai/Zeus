@@ -9,6 +9,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <string_view>
 
 namespace Zeus
 {
@@ -31,7 +32,7 @@ public:
     static void SetDebugName(
         VkObjectType objectType,
         void* handle,
-        const char* name);
+        std::string_view name);
 
 private:
     static VkInstance s_instance;

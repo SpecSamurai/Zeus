@@ -6,6 +6,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -14,7 +15,7 @@ DescriptorPool::DescriptorPool(
     std::uint32_t maxSets,
     const std::vector<VkDescriptorPoolSize>& poolSizes,
     VkDescriptorPoolCreateFlags flags,
-    const char* name)
+    std::string_view name)
 {
     VkDescriptorPoolCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;

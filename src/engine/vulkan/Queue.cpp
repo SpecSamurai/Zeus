@@ -8,10 +8,11 @@
 
 #include <cassert>
 #include <cstdint>
+#include <string_view>
 
 namespace Zeus
 {
-Queue::Queue(const QueueType type, std::uint32_t family, const char* name)
+Queue::Queue(const QueueType type, std::uint32_t family, std::string_view name)
     : m_type{ type },
       m_family{ family }
 {

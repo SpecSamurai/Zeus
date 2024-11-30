@@ -10,7 +10,9 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <format>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -19,9 +21,9 @@ Pipeline::Pipeline(
     const PipelineState& pipelineState,
     const std::vector<DescriptorSetLayout*>& descriptorSetLayouts,
     const std::vector<PushConstants>& pushConstants,
-    const char* name)
+    std::string_view name)
     : m_state{ pipelineState },
-      m_name(name)
+      m_name{ name }
 {
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetLayouts.size());
     for (std::uint32_t i{ 0 }; i < descriptorSetLayouts.size(); ++i)
@@ -65,28 +67,21 @@ Pipeline::Pipeline(
     }
 
     VkContext::SetDebugName(VK_OBJECT_TYPE_PIPELINE, m_handle, m_name);
-
-    if (m_name)
-    {
-        std::string layoutName(m_name);
-        layoutName += "_Layout";
-        VkContext::SetDebugName(
-            VK_OBJECT_TYPE_PIPELINE_LAYOUT,
-            m_pipelineLayout,
-            layoutName.c_str());
-    }
+    VkContext::SetDebugName(
+        VK_OBJECT_TYPE_PIPELINE_LAYOUT,
+        m_pipelineLayout,
+        m_name.empty() ? "" : std::format("{}_Layout", m_name));
 }
 
 Pipeline::Pipeline(Pipeline&& other) noexcept
     : m_handle{ other.m_handle },
       m_pipelineLayout{ other.m_pipelineLayout },
       m_state{ other.m_state },
-      m_name{ other.m_name },
+      m_name{ std::move(other.m_name) },
       m_bindPoint{ other.m_bindPoint }
 {
     other.m_handle = VK_NULL_HANDLE;
     other.m_pipelineLayout = VK_NULL_HANDLE;
-    other.m_name = nullptr;
 }
 
 Pipeline& Pipeline::operator=(Pipeline&& other)
@@ -101,12 +96,11 @@ Pipeline& Pipeline::operator=(Pipeline&& other)
         m_handle = other.m_handle;
         m_pipelineLayout = other.m_pipelineLayout;
         // m_state = other.m_state;
-        m_name = other.m_name;
+        m_name = std::move(other.m_name);
         m_bindPoint = other.m_bindPoint;
 
         other.m_handle = VK_NULL_HANDLE;
         other.m_pipelineLayout = VK_NULL_HANDLE;
-        other.m_name = nullptr;
     }
 
     return *this;
@@ -142,8 +136,6 @@ void Pipeline::Destroy()
         m_pipelineLayout,
         allocationCallbacks.get());
     m_pipelineLayout = VK_NULL_HANDLE;
-
-    m_name = nullptr;
 }
 
 VkPipeline Pipeline::GetHandle() const
@@ -161,7 +153,7 @@ const PipelineState& Pipeline::GetState() const
     return m_state;
 }
 
-const char* Pipeline::GetName() const
+std::string_view Pipeline::GetName() const
 {
     return m_name;
 }

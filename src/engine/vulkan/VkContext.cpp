@@ -14,6 +14,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <string_view>
 
 namespace Zeus
 {
@@ -120,16 +121,16 @@ std::uint32_t VkContext::GetQueueFamily(QueueType type)
 void VkContext::SetDebugName(
     VkObjectType objectType,
     void* handle,
-    const char* name)
+    std::string_view name)
 {
 #ifndef NDEBUG
-    if (name != nullptr)
+    if (!name.empty())
     {
         setDebugUtilsObjectNameEXT(
             s_device.GetLogicalDevice(),
             objectType,
             reinterpret_cast<std::uint64_t>(handle),
-            name);
+            name.data());
     }
 #endif
 }

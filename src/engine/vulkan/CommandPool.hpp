@@ -3,6 +3,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -14,7 +15,7 @@ public:
     CommandPool(
         std::uint32_t queueFamilyIndex,
         VkCommandPoolCreateFlagBits createFlags = {},
-        const char* name = nullptr);
+        std::string_view name = "");
 
     CommandPool(const CommandPool&) = delete;
     CommandPool& operator=(const CommandPool&) = delete;

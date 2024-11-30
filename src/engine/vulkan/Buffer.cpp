@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <string_view>
 
 namespace Zeus
 {
@@ -16,7 +17,7 @@ Buffer::Buffer(
     VkDeviceSize size,
     VkMemoryPropertyFlags memoryPropertyFlags,
     bool mapped,
-    const char* name)
+    std::string_view name)
     : m_usage{ usage },
       m_mapped{ mapped }
 {

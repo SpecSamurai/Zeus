@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <string_view>
 
 namespace Zeus
 {
@@ -11,7 +12,7 @@ class Fence
 {
 public:
     Fence() = default;
-    Fence(bool signaled, const char* name = nullptr);
+    Fence(bool signaled, std::string_view name = "");
 
     Fence(const Fence&) = delete;
     Fence& operator=(const Fence&) = delete;

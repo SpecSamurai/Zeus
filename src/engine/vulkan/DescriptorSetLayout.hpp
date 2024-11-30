@@ -4,6 +4,7 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -15,7 +16,7 @@ public:
 
     DescriptorSetLayout(
         const std::vector<Descriptor>& descriptors,
-        const char* name = nullptr);
+        std::string_view name = "");
 
     DescriptorSetLayout(const DescriptorSetLayout&) = delete;
     DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;

@@ -4,6 +4,7 @@
 #include "VkContext.hpp"
 #include "rhi/vulkan_debug.hpp"
 
+#include <string_view>
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
@@ -60,7 +61,7 @@ Shader::Shader(
     VkShaderStageFlagBits shaderStage,
     const char* entryPoint,
     const std::vector<VertexInput>&& vertexInputs,
-    const char* name)
+    std::string_view name)
     : m_vertexInputs{ std::move(vertexInputs) },
       m_entryPoint(entryPoint),
       m_filePath(filePath),

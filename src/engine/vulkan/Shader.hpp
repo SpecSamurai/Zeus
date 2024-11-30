@@ -5,6 +5,7 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -18,7 +19,7 @@ public:
         VkShaderStageFlagBits shaderStage,
         const char* entryPoint = "main",
         const std::vector<VertexInput>&& vertexInputs = {},
-        const char* name = nullptr);
+        std::string_view name = "");
 
     Shader(const Shader&) = delete;
     Shader& operator=(const Shader&) = delete;

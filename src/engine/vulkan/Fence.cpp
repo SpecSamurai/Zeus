@@ -7,10 +7,11 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <string_view>
 
 namespace Zeus
 {
-Fence::Fence(bool signaled, const char* name)
+Fence::Fence(bool signaled, std::string_view name)
 {
     createVkFence(VkContext::GetLogicalDevice(), signaled, &m_handle);
 

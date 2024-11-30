@@ -5,6 +5,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstddef>
+#include <string_view>
 
 namespace Zeus
 {
@@ -17,7 +18,7 @@ public:
         VkDeviceSize size,
         VkMemoryPropertyFlags memoryPropertyFlags,
         bool mapped = false,
-        const char* name = nullptr);
+        std::string_view name = "");
 
     Buffer(const Buffer&) = delete;
     Buffer& operator=(const Buffer&) = delete;

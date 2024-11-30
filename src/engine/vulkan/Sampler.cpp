@@ -6,6 +6,8 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <string_view>
+
 namespace Zeus
 {
 Sampler::Sampler(
@@ -17,7 +19,7 @@ Sampler::Sampler(
     float maxAnisotropy,
     VkBool32 compareEnable,
     VkCompareOp compareOp,
-    const char* name)
+    std::string_view name)
 {
     VkSamplerCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;

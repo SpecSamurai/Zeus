@@ -6,6 +6,7 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -17,7 +18,7 @@ public:
         const PipelineState& pipelineState,
         const std::vector<DescriptorSetLayout*>& descriptorSetLayouts,
         const std::vector<PushConstants>& pushConstants,
-        const char* name = nullptr);
+        std::string_view name = "");
 
     Pipeline(const Pipeline&) = delete;
     Pipeline& operator=(const Pipeline&) = delete;
@@ -32,7 +33,7 @@ public:
     VkPipeline GetHandle() const;
     VkPipelineLayout GetLayout() const;
     const PipelineState& GetState() const;
-    const char* GetName() const;
+    std::string_view GetName() const;
     VkPipelineBindPoint GetBindPoint() const;
 
 private:
@@ -47,7 +48,7 @@ private:
     VkPipeline m_handle{ VK_NULL_HANDLE };
     VkPipelineLayout m_pipelineLayout{ VK_NULL_HANDLE };
     const PipelineState& m_state;
-    const char* m_name;
+    std::string_view m_name;
     VkPipelineBindPoint m_bindPoint;
 };
 }

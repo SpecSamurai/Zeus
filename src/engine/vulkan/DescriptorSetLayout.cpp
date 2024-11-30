@@ -7,13 +7,14 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <string_view>
 #include <vector>
 
 namespace Zeus
 {
 DescriptorSetLayout::DescriptorSetLayout(
     const std::vector<Descriptor>& descriptors,
-    const char* name)
+    std::string_view name)
     : m_descriptors{ descriptors }
 {
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings{};

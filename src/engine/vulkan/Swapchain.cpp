@@ -13,6 +13,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <format>
 #include <limits>
 #include <vector>
 
@@ -248,18 +249,15 @@ void Swapchain::Create()
                 &m_imageViews[i]),
             "Failed to create swapchain image view.");
 
-        std::string imageName{ "Image Swapchain " + std::to_string(i) };
         VkContext::SetDebugName(
             VK_OBJECT_TYPE_IMAGE,
             m_images[i],
-            imageName.c_str());
+            std::format("Image Swapchain {}", i));
 
-        std::string imageViewName{ "Image View Swapchain " +
-                                   std::to_string(i) };
         VkContext::SetDebugName(
             VK_OBJECT_TYPE_IMAGE_VIEW,
             m_imageViews[i],
-            imageViewName.c_str());
+            std::format("Image View Swapchain {}", i));
     }
 
     m_frames.reserve(m_framesCount);

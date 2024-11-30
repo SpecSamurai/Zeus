@@ -8,10 +8,11 @@
 
 #include <cassert>
 #include <cstdint>
+#include <string_view>
 
 namespace Zeus
 {
-Semaphore::Semaphore(bool isTimeline, const char* name)
+Semaphore::Semaphore(bool isTimeline, std::string_view name)
     : m_isTimeline{ isTimeline }
 {
     createVkSemaphore(VkContext::GetLogicalDevice(), &m_handle, m_isTimeline);

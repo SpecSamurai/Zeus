@@ -3,6 +3,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -15,7 +16,8 @@ public:
         std::uint32_t maxSets,
         const std::vector<VkDescriptorPoolSize>& poolSizes,
         VkDescriptorPoolCreateFlags flags = {},
-        const char* name = nullptr);
+        std::string_view name = "");
+
     ~DescriptorPool();
 
     DescriptorPool(const DescriptorPool&) = delete;
