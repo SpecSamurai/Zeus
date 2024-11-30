@@ -4,14 +4,6 @@
 
 namespace Zeus
 {
-const DepthStencilState DepthStencilState::Disabled{ DepthStencilState() };
-const DepthStencilState DepthStencilState::Enabled{ DepthStencilState(
-    VK_TRUE,
-    VK_TRUE,
-    VK_COMPARE_OP_GREATER_OR_EQUAL,
-    VK_FALSE,
-    VK_FALSE) };
-
 DepthStencilState::DepthStencilState(
     VkBool32 depthTestEnable,
     VkBool32 depthWriteEnable,

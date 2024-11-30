@@ -139,21 +139,22 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
     m_deletionQueue.Initialize(m_logicalDevice);
 
     m_graphicsQueue =
-        Queue(QueueType::Graphics, graphicsFamily, "Queue Graphics");
-    m_presentQueue = Queue(QueueType::Present, presentFamily, "Queue Present");
+        Queue(QueueType::Graphics, graphicsFamily, "Queue_Graphics");
+    m_presentQueue = Queue(QueueType::Present, presentFamily, "Queue_Present");
     m_transferQueue =
-        Queue(QueueType::Transfer, transferFamily, "Queue Transfer");
-    m_computeQueue = Queue(QueueType::Compute, computeFamily, "Queue Compute");
+        Queue(QueueType::Transfer, transferFamily, "Queue_Transfer");
+    m_computeQueue = Queue(QueueType::Compute, computeFamily, "Queue_Compute");
 
     m_ImmediateSubmitCommandPool = CommandPool(
         transferFamily,
         VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        "CommandPool Immediate");
+        "CommandPool_ImmediateSubmit");
 
-    m_ImmediateSubmitCommandBuffer =
-        CommandBuffer(m_ImmediateSubmitCommandPool, "CommandBuffer Immediate");
+    m_ImmediateSubmitCommandBuffer = CommandBuffer(
+        m_ImmediateSubmitCommandPool,
+        "CommandBuffer_ImmediateSubmit");
 
-    m_ImmediateSubmitFence = Fence(true, "Fence Immediate Submit");
+    m_ImmediateSubmitFence = Fence(true, "Fence_ImmediateSubmit");
 }
 
 void Device::Destroy()
@@ -169,12 +170,12 @@ void Device::Destroy()
     m_physicalDevice = VK_NULL_HANDLE;
 }
 
-void Device::Wait()
+void Device::Wait() const
 {
     vkDeviceWaitIdle(m_logicalDevice);
 }
 
-void Device::WaitAll()
+void Device::WaitAll() const
 {
     m_graphicsQueue.Wait();
     m_presentQueue.Wait();

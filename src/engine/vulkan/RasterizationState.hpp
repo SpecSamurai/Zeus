@@ -30,8 +30,6 @@ public:
     VkBool32 GetDepthClampEnable() const;
     VkBool32 GetDepthBiasEnable() const;
 
-    static const RasterizationState Default;
-
 private:
     VkPolygonMode m_polygonMode;
     VkCullModeFlags m_cullMode;

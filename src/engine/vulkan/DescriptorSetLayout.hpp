@@ -28,7 +28,7 @@ public:
 
     void Destroy();
 
-    const VkDescriptorSetLayout& GetHandle() const;
+    VkDescriptorSetLayout GetHandle() const;
     const std::vector<Descriptor>& GetDescriptors() const;
 
 private:

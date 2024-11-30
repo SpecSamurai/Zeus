@@ -34,7 +34,7 @@ public:
         std::vector<VkCommandBuffer>& commandBuffers,
         VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY) const;
 
-    void Reset(VkCommandPoolResetFlags flags = 0);
+    void Reset(VkCommandPoolResetFlags flags = 0) const;
 
     VkCommandPool GetHandle() const;
 

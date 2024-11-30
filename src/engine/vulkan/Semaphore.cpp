@@ -2,7 +2,6 @@
 
 #include "VkContext.hpp"
 #include "rhi/vulkan_debug.hpp"
-#include "rhi/vulkan_sync.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -15,7 +14,24 @@ namespace Zeus
 Semaphore::Semaphore(bool isTimeline, std::string_view name)
     : m_isTimeline{ isTimeline }
 {
-    createVkSemaphore(VkContext::GetLogicalDevice(), &m_handle, m_isTimeline);
+    VkSemaphoreTypeCreateInfo typeCreateInfo{};
+    typeCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
+    typeCreateInfo.pNext = nullptr;
+    typeCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+    typeCreateInfo.initialValue = 0;
+
+    VkSemaphoreCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    createInfo.pNext = m_isTimeline ? &typeCreateInfo : nullptr;
+    createInfo.flags = 0;
+
+    VKCHECK(
+        vkCreateSemaphore(
+            VkContext::GetLogicalDevice(),
+            &createInfo,
+            allocationCallbacks.get(),
+            &m_handle),
+        "Failed to create Semaphore.");
 
     VkContext::SetDebugName(VK_OBJECT_TYPE_SEMAPHORE, m_handle, name);
 }
@@ -64,21 +80,36 @@ void Semaphore::Destroy()
 }
 
 void Semaphore::Wait(const std::uint64_t value, const std::uint64_t timeout_ns)
+    const
 {
     assert(m_isTimeline);
 
-    waitVkSemaphores(
-        VkContext::GetLogicalDevice(),
-        &m_handle,
-        value,
-        timeout_ns);
+    VkSemaphoreWaitInfo waitInfo{};
+    waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+    waitInfo.pNext = nullptr;
+    waitInfo.flags = 0;
+    waitInfo.semaphoreCount = 1;
+    waitInfo.pSemaphores = &m_handle;
+    waitInfo.pValues = &value;
+
+    VKCHECK(
+        vkWaitSemaphores(VkContext::GetLogicalDevice(), &waitInfo, timeout_ns),
+        "Failed to wait for Semaphore.");
 }
 
-void Semaphore::Signal(const std::uint64_t value)
+void Semaphore::Signal(const std::uint64_t value) const
 {
     assert(m_isTimeline);
 
-    signalVkSemaphores(VkContext::GetLogicalDevice(), m_handle, value);
+    VkSemaphoreSignalInfo signalInfo{};
+    signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO;
+    signalInfo.pNext = nullptr;
+    signalInfo.semaphore = m_handle;
+    signalInfo.value = value;
+
+    VKCHECK(
+        vkSignalSemaphore(VkContext::GetLogicalDevice(), &signalInfo),
+        "Failed to signal Semaphore.");
 }
 
 std::uint64_t Semaphore::GetValue() const
@@ -97,7 +128,7 @@ std::uint64_t Semaphore::GetValue() const
     return value;
 }
 
-const VkSemaphore& Semaphore::GetHandle() const
+VkSemaphore Semaphore::GetHandle() const
 {
     return m_handle;
 }

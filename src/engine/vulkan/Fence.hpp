@@ -25,12 +25,13 @@ public:
 
     // timeout_ns - timeout in nanoseconds
     bool Wait(
-        std::uint64_t timeout_ns = std::numeric_limits<std::uint64_t>::max());
-    void Reset();
+        std::uint64_t timeout_ns =
+            std::numeric_limits<std::uint64_t>::max()) const;
+    void Reset() const;
 
     bool Signaled() const;
 
-    const VkFence& GetHandle() const;
+    VkFence GetHandle() const;
 
 private:
     VkFence m_handle{ VK_NULL_HANDLE };

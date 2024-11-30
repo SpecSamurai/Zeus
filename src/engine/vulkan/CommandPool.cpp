@@ -111,7 +111,7 @@ void CommandPool::AllocateBuffers(
         "Failed to allocate command buffers.");
 }
 
-void CommandPool::Reset(VkCommandPoolResetFlags flags)
+void CommandPool::Reset(VkCommandPoolResetFlags flags) const
 {
     VKCHECK(
         vkResetCommandPool(VkContext::GetLogicalDevice(), m_handle, flags),

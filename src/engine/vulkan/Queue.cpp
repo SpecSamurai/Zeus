@@ -43,7 +43,7 @@ Queue& Queue::operator=(Queue&& other)
     return *this;
 }
 
-void Queue::Wait()
+void Queue::Wait() const
 {
     VKCHECK(vkQueueWaitIdle(m_handle), "Failed to wait for Queue");
 }

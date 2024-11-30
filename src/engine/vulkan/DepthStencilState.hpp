@@ -20,9 +20,6 @@ public:
     VkBool32 GetDepthBoundsTestEnable() const;
     VkBool32 GetStencilTestEnable() const;
 
-    static const DepthStencilState Disabled;
-    static const DepthStencilState Enabled;
-
 private:
     VkBool32 m_depthTestEnable;
     VkBool32 m_depthWriteEnable;

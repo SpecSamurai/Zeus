@@ -29,13 +29,6 @@ public:
     VkBlendOp GetAlphaBlendOp() const;
     VkColorComponentFlags GetColorWriteMask() const;
 
-    // out = srcColor * srcColorBlendFactor <op> dstColor * dstColorBlendFactor
-    static const BlendState Disabled;
-    // out = srcColor.rgb * srcColor.a + dstColor.rgb * 1.0
-    static const BlendState AdditiveBlending;
-    // out = srcColor.rgb * srcColor.a + dstColor.rgb * (1.0 - srcColor.a)
-    static const BlendState AlphaBlending;
-
 private:
     VkBool32 m_blendEnable;
     VkBlendFactor m_srcColorBlendFactor;

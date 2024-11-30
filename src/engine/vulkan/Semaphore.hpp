@@ -27,11 +27,12 @@ public:
     void Wait(
         const std::uint64_t value,
         const std::uint64_t timeout_ns =
-            std::numeric_limits<std::uint64_t>::max());
-    void Signal(const std::uint64_t value);
+            std::numeric_limits<std::uint64_t>::max()) const;
+
+    void Signal(const std::uint64_t value) const;
 
     std::uint64_t GetValue() const;
-    const VkSemaphore& GetHandle() const;
+    VkSemaphore GetHandle() const;
 
 private:
     VkSemaphore m_handle{ VK_NULL_HANDLE };

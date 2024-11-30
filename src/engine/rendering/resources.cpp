@@ -1,4 +1,4 @@
-#include "Renderer_resources.hpp"
+#include "resources.hpp"
 
 #include "core/defines.hpp"
 

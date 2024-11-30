@@ -2,7 +2,6 @@
 
 #include "VkContext.hpp"
 #include "rhi/vulkan_debug.hpp"
-#include "rhi/vulkan_sync.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -13,7 +12,21 @@ namespace Zeus
 {
 Fence::Fence(bool signaled, std::string_view name)
 {
-    createVkFence(VkContext::GetLogicalDevice(), signaled, &m_handle);
+    VkFenceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+    if (signaled)
+    {
+        createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    }
+
+    VKCHECK(
+        vkCreateFence(
+            VkContext::GetLogicalDevice(),
+            &createInfo,
+            allocationCallbacks.get(),
+            &m_handle),
+        "Failed to create Fence.");
 
     VkContext::SetDebugName(VK_OBJECT_TYPE_FENCE, m_handle, name);
 }
@@ -57,7 +70,7 @@ void Fence::Destroy()
     m_handle = VK_NULL_HANDLE;
 }
 
-bool Fence::Wait(std::uint64_t timeout_ns)
+bool Fence::Wait(std::uint64_t timeout_ns) const
 {
     return vkWaitForFences(
                VkContext::GetLogicalDevice(),
@@ -67,7 +80,7 @@ bool Fence::Wait(std::uint64_t timeout_ns)
                timeout_ns) == VK_SUCCESS;
 }
 
-void Fence::Reset()
+void Fence::Reset() const
 {
     VKCHECK(
         vkResetFences(VkContext::GetLogicalDevice(), 1, &m_handle),
@@ -80,7 +93,7 @@ bool Fence::Signaled() const
            VK_SUCCESS;
 }
 
-const VkFence& Fence::GetHandle() const
+VkFence Fence::GetHandle() const
 {
     return m_handle;
 }

@@ -24,7 +24,7 @@ public:
     Queue(Queue&& other) noexcept;
     Queue& operator=(Queue&& other);
 
-    void Wait();
+    void Wait() const;
 
     void Submit(
         VkFence fence,

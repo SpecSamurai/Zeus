@@ -97,8 +97,12 @@ add_library(Engine
 
     rendering/Renderer.cpp
     rendering/Renderer.hpp
-    rendering/Renderer_resources.cpp
-    rendering/Renderer_resources.hpp
+
+    rendering/renderer_types.cpp
+    rendering/renderer_types.hpp
+
+    rendering/resources.cpp
+    rendering/resources.hpp
 
     vulkan/BlendState.cpp
     vulkan/BlendState.hpp
@@ -173,8 +177,6 @@ add_library(Engine
     vulkan/rhi/vulkan_renderpass.hpp
     vulkan/rhi/vulkan_surface.cpp
     vulkan/rhi/vulkan_surface.hpp
-    vulkan/rhi/vulkan_sync.cpp
-    vulkan/rhi/vulkan_sync.hpp
 
     window/glfw_utils.cpp
     window/glfw_utils.hpp

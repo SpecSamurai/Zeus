@@ -319,12 +319,15 @@ void Swapchain::Present(VkCommandBuffer commandBuffer)
             1,
             &signalSemaphoreInfo);
 
+    VkSemaphore waitSemaphores[] = {
+        CurrentFrame().renderCompleteSemaphore.GetHandle()
+    };
+
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores =
-        &CurrentFrame().renderCompleteSemaphore.GetHandle();
+    presentInfo.pWaitSemaphores = waitSemaphores;
 
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &m_handle;

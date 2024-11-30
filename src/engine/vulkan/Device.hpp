@@ -20,8 +20,8 @@ public:
     void Initialize(VkInstance instance, VkSurfaceKHR surface);
     void Destroy();
 
-    void Wait();
-    void WaitAll();
+    void Wait() const;
+    void WaitAll() const;
 
     void CmdImmediateSubmit(
         std::function<void(const CommandBuffer& cmd)>&& function);

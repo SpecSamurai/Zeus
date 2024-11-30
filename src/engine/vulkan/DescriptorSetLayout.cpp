@@ -99,7 +99,7 @@ void DescriptorSetLayout::Destroy()
     m_handle = VK_NULL_HANDLE;
 }
 
-const VkDescriptorSetLayout& DescriptorSetLayout::GetHandle() const
+VkDescriptorSetLayout DescriptorSetLayout::GetHandle() const
 {
     return m_handle;
 }

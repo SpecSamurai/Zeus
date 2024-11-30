@@ -2,8 +2,6 @@
 
 namespace Zeus
 {
-const RasterizationState RasterizationState::Default{ RasterizationState() };
-
 RasterizationState::RasterizationState(
     VkPolygonMode polygonMode,
     VkCullModeFlags cullMode,

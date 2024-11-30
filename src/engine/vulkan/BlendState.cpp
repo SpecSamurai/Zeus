@@ -4,26 +4,6 @@
 
 namespace Zeus
 {
-const BlendState BlendState::Disabled{ BlendState() };
-
-const BlendState BlendState::AdditiveBlending{ BlendState(
-    VK_TRUE,
-    VK_BLEND_FACTOR_SRC_ALPHA,
-    VK_BLEND_FACTOR_ONE,
-    VK_BLEND_OP_ADD,
-    VK_BLEND_FACTOR_ONE,
-    VK_BLEND_FACTOR_ZERO,
-    VK_BLEND_OP_ADD) };
-
-const BlendState BlendState::AlphaBlending{ BlendState(
-    VK_TRUE,
-    VK_BLEND_FACTOR_SRC_ALPHA,
-    VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
-    VK_BLEND_OP_ADD,
-    VK_BLEND_FACTOR_ONE,
-    VK_BLEND_FACTOR_ZERO,
-    VK_BLEND_OP_ADD) };
-
 BlendState::BlendState(
     VkBool32 blendEnable,
     VkBlendFactor srcColorBlendFactor,
