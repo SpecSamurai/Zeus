@@ -58,6 +58,8 @@ add_library(Engine
     events/MouseEvent.hpp
     events/WindowEvent.hpp
 
+    gltf/GltfLoader.cpp
+    gltf/GltfLoader.hpp
     gltf/utility.cpp
     gltf/utility.hpp
 
