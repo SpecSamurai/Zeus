@@ -1,67 +1,72 @@
 #include "DescriptorSet.hpp"
 
-#include "Buffer.hpp"
 #include "Descriptor.hpp"
 #include "DescriptorPool.hpp"
 #include "DescriptorSetLayout.hpp"
-#include "Image.hpp"
 #include "VkContext.hpp"
 
 #include <vulkan/vulkan_core.h>
 
 #include <cassert>
 #include <cstdint>
+#include <string_view>
 #include <vector>
 
 namespace Zeus
 {
 DescriptorSet::DescriptorSet(
-    const std::vector<Descriptor>& descriptors,
     DescriptorSetLayout& descriptorSetLayout,
     DescriptorPool& descriptorPool,
-    const char* name)
-    : m_descriptors{ descriptors }
+    std::string_view name)
 {
     m_handle = descriptorPool.Allocate(descriptorSetLayout.GetHandle());
+
     VkContext::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET, m_handle, name);
 }
 
-void DescriptorSet::Update(const std::vector<Descriptor>& descriptors)
+DescriptorSet::DescriptorSet(DescriptorSet&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_binding{ other.m_binding }
+{
+    other.m_handle = VK_NULL_HANDLE;
+}
+
+DescriptorSet& DescriptorSet::operator=(DescriptorSet&& other)
+{
+    if (this != &other)
+    {
+        if (m_handle != VK_NULL_HANDLE)
+        {
+            // Free();
+        }
+
+        m_handle = other.m_handle;
+        m_binding = other.m_binding;
+
+        other.m_handle = VK_NULL_HANDLE;
+    }
+
+    return *this;
+}
+
+void DescriptorSet::Update(
+    const std::vector<DescriptorBuffer>& bufferDescriptors,
+    const std::vector<DescriptorImage>& imageDescriptors)
 {
     std::vector<VkWriteDescriptorSet> descriptorSetWrites{};
-    descriptorSetWrites.reserve(descriptors.size());
+    descriptorSetWrites.reserve(
+        bufferDescriptors.size() + imageDescriptors.size());
 
-    std::vector<VkDescriptorImageInfo> imageInfos;
     std::vector<VkDescriptorBufferInfo> bufferInfos;
+    bufferInfos.reserve(bufferDescriptors.size());
 
-    for (const Descriptor& descriptor : descriptors)
+    for (const DescriptorBuffer& descriptor : bufferDescriptors)
     {
-        switch (descriptor.GetType())
-        {
-        case VK_DESCRIPTOR_TYPE_SAMPLER:
-        case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
-        case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-        case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
-            imageInfos.emplace_back(VkDescriptorImageInfo{
-                .sampler = descriptor.GetSampler(),
-                .imageView = descriptor.GetData<Image>()->GetView(),
-                .imageLayout = descriptor.GetImageLayout(),
-            });
-            break;
-        case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-        case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
-        case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
-        case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
-            bufferInfos.emplace_back(VkDescriptorBufferInfo{
-                .buffer = descriptor.GetData<Buffer>()->GetHandle(),
-                .offset = 0,
-                .range = descriptor.GetRange(),
-            });
-            break;
-        default:
-            assert(false && "Descriptor type not supported");
-            break;
-        }
+        bufferInfos.emplace_back(VkDescriptorBufferInfo{
+            .buffer = descriptor.GetBuffer(),
+            .offset = descriptor.GetOffset(),
+            .range = descriptor.GetRange(),
+        });
 
         VkWriteDescriptorSet writeDescriptorSet{};
         writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -71,11 +76,34 @@ void DescriptorSet::Update(const std::vector<Descriptor>& descriptors)
         writeDescriptorSet.dstArrayElement = 0;
         writeDescriptorSet.descriptorCount = 1;
         writeDescriptorSet.descriptorType = descriptor.GetType();
-        writeDescriptorSet.pImageInfo = imageInfos.data();
         writeDescriptorSet.pBufferInfo = bufferInfos.data();
-        writeDescriptorSet.pTexelBufferView = nullptr;
 
         descriptorSetWrites.emplace_back(writeDescriptorSet);
+    }
+
+    std::vector<VkDescriptorImageInfo> imageInfos;
+    imageInfos.reserve(imageDescriptors.size());
+
+    for (const DescriptorImage& descriptor : imageDescriptors)
+    {
+        VkDescriptorImageInfo& info =
+            imageInfos.emplace_back(VkDescriptorImageInfo{
+                .sampler = descriptor.GetSampler(),
+                .imageView = descriptor.GetImageView(),
+                .imageLayout = descriptor.GetImageLayout(),
+            });
+
+        VkWriteDescriptorSet writeDescriptorSet{};
+        writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        writeDescriptorSet.pNext = nullptr;
+        writeDescriptorSet.dstSet = m_handle;
+        writeDescriptorSet.dstBinding = descriptor.GetBinding();
+        writeDescriptorSet.dstArrayElement = 0;
+        writeDescriptorSet.descriptorCount = 1;
+        writeDescriptorSet.descriptorType = descriptor.GetType();
+        writeDescriptorSet.pImageInfo = &info;
+
+        descriptorSetWrites.push_back(writeDescriptorSet);
     }
 
     vkUpdateDescriptorSets(
@@ -89,10 +117,5 @@ void DescriptorSet::Update(const std::vector<Descriptor>& descriptors)
 VkDescriptorSet DescriptorSet::GetHandle() const
 {
     return m_handle;
-}
-
-const std::vector<Descriptor>& DescriptorSet::GetDescriptors() const
-{
-    return m_descriptors;
 }
 }

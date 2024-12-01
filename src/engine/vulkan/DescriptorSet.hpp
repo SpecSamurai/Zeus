@@ -6,6 +6,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -15,20 +16,24 @@ class DescriptorSet
 public:
     DescriptorSet() = default;
     DescriptorSet(
-        const std::vector<Descriptor>& descriptors,
         DescriptorSetLayout& descriptorSetLayout,
         DescriptorPool& descriptorPool,
-        const char* name = nullptr);
+        std::string_view name = "");
 
-    void Update(const std::vector<Descriptor>& descriptors);
+    DescriptorSet(const DescriptorSet&) = delete;
+    DescriptorSet& operator=(const DescriptorSet&) = delete;
+
+    DescriptorSet(DescriptorSet&& other) noexcept;
+    DescriptorSet& operator=(DescriptorSet&& other);
+
+    void Update(
+        const std::vector<DescriptorBuffer>& bufferDescriptors,
+        const std::vector<DescriptorImage>& imageDescriptors);
 
     VkDescriptorSet GetHandle() const;
-    const std::vector<Descriptor>& GetDescriptors() const;
 
 private:
     VkDescriptorSet m_handle{ VK_NULL_HANDLE };
-    std::vector<Descriptor> m_descriptors;
-
     std::uint32_t m_binding;
 };
 }
