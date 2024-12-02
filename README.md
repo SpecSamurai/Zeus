@@ -1,6 +1,17 @@
 # Zeus - Game Engine
 
 ## Todo
+- Cleanup
+    - DONE:
+        - VkContext
+        - Device
+        - Semaphore
+        - Fence
+        - CommandPool
+        - Queue
+        - DescriptorSetLayout
+        - DescriptorPool
+        - Sampler
 - Grid
 - Transfer queue
 - SIMD
@@ -74,6 +85,10 @@ ctest --preset test
 ### LLDB
 ```
 target symbols add my.pdb
+
+breakpoint list
+breakpoint delete 1
+breakpoint set --method method
 ```
 
 ## Environment variables
