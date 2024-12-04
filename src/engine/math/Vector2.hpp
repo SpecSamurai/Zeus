@@ -119,6 +119,12 @@ constexpr Vector2<T> operator*(const T& scalar, const Vector2<T>& right)
 }
 
 template <typename T>
+constexpr Vector2<T> operator*(const Vector2<T>& left, const Vector2<T>& right)
+{
+    return Vector2<T>(left.x * right.x, left.y * right.y);
+}
+
+template <typename T>
 constexpr Vector2<T> operator/(const Vector2<T>& left, const T& scalar)
 {
     return Vector2<T>(left.x / scalar, left.y / scalar);

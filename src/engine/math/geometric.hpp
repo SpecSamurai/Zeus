@@ -78,6 +78,56 @@ constexpr T length(const Vector4<T>& v)
     return std::sqrt(dot(v, v));
 }
 
+template <typename T>
+constexpr Vector2<T> min(const Vector2<T>& left, const Vector2<T>& right)
+{
+    return Vector2<T>(std::min(left.x, right.x), std::min(left.y, right.y));
+}
+
+template <typename T>
+constexpr Vector3<T> min(const Vector3<T>& left, const Vector3<T>& right)
+{
+    return Vector3<T>(
+        std::min(left.x, right.x),
+        std::min(left.y, right.y),
+        std::min(left.z, right.z));
+}
+
+template <typename T>
+constexpr Vector4<T> min(const Vector4<T>& left, const Vector4<T>& right)
+{
+    return Vector4<T>(
+        std::min(left.x, right.x),
+        std::min(left.y, right.y),
+        std::min(left.z, right.z),
+        std::min(left.w, right.w));
+}
+
+template <typename T>
+constexpr Vector2<T> max(const Vector2<T>& left, const Vector2<T>& right)
+{
+    return Vector2<T>(std::max(left.x, right.x), std::max(left.y, right.y));
+}
+
+template <typename T>
+constexpr Vector3<T> max(const Vector3<T>& left, const Vector3<T>& right)
+{
+    return Vector3<T>(
+        std::max(left.x, right.x),
+        std::max(left.y, right.y),
+        std::max(left.z, right.z));
+}
+
+template <typename T>
+constexpr Vector4<T> max(const Vector4<T>& left, const Vector4<T>& right)
+{
+    return Vector4<T>(
+        std::max(left.x, right.x),
+        std::max(left.y, right.y),
+        std::max(left.z, right.z),
+        std::max(left.w, right.w));
+}
+
 // length: std::sqrt(dot(quaternion, quaternion))
 template <typename T>
 constexpr T norm(const Quaternion<T>& quaternion)

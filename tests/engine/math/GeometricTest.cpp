@@ -114,6 +114,78 @@ TEST(GeometricTest, Length_Vector4)
     EXPECT_EQ(5.f, actual);
 }
 
+TEST(GeometricTest, min_Vector2)
+{
+    Zeus::Vector2 sut1(1.f, 4.f);
+    Zeus::Vector2 sut2(2.f, 3.f);
+
+    auto actual = Zeus::min(sut1, sut2);
+
+    EXPECT_EQ(1.f, actual.x);
+    EXPECT_EQ(3.f, actual.y);
+}
+
+TEST(GeometricTest, min_Vector3)
+{
+    Zeus::Vector3 sut1(1.f, 4.f, 5.f);
+    Zeus::Vector3 sut2(2.f, 3.f, 6.f);
+
+    auto actual = Zeus::min(sut1, sut2);
+
+    EXPECT_EQ(1.f, actual.x);
+    EXPECT_EQ(3.f, actual.y);
+    EXPECT_EQ(5.f, actual.z);
+}
+
+TEST(GeometricTest, min_Vector4)
+{
+    Zeus::Vector4 sut1(1.f, 4.f, 5.f, 8.f);
+    Zeus::Vector4 sut2(2.f, 3.f, 6.f, 7.f);
+
+    auto actual = Zeus::min(sut1, sut2);
+
+    EXPECT_EQ(1.f, actual.x);
+    EXPECT_EQ(3.f, actual.y);
+    EXPECT_EQ(5.f, actual.z);
+    EXPECT_EQ(7.f, actual.w);
+}
+
+TEST(GeometricTest, max_Vector2)
+{
+    Zeus::Vector2 sut1(1.f, 4.f);
+    Zeus::Vector2 sut2(2.f, 3.f);
+
+    auto actual = Zeus::max(sut1, sut2);
+
+    EXPECT_EQ(2.f, actual.x);
+    EXPECT_EQ(4.f, actual.y);
+}
+
+TEST(GeometricTest, max_Vector3)
+{
+    Zeus::Vector3 sut1(1.f, 4.f, 5.f);
+    Zeus::Vector3 sut2(2.f, 3.f, 6.f);
+
+    auto actual = Zeus::max(sut1, sut2);
+
+    EXPECT_EQ(2.f, actual.x);
+    EXPECT_EQ(4.f, actual.y);
+    EXPECT_EQ(6.f, actual.z);
+}
+
+TEST(GeometricTest, max_Vector4)
+{
+    Zeus::Vector4 sut1(1.f, 4.f, 5.f, 8.f);
+    Zeus::Vector4 sut2(2.f, 3.f, 6.f, 7.f);
+
+    auto actual = Zeus::max(sut1, sut2);
+
+    EXPECT_EQ(2.f, actual.x);
+    EXPECT_EQ(4.f, actual.y);
+    EXPECT_EQ(6.f, actual.z);
+    EXPECT_EQ(8.f, actual.w);
+}
+
 TEST(GeometricTest, norm_Quaternion)
 {
     Zeus::Quaternion sut(1.f, 2.f, 2.f, 4.f);

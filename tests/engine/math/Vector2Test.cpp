@@ -145,6 +145,21 @@ TEST(Vector2Test, BinaryMultiplicationOperator_VectorWithScalar)
     EXPECT_EQ(4.f, actual2.y);
 }
 
+TEST(Vector2Test, BinaryMultiplicationOperator_Vectors)
+{
+    auto sut1 = Zeus::Vector2(1.f, 2.f);
+    auto sut2 = Zeus::Vector2(10.f, 20.f);
+
+    Zeus::Vector2 actual1 = sut1 * sut2;
+    Zeus::Vector2 actual2 = sut2 * sut1;
+
+    EXPECT_EQ(10.f, actual1.x);
+    EXPECT_EQ(40.f, actual1.y);
+
+    EXPECT_EQ(10.f, actual2.x);
+    EXPECT_EQ(40.f, actual2.y);
+}
+
 TEST(Vector2Test, BinaryDivisionOperator_VectorWithScalar)
 {
     auto sut = Zeus::Vector2(1.f, 2.f);
