@@ -2,6 +2,7 @@
 
 #include "Definitions.hpp"
 #include "PhysicalDeviceSelector.hpp"
+#include "VkContext.hpp"
 #include "rhi/vulkan_command.hpp"
 #include "rhi/vulkan_debug.hpp"
 #include "rhi/vulkan_memory.hpp"
@@ -226,6 +227,34 @@ const Queue& Device::GetQueue(QueueType type) const
     default:
         assert(false && "Queue type not supported");
     }
+}
+
+DeviceMemoryBudget Device::GetMemoryBudget() const
+{
+    DeviceMemoryBudget deviceMemoryBudget{};
+
+    VkPhysicalDeviceMemoryProperties memory_properties;
+    vkGetPhysicalDeviceMemoryProperties(
+        static_cast<VkPhysicalDevice>(m_physicalDevice),
+        &memory_properties);
+
+    VmaBudget budgets[VK_MAX_MEMORY_HEAPS];
+    vmaGetHeapBudgets(VkContext::GetAllocator(), budgets);
+
+    for (std::uint32_t i{ 0 }; i < VK_MAX_MEMORY_HEAPS; ++i)
+    {
+        if (memory_properties.memoryHeaps[i].flags &
+            VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+        {
+            if (budgets[i].budget < 1ull << 60)
+            {
+                deviceMemoryBudget.budgetBytes += budgets[i].budget;
+                deviceMemoryBudget.usageBytes += budgets[i].usage;
+            }
+        }
+    }
+
+    return deviceMemoryBudget;
 }
 
 VkDevice Device::GetLogicalDevice() const

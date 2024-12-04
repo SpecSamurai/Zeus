@@ -14,6 +14,12 @@
 
 namespace Zeus
 {
+struct DeviceMemoryBudget
+{
+    VkDeviceSize budgetBytes;
+    VkDeviceSize usageBytes;
+};
+
 class Device
 {
 public:
@@ -27,6 +33,8 @@ public:
         std::function<void(const CommandBuffer& cmd)>&& function);
 
     const Queue& GetQueue(QueueType type) const;
+
+    DeviceMemoryBudget GetMemoryBudget() const;
 
     VkDevice GetLogicalDevice() const;
     VkPhysicalDevice GetPhysicalDevice() const;
