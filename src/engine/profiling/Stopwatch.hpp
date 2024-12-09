@@ -4,13 +4,12 @@
 
 namespace Zeus
 {
-class Timer
+class Stopwatch
 {
 public:
-    Timer();
+    void Restart();
 
-    void Start();
-    float GetElapsedMilliseconds();
+    double GetElapsedMilliseconds();
 
 private:
     std::chrono::time_point<std::chrono::steady_clock> m_start;
