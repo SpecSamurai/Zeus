@@ -3,9 +3,9 @@
 #include "Definitions.hpp"
 #include "PhysicalDeviceSelector.hpp"
 #include "VkContext.hpp"
-#include "rhi/vulkan_command.hpp"
-#include "rhi/vulkan_debug.hpp"
-#include "rhi/vulkan_memory.hpp"
+#include "vulkan/vulkan_command.hpp"
+#include "vulkan/vulkan_debug.hpp"
+#include "vulkan/vulkan_memory.hpp"
 
 #include <vulkan/vulkan_core.h>
 

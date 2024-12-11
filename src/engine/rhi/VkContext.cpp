@@ -5,9 +5,9 @@
 #include "Device.hpp"
 #include "InstanceBuilder.hpp"
 #include "logging/logger.hpp"
-#include "rhi/vulkan_debug.hpp"
-#include "rhi/vulkan_memory.hpp"
-#include "rhi/vulkan_surface.hpp"
+#include "vulkan/vulkan_debug.hpp"
+#include "vulkan/vulkan_memory.hpp"
+#include "vulkan/vulkan_surface.hpp"
 #include "window/Window.hpp"
 #include "window/glfw_utils.hpp"
 

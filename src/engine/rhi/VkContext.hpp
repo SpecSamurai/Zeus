@@ -3,7 +3,7 @@
 #include "Definitions.hpp"
 #include "DeletionQueue.hpp"
 #include "Device.hpp"
-#include "rhi/vulkan_memory.hpp"
+#include "vulkan/vulkan_memory.hpp"
 #include "window/Window.hpp"
 
 #include <vulkan/vulkan_core.h>

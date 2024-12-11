@@ -1,7 +1,7 @@
 #include "DescriptorPool.hpp"
 
 #include "VkContext.hpp"
-#include "rhi/vulkan_debug.hpp"
+#include "vulkan/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
 
