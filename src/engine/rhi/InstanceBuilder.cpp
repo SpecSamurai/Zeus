@@ -1,8 +1,8 @@
 #include "InstanceBuilder.hpp"
 
 #include "logging/logger.hpp"
-#include "rhi/vulkan_debug.hpp"
-#include "rhi/vulkan_memory.hpp"
+#include "vulkan/vulkan_debug.hpp"
+#include "vulkan/vulkan_memory.hpp"
 
 #include <vulkan/vulkan_core.h>
 
