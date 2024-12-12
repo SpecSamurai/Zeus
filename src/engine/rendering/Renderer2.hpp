@@ -1,10 +1,13 @@
 #pragma once
 
+#include "core/defines.hpp"
 #include "logging/logger.hpp"
+#include "rendering/resources.hpp"
 #include "rhi/CommandBuffer.hpp"
 #include "rhi/CommandPool.hpp"
 #include "rhi/Swapchain.hpp"
 #include "rhi/VkContext.hpp"
+#include "rhi/vulkan/vulkan_dynamic_rendering.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -53,6 +56,8 @@ public:
         }
 
         InitializeRenderTargets();
+        InitializeShaders();
+        InitializePipelines();
         // InitializeDefaultResources();
     }
 
@@ -63,6 +68,13 @@ public:
         VkContext::GetDevice().Wait();
 
         // DestroyDefaultResources();
+
+        m_basicPipeline->Destroy();
+
+        for (std::uint32_t i{ 0 }; i < m_shaders.size(); ++i)
+        {
+            m_shaders[i].Destroy();
+        }
 
         for (std::uint32_t i{ 0 }; i < m_renderTargets.size(); ++i)
         {
@@ -96,6 +108,69 @@ public:
         auto& cmd{ CurrentFrame().graphicsCommandBuffer };
         cmd.Reset();
         cmd.Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+        cmd.TransitionImageLayout(
+            m_renderTargets[0].GetHandle(),
+            m_renderTargets[0].GetFormat(),
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_GENERAL);
+
+        cmd.TransitionImageLayout(
+            m_renderTargets[1].GetHandle(),
+            m_renderTargets[1].GetFormat(),
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+
+        vkCmdBindPipeline(
+            cmd.GetHandle(),
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            m_basicPipeline->GetHandle());
+
+        VkRenderingAttachmentInfo colorAttachmentInfo =
+            createColorAttachmentInfo(
+                m_renderTargets[0].GetView(),
+                VK_IMAGE_LAYOUT_GENERAL);
+
+        VkRenderingAttachmentInfo depthAttachmentInfo =
+            createDepthAttachmentInfo(
+                m_renderTargets[1].GetView(),
+                VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+
+        cmd.BeginRendering(
+            { m_renderTargets[0].GetExtent().width,
+              m_renderTargets[0].GetExtent().height },
+            1,
+            &colorAttachmentInfo,
+            &depthAttachmentInfo);
+
+        cmd.SetViewport({
+            .x = 0.f,
+            .y = 0.f,
+            .width = static_cast<float>(m_renderTargets[0].GetExtent().width),
+            .height = static_cast<float>(m_renderTargets[0].GetExtent().height),
+            .minDepth = 0.f,
+            .maxDepth = 1.f,
+        });
+
+        cmd.SetScissor({
+            .offset = { .x = 0, .y = 0 },
+            .extent = { .width = m_renderTargets[0].GetExtent().width,
+                        .height = m_renderTargets[0].GetExtent().height },
+        });
+
+        cmd.Draw(3, 0);
+
+        cmd.EndRendering();
+
+        cmd.TransitionImageLayout(
+            m_renderTargets[0].GetHandle(),
+            m_renderTargets[0].GetFormat(),
+            VK_IMAGE_LAYOUT_GENERAL,
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+        m_swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+        cmd.BlitImage(m_renderTargets[0], m_swapchain);
 
         m_swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         cmd.End();
@@ -160,6 +235,52 @@ private:
             "Image_render_output_depth_frame_");
     }
 
+    void InitializeShaders()
+    {
+        m_shaders[0] = Shader(
+            std::format("{}/basic.vert.spv", ShadersFolderPath).data(),
+            VK_SHADER_STAGE_VERTEX_BIT,
+            "main",
+            {},
+            "Shader_basic_vert");
+
+        m_shaders[1] = Shader(
+            std::format("{}/basic.frag.spv", ShadersFolderPath).data(),
+            VK_SHADER_STAGE_FRAGMENT_BIT,
+            "main",
+            {},
+            "Shader_basic_frag");
+    }
+
+    void InitializePipelines()
+    {
+        std::vector<Shader> shaders;
+        shaders.emplace_back(Shader(
+            std::format("{}/basic.vert.spv", ShadersFolderPath).data(),
+            VK_SHADER_STAGE_VERTEX_BIT,
+            "main",
+            {},
+            "Shader_basic_vert"));
+
+        shaders.emplace_back(Shader(
+            std::format("{}/basic.frag.spv", ShadersFolderPath).data(),
+            VK_SHADER_STAGE_FRAGMENT_BIT,
+            "main",
+            {},
+            "Shader_basic_frag"));
+
+        PipelineState pipelineState(
+            std::move(shaders),
+            Rasterization::Default,
+            DepthStencil::DefaultDisabled,
+            Blending::Disabled,
+            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+            { VK_FORMAT_R16G16B16A16_SFLOAT },
+            VK_FORMAT_D32_SFLOAT);
+
+        m_basicPipeline = new Pipeline(pipelineState, {}, {}, "Pipeline_basic");
+    }
+
 public:
     static constexpr std::int32_t FRAMES_IN_FLIGHT{ 2 };
 
@@ -171,5 +292,8 @@ private:
     // turn it into per frame resoruce
     std::array<Image, static_cast<std::uint32_t>(RenderTargets::COUNT)>
         m_renderTargets;
+
+    std::array<Shader, 2> m_shaders;
+    Pipeline* m_basicPipeline;
 };
 }
