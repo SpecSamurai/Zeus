@@ -16,8 +16,22 @@ using Vector2f = Vector2<float>;
 using Vector3f = Vector3<float>;
 using Vector4f = Vector4<float>;
 
-using Color = Vector4f;
-
 using Matrix3x3f = Matrix3x3<float>;
 using Matrix4x4f = Matrix4x4<float>;
+
+using Color = Vector4f;
+
+namespace Colors
+{
+inline constexpr Color BLACK(0, 0, 0, 1);
+inline constexpr Color WHITE(1, 1, 1, 1);
+
+inline constexpr Color RED(1, 0, 0, 1);
+inline constexpr Color GREEN(0, 1, 0, 1);
+inline constexpr Color BLUE(0, 0, 1, 1);
+
+inline constexpr Color YELLOW(1, 1, 0, 1);
+inline constexpr Color MAGENTA(1, 0, 1, 1);
+inline constexpr Color CYAN(0, 1, 1, 1);
+}
 }

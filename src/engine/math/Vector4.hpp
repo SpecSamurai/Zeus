@@ -9,15 +9,19 @@ template <typename T>
 class Vector4
 {
 public:
-    Vector4() : x{ 0 }, y{ 0 }, z{ 0 }, w{ 0 }
+    constexpr Vector4() : x{ 0 }, y{ 0 }, z{ 0 }, w{ 0 }
     {
     }
 
-    Vector4(T x, T y, T z, T w) : x{ x }, y{ y }, z{ z }, w{ w }
+    constexpr Vector4(T x, T y, T z, T w) : x{ x }, y{ y }, z{ z }, w{ w }
     {
     }
 
-    Vector4(T scalar) : x{ scalar }, y{ scalar }, z{ scalar }, w{ scalar }
+    constexpr Vector4(T scalar)
+        : x{ scalar },
+          y{ scalar },
+          z{ scalar },
+          w{ scalar }
     {
     }
 

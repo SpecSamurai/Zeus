@@ -9,15 +9,15 @@ template <typename T>
 class Vector2
 {
 public:
-    Vector2() : x{ 0 }, y{ 0 }
+    constexpr Vector2() : x{ 0 }, y{ 0 }
     {
     }
 
-    Vector2(T x, T y) : x{ x }, y{ y }
+    constexpr Vector2(T x, T y) : x{ x }, y{ y }
     {
     }
 
-    Vector2(T scalar) : x{ scalar }, y{ scalar }
+    constexpr Vector2(T scalar) : x{ scalar }, y{ scalar }
     {
     }
 
