@@ -9,16 +9,16 @@ struct Vertex_Position
     Vector3f position;
 };
 
-struct Vertex_PositionTexture
-{
-    Vector3f position;
-    Vector2f texture;
-};
-
 struct Vertex_PositionColor
 {
     Vector3f position;
     Color color;
+};
+
+struct Vertex_PositionTexture
+{
+    Vector3f position;
+    Vector2f texture;
 };
 
 // UV parameters are interleaved is due to alignement limitations
