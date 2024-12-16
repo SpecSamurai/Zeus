@@ -1,9 +1,12 @@
 #pragma once
 
+#include "Renderer_BufferData.hpp"
+#include "Renderer_definitions.hpp"
 #include "math/definitions.hpp"
 #include "rhi/Buffer.hpp"
 #include "rhi/CommandBuffer.hpp"
 #include "rhi/CommandPool.hpp"
+#include "rhi/DescriptorSet.hpp"
 #include "rhi/Swapchain.hpp"
 #include "rhi/Vertex.hpp"
 #include "window/Window.hpp"
@@ -16,26 +19,6 @@
 
 namespace Zeus
 {
-enum class RenderTargets
-{
-    RENDER_OUTPUT_COLOR,
-    RENDER_OUTPUT_DEPTH,
-    COUNT
-};
-
-enum class ShaderModuleTypes
-{
-    LINE_VERT,
-    FLAT_COLOR_FRAG,
-    COUNT,
-};
-
-enum class PipelineTypes
-{
-    LINES,
-    COUNT,
-};
-
 class Renderer2
 {
 public:
@@ -88,6 +71,7 @@ private:
     void ResizeSwapchain();
 
     void InitializeRenderTargets();
+    void InitializeDescriptors();
     void InitializeShaders();
     void InitializePipelines();
     void InitializeBuffers();
@@ -96,10 +80,12 @@ public:
     static constexpr std::int32_t FRAMES_IN_FLIGHT{ 2 };
     static constexpr std::uint32_t LINES_BUFFER_BASE_SIZE{ 32768 };
 
-private:
+public:
     const Window& m_window;
     Swapchain m_swapchain;
     std::array<Frame, FRAMES_IN_FLIGHT> m_frames;
+
+    DescriptorPool m_descriptorPool;
 
     // turn it into per frame resoruce
     std::array<Image, static_cast<std::uint32_t>(RenderTargets::COUNT)>
@@ -112,5 +98,10 @@ private:
     Buffer m_linesVertexBuffer;
     std::uint64_t m_linesIndex{ 0 };
     std::array<Vertex_PositionColor, LINES_BUFFER_BASE_SIZE> m_lines;
+
+    FrameData m_frameData;
+    DescriptorSetLayout m_frameDataSetLayout;
+    DescriptorSet m_frameDataSet;
+    Buffer m_frameDataBuffer;
 };
 }

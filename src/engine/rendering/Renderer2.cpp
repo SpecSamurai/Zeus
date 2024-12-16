@@ -1,11 +1,14 @@
 #include "Renderer2.hpp"
 
+#include "Renderer_BufferData.hpp"
 #include "logging/logger.hpp"
 #include "math/definitions.hpp"
 #include "resources.hpp"
 #include "rhi/Buffer.hpp"
 #include "rhi/CommandBuffer.hpp"
 #include "rhi/CommandPool.hpp"
+#include "rhi/Descriptor.hpp"
+#include "rhi/DescriptorSet.hpp"
 #include "rhi/Swapchain.hpp"
 #include "rhi/Vertex.hpp"
 #include "rhi/VkContext.hpp"
@@ -49,19 +52,22 @@ void Renderer2::Initialize()
     }
 
     InitializeRenderTargets();
+    InitializeDescriptors();
     InitializeShaders();
     InitializePipelines();
     InitializeBuffers();
-    // InitializeDefaultResources();
 
+    InitializeDefaultResources();
+
+    // temp
     DrawTriangle(
-        Vector3f(0.0f, -0.5f, 0.8f),
+        Vector3f(0.0f, -0.5f, 0.0f),
         Vector3f(0.5, 0.5, 0),
         Vector3f(-0.5, 0.5, 0),
         Colors::GREEN);
 
     DrawRectangle(
-        Vector3f(0.0f, 0.0f, 0.8f),
+        Vector3f(0.0f, 0.0f, 0.0f),
         Vector3f(0.5, 0.0, 0),
         Vector3f(0.5, 0.5, 0),
         Vector3f(0, 0.5, 0),
@@ -69,18 +75,19 @@ void Renderer2::Initialize()
 
     m_linesVertexBuffer.Update(
         m_lines.data(),
-        { m_lines.size() * sizeof(Vertex_PositionColor) });
+        m_lines.size() * sizeof(Vertex_PositionColor));
 }
 
 void Renderer2::Destroy()
 {
     LOG_DEBUG("Destroying Renderer");
-    // temp
+
     VkContext::GetDevice().Wait();
 
-    m_linesVertexBuffer.Destroy();
+    DestroyDefaultResources();
 
-    // DestroyDefaultResources();
+    m_frameDataBuffer.Destroy();
+    m_linesVertexBuffer.Destroy();
 
     for (std::uint32_t i{ 0 }; i < m_pipelines.size(); ++i)
     {
@@ -102,6 +109,8 @@ void Renderer2::Destroy()
         m_frames[i].graphicsCommandPool.Destroy();
     }
 
+    m_frameDataSetLayout.Destroy();
+    m_descriptorPool.Destroy();
     m_swapchain.Destroy();
 }
 
@@ -142,10 +151,22 @@ void Renderer2::Update()
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
+    // cmdClearColorImage(
+    //     m_renderer.CurrentFrame().mainCommandBuffer,
+    //     m_renderer.drawImage.image,
+    //     Vector4f(0.f, 0.f, 0.5f, 1.f),
+    //     VK_IMAGE_LAYOUT_GENERAL);
+
+    // DrawCompute();
+
     vkCmdBindPipeline(
         cmd.GetHandle(),
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         GetPipeline(PipelineTypes::LINES)->GetHandle());
+
+    cmd.BindDescriptorSets(
+        m_frameDataSet.GetHandle(),
+        *GetPipeline(PipelineTypes::LINES));
 
     cmd.BindVertexBuffers(m_linesVertexBuffer);
 
@@ -180,6 +201,8 @@ void Renderer2::Update()
     });
 
     cmd.Draw((std::uint32_t)m_lines.size(), 0);
+    // DrawCompute();
+    // DrawTriangle();
 
     cmd.EndRendering();
 
@@ -192,6 +215,29 @@ void Renderer2::Update()
     m_swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
     cmd.BlitImage(renderOutputColor, m_swapchain);
+
+    //  drawExtent,
+    //  m_swapchain->GetExtent());
+
+    // transitionImageLayout(
+    //     m_renderer.CurrentFrame().mainCommandBuffer,
+    //     VkContext.GetSwapchain()
+    //         .images[m_renderer.CurrentSwapchainImageIndex()],
+    //     VkContext.GetSwapchain().imageFormat,
+    //     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    //
+    // VkRenderingAttachmentInfo colorAttachment{
+    //     createColorAttachmentInfo(
+    //         VkContext.GetSwapchain()
+    //             .imageViews[m_renderer.CurrentSwapchainImageIndex()],
+    //         VK_IMAGE_LAYOUT_GENERAL),
+    // };
+
+    // uiManager.Draw(
+    //     m_renderer.CurrentFrame().mainCommandBuffer,
+    //     colorAttachment,
+    //     VkContext.GetSwapchain().extent);
 
     m_swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     cmd.End();
@@ -294,17 +340,34 @@ void Renderer2::InitializeRenderTargets()
         "Image_render_output_depth_frame_");
 }
 
+void Renderer2::InitializeDescriptors()
+{
+    std::vector<VkDescriptorPoolSize> poolSizes{
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
+    };
+
+    m_descriptorPool = DescriptorPool(1, poolSizes);
+
+    m_frameDataSetLayout = DescriptorSetLayout({
+        Descriptor(
+            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            VK_SHADER_STAGE_VERTEX_BIT,
+            0),
+    });
+}
+
 void Renderer2::InitializeShaders()
 {
 #define shader(type) m_shaders[static_cast<std::uint32_t>(type)]
+
     shader(ShaderModuleTypes::FLAT_COLOR_FRAG) = Shader(
+        "Shader_fragment_flat_color",
         std::format("{}/flat_color.frag.spv", ShadersFolderPath).data(),
         VK_SHADER_STAGE_FRAGMENT_BIT,
-        "main",
-        {},
-        "Shader_fragment_flat_color");
+        "main");
 
     shader(ShaderModuleTypes::LINE_VERT) = Shader(
+        "Shader_vertex_line",
         std::format("{}/line.vert.spv", ShadersFolderPath).data(),
         VK_SHADER_STAGE_VERTEX_BIT,
         "main",
@@ -325,39 +388,55 @@ void Renderer2::InitializeShaders()
                         offsetof(Vertex_PositionColor, color),
                         VK_FORMAT_R32G32B32A32_SFLOAT),
                 }),
-        },
-        "Shader_vertex_line");
+        });
 }
 
 void Renderer2::InitializePipelines()
 {
-    PipelineState pipelineState(
-        Rasterization::Default,
-        DepthStencil::DefaultDisabled,
-        Blending::Disabled,
-        VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
-        { VK_FORMAT_R16G16B16A16_SFLOAT },
-        VK_FORMAT_D32_SFLOAT);
-
     m_pipelines[static_cast<std::uint32_t>(PipelineTypes::LINES)] =
         new Pipeline(
-            pipelineState,
+            "Pipeline_basic",
+            Rasterization::Default,
+            DepthStencil::DefaultDisabled,
+            Blending::Disabled,
+            VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
             {
                 &GetShader(ShaderModuleTypes::LINE_VERT),
                 &GetShader(ShaderModuleTypes::FLAT_COLOR_FRAG),
             },
+            { &m_frameDataSetLayout },
             {},
-            {},
-            "Pipeline_basic");
+            { VK_FORMAT_R16G16B16A16_SFLOAT },
+            VK_FORMAT_D32_SFLOAT);
 }
 
 void Renderer2::InitializeBuffers()
 {
     m_linesVertexBuffer = Buffer(
+        "Buffer_vertex_lines",
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
         m_lines.size() * sizeof(Vertex_PositionColor),
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        false,
-        "Buffer_vertex_lines");
+        false);
+
+    m_frameDataBuffer = Buffer(
+        "Buffer_frame_data",
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        sizeof(FrameData),
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        true);
+
+    m_frameDataSet = DescriptorSet(m_frameDataSetLayout, m_descriptorPool);
+    m_frameDataSet.Update(
+        {
+            DescriptorBuffer(
+                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                VK_SHADER_STAGE_VERTEX_BIT,
+                0,
+                m_frameDataBuffer.GetHandle(),
+                sizeof(FrameData)),
+        },
+        {});
 }
 }
