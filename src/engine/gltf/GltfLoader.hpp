@@ -1,29 +1,31 @@
 #pragma once
 
+#include "rendering/renderer_types.hpp"
 #include "rhi/Image.hpp"
 
 #include <fastgltf/core.hpp>
 #include <fastgltf/types.hpp>
-#include <format>
 #include <stb_image.h>
 
 #include <cassert>
 #include <filesystem>
 #include <optional>
-#include <string_view>
 
 namespace Zeus
 {
 class GltfLoader
 {
 public:
-    std::optional<bool> Load(std::filesystem::path path);
+    static GltfLoader& GetInstance();
+
+    std::optional<std::shared_ptr<LoadedGLTF>> Load(std::filesystem::path path);
 
 private:
-    std::optional<Image*> loadImage(
+    std::optional<Image*> LoadImage(
         fastgltf::Asset& asset,
         fastgltf::Image& image);
 
+private:
     static constexpr fastgltf::Options PARSER_OPTIONS{
         fastgltf::Options::DontRequireValidAssetMember |
         fastgltf::Options::AllowDouble |
