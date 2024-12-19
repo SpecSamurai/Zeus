@@ -1,5 +1,8 @@
 #include "utility.hpp"
 
+#include "math/Quaternion.hpp"
+#include "math/definitions.hpp"
+
 #include <fastgltf/types.hpp>
 #include <vulkan/vulkan_core.h>
 
@@ -53,5 +56,25 @@ VkSamplerAddressMode toVkSamplerAddressMode(fastgltf::Wrap wrap)
         assert(false && "Unsupported type");
         return VK_SAMPLER_ADDRESS_MODE_REPEAT;
     }
+}
+
+Vector2f toVector2f(fastgltf::math::fvec2 vec2)
+{
+    return Vector2f(vec2.x(), vec2.y());
+}
+
+Vector3f toVector3f(fastgltf::math::fvec3 vec3)
+{
+    return Vector3f(vec3.x(), vec3.y(), vec3.z());
+}
+
+Vector4f toVector4f(fastgltf::math::fvec4 vec4)
+{
+    return Vector4f(vec4.x(), vec4.y(), vec4.z(), vec4.w());
+}
+
+Quaternion<float> toQuaternion(fastgltf::math::fquat quat)
+{
+    return Quaternion(quat.x(), quat.y(), quat.z(), quat.w());
 }
 }
