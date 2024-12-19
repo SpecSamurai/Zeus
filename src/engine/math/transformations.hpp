@@ -5,14 +5,38 @@
 #include "Quaternion.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
+#include "definitions.hpp"
 #include "geometric.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
+#include <type_traits>
 #include <utility>
 
 namespace Zeus
 {
+inline constexpr std::uint32_t toUNormInt(const Color& color)
+{
+    union {
+        std::uint32_t value;
+        std::uint8_t chunks[4];
+    } output;
+
+    float r{ std::clamp(color.r, 0.f, 1.f) * 255.f };
+    float g{ std::clamp(color.g, 0.f, 1.f) * 255.f };
+    float b{ std::clamp(color.b, 0.f, 1.f) * 255.f };
+    float a{ std::clamp(color.a, 0.f, 1.f) * 255.f };
+
+    output.chunks[0] = static_cast<std::uint8_t>(r);
+    output.chunks[1] = static_cast<std::uint8_t>(g);
+    output.chunks[2] = static_cast<std::uint8_t>(b);
+    output.chunks[3] = static_cast<std::uint8_t>(a);
+
+    return output.value;
+}
+
 template <typename T>
 constexpr void transpose(Matrix4x4<T>& matrix)
 {

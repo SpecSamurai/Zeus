@@ -1,9 +1,33 @@
 #include <math/Matrix3x3.hpp>
 #include <math/Quaternion.hpp>
 #include <math/Vector3.hpp>
+#include <math/definitions.hpp>
 #include <math/transformations.hpp>
 
 #include <gtest/gtest.h>
+
+#include <cstdint>
+
+TEST(TransformationsTest, toUNormInt)
+{
+    std::uint32_t sut1 = Zeus::toUNormInt(Zeus::Color(1, 1, 1, 1));
+    std::uint32_t sut2 = Zeus::toUNormInt(Zeus::Color(0, 0, 0, 0));
+    std::uint32_t sut3 = Zeus::toUNormInt(Zeus::Color(0, 1, 1, 1));
+    std::uint32_t sut4 = Zeus::toUNormInt(Zeus::Color(0, 0, 1, 1));
+    std::uint32_t sut5 = Zeus::toUNormInt(Zeus::Color(0, 0, 0, 1));
+    std::uint32_t sut6 = Zeus::toUNormInt(Zeus::Color(0, 0, 1, 0));
+    std::uint32_t sut7 = Zeus::toUNormInt(Zeus::Color(0, 1, 0, 0));
+    std::uint32_t sut8 = Zeus::toUNormInt(Zeus::Color(1, 0, 0, 0));
+
+    EXPECT_EQ(sut1, 0xffffffff);
+    EXPECT_EQ(sut2, 0x00000000);
+    EXPECT_EQ(sut3, 0x00ffffff);
+    EXPECT_EQ(sut4, 0x0000ffff);
+    EXPECT_EQ(sut5, 0x000000ff);
+    EXPECT_EQ(sut6, 0x0000ff00);
+    EXPECT_EQ(sut7, 0x00ff0000);
+    EXPECT_EQ(sut8, 0xff000000);
+}
 
 TEST(TransformationsTest, transpose_Matrix3x3)
 {
