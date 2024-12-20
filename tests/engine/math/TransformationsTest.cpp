@@ -21,12 +21,12 @@ TEST(TransformationsTest, toUNormInt)
 
     EXPECT_EQ(sut1, 0xffffffff);
     EXPECT_EQ(sut2, 0x00000000);
-    EXPECT_EQ(sut3, 0x00ffffff);
-    EXPECT_EQ(sut4, 0x0000ffff);
-    EXPECT_EQ(sut5, 0x000000ff);
-    EXPECT_EQ(sut6, 0x0000ff00);
-    EXPECT_EQ(sut7, 0x00ff0000);
-    EXPECT_EQ(sut8, 0xff000000);
+    EXPECT_EQ(sut3, 0xffffff00);
+    EXPECT_EQ(sut4, 0xffff0000);
+    EXPECT_EQ(sut5, 0xff000000);
+    EXPECT_EQ(sut6, 0x00ff0000);
+    EXPECT_EQ(sut7, 0x0000ff00);
+    EXPECT_EQ(sut8, 0x000000ff);
 }
 
 TEST(TransformationsTest, transpose_Matrix3x3)
