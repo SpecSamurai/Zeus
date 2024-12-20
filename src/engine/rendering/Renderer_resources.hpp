@@ -1,13 +1,15 @@
 #pragma once
 
-#include "vulkan/BlendState.hpp"
-#include "vulkan/DepthStencilState.hpp"
-#include "vulkan/Image.hpp"
-#include "vulkan/RasterizationState.hpp"
-#include "vulkan/Sampler.hpp"
+#include "rhi/BlendState.hpp"
+#include "rhi/DepthStencilState.hpp"
+#include "rhi/Image.hpp"
+#include "rhi/RasterizationState.hpp"
+#include "rhi/Sampler.hpp"
 
 namespace Zeus
 {
+inline const std::string ShadersFolderPath{ "../engine/shaders" };
+
 void InitializeDefaultResources();
 void DestroyDefaultResources();
 
@@ -15,6 +17,8 @@ namespace Textures
 {
 void InitializeTextures();
 
+inline Image Black;
+inline Image White;
 inline Image DebugCheckerboard;
 }
 
