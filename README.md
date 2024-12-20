@@ -80,6 +80,7 @@ cmake --preset debug|release|test
 cmake --build --preset debug|release
 cmake --build --verbose --preset debug
 ctest --preset test
+ctest --preset test -R TestName
 ```
 
 ### LLDB
