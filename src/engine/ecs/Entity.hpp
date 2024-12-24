@@ -1,5 +1,8 @@
 #pragma once
 
-namespace Zeus {
+#include <cstdint>
 
+namespace Zeus
+{
+using Entity = std::uint32_t;
 }
