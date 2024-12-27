@@ -14,6 +14,7 @@ public:
     SparseSet() : m_sparse{}, m_dense{}, m_size{ 0 }
     {
     }
+    // virtual ~SparseSet() = default;
 
     SparseSet(const SparseSet&) = delete;
     SparseSet& operator=(const SparseSet&) = delete;
@@ -37,7 +38,7 @@ public:
         return *this;
     }
 
-    void Push(Entity entity)
+    virtual void Push(Entity entity)
     {
         assert(!Contains(entity) && "Set contains entity");
 

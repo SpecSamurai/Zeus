@@ -47,8 +47,10 @@ add_library(Engine
     core/Engine.cpp
     core/Engine.hpp
 
+    ecs/ComponentSparseSet.hpp
     ecs/Definitions.hpp
     ecs/FamilyId.hpp
+    ecs/SparseSet.hpp
 
     events/Event.hpp
     events/EventDispatcher.hpp
