@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace Zeus
+namespace Zeus::ECS
 {
 using Entity = std::uint32_t;
 }

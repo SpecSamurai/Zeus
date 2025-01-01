@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-namespace Zeus
+namespace Zeus::ECS
 {
 class SparseSet
 {
