@@ -4,7 +4,7 @@
 
 #include <functional>
 
-namespace Zeus
+namespace Zeus::ECS
 {
 template <typename Type>
 class ComponentSparseSet : public SparseSet
