@@ -3,6 +3,7 @@
 #include "Entity.hpp"
 
 #include <cassert>
+#include <cstddef>
 #include <utility>
 #include <vector>
 
@@ -11,10 +12,13 @@ namespace Zeus::ECS
 class SparseSet
 {
 public:
-    SparseSet() : m_sparse{}, m_dense{}, m_size{ 0 }
+    SparseSet(std::size_t capacity = 0) : m_sparse{}, m_dense{}, m_size{ 0 }
     {
+        if (capacity > 0)
+            Reserve(capacity);
     }
-    // virtual ~SparseSet() = default;
+
+    virtual ~SparseSet() = default;
 
     SparseSet(const SparseSet&) = delete;
     SparseSet& operator=(const SparseSet&) = delete;
@@ -49,7 +53,7 @@ public:
 
         m_dense.push_back(entity);
         // dense[size] = entity;
-        m_sparse[entity] = m_size;
+        m_sparse[entity] = static_cast<Entity>(m_size);
 
         ++m_size;
     }
