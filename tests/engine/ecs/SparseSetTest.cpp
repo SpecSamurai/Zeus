@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(SparseSetTest, EmptySet)
+TEST(SparseSetTest, Constructor_Default_Empty)
 {
     Zeus::ECS::SparseSet sut;
 
@@ -16,7 +16,7 @@ TEST(SparseSetTest, EmptySet)
     EXPECT_EQ(capacity, 0);
 }
 
-TEST(SparseSetTest, ReservedConstructor_EmptySet)
+TEST(SparseSetTest, Constructor_MaxEntity_ReservedCapacity)
 {
     Zeus::ECS::SparseSet sut(10);
 
@@ -88,6 +88,19 @@ TEST(SparseSetTest, Contains_EmptySet)
     assert(!actual3);
 }
 
+TEST(SparseSetTest, Contains_Reserved_EmptySet)
+{
+    Zeus::ECS::SparseSet sut(100);
+
+    auto actual1 = sut.Contains(0);
+    auto actual2 = sut.Contains(1);
+    auto actual3 = sut.Contains(2);
+
+    assert(!actual1);
+    assert(!actual2);
+    assert(!actual3);
+}
+
 TEST(SparseSetTest, Contains_Multiple)
 {
     Zeus::ECS::SparseSet sut;
@@ -103,7 +116,7 @@ TEST(SparseSetTest, Contains_Multiple)
 
     assert(!isEmpty);
     assert(size == 3);
-    assert(capacity == 4);
+    assert(capacity == 3);
 
     assert(sut.Contains(0));
     assert(sut.Contains(1));
