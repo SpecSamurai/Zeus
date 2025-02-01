@@ -26,7 +26,7 @@ public:
 
     std::size_t Index(const Entity entity) const;
     bool Contains(const Entity entity) const;
-    void Reserve(std::size_t capacity);
+    virtual void Reserve(std::size_t capacity);
     void Clear();
 
     std::size_t Capacity() const;
