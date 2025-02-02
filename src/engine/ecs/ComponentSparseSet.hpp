@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Entity.hpp"
 #include "SparseSet.hpp"
 
+#include <algorithm>
 #include <functional>
+#include <utility>
 
 namespace Zeus::ECS
 {
@@ -10,26 +13,42 @@ template <typename Type>
 class ComponentSparseSet : public SparseSet
 {
 public:
-    ComponentSparseSet() : SparseSet(), m_components{}
+    ComponentSparseSet(std::size_t maxEntity = 0)
+        : SparseSet(maxEntity),
+          m_components{}
+    {
+        if (maxEntity > 0)
+            Reserve(maxEntity);
+    }
+
+    ComponentSparseSet(ComponentSparseSet&& other) noexcept
+        : SparseSet(static_cast<SparseSet&&>(other)),
+          m_components{ std::move(other.m_components) }
     {
     }
 
-    void Push(Entity entity) override
+    ComponentSparseSet& operator=(ComponentSparseSet&& other)
+    {
+        if (this != &other)
+        {
+            static_cast<SparseSet&>(*this) = std::move(other);
+            m_components = std::move(other.m_components);
+        }
+
+        return *this;
+    }
+
+    void Push(const Entity entity) override
     {
         SparseSet::Push(entity);
         m_components.push_back({});
     }
 
-    Type& Emplace(const Entity entity, Type&& component)
-    {
-        Push(entity);
-        return m_components.emplace_back(component);
-    }
-
     template <typename... Args>
     Type& Emplace(const Entity entity, Args&&... args)
     {
-        return Emplace(entity, Type{ std::forward<Args>(args)... });
+        SparseSet::Push(entity);
+        return m_components.emplace_back(std::forward<Args>(args)...);
     }
 
     Type& Patch(const Entity entt, std::function<Type>&& func)
@@ -40,7 +59,7 @@ public:
         return elem;
     }
 
-    void Erase(Entity entity)
+    void Erase(const Entity entity)
     {
         auto index = Index(entity);
         Pop(entity);
@@ -49,10 +68,16 @@ public:
         m_components.pop_back();
     }
 
-    Type& Get(Entity entity)
+    Type& Get(const Entity entity)
     {
         const auto index = Index(entity);
         return m_components[index];
+    }
+
+    void Reserve(std::size_t capacity) override
+    {
+        SparseSet::Reserve(capacity);
+        m_components.reserve(capacity);
     }
 
     const Type* Componenets() const
