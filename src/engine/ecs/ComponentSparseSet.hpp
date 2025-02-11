@@ -44,6 +44,15 @@ public:
         m_components.push_back({});
     }
 
+    void Pop(const Entity entity) override
+    {
+        auto index{ Index(entity) };
+        Pop(entity);
+
+        std::swap(m_components[index], m_components[m_components.size() - 1]);
+        m_components.pop_back();
+    }
+
     template <typename... Args>
     Type& Emplace(const Entity entity, Args&&... args)
     {
@@ -56,15 +65,6 @@ public:
         auto& elem{ Get(entity) };
         (func)(elem);
         return elem;
-    }
-
-    void Erase(const Entity entity)
-    {
-        auto index{ Index(entity) };
-        Pop(entity);
-
-        std::swap(m_components[index], m_components[m_components.size() - 1]);
-        m_components.pop_back();
     }
 
     Type& Get(const Entity entity)

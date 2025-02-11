@@ -152,7 +152,7 @@ TEST(ComponentSparseSetTest, Patch_ModifyComponent)
     EXPECT_EQ(actual.y, 24);
 }
 
-TEST(ComponentSparseSetTest, Erase_EntityNotFound)
+TEST(ComponentSparseSetTest, Pop_EntityNotFound)
 {
     Zeus::ECS::ComponentSparseSet<TestComponent> sut;
     TestComponent component{ .x = 1, .y = 2 };
@@ -161,7 +161,7 @@ TEST(ComponentSparseSetTest, Erase_EntityNotFound)
     sut.Emplace(entity1, component);
     sut.Emplace(entity2, component);
 
-    sut.Erase(entity1);
+    sut.Pop(entity1);
 
     auto empty = sut.Empty();
     auto capacity = sut.Capacity();

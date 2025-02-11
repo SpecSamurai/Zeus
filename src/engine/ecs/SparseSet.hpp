@@ -22,7 +22,7 @@ public:
     SparseSet& operator=(SparseSet&& other);
 
     virtual void Push(Entity entity);
-    void Pop(Entity entity);
+    virtual void Pop(Entity entity);
 
     std::size_t Index(const Entity entity) const;
     bool Contains(const Entity entity) const;
