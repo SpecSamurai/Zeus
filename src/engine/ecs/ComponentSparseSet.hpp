@@ -51,17 +51,16 @@ public:
         return m_components.emplace_back(std::forward<Args>(args)...);
     }
 
-    Type& Patch(const Entity entt, std::function<Type>&& func)
+    Type& Patch(const Entity entity, std::function<void(Type&)>&& func)
     {
-        // const auto idx = Index(entt);
-        auto& elem = Get(entt); // components(idx);
+        auto& elem{ Get(entity) };
         (func)(elem);
         return elem;
     }
 
     void Erase(const Entity entity)
     {
-        auto index = Index(entity);
+        auto index{ Index(entity) };
         Pop(entity);
 
         std::swap(m_components[index], m_components[m_components.size() - 1]);
@@ -70,7 +69,7 @@ public:
 
     Type& Get(const Entity entity)
     {
-        const auto index = Index(entity);
+        const auto index{ Index(entity) };
         return m_components[index];
     }
 
