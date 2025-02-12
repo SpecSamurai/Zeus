@@ -47,7 +47,7 @@ public:
     void Pop(const Entity entity) override
     {
         auto index{ Index(entity) };
-        Pop(entity);
+        SparseSet::Pop(entity);
 
         std::swap(m_components[index], m_components[m_components.size() - 1]);
         m_components.pop_back();
