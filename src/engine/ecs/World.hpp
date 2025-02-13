@@ -1,8 +1,12 @@
 #pragma once
 
 #include "Entity.hpp"
+#include "ecs/ComponentSparseSet.hpp"
+#include "ecs/FamilyId.hpp"
+#include "ecs/SparseSet.hpp"
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <tuple>
 #include <unordered_map>
@@ -17,68 +21,118 @@ namespace Zeus::ECS
 // - Systems
 // - Archetype
 // Query - iterator
-// Sparse Set
 // Entity LifeCycle
 // Grouping and filtering
 // Observe changes
 // A tombstone is a marker or reserved value used to represent an entity that
 // has been destroyed or is no longer valid in an entity-component system (ECS).
 
-class IStorage
-{
-};
-
-template <typename Type>
-class Storage : IStorage
-{
-};
-
 class World
 {
 public:
-    inline Entity Create()
+    World() : pools{}, entities()
     {
-        Entity newEntity{}; // Generator::Generate() };
-        entities.insert(newEntity);
+    }
+
+    Entity Create()
+    {
+        static std::uint32_t i{ 0 };
+        Entity newEntity{ lastEntity++ }; // Generator::Generate() };
+        entities.Push(newEntity);
         return newEntity;
     }
 
-    inline void Destroy(Entity entity)
+    void Destroy(const Entity entity)
     {
-        entities.erase(entity);
+        for (auto& pool : pools)
+        {
+            pool.second->Pop(entity);
+        }
+
+        entities.Pop(entity);
     }
 
-    // clear()
+    void Clear()
+    {
+        for (auto& pool : pools)
+        {
+            pool.second->Clear();
+        }
+
+        entities.Clear();
+    }
 
     template <typename Component, typename... Args>
-    inline Component Emplace(Entity entity, Args&&... args)
+    decltype(auto) Emplace(const Entity entity, Args&&... args)
     {
-        auto component = Component{ std::forward<Args>(args)... };
-        return component;
+        if (!entities.Contains(entity))
+            entities.Push(entity);
+
+        Family family{ FamilyId::Type<Component>() };
+
+        if (!pools.contains(family))
+        {
+            pools[family] = new ComponentSparseSet<Component>();
+        }
+
+        auto pool{ static_cast<ComponentSparseSet<Component>*>(pools[family]) };
+
+        return pool->Emplace(entity, std::forward<Args>(args)...);
     }
 
     template <typename Component>
-    inline Component Emplace(Entity entity, Component&& component)
+    decltype(auto) Patch(
+        const Entity entity,
+        std::function<void(Component&)>&& func)
     {
-        return component;
+        ComponentSparseSet<Component>* pool{ TryGetPool<Component>() };
+        assert(pool != nullptr && "Component not added to the pools");
+
+        return pool->Patch(
+            entity,
+            std::forward<std::function<void(Component&)>>(func));
     }
 
-    // replace<position>(entity, 0., 0.);
     // emplace_or_replace<position>(entity, 0., 0.);
-
     // erase componenets
     // erase<position>(entity);
-
     template <typename... Components>
-    inline decltype(auto) Get(Entity entity)
+    void Erase(Entity entity)
     {
+        /*Family family{ FamilyId::Type<Component>() };*/
+        /**/
+        /*ComponentSparseSet<Component> pool{ pools[family] };*/
+        /**/
+        /*pool.Pop(entity);*/
+
         if constexpr (sizeof...(Components) == 1u)
         {
-            return (Components{}, ...); //(Get<Components>(entity), ...);
+
+            Family family{ FamilyId::Type<Components>()... };
+            auto& pool{ pools[family] };
+            /*auto* cpool = assure<std::remove_const_t<Type>...>();*/
+            /*return cpool && cpool->contains(entt);*/
+            // ComponentSparseSet<Component>* pool{ GetPool<Component>() };
+            pool->Contains(entity);
         }
         else
         {
-            return std::forward_as_tuple(Get<Components>(entity)...);
+            return (AllOf<Components>(entity) && ...);
+        }
+    }
+
+    template <typename... Components>
+    [[nodiscard]] decltype(auto) Get(const Entity entity)
+    {
+        static_assert(sizeof...(Components) > 0);
+        if constexpr (sizeof...(Components) == 1u)
+        {
+            return (TryGetPool<Components>()->Get(entity), ...);
+        }
+        else
+        {
+            return std::forward_as_tuple(
+                TryGetPool<Components>()->Get(entity)...);
         }
     }
 
@@ -86,29 +140,53 @@ public:
 
     // iterator
     template <typename... Components>
-    inline std::array<Entity, 10> Query()
+    std::array<Entity, 10> Query()
     {
+    }
+
+    // auto view = registry.view<a_component, another_component>();
+    // registry.destroy(view.begin(), view.end());
+
+    template <typename... Components>
+    bool AnyOf(Entity entity)
+    {
+        return (AllOf<Components>(entity) || ...);
     }
 
     template <typename... Components>
-    inline bool AnyOf(Entity entity)
+    bool AllOf(Entity entity)
     {
+        static_assert(sizeof...(Components) > 0);
+        if constexpr (sizeof...(Components) == 1u)
+        {
+            auto* pool{ TryGetPool<Components...>() };
+            return pool && pool->Contains(entity);
+        }
+        else
+        {
+            return (AllOf<Components>(entity) && ...);
+        }
     }
 
-    template <typename... Components>
-    inline bool AllOf(Entity entity)
+    bool IsValid(Entity entity)
     {
+        return entities.Contains(entity);
     }
 
-    inline bool IsValid(Entity entity)
+private:
+    template <typename Component>
+    ComponentSparseSet<Component>* TryGetPool()
     {
-        return entities.contains(entity);
+        Family family{ FamilyId::Type<Component>() };
+        return pools.contains(family)
+                   ? static_cast<ComponentSparseSet<Component>*>(pools[family])
+                   : nullptr;
     }
 
 private:
     Entity lastEntity{};
 
-    std::unordered_map<std::uint32_t, std::vector<IStorage>> components;
-    std::unordered_set<Entity> entities;
+    std::unordered_map<std::uint32_t, SparseSet*> pools;
+    SparseSet entities;
 };
 }
