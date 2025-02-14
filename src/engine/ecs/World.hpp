@@ -93,31 +93,19 @@ public:
             std::forward<std::function<void(Component&)>>(func));
     }
 
-    // emplace_or_replace<position>(entity, 0., 0.);
-    // erase componenets
-    // erase<position>(entity);
     template <typename... Components>
-    void Erase(Entity entity)
+    void Erase(const Entity entity)
     {
-        /*Family family{ FamilyId::Type<Component>() };*/
-        /**/
-        /*ComponentSparseSet<Component> pool{ pools[family] };*/
-        /**/
-        /*pool.Pop(entity);*/
-
+        static_assert(sizeof...(Components) > 0);
         if constexpr (sizeof...(Components) == 1u)
         {
-
-            Family family{ FamilyId::Type<Components>()... };
-            auto& pool{ pools[family] };
-            /*auto* cpool = assure<std::remove_const_t<Type>...>();*/
-            /*return cpool && cpool->contains(entt);*/
-            // ComponentSparseSet<Component>* pool{ GetPool<Component>() };
-            pool->Contains(entity);
+            auto* pool{ TryGetPool<Components...>() };
+            if (pool)
+                pool->Pop(entity);
         }
         else
         {
-            return (AllOf<Components>(entity) && ...);
+            (Erase<Components>(entity), ...);
         }
     }
 
@@ -136,25 +124,22 @@ public:
         }
     }
 
-    // try_get
-
+    // auto view = registry.view<a_component, another_component>();
     // iterator
     template <typename... Components>
     std::array<Entity, 10> Query()
     {
+        static_assert(sizeof...(Components) > 0);
     }
 
-    // auto view = registry.view<a_component, another_component>();
-    // registry.destroy(view.begin(), view.end());
-
     template <typename... Components>
-    bool AnyOf(Entity entity)
+    bool AnyOf(const Entity entity)
     {
         return (AllOf<Components>(entity) || ...);
     }
 
     template <typename... Components>
-    bool AllOf(Entity entity)
+    bool AllOf(const Entity entity)
     {
         static_assert(sizeof...(Components) > 0);
         if constexpr (sizeof...(Components) == 1u)
@@ -168,7 +153,7 @@ public:
         }
     }
 
-    bool IsValid(Entity entity)
+    bool IsValid(const Entity entity)
     {
         return entities.Contains(entity);
     }

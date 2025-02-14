@@ -54,20 +54,20 @@ public:
     }
 
     template <typename... Args>
-    Type& Emplace(const Entity entity, Args&&... args)
+    decltype(auto) Emplace(const Entity entity, Args&&... args)
     {
         SparseSet::Push(entity);
         return m_components.emplace_back(std::forward<Args>(args)...);
     }
 
-    Type& Patch(const Entity entity, std::function<void(Type&)>&& func)
+    decltype(auto) Patch(const Entity entity, std::function<void(Type&)>&& func)
     {
         auto& elem{ Get(entity) };
         (func)(elem);
         return elem;
     }
 
-    Type& Get(const Entity entity)
+    decltype(auto) Get(const Entity entity)
     {
         const auto index{ Index(entity) };
         return m_components[index];
