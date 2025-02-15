@@ -270,20 +270,64 @@ TEST(WorldTest, AnyOf_MultipleComponent)
     EXPECT_TRUE(actual2);
 }
 
-TEST(WorldTest, Query)
+TEST(WorldTest, Erase_SingleComponent)
 {
     ECS::World sut;
-    ECS::Entity entity = sut.Create();
-    // sut.Emplace<AComponent>(entity, 1, "Test");
+    ECS::Entity entity0{ 0 };
+    ECS::Entity entity1{ 1 };
 
-    // auto [a, b] = sut.Get<AComponent, BComponent>(entity);
-    // auto actual = sut.Get<AComponent>(entity);
+    sut.Emplace<AComponent>(entity0, 1);
+    sut.Emplace<AComponent>(entity1, 42);
+    sut.Emplace<BComponent>(entity1, 1, "Test");
 
-    /*EXPECT_EQ(a.number, 1);*/
-    /*EXPECT_STREQ(actual.string, "Test");*/
-    /*auto query = sut.Query<AComponent>();*/
+    sut.Erase<AComponent>(entity0);
+    sut.Erase<BComponent>(entity1);
 
-    /*EXPECT_TRUE(false);*/
+    bool actual0 = sut.AllOf<AComponent>(entity0);
+    bool actual1 = sut.AllOf<BComponent>(entity0);
+
+    bool actual2 = sut.AllOf<AComponent>(entity1);
+    bool actual3 = sut.AllOf<BComponent>(entity1);
+
+    EXPECT_FALSE(actual0);
+    EXPECT_FALSE(actual1);
+
+    EXPECT_TRUE(actual2);
+    EXPECT_FALSE(actual3);
+}
+
+TEST(WorldTest, Erase_MultipleComponents)
+{
+    ECS::World sut;
+    ECS::Entity entity0{ 0 };
+    ECS::Entity entity1{ 1 };
+
+    sut.Emplace<AComponent>(entity0, 1);
+    sut.Emplace<AComponent>(entity1, 42);
+    sut.Emplace<BComponent>(entity1, 1, "Test");
+
+    sut.Erase<AComponent>(entity0);
+    sut.Erase<AComponent, BComponent>(entity1);
+
+    bool actual0 = sut.AllOf<AComponent, BComponent>(entity0);
+    bool actual1 = sut.AllOf<AComponent, BComponent>(entity0);
+
+    EXPECT_FALSE(actual0);
+    EXPECT_FALSE(actual1);
+}
+
+TEST(WorldTest, Query_SingleComponent)
+{
+    ECS::World sut;
+    ECS::Entity entity0{ 0 };
+    ECS::Entity entity1{ 1 };
+
+    sut.Emplace<AComponent>(entity0, 1);
+    sut.Emplace<AComponent>(entity1, 42);
+    sut.Emplace<BComponent>(entity1, 1, "Test");
+
+    //auto actual1 = sut.Query<AComponent>();
+    //auto actual2 = sut.Query<BComponent>();
 }
 
 TEST(WorldTest, IsValid)

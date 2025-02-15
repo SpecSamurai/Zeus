@@ -1,32 +1,17 @@
 #pragma once
 
+#include "ComponentSparseSet.hpp"
 #include "Entity.hpp"
-#include "ecs/ComponentSparseSet.hpp"
-#include "ecs/FamilyId.hpp"
-#include "ecs/SparseSet.hpp"
+#include "FamilyId.hpp"
+#include "SparseSet.hpp"
 
-#include <array>
-#include <cstddef>
 #include <cstdint>
 #include <tuple>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
-#include <vector>
 
 namespace Zeus::ECS
 {
-// TODO:
-// - Versions
-// - Systems
-// - Archetype
-// Query - iterator
-// Entity LifeCycle
-// Grouping and filtering
-// Observe changes
-// A tombstone is a marker or reserved value used to represent an entity that
-// has been destroyed or is no longer valid in an entity-component system (ECS).
-
 class World
 {
 public:
@@ -36,8 +21,7 @@ public:
 
     Entity Create()
     {
-        static std::uint32_t i{ 0 };
-        Entity newEntity{ lastEntity++ }; // Generator::Generate() };
+        Entity newEntity{ lastEntity++ };
         entities.Push(newEntity);
         return newEntity;
     }
@@ -124,12 +108,18 @@ public:
         }
     }
 
-    // auto view = registry.view<a_component, another_component>();
-    // iterator
     template <typename... Components>
-    std::array<Entity, 10> Query()
+    decltype(auto) Query()
     {
         static_assert(sizeof...(Components) > 0);
+        if constexpr (sizeof...(Components) == 1u)
+        {
+            return (TryGetPool<Components>(), ...);
+        }
+        else
+        {
+            return std::forward_as_tuple(TryGetPool<Components>()...);
+        }
     }
 
     template <typename... Components>
