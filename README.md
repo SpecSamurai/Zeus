@@ -30,6 +30,16 @@
     - Async compilation, ThreadPool
     - Runtime shaders compilation | libshaderc
     - Atomic
+- ECS
+    - Versions
+    - Systems
+    - Archetype
+    - Query - iterator
+    - Entity LifeCycle
+    - Grouping and filtering
+    - Observe changes
+    - A tombstone is a marker or reserved value used to represent an entity that
+    - has been destroyed or is no longer valid in an entity-component system (ECS).
 
 ## Math
 - Column-Major matrices to maintain consistency with both GLSL and SPIR-V.
