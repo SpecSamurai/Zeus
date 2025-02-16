@@ -23,6 +23,7 @@ add_executable(Tests
 
     engine/ecs/ComponentSparseSetTest.cpp
     engine/ecs/FamilyIdTest.cpp
+    engine/ecs/SparseSetIteratorTest.cpp
     engine/ecs/SparseSetTest.cpp
     engine/ecs/WorldTest.cpp
 

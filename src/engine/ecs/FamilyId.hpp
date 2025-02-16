@@ -1,21 +1,25 @@
 #pragma once
 
+#include <cstdint>
+
 namespace Zeus
 {
+using Family = std::uint32_t;
+
 class FamilyId
 {
 public:
     template <typename>
-    static int Type() noexcept
+    static Family Type() noexcept
     {
-        static const int id{ Identifier() };
+        static const Family id{ Identifier() };
         return id;
     }
 
 private:
-    inline static int Identifier() noexcept
+    inline static Family Identifier() noexcept
     {
-        static int id{ 0 };
+        static Family id{ 0 };
         return id++;
     }
 };

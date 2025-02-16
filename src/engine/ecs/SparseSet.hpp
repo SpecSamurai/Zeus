@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entity.hpp"
+#include "SparseSetIterator.hpp"
 
 #include <cassert>
 #include <cstddef>
@@ -10,7 +11,13 @@ namespace Zeus::ECS
 {
 class SparseSet
 {
+private:
+    using Container = std::vector<Entity>;
+
 public:
+    using size_type = typename Container::size_type;
+    using iterator = SparseSetIterator<Container>;
+
     SparseSet(std::size_t maxEntity = 0);
     SparseSet(SparseSet&& other) noexcept;
 
@@ -34,11 +41,15 @@ public:
     const Entity* Data() const;
     std::size_t Size() const;
 
-private:
-    static constexpr std::size_t SPARSE_PAGE_SIZE{ 4096 };
+    static_assert(std::random_access_iterator<iterator>);
+    [[nodiscard]] iterator begin() const noexcept;
+    [[nodiscard]] iterator end() const noexcept;
 
-    std::vector<Entity> m_sparse;
-    std::vector<Entity> m_dense;
-    std::size_t m_size;
+private:
+    static constexpr size_type SPARSE_PAGE_SIZE{ 4096 };
+
+    Container m_sparse;
+    Container m_dense;
+    size_type m_size;
 };
 }

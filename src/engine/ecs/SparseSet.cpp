@@ -5,7 +5,6 @@
 #include <cassert>
 #include <cstddef>
 #include <utility>
-#include <vector>
 
 namespace Zeus::ECS
 {
@@ -107,5 +106,15 @@ const Entity* SparseSet::Data() const
 std::size_t SparseSet::Size() const
 {
     return m_size;
+}
+
+[[nodiscard]] SparseSet::iterator SparseSet::begin() const noexcept
+{
+    return iterator(m_dense, 0);
+}
+
+[[nodiscard]] SparseSet::iterator SparseSet::end() const noexcept
+{
+    return iterator(m_dense, m_size);
 }
 }
