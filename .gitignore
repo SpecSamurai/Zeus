@@ -13,4 +13,4 @@ build/
 cmake_install.cmake
 
 # Assets
-*.glb
+models/
