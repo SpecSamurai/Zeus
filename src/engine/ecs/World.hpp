@@ -114,11 +114,11 @@ public:
         static_assert(sizeof...(Components) > 0);
         if constexpr (sizeof...(Components) == 1u)
         {
-            return (TryGetPool<Components>(), ...);
+            return (TryGetPool<Components>()->begin(), ...);
         }
         else
         {
-            return std::forward_as_tuple(TryGetPool<Components>()...);
+            return std::make_tuple(TryGetPool<Components>()->begin()...);
         }
     }
 

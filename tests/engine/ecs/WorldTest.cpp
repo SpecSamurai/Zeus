@@ -326,8 +326,33 @@ TEST(WorldTest, Query_SingleComponent)
     sut.Emplace<AComponent>(entity1, 42);
     sut.Emplace<BComponent>(entity1, 1, "Test");
 
-    //auto actual1 = sut.Query<AComponent>();
-    //auto actual2 = sut.Query<BComponent>();
+    auto actual1 = sut.Query<AComponent>();
+    auto actual2 = sut.Query<BComponent>();
+
+    EXPECT_EQ(actual1[0].number, 1);
+    EXPECT_EQ(actual1[1].number, 42);
+
+    EXPECT_EQ(actual2[0].number, 1);
+    EXPECT_STREQ(actual2[0].string, "Test");
+}
+
+TEST(WorldTest, Query_MultipleComponent)
+{
+    ECS::World sut;
+    ECS::Entity entity0{ 0 };
+    ECS::Entity entity1{ 1 };
+
+    sut.Emplace<AComponent>(entity0, 1);
+    sut.Emplace<AComponent>(entity1, 42);
+    sut.Emplace<BComponent>(entity1, 1, "Test");
+
+    auto [actual1, actual2] = sut.Query<AComponent, BComponent>();
+
+    EXPECT_EQ(actual1[0].number, 1);
+    EXPECT_EQ(actual1[1].number, 42);
+
+    EXPECT_EQ(actual2[0].number, 1);
+    EXPECT_STREQ(actual2[0].string, "Test");
 }
 
 TEST(WorldTest, IsValid)
