@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ComponentSparseSetIterator.hpp"
 #include "Entity.hpp"
 #include "SparseSet.hpp"
 
@@ -12,7 +13,13 @@ namespace Zeus::ECS
 template <typename Type>
 class ComponentSparseSet : public SparseSet
 {
+private:
+    using Container = std::vector<Type>;
+
 public:
+    using size_type = typename Container::size_type;
+    using iterator = ComponentSparseSetIterator<Container>;
+
     ComponentSparseSet(std::size_t maxEntity = 0)
         : SparseSet(maxEntity),
           m_components{}
@@ -84,7 +91,18 @@ public:
         return m_components.data();
     }
 
+    static_assert(std::random_access_iterator<iterator>);
+    [[nodiscard]] iterator begin() const noexcept
+    {
+        return iterator(m_components, 0);
+    }
+
+    [[nodiscard]] iterator end() const noexcept
+    {
+        return iterator(m_components, m_components.size());
+    }
+
 private:
-    std::vector<Type> m_components;
+    Container m_components;
 };
 }
