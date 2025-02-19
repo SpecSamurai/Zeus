@@ -17,11 +17,11 @@ struct MouseButtonReleasedEvent
 
 struct MouseScrolledEvent
 {
-    Vector2f offset;
+    Math::Vector2f offset;
 };
 
 struct MouseMovedEvent
 {
-    Vector2f position;
+    Math::Vector2f position;
 };
 }

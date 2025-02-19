@@ -52,7 +52,7 @@ bool Input::IsMouseButtonUp(const MouseButtonCode buttonCode)
     return state == GLFW_RELEASE;
 }
 
-Vector2f Input::GetMousePosition()
+Math::Vector2f Input::GetMousePosition()
 {
     auto* window{ static_cast<GLFWwindow*>(
         Application::Instance().GetWindow().GetHandle()) };
@@ -60,6 +60,6 @@ Vector2f Input::GetMousePosition()
     double xPos, yPos;
     glfwGetCursorPos(window, &xPos, &yPos);
 
-    return Vector2f(static_cast<float>(xPos), static_cast<float>(yPos));
+    return Math::Vector2f(static_cast<float>(xPos), static_cast<float>(yPos));
 }
 }

@@ -43,8 +43,8 @@ public:
         bool constrainPitch = true) = 0;
     virtual void OnScroll(float yOffset) = 0;
 
-    virtual Vector3f& GetPosition() = 0;
-    virtual const Matrix4x4f& GetViewProjection() const = 0;
+    virtual Math::Vector3f& GetPosition() = 0;
+    virtual const Math::Matrix4x4f& GetViewProjection() const = 0;
 
     inline constexpr bool IsType(CameraType cameraType) const
     {
@@ -56,7 +56,9 @@ public:
     inline static constexpr float DEFAULT_NEAR_PLANE_DISTANCE{ 10000.f };
     inline static constexpr float DEFAULT_FAR_PLANE_DISTANCE{ 0.1f };
     inline static constexpr float DEFAULT_FOV{ 45.f };
-    inline static const Vector3f WORLD_UP{ Vector3f(0.f, 1.f, 0.f) };
+    inline static const Math::Vector3f WORLD_UP{
+        Math::Vector3f(0.f, 1.f, 0.f)
+    };
 
 protected:
     const CameraType m_cameraType;

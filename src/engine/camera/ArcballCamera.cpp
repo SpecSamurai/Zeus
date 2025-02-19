@@ -10,17 +10,17 @@ namespace Zeus
 {
 ArcballCamera::ArcballCamera(
     float aspectRatio,
-    Vector3f position,
-    Vector3f target,
-    Vector3f up)
+    Math::Vector3f position,
+    Math::Vector3f target,
+    Math::Vector3f up)
     : EditorCamera(CameraType::ARCBALL),
       m_position{ position },
       m_target{ target },
       m_up{ up },
       m_aspectRatio{ aspectRatio }
 {
-    m_projection = perspective<float>(
-        radians(m_fieldOfView),
+    m_projection = Math::perspective<float>(
+        Math::radians(m_fieldOfView),
         m_aspectRatio,
         m_near,
         m_far);
@@ -28,8 +28,8 @@ ArcballCamera::ArcballCamera(
 
 void ArcballCamera::Reset()
 {
-    m_position = Vector3f();
-    m_target = Vector3f();
+    m_position = Math::Vector3f();
+    m_target = Math::Vector3f();
     // m_direction;
     // m_up;
     // m_right;
@@ -46,8 +46,8 @@ void ArcballCamera::Reset()
     m_movementSpeed = DEFAULT_MOVEMENT_SPEED;
     m_mouseSensitivity = DEFAULT_MOUSE_SENSITIVITY;
 
-    m_projection = perspective<float>(
-        radians(m_fieldOfView),
+    m_projection = Math::perspective<float>(
+        Math::radians(m_fieldOfView),
         m_aspectRatio,
         m_near,
         m_far);
@@ -98,10 +98,12 @@ void ArcballCamera::OnScroll(float yOffset)
 
 void ArcballCamera::Update()
 {
-    Vector3f direction(
-        m_radius * std::cos(radians(m_yaw)) * std::cos(radians(m_pitch)),
-        m_radius * std::sin(radians(m_pitch)),
-        m_radius * std::sin(radians(m_yaw)) * std::cos(radians(m_pitch)));
+    Math::Vector3f direction(
+        m_radius * std::cos(Math::radians(m_yaw)) *
+            std::cos(Math::radians(m_pitch)),
+        m_radius * std::sin(Math::radians(m_pitch)),
+        m_radius * std::sin(Math::radians(m_yaw)) *
+            std::cos(Math::radians(m_pitch)));
 
     m_position = m_target - direction;
 
@@ -113,12 +115,12 @@ void ArcballCamera::Update()
     m_viewProjection = m_projection * m_view;
 }
 
-Vector3f& ArcballCamera::GetPosition()
+Math::Vector3f& ArcballCamera::GetPosition()
 {
     return m_position;
 }
 
-const Matrix4x4f& ArcballCamera::GetViewProjection() const
+const Math::Matrix4x4f& ArcballCamera::GetViewProjection() const
 {
     return m_viewProjection;
 }

@@ -30,7 +30,7 @@ void DestroyDefaultResources()
 
 void Textures::InitializeTextures()
 {
-    std::uint32_t black{ toUNormInt(Colors::BLACK) };
+    std::uint32_t black{ toUNormInt(Math::Colors::BLACK) };
     Black = Image(
         ImageType::Texture2D,
         { 1, 1, 1 },
@@ -40,7 +40,7 @@ void Textures::InitializeTextures()
         "Image Black");
     Black.Update(&black, sizeof(black), 0);
 
-    std::uint32_t white{ toUNormInt(Colors::WHITE) };
+    std::uint32_t white{ toUNormInt(Math::Colors::WHITE) };
     White = Image(
         ImageType::Texture2D,
         { 1, 1, 1 },
@@ -50,7 +50,7 @@ void Textures::InitializeTextures()
         "Image White");
     White.Update(&white, sizeof(white), 0);
 
-    std::uint32_t magenta{ toUNormInt(Colors::MAGENTA) };
+    std::uint32_t magenta{ toUNormInt(Math::Colors::MAGENTA) };
     std::array<std::uint32_t, 16 * 16> pixels;
     for (std::uint32_t x{ 0 }; x < 16; ++x)
     {

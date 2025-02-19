@@ -118,7 +118,7 @@ void Window::Initialize()
            double xOffset,
            double yOffset) {
             Event::Dispatcher.Dispatch(MouseScrolledEvent{
-                .offset = Vector2f(
+                .offset = Math::Vector2f(
                     static_cast<float>(xOffset),
                     static_cast<float>(yOffset)),
             });
@@ -128,7 +128,7 @@ void Window::Initialize()
         m_handle,
         []([[maybe_unused]] GLFWwindow* window, double xPos, double yPos) {
             Event::Dispatcher.Dispatch(MouseMovedEvent{
-                .position = Vector2f(
+                .position = Math::Vector2f(
                     static_cast<float>(xPos),
                     static_cast<float>(yPos)),
             });

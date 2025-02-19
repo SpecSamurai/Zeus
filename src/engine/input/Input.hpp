@@ -15,6 +15,6 @@ public:
     static bool IsMouseButtonDown(const MouseButtonCode buttonCode);
     static bool IsMouseButtonUp(const MouseButtonCode buttonCode);
 
-    static Vector2f GetMousePosition();
+    static Math::Vector2f GetMousePosition();
 };
 }

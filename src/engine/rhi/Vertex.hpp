@@ -6,28 +6,28 @@ namespace Zeus
 {
 struct Vertex_Position
 {
-    Vector3f position;
+    Math::Vector3f position;
 };
 
 struct Vertex_PositionColor
 {
-    Vector3f position;
-    Color color;
+    Math::Vector3f position;
+    Math::Color color;
 };
 
 struct Vertex_PositionTexture
 {
-    Vector3f position;
-    Vector2f texture;
+    Math::Vector3f position;
+    Math::Vector2f texture;
 };
 
 // UV parameters are interleaved is due to alignement limitations
 struct Vertex
 {
-    Vector3f position;
+    Math::Vector3f position;
     float uvX;
-    Vector3f normal;
+    Math::Vector3f normal;
     float uvY;
-    Color color;
+    Math::Color color;
 };
 }
