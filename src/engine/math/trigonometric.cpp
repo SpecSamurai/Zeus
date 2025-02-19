@@ -2,7 +2,7 @@
 
 #include "definitions.hpp"
 
-namespace Zeus
+namespace Zeus::Math
 {
 float radians(const float degrees)
 {

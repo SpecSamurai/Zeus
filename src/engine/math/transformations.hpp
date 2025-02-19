@@ -15,7 +15,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace Zeus
+namespace Zeus::Math
 {
 inline constexpr std::uint32_t toUNormInt(const Color& color)
 {

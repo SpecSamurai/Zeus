@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-namespace Zeus
+namespace Zeus::Math
 {
 template <typename T>
 constexpr T dot(const Vector2<T>& left, const Vector2<T>& right)

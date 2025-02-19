@@ -6,7 +6,7 @@
 #include "Vector3.hpp"
 #include "Vector4.hpp"
 
-namespace Zeus
+namespace Zeus::Math
 {
 inline constexpr float PI{ 3.14159265358979323846f };
 inline constexpr float DEG2RAD_MULTIPLIER{ PI / 180.0f };

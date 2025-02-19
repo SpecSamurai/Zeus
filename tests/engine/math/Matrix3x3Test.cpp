@@ -5,7 +5,7 @@
 
 TEST(Matrix3x3Test, Constructor_ArraySubscriptOperator)
 {
-    auto sut = Zeus::Matrix3x3(
+    auto sut = Zeus::Math::Matrix3x3(
         // clang-format off
         0.f, 0.f, 0.f,
         0.f, 0.f, 0.f,
@@ -30,7 +30,7 @@ TEST(Matrix3x3Test, Constructor_ArraySubscriptOperator)
 
 TEST(Matrix3x3Test, Constructor_Scalar)
 {
-    auto sut = Zeus::Matrix3x3(1.f);
+    auto sut = Zeus::Math::Matrix3x3(1.f);
 
     for (std::size_t i{ 0 }; i < 3; ++i)
         for (std::size_t j{ 0 }; j < 3; ++j)
@@ -42,7 +42,7 @@ TEST(Matrix3x3Test, Constructor_Scalar)
 
 TEST(Matrix3x3Test, BinaryAdditionOperator_Matrices)
 {
-    auto sut1 = Zeus::Matrix3x3(
+    auto sut1 = Zeus::Math::Matrix3x3(
         // clang-format off
         1.f, 2.f, 3.f,
         4.f, 5.f, 6.f,
@@ -50,7 +50,7 @@ TEST(Matrix3x3Test, BinaryAdditionOperator_Matrices)
         // clang-format on
     );
 
-    auto sut2 = Zeus::Matrix3x3(
+    auto sut2 = Zeus::Math::Matrix3x3(
         // clang-format off
         10.f, 11.f, 12.f,
         13.f, 14.f, 15.f,
@@ -58,7 +58,7 @@ TEST(Matrix3x3Test, BinaryAdditionOperator_Matrices)
         // clang-format on
     );
 
-    auto expected = Zeus::Matrix3x3(
+    auto expected = Zeus::Math::Matrix3x3(
         // clang-format off
         11.f, 13.f, 15.f,
         17.f, 19.f, 21.f,
@@ -75,7 +75,7 @@ TEST(Matrix3x3Test, BinaryAdditionOperator_Matrices)
 
 TEST(Matrix3x3Test, BinaryAdditionOperator_MatrixWithScalar)
 {
-    auto sut = Zeus::Matrix3x3(
+    auto sut = Zeus::Math::Matrix3x3(
         // clang-format off
         1.f, 2.f, 3.f,
         4.f, 5.f, 6.f,
@@ -85,7 +85,7 @@ TEST(Matrix3x3Test, BinaryAdditionOperator_MatrixWithScalar)
 
     float scalar = 1.f;
 
-    auto expected = Zeus::Matrix3x3(
+    auto expected = Zeus::Math::Matrix3x3(
         // clang-format off
         2.f, 3.f, 4.f,
         5.f, 6.f, 7.f,
@@ -107,7 +107,7 @@ TEST(Matrix3x3Test, BinaryAdditionOperator_MatrixWithScalar)
 
 TEST(Matrix3x3Test, BinarySubtractionOperator_Matrices)
 {
-    auto sut1 = Zeus::Matrix3x3(
+    auto sut1 = Zeus::Math::Matrix3x3(
         // clang-format off
         9.f, 8.f, 7.f,
         6.f, 5.f, 4.f,
@@ -115,7 +115,7 @@ TEST(Matrix3x3Test, BinarySubtractionOperator_Matrices)
         // clang-format on
     );
 
-    auto sut2 = Zeus::Matrix3x3(
+    auto sut2 = Zeus::Math::Matrix3x3(
         // clang-format off
         1.f, 2.f, 3.f,
         4.f, 5.f, 6.f,
@@ -123,7 +123,7 @@ TEST(Matrix3x3Test, BinarySubtractionOperator_Matrices)
         // clang-format on
     );
 
-    auto expected1 = Zeus::Matrix3x3(
+    auto expected1 = Zeus::Math::Matrix3x3(
         // clang-format off
         8.f, 6.f, 4.f,
         2.f, 0.f, -2.f,
@@ -131,7 +131,7 @@ TEST(Matrix3x3Test, BinarySubtractionOperator_Matrices)
         // clang-format on
     );
 
-    auto expected2 = Zeus::Matrix3x3(
+    auto expected2 = Zeus::Math::Matrix3x3(
         // clang-format off
         -8.f, -6.f, -4.f,
         -2.f, 0.f, 2.f,
@@ -153,7 +153,7 @@ TEST(Matrix3x3Test, BinarySubtractionOperator_Matrices)
 
 TEST(Matrix3x3Test, BinarySubtractionOperator_MatrixWithScalar)
 {
-    auto sut = Zeus::Matrix3x3(
+    auto sut = Zeus::Math::Matrix3x3(
         // clang-format off
         1.f, 2.f, 3.f,
         5.f, 6.f, 7.f,
@@ -163,7 +163,7 @@ TEST(Matrix3x3Test, BinarySubtractionOperator_MatrixWithScalar)
 
     float scalar = 1.f;
 
-    auto expected1 = Zeus::Matrix3x3(
+    auto expected1 = Zeus::Math::Matrix3x3(
         // clang-format off
         0.f, -1.f, -2.f,
         -4.f, -5.f, -6.f,
@@ -171,7 +171,7 @@ TEST(Matrix3x3Test, BinarySubtractionOperator_MatrixWithScalar)
         // clang-format on
     );
 
-    auto expected2 = Zeus::Matrix3x3(
+    auto expected2 = Zeus::Math::Matrix3x3(
         // clang-format off
         0.f, 1.f, 2.f,
         4.f, 5.f, 6.f,
@@ -193,7 +193,7 @@ TEST(Matrix3x3Test, BinarySubtractionOperator_MatrixWithScalar)
 
 TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithScalar)
 {
-    auto sut = Zeus::Matrix3x3(
+    auto sut = Zeus::Math::Matrix3x3(
         // clang-format off
         1.f, 2.f, 3.f,
         5.f, 6.f, 7.f,
@@ -203,7 +203,7 @@ TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithScalar)
 
     float scalar = 2.f;
 
-    auto expected = Zeus::Matrix3x3(
+    auto expected = Zeus::Math::Matrix3x3(
         // clang-format off
         2.f, 4.f, 6.f,
         10.f, 12.f, 14.f,
@@ -225,7 +225,7 @@ TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithScalar)
 
 TEST(Matrix3x3Test, BinaryDivisionOperator_MatrixWithScalar)
 {
-    auto sut = Zeus::Matrix3x3(
+    auto sut = Zeus::Math::Matrix3x3(
         // clang-format off
         2.f, 4.f, 6.f,
         10.f, 12.f, 14.f,
@@ -235,7 +235,7 @@ TEST(Matrix3x3Test, BinaryDivisionOperator_MatrixWithScalar)
 
     float scalar = 2.f;
 
-    auto expected1 = Zeus::Matrix3x3(
+    auto expected1 = Zeus::Math::Matrix3x3(
         // clang-format off
         2.f / 2.f, 2.f / 4.f, 2.f / 6.f,
         2.f / 10.f, 2.f / 12.f, 2.f / 14.f,
@@ -243,7 +243,7 @@ TEST(Matrix3x3Test, BinaryDivisionOperator_MatrixWithScalar)
         // clang-format on
     );
 
-    auto expected2 = Zeus::Matrix3x3(
+    auto expected2 = Zeus::Math::Matrix3x3(
         // clang-format off
         1.f, 2.f, 3.f,
         5.f, 6.f, 7.f,
@@ -265,7 +265,7 @@ TEST(Matrix3x3Test, BinaryDivisionOperator_MatrixWithScalar)
 
 TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithMatrix)
 {
-    auto sut1 = Zeus::Matrix3x3(
+    auto sut1 = Zeus::Math::Matrix3x3(
         // clang-format off
         1.f, 4.f, 7.f,
         2.f, 5.f, 8.f,
@@ -273,7 +273,7 @@ TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithMatrix)
         // clang-format on
     );
 
-    auto sut2 = Zeus::Matrix3x3(
+    auto sut2 = Zeus::Math::Matrix3x3(
         // clang-format off
         10.f, 13.f, 16.f,
         11.f, 14.f, 17.f,
@@ -281,7 +281,7 @@ TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithMatrix)
         // clang-format on
     );
 
-    Zeus::Matrix3x3 expected1(
+    Zeus::Math::Matrix3x3 expected1(
         // clang-format off
         84.f, 201.f, 318.f,
         90.f, 216.f, 342.f,
@@ -289,7 +289,7 @@ TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithMatrix)
         // clang-format on
     );
 
-    Zeus::Matrix3x3 expected2(
+    Zeus::Math::Matrix3x3 expected2(
         // clang-format off
         138.f, 174.f, 210.f,
         171.f, 216.f, 261.f,
@@ -311,7 +311,7 @@ TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithMatrix)
 
 TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithVector)
 {
-    auto sut1 = Zeus::Matrix3x3(
+    auto sut1 = Zeus::Math::Matrix3x3(
         // clang-format off
         1.f, 4.f, 7.f,
         2.f, 5.f, 8.f,
@@ -319,9 +319,9 @@ TEST(Matrix3x3Test, BinaryMultiplicationOperator_MatrixWithVector)
         // clang-format on
     );
 
-    auto sut2 = Zeus::Vector3(2.f, 4.f, 8.f);
+    auto sut2 = Zeus::Math::Vector3(2.f, 4.f, 8.f);
 
-    auto expected = Zeus::Vector3(34.f, 76.f, 118.f);
+    auto expected = Zeus::Math::Vector3(34.f, 76.f, 118.f);
 
     auto actual = sut1 * sut2;
 

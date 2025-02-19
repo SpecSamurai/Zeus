@@ -4,7 +4,7 @@
 
 TEST(QuaternionTest, Identity_Quaternion)
 {
-    auto sut = Zeus::Quaternion<float>();
+    auto sut = Zeus::Math::Quaternion<float>();
 
     EXPECT_EQ(0.f, sut.x);
     EXPECT_EQ(0.f, sut.y);
@@ -19,7 +19,7 @@ TEST(QuaternionTest, Identity_Quaternion)
 
 TEST(QuaternionTest, ArraySubscriptOperator)
 {
-    auto sut = Zeus::Quaternion(0.f, 0.f, 0.f, 0.f);
+    auto sut = Zeus::Math::Quaternion(0.f, 0.f, 0.f, 0.f);
 
     EXPECT_EQ(0.f, sut[0]);
     EXPECT_EQ(0.f, sut[1]);
@@ -43,9 +43,9 @@ TEST(QuaternionTest, ArraySubscriptOperator)
 
 TEST(QuaternionTest, UnarySubtractionOperator_Quaternions)
 {
-    auto sut = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
+    auto sut = Zeus::Math::Quaternion(1.f, 2.f, 3.f, 4.f);
 
-    Zeus::Quaternion actual = -sut;
+    Zeus::Math::Quaternion actual = -sut;
 
     EXPECT_EQ(-1.f, actual.x);
     EXPECT_EQ(-2.f, actual.y);
@@ -55,10 +55,10 @@ TEST(QuaternionTest, UnarySubtractionOperator_Quaternions)
 
 TEST(QuaternionTest, BinaryAdditionOperator_Quaternions)
 {
-    auto sut1 = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
-    auto sut2 = Zeus::Quaternion(5.f, 6.f, 7.f, 8.f);
+    auto sut1 = Zeus::Math::Quaternion(1.f, 2.f, 3.f, 4.f);
+    auto sut2 = Zeus::Math::Quaternion(5.f, 6.f, 7.f, 8.f);
 
-    Zeus::Quaternion actual = sut1 + sut2;
+    Zeus::Math::Quaternion actual = sut1 + sut2;
 
     EXPECT_EQ(1.f, sut1.x);
     EXPECT_EQ(2.f, sut1.y);
@@ -78,11 +78,11 @@ TEST(QuaternionTest, BinaryAdditionOperator_Quaternions)
 
 TEST(QuaternionTest, BinaryAdditionOperator_QuaternionWithScalar)
 {
-    auto sut = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
+    auto sut = Zeus::Math::Quaternion(1.f, 2.f, 3.f, 4.f);
     float scalar = 1.f;
 
-    Zeus::Quaternion actual1 = scalar + sut;
-    Zeus::Quaternion actual2 = sut + scalar;
+    Zeus::Math::Quaternion actual1 = scalar + sut;
+    Zeus::Math::Quaternion actual2 = sut + scalar;
 
     EXPECT_EQ(1.f, sut.x);
     EXPECT_EQ(2.f, sut.y);
@@ -103,11 +103,11 @@ TEST(QuaternionTest, BinaryAdditionOperator_QuaternionWithScalar)
 
 TEST(QuaternionTest, BinarySubtractionOperator_Quaternions)
 {
-    auto sut1 = Zeus::Quaternion(10.f, 9.f, 8.f, 7.f);
-    auto sut2 = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
+    auto sut1 = Zeus::Math::Quaternion(10.f, 9.f, 8.f, 7.f);
+    auto sut2 = Zeus::Math::Quaternion(1.f, 2.f, 3.f, 4.f);
 
-    Zeus::Quaternion actual1 = sut1 - sut2;
-    Zeus::Quaternion actual2 = sut2 - sut1;
+    Zeus::Math::Quaternion actual1 = sut1 - sut2;
+    Zeus::Math::Quaternion actual2 = sut2 - sut1;
 
     EXPECT_EQ(10.f, sut1.x);
     EXPECT_EQ(9.f, sut1.y);
@@ -132,11 +132,11 @@ TEST(QuaternionTest, BinarySubtractionOperator_Quaternions)
 
 TEST(QuaternionTest, BinarySubtractionOperator_QuaternionWithScalar)
 {
-    auto sut = Zeus::Quaternion(10.f, 9.f, 8.f, 7.f);
+    auto sut = Zeus::Math::Quaternion(10.f, 9.f, 8.f, 7.f);
     float scalar = 1.f;
 
-    Zeus::Quaternion actual1 = sut - scalar;
-    Zeus::Quaternion actual2 = scalar - sut;
+    Zeus::Math::Quaternion actual1 = sut - scalar;
+    Zeus::Math::Quaternion actual2 = scalar - sut;
 
     EXPECT_EQ(10.f, sut.x);
     EXPECT_EQ(9.f, sut.y);
@@ -157,11 +157,11 @@ TEST(QuaternionTest, BinarySubtractionOperator_QuaternionWithScalar)
 
 TEST(QuaternionTest, BinaryMultiplicationOperator_QuaternionWithScalar)
 {
-    auto sut = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
+    auto sut = Zeus::Math::Quaternion(1.f, 2.f, 3.f, 4.f);
     float scalar = 2.f;
 
-    Zeus::Quaternion actual1 = sut * scalar;
-    Zeus::Quaternion actual2 = scalar * sut;
+    Zeus::Math::Quaternion actual1 = sut * scalar;
+    Zeus::Math::Quaternion actual2 = scalar * sut;
 
     EXPECT_EQ(1.f, sut.x);
     EXPECT_EQ(2.f, sut.y);
@@ -182,11 +182,11 @@ TEST(QuaternionTest, BinaryMultiplicationOperator_QuaternionWithScalar)
 
 TEST(QuaternionTest, BinaryMultiplicationOperator_HamiltonProduct)
 {
-    Zeus::Quaternion v1(1.f, 0.f, 0.f, 1.f);
-    Zeus::Quaternion v2(0.f, 1.f, 0.f, 1.f);
+    Zeus::Math::Quaternion v1(1.f, 0.f, 0.f, 1.f);
+    Zeus::Math::Quaternion v2(0.f, 1.f, 0.f, 1.f);
 
     auto actual = v1 * v2;
-    auto expected = Zeus::Quaternion(1.f, 1.f, 1.f, 1.f);
+    auto expected = Zeus::Math::Quaternion(1.f, 1.f, 1.f, 1.f);
 
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
@@ -196,11 +196,11 @@ TEST(QuaternionTest, BinaryMultiplicationOperator_HamiltonProduct)
 
 TEST(QuaternionTest, BinaryDivisionOperator_QuaternionWithScalar)
 {
-    auto sut = Zeus::Quaternion(1.f, 2.f, 3.f, 4.f);
+    auto sut = Zeus::Math::Quaternion(1.f, 2.f, 3.f, 4.f);
     float scalar = 2.f;
 
-    Zeus::Quaternion actual1 = sut / scalar;
-    Zeus::Quaternion actual2 = scalar / sut;
+    Zeus::Math::Quaternion actual1 = sut / scalar;
+    Zeus::Math::Quaternion actual2 = scalar / sut;
 
     EXPECT_EQ(1.f, sut.x);
     EXPECT_EQ(2.f, sut.y);

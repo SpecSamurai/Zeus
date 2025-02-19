@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace Zeus
+namespace Zeus::Math
 {
 template <typename T>
 class Quaternion

@@ -4,7 +4,7 @@
 
 TEST(Vector2Test, Constructor_Properties)
 {
-    auto sut = Zeus::Vector2(0.f, 0.f);
+    auto sut = Zeus::Math::Vector2(0.f, 0.f);
 
     EXPECT_EQ(0.f, sut.x);
     EXPECT_EQ(0.f, sut.r);
@@ -28,7 +28,7 @@ TEST(Vector2Test, Constructor_Properties)
 
 TEST(Vector2Test, ArraySubscriptOperator)
 {
-    auto sut = Zeus::Vector2(0.f, 0.f);
+    auto sut = Zeus::Math::Vector2(0.f, 0.f);
 
     EXPECT_EQ(0.f, sut[0]);
     EXPECT_EQ(0.f, sut[1]);
@@ -42,10 +42,10 @@ TEST(Vector2Test, ArraySubscriptOperator)
 
 TEST(Vector2Test, BinaryAdditionOperator_Vectors)
 {
-    auto sut1 = Zeus::Vector2(1.f, 2.f);
-    auto sut2 = Zeus::Vector2(5.f, 6.f);
+    auto sut1 = Zeus::Math::Vector2(1.f, 2.f);
+    auto sut2 = Zeus::Math::Vector2(5.f, 6.f);
 
-    Zeus::Vector2 actual = sut1 + sut2;
+    Zeus::Math::Vector2 actual = sut1 + sut2;
 
     EXPECT_EQ(1.f, sut1.x);
     EXPECT_EQ(2.f, sut1.y);
@@ -59,11 +59,11 @@ TEST(Vector2Test, BinaryAdditionOperator_Vectors)
 
 TEST(Vector2Test, BinaryAdditionOperator_VectorWithScalar)
 {
-    auto sut = Zeus::Vector2(1.f, 2.f);
+    auto sut = Zeus::Math::Vector2(1.f, 2.f);
     float scalar = 1.f;
 
-    Zeus::Vector2 actual1 = scalar + sut;
-    Zeus::Vector2 actual2 = sut + scalar;
+    Zeus::Math::Vector2 actual1 = scalar + sut;
+    Zeus::Math::Vector2 actual2 = sut + scalar;
 
     EXPECT_EQ(1.f, sut.x);
     EXPECT_EQ(2.f, sut.y);
@@ -78,7 +78,7 @@ TEST(Vector2Test, BinaryAdditionOperator_VectorWithScalar)
 
 TEST(Vector2Test, UnarySubtractionOperator_Vector)
 {
-    auto sut = Zeus::Vector2(1.f, 2.f);
+    auto sut = Zeus::Math::Vector2(1.f, 2.f);
 
     auto actual = -sut;
 
@@ -88,11 +88,11 @@ TEST(Vector2Test, UnarySubtractionOperator_Vector)
 
 TEST(Vector2Test, BinarySubtractionOperator_Vectors)
 {
-    auto sut1 = Zeus::Vector2(10.f, 9.f);
-    auto sut2 = Zeus::Vector2(1.f, 2.f);
+    auto sut1 = Zeus::Math::Vector2(10.f, 9.f);
+    auto sut2 = Zeus::Math::Vector2(1.f, 2.f);
 
-    Zeus::Vector2 actual1 = sut1 - sut2;
-    Zeus::Vector2 actual2 = sut2 - sut1;
+    Zeus::Math::Vector2 actual1 = sut1 - sut2;
+    Zeus::Math::Vector2 actual2 = sut2 - sut1;
 
     EXPECT_EQ(10.f, sut1.x);
     EXPECT_EQ(9.f, sut1.y);
@@ -109,11 +109,11 @@ TEST(Vector2Test, BinarySubtractionOperator_Vectors)
 
 TEST(Vector2Test, BinarySubtractionOperator_VectorWithScalar)
 {
-    auto sut = Zeus::Vector2(10.f, 9.f);
+    auto sut = Zeus::Math::Vector2(10.f, 9.f);
     float scalar = 1.f;
 
-    Zeus::Vector2 actual1 = sut - scalar;
-    Zeus::Vector2 actual2 = scalar - sut;
+    Zeus::Math::Vector2 actual1 = sut - scalar;
+    Zeus::Math::Vector2 actual2 = scalar - sut;
 
     EXPECT_EQ(10.f, sut.x);
     EXPECT_EQ(9.f, sut.y);
@@ -128,11 +128,11 @@ TEST(Vector2Test, BinarySubtractionOperator_VectorWithScalar)
 
 TEST(Vector2Test, BinaryMultiplicationOperator_VectorWithScalar)
 {
-    auto sut = Zeus::Vector2(1.f, 2.f);
+    auto sut = Zeus::Math::Vector2(1.f, 2.f);
     float scalar = 2.f;
 
-    Zeus::Vector2 actual1 = sut * scalar;
-    Zeus::Vector2 actual2 = scalar * sut;
+    Zeus::Math::Vector2 actual1 = sut * scalar;
+    Zeus::Math::Vector2 actual2 = scalar * sut;
 
     EXPECT_EQ(1.f, sut.x);
     EXPECT_EQ(2.f, sut.y);
@@ -147,11 +147,11 @@ TEST(Vector2Test, BinaryMultiplicationOperator_VectorWithScalar)
 
 TEST(Vector2Test, BinaryMultiplicationOperator_Vectors)
 {
-    auto sut1 = Zeus::Vector2(1.f, 2.f);
-    auto sut2 = Zeus::Vector2(10.f, 20.f);
+    auto sut1 = Zeus::Math::Vector2(1.f, 2.f);
+    auto sut2 = Zeus::Math::Vector2(10.f, 20.f);
 
-    Zeus::Vector2 actual1 = sut1 * sut2;
-    Zeus::Vector2 actual2 = sut2 * sut1;
+    Zeus::Math::Vector2 actual1 = sut1 * sut2;
+    Zeus::Math::Vector2 actual2 = sut2 * sut1;
 
     EXPECT_EQ(10.f, actual1.x);
     EXPECT_EQ(40.f, actual1.y);
@@ -162,11 +162,11 @@ TEST(Vector2Test, BinaryMultiplicationOperator_Vectors)
 
 TEST(Vector2Test, BinaryDivisionOperator_VectorWithScalar)
 {
-    auto sut = Zeus::Vector2(1.f, 2.f);
+    auto sut = Zeus::Math::Vector2(1.f, 2.f);
     float scalar = 2.f;
 
-    Zeus::Vector2 actual1 = sut / scalar;
-    Zeus::Vector2 actual2 = scalar / sut;
+    Zeus::Math::Vector2 actual1 = sut / scalar;
+    Zeus::Math::Vector2 actual2 = scalar / sut;
 
     EXPECT_EQ(1.f, sut.x);
     EXPECT_EQ(2.f, sut.y);

@@ -6,67 +6,67 @@
 
 TEST(GeometricTest, DotProduct_Vector2_Properties)
 {
-    Zeus::Vector2 v1(1.f, 2.f);
-    Zeus::Vector2 v2(5.f, 6.f);
+    Zeus::Math::Vector2 v1(1.f, 2.f);
+    Zeus::Math::Vector2 v2(5.f, 6.f);
 
-    EXPECT_EQ(Zeus::dot(v1, v2), Zeus::dot(v2, v1));
+    EXPECT_EQ(Zeus::Math::dot(v1, v2), Zeus::Math::dot(v2, v1));
 }
 
 TEST(GeometricTest, DotProduct_Vector3_Properties)
 {
-    Zeus::Vector3 v1(1.f, 2.f, 3.f);
-    Zeus::Vector3 v2(5.f, 6.f, 7.f);
+    Zeus::Math::Vector3 v1(1.f, 2.f, 3.f);
+    Zeus::Math::Vector3 v2(5.f, 6.f, 7.f);
 
-    EXPECT_EQ(Zeus::dot(v1, v2), Zeus::dot(v2, v1));
+    EXPECT_EQ(Zeus::Math::dot(v1, v2), Zeus::Math::dot(v2, v1));
 }
 
 TEST(GeometricTest, DotProduct_Vector4_Properties)
 {
-    Zeus::Vector4 v1(1.f, 2.f, 3.f, 4.f);
-    Zeus::Vector4 v2(5.f, 6.f, 7.f, 8.f);
+    Zeus::Math::Vector4 v1(1.f, 2.f, 3.f, 4.f);
+    Zeus::Math::Vector4 v2(5.f, 6.f, 7.f, 8.f);
 
-    EXPECT_EQ(Zeus::dot(v1, v2), Zeus::dot(v2, v1));
+    EXPECT_EQ(Zeus::Math::dot(v1, v2), Zeus::Math::dot(v2, v1));
 }
 
 TEST(GeometricTest, DotProduct_Vector2_Orthogonality)
 {
-    Zeus::Vector2 v1(1.f, 2.f);
-    Zeus::Vector2 v2(2.f, -1.f);
+    Zeus::Math::Vector2 v1(1.f, 2.f);
+    Zeus::Math::Vector2 v2(2.f, -1.f);
 
-    EXPECT_EQ(0.f, Zeus::dot(v1, v2));
+    EXPECT_EQ(0.f, Zeus::Math::dot(v1, v2));
 }
 
 TEST(GeometricTest, DotProduct_Vector3_Orthogonality)
 {
-    Zeus::Vector3 v1(1.f, 2.f, 3.f);
-    Zeus::Vector3 v2(4.f, -8.f, 4.f);
+    Zeus::Math::Vector3 v1(1.f, 2.f, 3.f);
+    Zeus::Math::Vector3 v2(4.f, -8.f, 4.f);
 
-    EXPECT_EQ(0.f, Zeus::dot(v1, v2));
+    EXPECT_EQ(0.f, Zeus::Math::dot(v1, v2));
 }
 
 TEST(GeometricTest, DotProduct_Vector4_Orthogonality)
 {
-    Zeus::Vector4 v1(1.f, 2.f, 3.f, 4.f);
-    Zeus::Vector4 v2(1.f, -2.f, 1.f, 0.f);
+    Zeus::Math::Vector4 v1(1.f, 2.f, 3.f, 4.f);
+    Zeus::Math::Vector4 v2(1.f, -2.f, 1.f, 0.f);
 
-    EXPECT_EQ(0.f, Zeus::dot(v1, v2));
+    EXPECT_EQ(0.f, Zeus::Math::dot(v1, v2));
 }
 
 TEST(GeometricTest, DotProduct_Quaternion_Properties)
 {
-    Zeus::Quaternion v1(1.f, 2.f, 3.f, 4.f);
-    Zeus::Quaternion v2(5.f, 6.f, 7.f, 8.f);
+    Zeus::Math::Quaternion v1(1.f, 2.f, 3.f, 4.f);
+    Zeus::Math::Quaternion v2(5.f, 6.f, 7.f, 8.f);
 
-    EXPECT_EQ(Zeus::dot(v1, v2), Zeus::dot(v2, v1));
+    EXPECT_EQ(Zeus::Math::dot(v1, v2), Zeus::Math::dot(v2, v1));
 }
 
 TEST(GeometricTest, CrossProduct_Vector3)
 {
-    Zeus::Vector3 v1(1.f, 0.f, 0.f);
-    Zeus::Vector3 v2(0.f, 1.f, 0.f);
+    Zeus::Math::Vector3 v1(1.f, 0.f, 0.f);
+    Zeus::Math::Vector3 v2(0.f, 1.f, 0.f);
 
-    auto actual = Zeus::cross(v1, v2);
-    auto expected = Zeus::Vector3(0.f, 0.f, 1.f);
+    auto actual = Zeus::Math::cross(v1, v2);
+    auto expected = Zeus::Math::Vector3(0.f, 0.f, 1.f);
 
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
@@ -75,11 +75,11 @@ TEST(GeometricTest, CrossProduct_Vector3)
 
 TEST(GeometricTest, CrossProduct_Vector4)
 {
-    Zeus::Vector4 v1(1.f, 0.f, 0.f, 1.f);
-    Zeus::Vector4 v2(0.f, 1.f, 0.f, 1.f);
+    Zeus::Math::Vector4 v1(1.f, 0.f, 0.f, 1.f);
+    Zeus::Math::Vector4 v2(0.f, 1.f, 0.f, 1.f);
 
-    auto actual = Zeus::cross(v1, v2);
-    auto expected = Zeus::Vector4(0.f, 0.f, 1.f, 0.f);
+    auto actual = Zeus::Math::cross(v1, v2);
+    auto expected = Zeus::Math::Vector4(0.f, 0.f, 1.f, 0.f);
 
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
@@ -89,37 +89,37 @@ TEST(GeometricTest, CrossProduct_Vector4)
 
 TEST(GeometricTest, Length_Vector2)
 {
-    Zeus::Vector2 sut(3.f, 4.f);
+    Zeus::Math::Vector2 sut(3.f, 4.f);
 
-    auto actual = Zeus::length(sut);
+    auto actual = Zeus::Math::length(sut);
 
     EXPECT_EQ(5.f, actual);
 }
 
 TEST(GeometricTest, Length_Vector3)
 {
-    Zeus::Vector3 sut(1.f, 2.f, 2.f);
+    Zeus::Math::Vector3 sut(1.f, 2.f, 2.f);
 
-    auto actual = Zeus::length(sut);
+    auto actual = Zeus::Math::length(sut);
 
     EXPECT_EQ(3.f, actual);
 }
 
 TEST(GeometricTest, Length_Vector4)
 {
-    Zeus::Vector4 sut(1.f, 2.f, 2.f, 4.f);
+    Zeus::Math::Vector4 sut(1.f, 2.f, 2.f, 4.f);
 
-    auto actual = Zeus::length(sut);
+    auto actual = Zeus::Math::length(sut);
 
     EXPECT_EQ(5.f, actual);
 }
 
 TEST(GeometricTest, min_Vector2)
 {
-    Zeus::Vector2 sut1(1.f, 4.f);
-    Zeus::Vector2 sut2(2.f, 3.f);
+    Zeus::Math::Vector2 sut1(1.f, 4.f);
+    Zeus::Math::Vector2 sut2(2.f, 3.f);
 
-    auto actual = Zeus::min(sut1, sut2);
+    auto actual = Zeus::Math::min(sut1, sut2);
 
     EXPECT_EQ(1.f, actual.x);
     EXPECT_EQ(3.f, actual.y);
@@ -127,10 +127,10 @@ TEST(GeometricTest, min_Vector2)
 
 TEST(GeometricTest, min_Vector3)
 {
-    Zeus::Vector3 sut1(1.f, 4.f, 5.f);
-    Zeus::Vector3 sut2(2.f, 3.f, 6.f);
+    Zeus::Math::Vector3 sut1(1.f, 4.f, 5.f);
+    Zeus::Math::Vector3 sut2(2.f, 3.f, 6.f);
 
-    auto actual = Zeus::min(sut1, sut2);
+    auto actual = Zeus::Math::min(sut1, sut2);
 
     EXPECT_EQ(1.f, actual.x);
     EXPECT_EQ(3.f, actual.y);
@@ -139,10 +139,10 @@ TEST(GeometricTest, min_Vector3)
 
 TEST(GeometricTest, min_Vector4)
 {
-    Zeus::Vector4 sut1(1.f, 4.f, 5.f, 8.f);
-    Zeus::Vector4 sut2(2.f, 3.f, 6.f, 7.f);
+    Zeus::Math::Vector4 sut1(1.f, 4.f, 5.f, 8.f);
+    Zeus::Math::Vector4 sut2(2.f, 3.f, 6.f, 7.f);
 
-    auto actual = Zeus::min(sut1, sut2);
+    auto actual = Zeus::Math::min(sut1, sut2);
 
     EXPECT_EQ(1.f, actual.x);
     EXPECT_EQ(3.f, actual.y);
@@ -152,10 +152,10 @@ TEST(GeometricTest, min_Vector4)
 
 TEST(GeometricTest, max_Vector2)
 {
-    Zeus::Vector2 sut1(1.f, 4.f);
-    Zeus::Vector2 sut2(2.f, 3.f);
+    Zeus::Math::Vector2 sut1(1.f, 4.f);
+    Zeus::Math::Vector2 sut2(2.f, 3.f);
 
-    auto actual = Zeus::max(sut1, sut2);
+    auto actual = Zeus::Math::max(sut1, sut2);
 
     EXPECT_EQ(2.f, actual.x);
     EXPECT_EQ(4.f, actual.y);
@@ -163,10 +163,10 @@ TEST(GeometricTest, max_Vector2)
 
 TEST(GeometricTest, max_Vector3)
 {
-    Zeus::Vector3 sut1(1.f, 4.f, 5.f);
-    Zeus::Vector3 sut2(2.f, 3.f, 6.f);
+    Zeus::Math::Vector3 sut1(1.f, 4.f, 5.f);
+    Zeus::Math::Vector3 sut2(2.f, 3.f, 6.f);
 
-    auto actual = Zeus::max(sut1, sut2);
+    auto actual = Zeus::Math::max(sut1, sut2);
 
     EXPECT_EQ(2.f, actual.x);
     EXPECT_EQ(4.f, actual.y);
@@ -175,10 +175,10 @@ TEST(GeometricTest, max_Vector3)
 
 TEST(GeometricTest, max_Vector4)
 {
-    Zeus::Vector4 sut1(1.f, 4.f, 5.f, 8.f);
-    Zeus::Vector4 sut2(2.f, 3.f, 6.f, 7.f);
+    Zeus::Math::Vector4 sut1(1.f, 4.f, 5.f, 8.f);
+    Zeus::Math::Vector4 sut2(2.f, 3.f, 6.f, 7.f);
 
-    auto actual = Zeus::max(sut1, sut2);
+    auto actual = Zeus::Math::max(sut1, sut2);
 
     EXPECT_EQ(2.f, actual.x);
     EXPECT_EQ(4.f, actual.y);
@@ -188,19 +188,19 @@ TEST(GeometricTest, max_Vector4)
 
 TEST(GeometricTest, norm_Quaternion)
 {
-    Zeus::Quaternion sut(1.f, 2.f, 2.f, 4.f);
+    Zeus::Math::Quaternion sut(1.f, 2.f, 2.f, 4.f);
 
-    auto actual = Zeus::norm(sut);
+    auto actual = Zeus::Math::norm(sut);
 
     EXPECT_EQ(5.f, actual);
 }
 
 TEST(GeometricTest, Normalize_Vector2)
 {
-    Zeus::Vector2 sut(3.f, 4.f);
-    Zeus::Vector2 expected(0.6f, 0.8f);
+    Zeus::Math::Vector2 sut(3.f, 4.f);
+    Zeus::Math::Vector2 expected(0.6f, 0.8f);
 
-    auto actual = Zeus::normalize(sut);
+    auto actual = Zeus::Math::normalize(sut);
 
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
@@ -208,10 +208,10 @@ TEST(GeometricTest, Normalize_Vector2)
 
 TEST(GeometricTest, Normalize_Vector3)
 {
-    Zeus::Vector3 sut(1.f, 2.f, 2.f);
-    Zeus::Vector3 expected(1.f / 3.f, 2.f / 3.f, 2.f / 3.f);
+    Zeus::Math::Vector3 sut(1.f, 2.f, 2.f);
+    Zeus::Math::Vector3 expected(1.f / 3.f, 2.f / 3.f, 2.f / 3.f);
 
-    auto actual = Zeus::normalize(sut);
+    auto actual = Zeus::Math::normalize(sut);
 
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
@@ -220,10 +220,10 @@ TEST(GeometricTest, Normalize_Vector3)
 
 TEST(GeometricTest, Normalize_Vector4)
 {
-    Zeus::Vector4 sut(1.f, 2.f, 2.f, 4.f);
-    Zeus::Vector4 expected(1.f / 5.f, 2.f / 5.f, 2.f / 5.f, 4.f / 5.f);
+    Zeus::Math::Vector4 sut(1.f, 2.f, 2.f, 4.f);
+    Zeus::Math::Vector4 expected(1.f / 5.f, 2.f / 5.f, 2.f / 5.f, 4.f / 5.f);
 
-    auto actual = Zeus::normalize(sut);
+    auto actual = Zeus::Math::normalize(sut);
 
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
@@ -233,10 +233,10 @@ TEST(GeometricTest, Normalize_Vector4)
 
 TEST(GeometricTest, Normalize_Quaternion)
 {
-    Zeus::Quaternion sut(1.f, 2.f, 2.f, 4.f);
-    Zeus::Quaternion expected(1.f / 5.f, 2.f / 5.f, 2.f / 5.f, 4.f / 5.f);
+    Zeus::Math::Quaternion sut(1.f, 2.f, 2.f, 4.f);
+    Zeus::Math::Quaternion expected(1.f / 5.f, 2.f / 5.f, 2.f / 5.f, 4.f / 5.f);
 
-    auto actual = Zeus::normalize(sut);
+    auto actual = Zeus::Math::normalize(sut);
 
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
@@ -246,9 +246,9 @@ TEST(GeometricTest, Normalize_Quaternion)
 
 TEST(GeometricTest, Normalize_conjugate)
 {
-    Zeus::Quaternion sut(1.f, 2.f, 2.f, 4.f);
+    Zeus::Math::Quaternion sut(1.f, 2.f, 2.f, 4.f);
 
-    auto actual = Zeus::conjugate(sut);
+    auto actual = Zeus::Math::conjugate(sut);
 
     EXPECT_EQ(-1.f, actual.x);
     EXPECT_EQ(-2.f, actual.y);
@@ -258,9 +258,9 @@ TEST(GeometricTest, Normalize_conjugate)
 
 TEST(GeometricTest, Normalize_inverse)
 {
-    Zeus::Quaternion sut(1.f, 2.f, 2.f, 4.f);
+    Zeus::Math::Quaternion sut(1.f, 2.f, 2.f, 4.f);
 
-    auto actual = Zeus::inverse(sut);
+    auto actual = Zeus::Math::inverse(sut);
 
     EXPECT_EQ(-1.f / 25.f, actual.x);
     EXPECT_EQ(-2.f / 25.f, actual.y);

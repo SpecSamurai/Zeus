@@ -4,7 +4,7 @@
 
 TEST(Vector4Test, Constructor_Properties)
 {
-    auto sut = Zeus::Vector4(0.f, 0.f, 0.f, 0.f);
+    auto sut = Zeus::Math::Vector4(0.f, 0.f, 0.f, 0.f);
 
     EXPECT_EQ(0.f, sut.x);
     EXPECT_EQ(0.f, sut.r);
@@ -46,7 +46,7 @@ TEST(Vector4Test, Constructor_Properties)
 
 TEST(Vector4Test, ArraySubscriptOperator)
 {
-    auto sut = Zeus::Vector4(0.f, 0.f, 0.f, 0.f);
+    auto sut = Zeus::Math::Vector4(0.f, 0.f, 0.f, 0.f);
 
     EXPECT_EQ(0.f, sut[0]);
     EXPECT_EQ(0.f, sut[1]);
@@ -66,10 +66,10 @@ TEST(Vector4Test, ArraySubscriptOperator)
 
 TEST(Vector4Test, BinaryAdditionOperator_Vectors)
 {
-    auto sut1 = Zeus::Vector4(1.f, 2.f, 3.f, 4.f);
-    auto sut2 = Zeus::Vector4(5.f, 6.f, 7.f, 8.f);
+    auto sut1 = Zeus::Math::Vector4(1.f, 2.f, 3.f, 4.f);
+    auto sut2 = Zeus::Math::Vector4(5.f, 6.f, 7.f, 8.f);
 
-    Zeus::Vector4 actual = sut1 + sut2;
+    Zeus::Math::Vector4 actual = sut1 + sut2;
 
     EXPECT_EQ(1.f, sut1.x);
     EXPECT_EQ(2.f, sut1.y);
@@ -89,11 +89,11 @@ TEST(Vector4Test, BinaryAdditionOperator_Vectors)
 
 TEST(Vector4Test, BinaryAdditionOperator_VectorWithScalar)
 {
-    auto sut = Zeus::Vector4(1.f, 2.f, 3.f, 4.f);
+    auto sut = Zeus::Math::Vector4(1.f, 2.f, 3.f, 4.f);
     float scalar = 1.f;
 
-    Zeus::Vector4 actual1 = scalar + sut;
-    Zeus::Vector4 actual2 = sut + scalar;
+    Zeus::Math::Vector4 actual1 = scalar + sut;
+    Zeus::Math::Vector4 actual2 = sut + scalar;
 
     EXPECT_EQ(1.f, sut.x);
     EXPECT_EQ(2.f, sut.y);
@@ -114,7 +114,7 @@ TEST(Vector4Test, BinaryAdditionOperator_VectorWithScalar)
 
 TEST(Vector4Test, UnarySubtractionOperator_Vector)
 {
-    auto sut = Zeus::Vector4(1.f, 2.f, 3.f, 4.f);
+    auto sut = Zeus::Math::Vector4(1.f, 2.f, 3.f, 4.f);
 
     auto actual = -sut;
 
@@ -126,11 +126,11 @@ TEST(Vector4Test, UnarySubtractionOperator_Vector)
 
 TEST(Vector4Test, BinarySubtractionOperator_Vectors)
 {
-    auto sut1 = Zeus::Vector4(10.f, 9.f, 8.f, 7.f);
-    auto sut2 = Zeus::Vector4(1.f, 2.f, 3.f, 4.f);
+    auto sut1 = Zeus::Math::Vector4(10.f, 9.f, 8.f, 7.f);
+    auto sut2 = Zeus::Math::Vector4(1.f, 2.f, 3.f, 4.f);
 
-    Zeus::Vector4 actual1 = sut1 - sut2;
-    Zeus::Vector4 actual2 = sut2 - sut1;
+    Zeus::Math::Vector4 actual1 = sut1 - sut2;
+    Zeus::Math::Vector4 actual2 = sut2 - sut1;
 
     EXPECT_EQ(10.f, sut1.x);
     EXPECT_EQ(9.f, sut1.y);
@@ -155,11 +155,11 @@ TEST(Vector4Test, BinarySubtractionOperator_Vectors)
 
 TEST(Vector4Test, BinarySubtractionOperator_VectorWithScalar)
 {
-    auto sut = Zeus::Vector4(10.f, 9.f, 8.f, 7.f);
+    auto sut = Zeus::Math::Vector4(10.f, 9.f, 8.f, 7.f);
     float scalar = 1.f;
 
-    Zeus::Vector4 actual1 = sut - scalar;
-    Zeus::Vector4 actual2 = scalar - sut;
+    Zeus::Math::Vector4 actual1 = sut - scalar;
+    Zeus::Math::Vector4 actual2 = scalar - sut;
 
     EXPECT_EQ(10.f, sut.x);
     EXPECT_EQ(9.f, sut.y);
@@ -180,11 +180,11 @@ TEST(Vector4Test, BinarySubtractionOperator_VectorWithScalar)
 
 TEST(Vector4Test, BinaryMultiplicationOperator_VectorWithScalar)
 {
-    auto sut = Zeus::Vector4(1.f, 2.f, 3.f, 4.f);
+    auto sut = Zeus::Math::Vector4(1.f, 2.f, 3.f, 4.f);
     float scalar = 2.f;
 
-    Zeus::Vector4 actual1 = sut * scalar;
-    Zeus::Vector4 actual2 = scalar * sut;
+    Zeus::Math::Vector4 actual1 = sut * scalar;
+    Zeus::Math::Vector4 actual2 = scalar * sut;
 
     EXPECT_EQ(1.f, sut.x);
     EXPECT_EQ(2.f, sut.y);
@@ -205,11 +205,11 @@ TEST(Vector4Test, BinaryMultiplicationOperator_VectorWithScalar)
 
 TEST(Vector4Test, BinaryMultiplicationOperator_Vectors)
 {
-    auto sut1 = Zeus::Vector4(1.f, 2.f, 3.f, 4.f);
-    auto sut2 = Zeus::Vector4(10.f, 20.f, 30.f, 40.f);
+    auto sut1 = Zeus::Math::Vector4(1.f, 2.f, 3.f, 4.f);
+    auto sut2 = Zeus::Math::Vector4(10.f, 20.f, 30.f, 40.f);
 
-    Zeus::Vector4 actual1 = sut1 * sut2;
-    Zeus::Vector4 actual2 = sut2 * sut1;
+    Zeus::Math::Vector4 actual1 = sut1 * sut2;
+    Zeus::Math::Vector4 actual2 = sut2 * sut1;
 
     EXPECT_EQ(10.f, actual1.x);
     EXPECT_EQ(40.f, actual1.y);
@@ -224,11 +224,11 @@ TEST(Vector4Test, BinaryMultiplicationOperator_Vectors)
 
 TEST(Vector4Test, BinaryDivisionOperator_VectorWithScalar)
 {
-    auto sut = Zeus::Vector4(1.f, 2.f, 3.f, 4.f);
+    auto sut = Zeus::Math::Vector4(1.f, 2.f, 3.f, 4.f);
     float scalar = 2.f;
 
-    Zeus::Vector4 actual1 = sut / scalar;
-    Zeus::Vector4 actual2 = scalar / sut;
+    Zeus::Math::Vector4 actual1 = sut / scalar;
+    Zeus::Math::Vector4 actual2 = scalar / sut;
 
     EXPECT_EQ(1.f, sut.x);
     EXPECT_EQ(2.f, sut.y);

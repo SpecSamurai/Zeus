@@ -5,7 +5,7 @@
 #include <cassert>
 #include <cstddef>
 
-namespace Zeus
+namespace Zeus::Math
 {
 template <typename T>
 class Matrix3x3
