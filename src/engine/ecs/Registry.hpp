@@ -12,10 +12,10 @@
 
 namespace Zeus::ECS
 {
-class World
+class Registry
 {
 public:
-    World() : pools{}, entities()
+    Registry() : pools{}, entities()
     {
     }
 

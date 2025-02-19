@@ -26,7 +26,7 @@ add_executable(Tests
     engine/ecs/FamilyIdTest.cpp
     engine/ecs/SparseSetIteratorTest.cpp
     engine/ecs/SparseSetTest.cpp
-    engine/ecs/WorldTest.cpp
+    engine/ecs/RegistryTest.cpp
 
     engine/events/EventDispatcherTest.cpp
     engine/events/EventQueueTest.cpp

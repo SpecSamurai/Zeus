@@ -1,5 +1,5 @@
 #include <ecs/Entity.hpp>
-#include <ecs/World.hpp>
+#include <ecs/Registry.hpp>
 
 #include <gtest/gtest.h>
 
@@ -16,9 +16,9 @@ struct BComponent
     const char* string;
 };
 
-TEST(WorldTest, Create_EmptyEntity_IsValid)
+TEST(RegistryTest, Create_EmptyEntity_IsValid)
 {
-    ECS::World sut;
+    ECS::Registry sut;
 
     ECS::Entity entity0 = sut.Create();
     ECS::Entity entity1 = sut.Create();
@@ -32,9 +32,9 @@ TEST(WorldTest, Create_EmptyEntity_IsValid)
     EXPECT_FALSE(contains2);
 }
 
-TEST(WorldTest, Destroy_EmptyEntity_IsValid)
+TEST(RegistryTest, Destroy_EmptyEntity_IsValid)
 {
-    ECS::World sut;
+    ECS::Registry sut;
 
     ECS::Entity entity0 = sut.Create();
     ECS::Entity entity1 = sut.Create();
@@ -49,9 +49,9 @@ TEST(WorldTest, Destroy_EmptyEntity_IsValid)
     EXPECT_FALSE(contains2);
 }
 
-TEST(WorldTest, Clear_EmptyEntity_Empty)
+TEST(RegistryTest, Clear_EmptyEntity_Empty)
 {
-    ECS::World sut;
+    ECS::Registry sut;
 
     ECS::Entity entity0 = sut.Create();
     ECS::Entity entity1 = sut.Create();
@@ -66,9 +66,9 @@ TEST(WorldTest, Clear_EmptyEntity_Empty)
     EXPECT_FALSE(contains2);
 }
 
-TEST(WorldTest, Emplace_SingleNothing)
+TEST(RegistryTest, Emplace_SingleNothing)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity{ 0 };
 
     auto actual = sut.Emplace<AComponent>(entity);
@@ -78,9 +78,9 @@ TEST(WorldTest, Emplace_SingleNothing)
     EXPECT_EQ(actual.number, 0);
 }
 
-TEST(WorldTest, Emplace_SingleEmptyComponent)
+TEST(RegistryTest, Emplace_SingleEmptyComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity{ 0 };
 
     auto actual = sut.Emplace<AComponent>(entity, AComponent{});
@@ -90,9 +90,9 @@ TEST(WorldTest, Emplace_SingleEmptyComponent)
     EXPECT_EQ(actual.number, 0);
 }
 
-TEST(WorldTest, Emplace_SingleValidComponent)
+TEST(RegistryTest, Emplace_SingleValidComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity0{ 0 };
     ECS::Entity entity1{ 1 };
     ECS::Entity entity2{ 2 };
@@ -113,9 +113,9 @@ TEST(WorldTest, Emplace_SingleValidComponent)
     EXPECT_STREQ(actual2.string, "Test");
 }
 
-TEST(WorldTest, Emplace_MultipleComponent)
+TEST(RegistryTest, Emplace_MultipleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity{ 0 };
 
     auto actual1 = sut.Emplace<AComponent>(entity, 42);
@@ -128,9 +128,9 @@ TEST(WorldTest, Emplace_MultipleComponent)
     EXPECT_STREQ(actual2.string, "Test");
 }
 
-TEST(WorldTest, Patch_SingleComponent)
+TEST(RegistryTest, Patch_SingleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity{ 0 };
 
     auto& component = sut.Emplace<BComponent>(entity, 1, "Test");
@@ -145,9 +145,9 @@ TEST(WorldTest, Patch_SingleComponent)
     EXPECT_STREQ(actual.string, "Test2");
 }
 
-TEST(WorldTest, Get_SingleComponent)
+TEST(RegistryTest, Get_SingleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity{ 0 };
 
     sut.Emplace<AComponent>(entity, 42);
@@ -162,9 +162,9 @@ TEST(WorldTest, Get_SingleComponent)
     EXPECT_STREQ(actual2.string, "Test");
 }
 
-TEST(WorldTest, Get_MultipleComponent)
+TEST(RegistryTest, Get_MultipleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity{ 0 };
 
     sut.Emplace<AComponent>(entity, 42);
@@ -178,9 +178,9 @@ TEST(WorldTest, Get_MultipleComponent)
     EXPECT_STREQ(actual2.string, "Test");
 }
 
-TEST(WorldTest, AnyOf_EmptyEntity_False)
+TEST(RegistryTest, AnyOf_EmptyEntity_False)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity = sut.Create();
 
     bool actual1 = sut.AnyOf<AComponent>(entity);
@@ -190,9 +190,9 @@ TEST(WorldTest, AnyOf_EmptyEntity_False)
     EXPECT_FALSE(actual2);
 }
 
-TEST(WorldTest, AllOf_EmptyEntity_False)
+TEST(RegistryTest, AllOf_EmptyEntity_False)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity = sut.Create();
 
     bool actual1 = sut.AllOf<AComponent>(entity);
@@ -202,9 +202,9 @@ TEST(WorldTest, AllOf_EmptyEntity_False)
     EXPECT_FALSE(actual2);
 }
 
-TEST(WorldTest, AllOf_SingleComponent)
+TEST(RegistryTest, AllOf_SingleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity0{ 0 };
     ECS::Entity entity1{ 1 };
 
@@ -218,9 +218,9 @@ TEST(WorldTest, AllOf_SingleComponent)
     EXPECT_TRUE(actual2);
 }
 
-TEST(WorldTest, AllOf_MultipleComponent)
+TEST(RegistryTest, AllOf_MultipleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity0{ 0 };
     ECS::Entity entity1{ 1 };
 
@@ -235,9 +235,9 @@ TEST(WorldTest, AllOf_MultipleComponent)
     EXPECT_TRUE(actual2);
 }
 
-TEST(WorldTest, AnyOf_SingleComponent)
+TEST(RegistryTest, AnyOf_SingleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity0{ 0 };
     ECS::Entity entity1{ 1 };
 
@@ -251,9 +251,9 @@ TEST(WorldTest, AnyOf_SingleComponent)
     EXPECT_TRUE(actual2);
 }
 
-TEST(WorldTest, AnyOf_MultipleComponent)
+TEST(RegistryTest, AnyOf_MultipleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity0{ 0 };
     ECS::Entity entity1{ 1 };
 
@@ -270,9 +270,9 @@ TEST(WorldTest, AnyOf_MultipleComponent)
     EXPECT_TRUE(actual2);
 }
 
-TEST(WorldTest, Erase_SingleComponent)
+TEST(RegistryTest, Erase_SingleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity0{ 0 };
     ECS::Entity entity1{ 1 };
 
@@ -296,9 +296,9 @@ TEST(WorldTest, Erase_SingleComponent)
     EXPECT_FALSE(actual3);
 }
 
-TEST(WorldTest, Erase_MultipleComponents)
+TEST(RegistryTest, Erase_MultipleComponents)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity0{ 0 };
     ECS::Entity entity1{ 1 };
 
@@ -316,9 +316,9 @@ TEST(WorldTest, Erase_MultipleComponents)
     EXPECT_FALSE(actual1);
 }
 
-TEST(WorldTest, Query_SingleComponent)
+TEST(RegistryTest, Query_SingleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity0{ 0 };
     ECS::Entity entity1{ 1 };
 
@@ -336,9 +336,9 @@ TEST(WorldTest, Query_SingleComponent)
     EXPECT_STREQ(actual2[0].string, "Test");
 }
 
-TEST(WorldTest, Query_MultipleComponent)
+TEST(RegistryTest, Query_MultipleComponent)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity0{ 0 };
     ECS::Entity entity1{ 1 };
 
@@ -355,9 +355,9 @@ TEST(WorldTest, Query_MultipleComponent)
     EXPECT_STREQ(actual2[0].string, "Test");
 }
 
-TEST(WorldTest, IsValid)
+TEST(RegistryTest, IsValid)
 {
-    ECS::World sut;
+    ECS::Registry sut;
     ECS::Entity entity = sut.Create();
 
     bool actual1 = sut.IsValid(entity);
