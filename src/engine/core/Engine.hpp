@@ -2,6 +2,7 @@
 
 #include "ecs/Registry.hpp"
 #include "rendering/Renderer.hpp"
+#include "rendering/Renderer2.hpp"
 #include "window/Window.hpp"
 
 namespace Zeus
@@ -14,10 +15,12 @@ public:
     static void Update();
 
     static Renderer& GetRenderer();
-    static ECS::Registry& GetWorld();
+    static Renderer2& Renderer();
+    static ECS::Registry& World();
 
 private:
-    static Renderer* s_renderer;
+    static class Renderer2* s_renderer;
+    static class Renderer* s_rendererOld;
     static ECS::Registry* s_world;
 };
 }
