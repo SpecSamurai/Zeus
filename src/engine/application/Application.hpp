@@ -27,15 +27,8 @@ public:
     void Run();
     void Shutdown();
 
-    inline const Window& GetWindow() const
-    {
-        return m_window;
-    }
-
-    inline static const Application& Instance()
-    {
-        return *s_instance;
-    }
+    static const Application& Instance();
+    const Window& GetWindow() const;
 
 private:
     bool OnWindowClosed(const WindowClosedEvent& event);

@@ -10,7 +10,6 @@
 #include "logging/logger.hpp"
 #include "math/definitions.hpp"
 #include "profiling/Profiler.hpp"
-#include "rendering/Renderer2.hpp"
 #include "window/Window.hpp"
 
 #include <cassert>
@@ -19,7 +18,6 @@
 namespace Zeus
 {
 Application* Application::s_instance{ nullptr };
-Renderer2* renderer2;
 
 Application::Application(const ApplicationSpecification& specification)
     : m_window(WindowProperties{
@@ -53,18 +51,13 @@ void Application::Initialize()
         });
 
     m_window.Initialize();
-
     Engine::Initialize(m_window);
-    renderer2 = new Renderer2(m_window);
-    renderer2->Initialize();
-    // InputManager::Init((GLFWwindow*)m_window.GetHandle());
-    // uiManager.Init(m_window, m_vkContext);
 }
 
 void Application::Run()
 {
     m_running = true;
-    // while (!glfwWindowShouldClose((GLFWwindow*)m_window.GetHandle()))
+
     while (m_running)
     {
         Profiler::Begin();
@@ -85,27 +78,12 @@ void Application::Run()
         //     vulkan_memory_allocator::allocator,
         //     static_cast<uint32_t>(frame_count));
 
-        // if (m_renderer.ResizeRequired())
-        // {
-        //     VkExtent2D e{ m_window.GetWidth(), m_window.GetHeight() };
-        //     m_renderer.ResizeDrawObjects(e);
-
-        // uiManager.ConfigureFrame();
-
-        // imgui commands
-        // updateScene();
-
         HandleKeyboard();
         camera->Update();
+
         // Engine::GetRenderer().SetCamera(camera->GetViewProjection());
-        // Engine::GetRenderer().Draw();
-
-        auto a{ camera->GetViewProjection() };
-        renderer2->m_frameDataBuffer.Update(
-            &a,
-            sizeof(camera->GetViewProjection()));
-
-        renderer2->Update();
+        Engine::Renderer().SetCameraProjection(camera->GetViewProjection());
+        Engine::Update();
 
         Profiler::End();
     }
@@ -115,10 +93,19 @@ void Application::Shutdown()
 {
     LOG_DEBUG("Shutting down application");
 
-    renderer2->Destroy();
-
     Engine::Shutdown();
     m_window.Destroy();
+}
+
+const Application& Application::Instance()
+{
+    assert(s_instance && "The application instance is not initialized.");
+    return *s_instance;
+}
+
+const Window& Application::GetWindow() const
+{
+    return m_window;
 }
 
 bool Application::OnWindowClosed(
