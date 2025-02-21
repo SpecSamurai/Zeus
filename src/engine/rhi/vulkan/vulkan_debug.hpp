@@ -17,8 +17,8 @@ namespace Zeus
 {
 namespace DebugLabelColors
 {
-const static Color RED{ Vector4f(1.f, 0.f, 0.f, 1.f) };
-const static Color GREEN{ Vector4f(0.f, 1.f, 0.f, 1.f) };
+const static Math::Color RED{ Math::Vector4f(1.f, 0.f, 0.f, 1.f) };
+const static Math::Color GREEN{ Math::Vector4f(0.f, 1.f, 0.f, 1.f) };
 }
 
 #ifdef NDEBUG
@@ -66,12 +66,12 @@ void setDebugUtilsObjectNameEXT(
 void cmdBeginDebugUtilsLabelEXT(
     VkCommandBuffer commandBuffer,
     const char* pLabelName,
-    const Vector4f& color);
+    const Math::Vector4f& color);
 
 void cmdEndDebugUtilsLabelEXT(VkCommandBuffer commandBuffer);
 
 void cmdInsertDebugUtilsLabelEXT(
     VkCommandBuffer commandBuffer,
     const char* pLabelName,
-    const Vector4f& color);
+    const Math::Vector4f& color);
 }

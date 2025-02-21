@@ -1,9 +1,9 @@
 #include "Renderer2.hpp"
 
 #include "Renderer_BufferData.hpp"
+#include "Renderer_resources.hpp"
 #include "logging/logger.hpp"
 #include "math/definitions.hpp"
-#include "resources.hpp"
 #include "rhi/Buffer.hpp"
 #include "rhi/CommandBuffer.hpp"
 #include "rhi/CommandPool.hpp"
@@ -60,18 +60,25 @@ void Renderer2::Initialize()
     InitializeDefaultResources();
 
     // temp
+
     DrawTriangle(
-        Vector3f(0.0f, -0.5f, 0.0f),
-        Vector3f(0.5, 0.5, 0),
-        Vector3f(-0.5, 0.5, 0),
-        Colors::GREEN);
+        Math::Vector3f(0.0f, -0.5f, 0.0f),
+        Math::Vector3f(0.5, 0.5, 0),
+        Math::Vector3f(-0.5, 0.5, 0),
+        Math::Colors::GREEN);
 
     DrawRectangle(
-        Vector3f(0.0f, 0.0f, 0.0f),
-        Vector3f(0.5, 0.0, 0),
-        Vector3f(0.5, 0.5, 0),
-        Vector3f(0, 0.5, 0),
-        Colors::BLUE);
+        Math::Vector3f(0.0f, 0.0f, 0.0f),
+        Math::Vector3f(0.5, 0.0, 0),
+        Math::Vector3f(0.5, 0.5, 0),
+        Math::Vector3f(0, 0.5, 0),
+        Math::Colors::BLUE);
+
+    DrawLine(
+        Math::Vector3f(0.0f, 0.0f, 0.0f),
+        Math::Vector3f(0.5f, -0.3f, 0.3f),
+        Math::Colors::MAGENTA,
+        Math::Colors::CYAN);
 
     m_linesVertexBuffer.Update(
         m_lines.data(),
@@ -246,10 +253,10 @@ void Renderer2::Update()
 }
 
 void Renderer2::DrawLine(
-    const Vector3f& from,
-    const Vector3f& to,
-    const Color& fromColor,
-    const Color& toColor)
+    const Math::Vector3f& from,
+    const Math::Vector3f& to,
+    const Math::Color& fromColor,
+    const Math::Color& toColor)
 {
     m_lines[m_linesIndex++] = Vertex_PositionColor{
         .position = from,
@@ -263,10 +270,10 @@ void Renderer2::DrawLine(
 }
 
 void Renderer2::DrawTriangle(
-    const Vector3f& vertex1,
-    const Vector3f& vertex2,
-    const Vector3f& vertex3,
-    const Color& color)
+    const Math::Vector3f& vertex1,
+    const Math::Vector3f& vertex2,
+    const Math::Vector3f& vertex3,
+    const Math::Color& color)
 {
     DrawLine(vertex1, vertex2, color, color);
     DrawLine(vertex2, vertex3, color, color);
@@ -274,11 +281,11 @@ void Renderer2::DrawTriangle(
 }
 
 void Renderer2::DrawRectangle(
-    const Vector3f& topLeft,
-    const Vector3f& topRight,
-    const Vector3f& bottomRight,
-    const Vector3f& bottomLeft,
-    const Color& color)
+    const Math::Vector3f& topLeft,
+    const Math::Vector3f& topRight,
+    const Math::Vector3f& bottomRight,
+    const Math::Vector3f& bottomLeft,
+    const Math::Color& color)
 {
     DrawLine(topLeft, topRight, color, color);
     DrawLine(topRight, bottomRight, color, color);
@@ -299,6 +306,11 @@ const Shader& Renderer2::GetShader(ShaderModuleTypes type) const
 const Pipeline* Renderer2::GetPipeline(PipelineTypes type) const
 {
     return m_pipelines[static_cast<std::uint32_t>(type)];
+}
+
+void Renderer2::SetCameraProjection(const Math::Matrix4x4f& viewProjection)
+{
+    m_frameDataBuffer.Update(&viewProjection, sizeof(Math::Matrix4x4f));
 }
 
 void Renderer2::ResizeSwapchain()

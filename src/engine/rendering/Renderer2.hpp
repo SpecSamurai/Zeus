@@ -15,7 +15,6 @@
 
 #include <array>
 #include <cstdint>
-#include <vector>
 
 namespace Zeus
 {
@@ -29,27 +28,29 @@ public:
     void Update();
 
     void DrawLine(
-        const Vector3f& from,
-        const Vector3f& to,
-        const Color& fromColor,
-        const Color& toColor);
+        const Math::Vector3f& from,
+        const Math::Vector3f& to,
+        const Math::Color& fromColor,
+        const Math::Color& toColor);
 
     void DrawTriangle(
-        const Vector3f& vertex1,
-        const Vector3f& vertex2,
-        const Vector3f& vertex3,
-        const Color& color);
+        const Math::Vector3f& vertex1,
+        const Math::Vector3f& vertex2,
+        const Math::Vector3f& vertex3,
+        const Math::Color& color);
 
     void DrawRectangle(
-        const Vector3f& topLeft,
-        const Vector3f& topRight,
-        const Vector3f& bottomRight,
-        const Vector3f& bottomLeft,
-        const Color& color);
+        const Math::Vector3f& topLeft,
+        const Math::Vector3f& topRight,
+        const Math::Vector3f& bottomRight,
+        const Math::Vector3f& bottomLeft,
+        const Math::Color& color);
 
     const Image& GetRenderTarget(RenderTargets type) const;
     const Shader& GetShader(ShaderModuleTypes type) const;
     const Pipeline* GetPipeline(PipelineTypes type) const;
+
+    void SetCameraProjection(const Math::Matrix4x4f& viewProjection);
 
 private:
     struct Frame

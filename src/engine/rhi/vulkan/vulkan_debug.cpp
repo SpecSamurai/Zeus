@@ -119,12 +119,12 @@ void setDebugUtilsObjectNameEXT(
 void cmdBeginDebugUtilsLabelEXT(
     VkCommandBuffer commandBuffer,
     const char* pLabelName,
-    const Vector4f& color)
+    const Math::Vector4f& color)
 {
     VkDebugUtilsLabelEXT labelInfo{};
     labelInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
     labelInfo.pLabelName = pLabelName;
-    memcpy(&labelInfo.color, &color[0], sizeof(Vector4f));
+    memcpy(&labelInfo.color, &color[0], sizeof(Math::Vector4f));
 
     vkCmdBeginDebugUtilsLabelEXT(commandBuffer, &labelInfo);
 }
@@ -137,12 +137,12 @@ void cmdEndDebugUtilsLabelEXT(VkCommandBuffer commandBuffer)
 void cmdInsertDebugUtilsLabelEXT(
     VkCommandBuffer commandBuffer,
     const char* pLabelName,
-    const Vector4f& color)
+    const Math::Vector4f& color)
 {
     VkDebugUtilsLabelEXT labelInfo{};
     labelInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
     labelInfo.pLabelName = pLabelName;
-    memcpy(&labelInfo.color, &color[0], sizeof(Vector4f));
+    memcpy(&labelInfo.color, &color[0], sizeof(Math::Vector4f));
 
     vkCmdInsertDebugUtilsLabelEXT(commandBuffer, &labelInfo);
 }
