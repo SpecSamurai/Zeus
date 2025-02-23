@@ -6,7 +6,7 @@
 #include "math/Quaternion.hpp"
 #include "math/definitions.hpp"
 #include "math/transformations.hpp"
-#include "rendering/resources.hpp"
+#include "rendering/Renderer_resources.hpp"
 #include "rhi/DescriptorPool.hpp"
 #include "rhi/Sampler.hpp"
 #include "rhi/VkContext.hpp"
@@ -21,12 +21,6 @@
 
 namespace Zeus
 {
-GltfLoader& GltfLoader::GetInstance()
-{
-    static GltfLoader instance;
-    return instance;
-}
-
 std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
     std::filesystem::path filePath)
 {
@@ -112,21 +106,11 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
         }
         else
         {
-            // we failed to load, so lets give the slot a default white
-            // texture
-            // to not completely break loading
+            // white tex
             images.push_back(&Textures::DebugCheckerboard);
             LOG_ERROR("Failed to load GLTF Image:{}", image.name);
         }
     }
-
-    //> load_buffer
-    // create buffer to hold the material data
-    // file.materialDataBuffer = engine->create_buffer(
-    //     sizeof(GLTFMetallic_Roughness::MaterialConstants) *
-    //         gltf.materials.size(),
-    //     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-    //     VMA_MEMORY_USAGE_CPU_TO_GPU);
 
     scene->materialDataBuffer = Buffer(
         filePath.string(),
@@ -137,47 +121,37 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         true);
 
-    int data_index = 0;
-    // GLTFMetallic_Roughness::MaterialConstants* sceneMaterialConstants =
-    //     (GLTFMetallic_Roughness::MaterialConstants*)
-    //         file.materialDataBuffer.info.pMappedData;
+    std::uint32_t data_index = 0;
 
-    GLTFMetallic_Roughness::MaterialConstants* sceneMaterialConstants =
-        (GLTFMetallic_Roughness::MaterialConstants*)
-            scene->materialDataBuffer.GetData();
-    //< load_buffer
+    auto sceneMaterialConstants =
+        scene->materialDataBuffer
+            .GetData<GLTFMetallic_Roughness::MaterialConstants>();
 
-    //> load_material
-    for (fastgltf::Material& mat : asset->materials)
+    for (fastgltf::Material& assetMaterial : asset->materials)
     {
         std::shared_ptr<Material> newMat = std::make_shared<Material>();
         materials.push_back(newMat);
-        scene->materials[mat.name.c_str()] = newMat;
+        scene->materials[assetMaterial.name.c_str()] = newMat;
 
         GLTFMetallic_Roughness::MaterialConstants constants;
-        constants.colorFactors.x = mat.pbrData.baseColorFactor[0];
-        constants.colorFactors.y = mat.pbrData.baseColorFactor[1];
-        constants.colorFactors.z = mat.pbrData.baseColorFactor[2];
-        constants.colorFactors.w = mat.pbrData.baseColorFactor[3];
+        constants.colorFactors.x = assetMaterial.pbrData.baseColorFactor[0];
+        constants.colorFactors.y = assetMaterial.pbrData.baseColorFactor[1];
+        constants.colorFactors.z = assetMaterial.pbrData.baseColorFactor[2];
+        constants.colorFactors.w = assetMaterial.pbrData.baseColorFactor[3];
 
-        constants.metal_rough_factors.x = mat.pbrData.metallicFactor;
-        constants.metal_rough_factors.y = mat.pbrData.roughnessFactor;
+        constants.metal_rough_factors.x = assetMaterial.pbrData.metallicFactor;
+        constants.metal_rough_factors.y = assetMaterial.pbrData.roughnessFactor;
 
         MaterialAlphaMode passType = MaterialAlphaMode::Opaque;
-        if (mat.alphaMode == fastgltf::AlphaMode::Blend)
+        if (assetMaterial.alphaMode == fastgltf::AlphaMode::Blend)
         {
             passType = MaterialAlphaMode::Transparent;
         }
 
         GLTFMetallic_Roughness::MaterialResources materialResources;
-        // default the material textures
-        // (textures on a GLTF material are optional. If they arent set, they
-        // generally default to white)
-        materialResources.colorImage =
-            &Textures::DebugCheckerboard; // engine->_whiteImage;
-        materialResources.colorSampler = Samplers::DefaultLinear.GetHandle();
-        materialResources.metalRoughImage =
-            &Textures::DebugCheckerboard; // engine->_whiteImage;
+        materialResources.colorImage = &Textures::White;
+        materialResources.colorSampler = Samplers::DefaultNearest.GetHandle();
+        materialResources.metalRoughImage = &Textures::White;
         materialResources.metalRoughSampler =
             Samplers::DefaultLinear.GetHandle();
 
@@ -186,16 +160,18 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
         materialResources.dataBufferOffset =
             data_index * sizeof(GLTFMetallic_Roughness::MaterialConstants);
         // grab textures from gltf file
-        if (mat.pbrData.baseColorTexture.has_value())
+        if (assetMaterial.pbrData.baseColorTexture.has_value())
         {
-            size_t img = asset
-                             ->textures[mat.pbrData.baseColorTexture.value()
-                                            .textureIndex]
-                             .imageIndex.value();
-            size_t sampler = asset
-                                 ->textures[mat.pbrData.baseColorTexture.value()
-                                                .textureIndex]
-                                 .samplerIndex.value();
+            size_t img =
+                asset
+                    ->textures[assetMaterial.pbrData.baseColorTexture.value()
+                                   .textureIndex]
+                    .imageIndex.value();
+            size_t sampler =
+                asset
+                    ->textures[assetMaterial.pbrData.baseColorTexture.value()
+                                   .textureIndex]
+                    .samplerIndex.value();
 
             materialResources.colorImage = images[img];
             materialResources.colorSampler = scene->samplers[sampler];
@@ -250,7 +226,6 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
 
             size_t initial_vtx = vertices.size();
 
-            // load indexes
             {
                 fastgltf::Accessor& indexaccessor =
                     asset->accessors[p.indicesAccessor.value()];
@@ -264,7 +239,6 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
                     });
             }
 
-            // load vertex positions
             {
                 fastgltf::Accessor& posAccessor =
                     asset
@@ -274,32 +248,30 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
                 fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(
                     asset.get(),
                     posAccessor,
-                    [&](fastgltf::math::fvec3 v, size_t index) {
-                        Vertex newvtx;
-                        newvtx.position = Vector3f(v.x(), v.y(), v.z());
-                        newvtx.normal = { 1, 0, 0 };
-                        newvtx.color = Color(1.f);
-                        newvtx.uvX = 0;
-                        newvtx.uvY = 0;
-                        vertices[initial_vtx + index] = newvtx;
+                    [&](fastgltf::math::fvec3 position, size_t index) {
+                        Vertex vertex{
+                            .position = toVector3f(position),
+                            .uvX = 0,
+                            .normal = { 1, 0, 0 },
+                            .uvY = 0,
+                            .color = Math::Color(1.f),
+                        };
+                        vertices[initial_vtx + index] = vertex;
                     });
             }
 
-            // load vertex normals
             auto normals = p.findAttribute("NORMAL");
             if (normals != p.attributes.end())
             {
-
                 fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(
                     asset.get(),
                     asset->accessors[(*normals).accessorIndex],
-                    [&](fastgltf::math::fvec3 v, size_t index) {
+                    [&](fastgltf::math::fvec3 normal, size_t index) {
                         vertices[initial_vtx + index].normal =
-                            Vector3f(v.x(), v.y(), v.z());
+                            toVector3f(normal);
                     });
             }
 
-            // load UVs
             auto uv = p.findAttribute("TEXCOORD_0");
             if (uv != p.attributes.end())
             {
@@ -307,13 +279,12 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
                 fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec2>(
                     asset.get(),
                     asset->accessors[(*uv).accessorIndex],
-                    [&](fastgltf::math::fvec2 v, size_t index) {
-                        vertices[initial_vtx + index].uvX = v.x();
-                        vertices[initial_vtx + index].uvY = v.y();
+                    [&](fastgltf::math::fvec2 uv, size_t index) {
+                        vertices[initial_vtx + index].uvX = uv.x();
+                        vertices[initial_vtx + index].uvY = uv.y();
                     });
             }
 
-            // load vertex colors
             auto colors = p.findAttribute("COLOR_0");
             if (colors != p.attributes.end())
             {
@@ -321,9 +292,8 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
                 fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec4>(
                     asset.get(),
                     asset->accessors[(*colors).accessorIndex],
-                    [&](fastgltf::math::fvec4 v, size_t index) {
-                        vertices[initial_vtx + index].color =
-                            Color(v.x(), v.y(), v.z(), v.w());
+                    [&](fastgltf::math::fvec4 color, size_t index) {
+                        vertices[initial_vtx + index].color = toVector4f(color);
                     });
             }
 
@@ -336,12 +306,12 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
                 newSurface.material = materials[0];
             }
 
-            Vector3f minpos = vertices[initial_vtx].position;
-            Vector3f maxpos = vertices[initial_vtx].position;
-            for (int i = initial_vtx; i < vertices.size(); i++)
+            Math::Vector3f minpos = vertices[initial_vtx].position;
+            Math::Vector3f maxpos = vertices[initial_vtx].position;
+            for (std::size_t i = initial_vtx; i < vertices.size(); i++)
             {
-                minpos = Zeus::min(minpos, vertices[i].position);
-                maxpos = Zeus::max(maxpos, vertices[i].position);
+                minpos = Math::min(minpos, vertices[i].position);
+                maxpos = Math::max(maxpos, vertices[i].position);
             }
 
             newSurface.bounds.origin = (maxpos + minpos) / 2.f;
@@ -355,8 +325,6 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
             Engine::GetRenderer().UploadMesh(vertices, indices);
     }
 
-    //> load_nodes
-    // load all nodes and their meshes
     for (fastgltf::Node& node : asset->nodes)
     {
         std::shared_ptr<Node> newNode;
@@ -379,39 +347,27 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
 
         std::visit(
             fastgltf::visitor{
-                [&](fastgltf::math::fmat4x4 matrix) {
+                [&](fastgltf::math::fmat4x4& matrix) {
                     memcpy(
                         &newNode->localTransform,
                         matrix.data(),
                         sizeof(matrix));
                 },
-                [&](fastgltf::TRS transform) {
-                    Vector3f tl(
-                        transform.translation[0],
-                        transform.translation[1],
-                        transform.translation[2]);
-                    Quaternion rot(
-                        transform.rotation.x(),
-                        transform.rotation.y(),
-                        transform.rotation.z(),
-                        transform.rotation.w());
-                    Vector3f sc(
-                        transform.scale[0],
-                        transform.scale[1],
-                        transform.scale[2]);
+                [&](fastgltf::TRS& trs) {
+                    Math::Vector3f translateVec{ toVector3f(trs.translation) };
+                    Math::Quaternion rotateQuat{ toQuaternion(trs.rotation) };
+                    Math::Vector3f scaleVec{ toVector3f(trs.scale) };
 
-                    Matrix4x4f tm = translation(tl);
-                    Matrix4x4f rm = rotationMatrix4x4(rot);
-                    Matrix4x4f sm = scale(sc);
-
-                    newNode->localTransform = tm * rm * sm;
+                    newNode->localTransform = translation(translateVec) *
+                                              rotationMatrix4x4(rotateQuat) *
+                                              scale(scaleVec);
                 },
             },
             node.transform);
     }
 
     // run loop again to setup transform hierarchy
-    for (int i = 0; i < asset->nodes.size(); i++)
+    for (std::uint32_t i{ 0 }; i < asset->nodes.size(); i++)
     {
         fastgltf::Node& node = asset->nodes[i];
         std::shared_ptr<Node>& sceneNode = nodes[i];
@@ -429,7 +385,7 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
         if (node->parent.lock() == nullptr)
         {
             scene->topNodes.push_back(node);
-            node->refreshTransform(Matrix4x4f(1.f));
+            node->refreshTransform(Math::Matrix4x4f(1.f));
         }
     }
 

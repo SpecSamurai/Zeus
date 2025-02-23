@@ -16,7 +16,7 @@ namespace Zeus
 class GltfLoader
 {
 public:
-    static GltfLoader& GetInstance();
+    static GltfLoader& Instance();
 
     std::optional<std::shared_ptr<LoadedGLTF>> Load(std::filesystem::path path);
 
