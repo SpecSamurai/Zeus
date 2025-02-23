@@ -32,6 +32,12 @@ add_library(Engine
     application/entry_point.cpp
     application/entry_point.hpp
 
+    assets/AssetsManager.hpp
+    assets/gltf/GltfLoader.cpp
+    assets/gltf/GltfLoader.hpp
+    assets/gltf/utility.cpp
+    assets/gltf/utility.hpp
+
     camera/camera_utils.cpp
     camera/camera_utils.hpp
     camera/ArcballCamera.cpp
@@ -43,14 +49,24 @@ add_library(Engine
     commands/CommandStack.hpp
     commands/ICommand.hpp
 
+    components/Renderable.hpp
+    components/Transform.hpp
+
     core/defines.hpp
     core/Engine.cpp
     core/Engine.hpp
+    core/FileSystem.hpp
+    core/Object.cpp
+    core/Object.hpp
 
     ecs/ComponentSparseSet.hpp
-    ecs/Definitions.hpp
+    ecs/ComponentSparseSetIterator.hpp
+    ecs/Entity.hpp
     ecs/FamilyId.hpp
+    ecs/SparseSet.cpp
     ecs/SparseSet.hpp
+    ecs/SparseSetIterator.hpp
+    ecs/Registry.hpp
 
     events/Event.hpp
     events/EventDispatcher.hpp
@@ -59,11 +75,6 @@ add_library(Engine
     events/KeyEvent.hpp
     events/MouseEvent.hpp
     events/WindowEvent.hpp
-
-    gltf/GltfLoader.cpp
-    gltf/GltfLoader.hpp
-    gltf/utility.cpp
-    gltf/utility.hpp
 
     input/Input.cpp
     input/Input.hpp
@@ -96,91 +107,92 @@ add_library(Engine
     memory/FreeListAllocator.hpp
     memory/FreeListAllocator.cpp
 
-    profiling/Timer.cpp
-    profiling/Timer.hpp
+    profiling/Profiler.cpp
+    profiling/Profiler.hpp
+    profiling/Stopwatch.cpp
+    profiling/Stopwatch.hpp
 
     rendering/Renderer.cpp
     rendering/Renderer.hpp
+    rendering/Renderer2.cpp
+    rendering/Renderer2.hpp
+    rendering/Renderer_definitions.hpp
+    rendering/Renderer_resources.cpp
+    rendering/Renderer_resources.hpp
+    rendering/Renderer_types.cpp
+    rendering/Renderer_types.hpp
 
-    rendering/renderer_types.cpp
-    rendering/renderer_types.hpp
+    rhi/BlendState.cpp
+    rhi/BlendState.hpp
+    rhi/Buffer.cpp
+    rhi/Buffer.hpp
+    rhi/CommandBuffer.cpp
+    rhi/CommandBuffer.hpp
+    rhi/CommandPool.cpp
+    rhi/CommandPool.hpp
+    rhi/Definitions.hpp
+    rhi/DeletionQueue.cpp
+    rhi/DeletionQueue.hpp
+    rhi/DepthStencilState.cpp
+    rhi/DepthStencilState.hpp
+    rhi/Descriptor.cpp
+    rhi/Descriptor.hpp
+    rhi/DescriptorPool.cpp
+    rhi/DescriptorPool.hpp
+    rhi/DescriptorSet.cpp
+    rhi/DescriptorSet.hpp
+    rhi/DescriptorSetLayout.cpp
+    rhi/DescriptorSetLayout.hpp
+    rhi/Device.cpp
+    rhi/Device.hpp
+    rhi/Fence.cpp
+    rhi/Fence.hpp
+    rhi/Image.cpp
+    rhi/Image.hpp
+    rhi/InstanceBuilder.cpp
+    rhi/InstanceBuilder.hpp
+    rhi/PhysicalDeviceSelector.cpp
+    rhi/PhysicalDeviceSelector.hpp
+    rhi/Pipeline.cpp
+    rhi/Pipeline.hpp
+    rhi/PushConstants.cpp
+    rhi/PushConstants.hpp
+    rhi/Queue.cpp
+    rhi/Queue.hpp
+    rhi/RasterizationState.cpp
+    rhi/RasterizationState.hpp
+    rhi/Sampler.cpp
+    rhi/Sampler.hpp
+    rhi/Semaphore.cpp
+    rhi/Semaphore.hpp
+    rhi/Shader.cpp
+    rhi/Shader.hpp
+    rhi/Swapchain.cpp
+    rhi/Swapchain.hpp
+    rhi/Vertex.hpp
+    rhi/VertexInput.cpp
+    rhi/VertexInput.hpp
+    rhi/VkContext.cpp
+    rhi/VkContext.hpp
 
-    rendering/resources.cpp
-    rendering/resources.hpp
-
-    vulkan/BlendState.cpp
-    vulkan/BlendState.hpp
-    vulkan/Buffer.cpp
-    vulkan/Buffer.hpp
-    vulkan/CommandBuffer.cpp
-    vulkan/CommandBuffer.hpp
-    vulkan/CommandPool.cpp
-    vulkan/CommandPool.hpp
-    vulkan/Definitions.hpp
-    vulkan/DeletionQueue.cpp
-    vulkan/DeletionQueue.hpp
-    vulkan/DepthStencilState.cpp
-    vulkan/DepthStencilState.hpp
-    vulkan/Descriptor.cpp
-    vulkan/Descriptor.hpp
-    vulkan/DescriptorPool.cpp
-    vulkan/DescriptorPool.hpp
-    vulkan/DescriptorSet.cpp
-    vulkan/DescriptorSet.hpp
-    vulkan/DescriptorSetLayout.cpp
-    vulkan/DescriptorSetLayout.hpp
-    vulkan/Device.cpp
-    vulkan/Device.hpp
-    vulkan/Fence.cpp
-    vulkan/Fence.hpp
-    vulkan/Image.cpp
-    vulkan/Image.hpp
-    vulkan/InstanceBuilder.cpp
-    vulkan/InstanceBuilder.hpp
-    vulkan/PhysicalDeviceSelector.cpp
-    vulkan/PhysicalDeviceSelector.hpp
-    vulkan/Pipeline.cpp
-    vulkan/Pipeline.hpp
-    vulkan/PipelineState.cpp
-    vulkan/PipelineState.hpp
-    vulkan/PushConstants.cpp
-    vulkan/PushConstants.hpp
-    vulkan/Queue.cpp
-    vulkan/Queue.hpp
-    vulkan/RasterizationState.cpp
-    vulkan/RasterizationState.hpp
-    vulkan/Sampler.cpp
-    vulkan/Sampler.hpp
-    vulkan/Semaphore.cpp
-    vulkan/Semaphore.hpp
-    vulkan/Shader.cpp
-    vulkan/Shader.hpp
-    vulkan/Swapchain.cpp
-    vulkan/Swapchain.hpp
-    vulkan/Vertex.hpp
-    vulkan/VertexInput.cpp
-    vulkan/VertexInput.hpp
-    vulkan/VkContext.cpp
-    vulkan/VkContext.hpp
-
-    vulkan/rhi/vulkan_command.cpp
-    vulkan/rhi/vulkan_command.hpp
-    vulkan/rhi/vulkan_debug.cpp
-    vulkan/rhi/vulkan_debug.hpp
-    vulkan/rhi/vulkan_device.cpp
-    vulkan/rhi/vulkan_device.hpp
-    vulkan/rhi/vulkan_dynamic_rendering.cpp
-    vulkan/rhi/vulkan_dynamic_rendering.hpp
-    vulkan/rhi/vulkan_framebuffer.cpp
-    vulkan/rhi/vulkan_framebuffer.hpp
-    vulkan/rhi/vulkan_image.hpp
-    vulkan/rhi/vulkan_image.cpp
-    vulkan/rhi/vulkan_memory.cpp
-    vulkan/rhi/vulkan_memory.hpp
-    vulkan/rhi/vulkan_renderpass.cpp
-    vulkan/rhi/vulkan_renderpass.hpp
-    vulkan/rhi/vulkan_surface.cpp
-    vulkan/rhi/vulkan_surface.hpp
+    rhi/vulkan/vulkan_command.cpp
+    rhi/vulkan/vulkan_command.hpp
+    rhi/vulkan/vulkan_debug.cpp
+    rhi/vulkan/vulkan_debug.hpp
+    rhi/vulkan/vulkan_device.cpp
+    rhi/vulkan/vulkan_device.hpp
+    rhi/vulkan/vulkan_dynamic_rendering.cpp
+    rhi/vulkan/vulkan_dynamic_rendering.hpp
+    rhi/vulkan/vulkan_framebuffer.cpp
+    rhi/vulkan/vulkan_framebuffer.hpp
+    rhi/vulkan/vulkan_image.hpp
+    rhi/vulkan/vulkan_image.cpp
+    rhi/vulkan/vulkan_memory.cpp
+    rhi/vulkan/vulkan_memory.hpp
+    rhi/vulkan/vulkan_renderpass.cpp
+    rhi/vulkan/vulkan_renderpass.hpp
+    rhi/vulkan/vulkan_surface.cpp
+    rhi/vulkan/vulkan_surface.hpp
 
     window/glfw_utils.cpp
     window/glfw_utils.hpp
