@@ -1,5 +1,5 @@
 #include <application/Application.hpp>
-#include <entry_point.hpp>
+#include <application/entry_point.hpp>
 
 Zeus::Application* Zeus::CreateApplication(CommandLineArgs args)
 {
