@@ -53,3 +53,10 @@ set_target_properties(stb PROPERTIES FOLDER "Libraries")
 target_include_directories(stb
     INTERFACE stb
 )
+
+add_library(tinyobjloader STATIC
+    tinyobjloader/tiny_obj_loader.cc
+    tinyobjloader/tiny_obj_loader.h
+)
+
+target_include_directories(tinyobjloader INTERFACE tinyobjloader)
