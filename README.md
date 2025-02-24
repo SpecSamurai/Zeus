@@ -68,6 +68,12 @@ git submodule init
 git submodule update
 ```
 
+Add a new submodule:
+1. Go to submodule directory `cd libraries`
+2. Add submodule: `git submodule add <url>`
+3. Checkout desired branch/tag `git checkout master`
+4. Update `git pull`
+
 Updating submodules:
 1. Go to submodule directory `cd libraries`
 2. Checkout desired branch `git checkout master`
