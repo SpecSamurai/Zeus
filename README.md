@@ -93,7 +93,7 @@ COMMAND dxc.exe -Zpr -spirv -O0 -T ps_6_8 -E main shader.frag.hlsl -Fo shader.fr
 ### CMake
 ```
 cmake --preset debug|release|test
-cmake --build --preset debug|release
+cmake --build --preset debug|release --clean-first
 cmake --build --verbose --preset debug
 ctest --preset test
 ctest --preset test -R TestName
