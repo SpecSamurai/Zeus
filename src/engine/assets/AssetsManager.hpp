@@ -1,6 +1,7 @@
 #pragma once
 
-#include "gltf/GltfLoader.hpp"
+#include "GltfLoader.hpp"
+#include "ObjLoader.hpp"
 
 #include <memory>
 
@@ -12,6 +13,11 @@ public:
     static std::unique_ptr<GltfLoader> GetGltfLoader()
     {
         return std::make_unique<GltfLoader>();
+    }
+
+    static std::unique_ptr<ObjLoader> GetObjLoader()
+    {
+        return std::make_unique<ObjLoader>();
     }
 
 private:
