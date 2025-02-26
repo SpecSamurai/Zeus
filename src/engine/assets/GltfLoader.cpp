@@ -26,21 +26,22 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
 {
     LOG_DEBUG("Loading GLTF asset: {}", filePath.string());
 
-    std::shared_ptr<LoadedGLTF> scene = std::make_shared<LoadedGLTF>();
+    std::shared_ptr<LoadedGLTF> scene{ std::make_shared<LoadedGLTF>() };
 
-    auto data{ fastgltf::GltfDataBuffer::FromPath(filePath) };
-    if (data.error() != fastgltf::Error::None)
+    auto dataBuffer{ fastgltf::GltfDataBuffer::FromPath(filePath) };
+    if (dataBuffer.error() != fastgltf::Error::None)
     {
         LOG_ERROR(
             "Failed to load GLTF asset. {}",
-            fastgltf::getErrorMessage(data.error()));
+            fastgltf::getErrorMessage(dataBuffer.error()));
 
         return std::nullopt;
     }
 
-    auto asset{
-        m_parser.loadGltf(data.get(), filePath.parent_path(), PARSER_OPTIONS)
-    };
+    auto asset{ m_parser.loadGltf(
+        dataBuffer.get(),
+        filePath.parent_path(),
+        PARSER_OPTIONS) };
 
     if (asset.error() != fastgltf::Error::None)
     {
@@ -60,17 +61,19 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
     }
 #endif
 
-    // we can stimate the descriptors we will need accurately
+    // TODO: use etimateion method
+    // we can estimate the descriptors we will need accurately
     std::vector<VkDescriptorPoolSize> sizes = {
         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 30 },
         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 30 },
         { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10 }
     };
 
-    // file.descriptorPool.init(engine->_device, gltf.materials.size(), sizes);
+    // TODO: improve
     scene->descriptorPool =
         DescriptorPool(asset->materials.size(), sizes, 0, filePath.string());
 
+    // Samplers
     for (fastgltf::Sampler& sampler : asset->samplers)
     {
         Sampler* newSampler{ new Sampler(
@@ -90,6 +93,7 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
     // std::vector<TextureID> imageIDs;
     std::vector<std::shared_ptr<Material>> materials;
 
+    // textures
     for (fastgltf::Image& image : asset->images)
     {
         std::optional<Image*> img = GltfLoader::LoadImage(asset.get(), image);
@@ -127,6 +131,7 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
         scene->materialDataBuffer
             .GetData<GLTFMetallic_Roughness::MaterialConstants>();
 
+    // materials
     for (fastgltf::Material& assetMaterial : asset->materials)
     {
         std::shared_ptr<Material> newMat = std::make_shared<Material>();
@@ -206,6 +211,7 @@ std::optional<std::shared_ptr<LoadedGLTF>> GltfLoader::Load(
     std::vector<uint32_t> indices;
     std::vector<Vertex> vertices;
 
+    // meshes
     for (fastgltf::Mesh& mesh : asset->meshes)
     {
         std::shared_ptr<MeshAsset> newmesh = std::make_shared<MeshAsset>();

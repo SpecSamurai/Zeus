@@ -16,14 +16,14 @@ namespace Zeus
 class GltfLoader
 {
 public:
-    static GltfLoader& Instance();
-
     std::optional<std::shared_ptr<LoadedGLTF>> Load(std::filesystem::path path);
 
 private:
     std::optional<Image*> LoadImage(
         fastgltf::Asset& asset,
         fastgltf::Image& image);
+
+    void EstimatePoolSizes() const;
 
 private:
     static constexpr fastgltf::Options PARSER_OPTIONS{
