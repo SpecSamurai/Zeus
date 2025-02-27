@@ -1,9 +1,10 @@
 add_executable(Editor
     EditorApp.cpp
+    EditorApp.hpp
 )
 
 target_include_directories(Editor
-    PRIVATE componenets
+    PRIVATE .
 )
 
 target_link_libraries(Editor
