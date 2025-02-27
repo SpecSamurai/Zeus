@@ -13,6 +13,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/glfw/glfw.git
     GIT_TAG 3.4
 )
+
 FetchContent_MakeAvailable(glfw)
 
 FetchContent_Declare(
@@ -33,10 +34,13 @@ add_library(Engine
     application/entry_point.hpp
 
     assets/AssetsManager.hpp
-    assets/gltf/GltfLoader.cpp
-    assets/gltf/GltfLoader.hpp
-    assets/gltf/utility.cpp
-    assets/gltf/utility.hpp
+    assets/GltfLoader.cpp
+    assets/GltfLoader.hpp
+    assets/ObjLoader.cpp
+    assets/ObjLoader.hpp
+    assets/ObjModel.hpp
+    assets/utility.cpp
+    assets/utility.hpp
 
     camera/camera_utils.cpp
     camera/camera_utils.hpp
@@ -49,6 +53,7 @@ add_library(Engine
     commands/CommandStack.hpp
     commands/ICommand.hpp
 
+    components/Light.hpp
     components/Renderable.hpp
     components/Transform.hpp
 
@@ -58,6 +63,8 @@ add_library(Engine
     core/FileSystem.hpp
     core/Object.cpp
     core/Object.hpp
+    core/World.cpp
+    core/World.hpp
 
     ecs/ComponentSparseSet.hpp
     ecs/ComponentSparseSetIterator.hpp
@@ -212,6 +219,7 @@ target_link_libraries(Engine
         fmt::fmt
         stb
         fastgltf
+        tinyobjloader
 )
 
 target_compile_options(Engine PRIVATE
@@ -260,15 +268,3 @@ endforeach(SHADER_FILE)
 add_custom_target(Shaders ALL
     DEPENDS ${SPIRV_BINARY_FILES}
     SOURCES ${SHADER_SOURCE_FILES})
-
-file(GLOB_RECURSE ASSETS_SOURCE_FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/assets/*"
-)
-
-foreach(ASSET_FILE ${ASSETS_SOURCE_FILES})
-    get_filename_component(FILE_NAME ${ASSET_FILE} NAME)
-
-    configure_file(
-        ${ASSET_FILE} "${CMAKE_CURRENT_BINARY_DIR}/assets/${FILE_NAME}"
-        COPYONLY)
-endforeach(ASSET_FILE)
