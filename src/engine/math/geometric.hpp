@@ -5,6 +5,7 @@
 #include "Vector3.hpp"
 #include "Vector4.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 namespace Zeus::Math
