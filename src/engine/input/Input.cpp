@@ -15,7 +15,7 @@ namespace Zeus
 bool Input::IsKeyDown(const KeyCode keyCode)
 {
     auto* window{ static_cast<GLFWwindow*>(
-        Application::Instance().GetWindow().GetHandle()) };
+        Application::Instance().Window().GetHandle()) };
     auto state{ glfwGetKey(window, static_cast<std::int32_t>(keyCode)) };
 
     return state == GLFW_PRESS;
@@ -24,7 +24,7 @@ bool Input::IsKeyDown(const KeyCode keyCode)
 bool Input::IsKeyUp(const KeyCode keyCode)
 {
     auto* window{ static_cast<GLFWwindow*>(
-        Application::Instance().GetWindow().GetHandle()) };
+        Application::Instance().Window().GetHandle()) };
     auto state{ glfwGetKey(window, static_cast<std::int32_t>(keyCode)) };
 
     return state == GLFW_RELEASE;
@@ -33,7 +33,7 @@ bool Input::IsKeyUp(const KeyCode keyCode)
 bool Input::IsMouseButtonDown(const MouseButtonCode buttonCode)
 {
     auto* window{ static_cast<GLFWwindow*>(
-        Application::Instance().GetWindow().GetHandle()) };
+        Application::Instance().Window().GetHandle()) };
     auto state{
         glfwGetMouseButton(window, static_cast<std::int32_t>(buttonCode))
     };
@@ -44,7 +44,7 @@ bool Input::IsMouseButtonDown(const MouseButtonCode buttonCode)
 bool Input::IsMouseButtonUp(const MouseButtonCode buttonCode)
 {
     auto* window{ static_cast<GLFWwindow*>(
-        Application::Instance().GetWindow().GetHandle()) };
+        Application::Instance().Window().GetHandle()) };
     auto state{
         glfwGetMouseButton(window, static_cast<std::int32_t>(buttonCode))
     };
@@ -55,7 +55,7 @@ bool Input::IsMouseButtonUp(const MouseButtonCode buttonCode)
 Math::Vector2f Input::GetMousePosition()
 {
     auto* window{ static_cast<GLFWwindow*>(
-        Application::Instance().GetWindow().GetHandle()) };
+        Application::Instance().Window().GetHandle()) };
 
     double xPos, yPos;
     glfwGetCursorPos(window, &xPos, &yPos);

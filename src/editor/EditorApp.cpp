@@ -35,19 +35,7 @@ void EditorApp::Initialize()
 {
     LOG_DEBUG("Initializing Editor Application");
 
-    Engine::Initialize(m_window);
-
-    Event::Dispatcher.Register<WindowClosedEvent>(
-        "Application::WindowClosedEvent",
-        [this](const WindowClosedEvent& event) -> bool {
-            return OnWindowClosed(event);
-        });
-
-    Event::Dispatcher.Register<WindowResizedEvent>(
-        "Application::WindowResizedEvent",
-        [this](const WindowResizedEvent& event) -> bool {
-            return OnWindowResized(event);
-        });
+    Engine::Initialize(Window());
 
     Event::Dispatcher.Register<MouseMovedEvent>(
         "Application::MouseMovedEvent",
@@ -88,15 +76,13 @@ void EditorApp::Initialize()
 
 void EditorApp::Run()
 {
-    m_running = true;
-
-    while (m_running)
+    while (IsRunning())
     {
         Profiler::Begin();
 
-        m_window.Update();
+        Window().Update();
 
-        if (m_minimized)
+        if (IsMinimized())
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
@@ -126,19 +112,6 @@ void EditorApp::Shutdown()
     LOG_DEBUG("Shutting down Editor Application");
 
     Engine::Shutdown();
-    m_window.Destroy();
-}
-
-bool EditorApp::OnWindowClosed([[maybe_unused]] const WindowClosedEvent& event)
-{
-    m_running = false;
-    return true;
-}
-
-bool EditorApp::OnWindowResized(const WindowResizedEvent& event)
-{
-    m_minimized = event.width == 0 || event.height == 0;
-    return true;
 }
 
 void EditorApp::HandleKeyboard()
@@ -164,13 +137,13 @@ void EditorApp::HandleKeyboard()
 
     if (Input::IsKeyDown(KeyCode::C))
         glfwSetInputMode(
-            reinterpret_cast<GLFWwindow*>(m_window.GetHandle()),
+            reinterpret_cast<GLFWwindow*>(Window().GetHandle()),
             GLFW_CURSOR,
             GLFW_CURSOR_DISABLED);
 
     if (Input::IsKeyDown(KeyCode::V))
         glfwSetInputMode(
-            reinterpret_cast<GLFWwindow*>(m_window.GetHandle()),
+            reinterpret_cast<GLFWwindow*>(Window().GetHandle()),
             GLFW_CURSOR,
             GLFW_CURSOR_NORMAL);
 
@@ -182,14 +155,14 @@ bool EditorApp::OnMouseMoved(const MouseMovedEvent& event)
 {
     if (camera->IsType(CameraType::FREEFLY) &&
         glfwGetInputMode(
-            reinterpret_cast<GLFWwindow*>(m_window.GetHandle()),
+            reinterpret_cast<GLFWwindow*>(Window().GetHandle()),
             GLFW_CURSOR) != GLFW_CURSOR_DISABLED)
     {
         return true;
     }
 
     if (!glfwGetMouseButton(
-            reinterpret_cast<GLFWwindow*>(m_window.GetHandle()),
+            reinterpret_cast<GLFWwindow*>(Window().GetHandle()),
             GLFW_MOUSE_BUTTON_LEFT))
     {
         m_isMouseReleased = true;

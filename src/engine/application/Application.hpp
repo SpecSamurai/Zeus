@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandLineArgs.hpp"
+#include "events/WindowEvent.hpp"
 #include "window/Window.hpp"
 
 #include <cstdint>
@@ -19,20 +20,28 @@ class Application
 {
 public:
     Application(const ApplicationSpecification& specification);
-    virtual ~Application() = default;
+    virtual ~Application();
 
     virtual void Initialize() = 0;
     virtual void Run() = 0;
     virtual void Shutdown() = 0;
 
-    static const Application& Instance();
-    const Window& GetWindow() const;
+    static Application& Instance();
+    Window& Window();
+    bool IsRunning() const;
+    bool IsMinimized() const;
+
+private:
+    bool OnWindowClosed(const WindowClosedEvent& event);
+    bool OnWindowResized(const WindowResizedEvent& event);
 
 private:
     static Application* s_instance;
 
-protected:
-    Window m_window;
+    class Window m_window;
+
+    bool m_running{ false };
+    bool m_minimized{ false };
 };
 
 [[nodiscard]] extern Application* CreateApplication(CommandLineArgs args);

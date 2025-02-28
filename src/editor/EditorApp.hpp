@@ -19,8 +19,6 @@ public:
     void Shutdown() override;
 
 private:
-    bool OnWindowClosed(const WindowClosedEvent& event);
-    bool OnWindowResized(const WindowResizedEvent& event);
     bool OnMouseMoved(const MouseMovedEvent& event);
 
     void HandleKeyboard();
@@ -35,8 +33,5 @@ private:
         float y;
     } m_lastMousePosition;
     inline static bool m_isMouseReleased{ true };
-
-    bool m_running{ false };
-    bool m_minimized{ false };
 };
 }
