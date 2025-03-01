@@ -1,11 +1,13 @@
 #pragma once
 
-#include "camera/EditorCamera.hpp"
-#include "camera/camera_utils.hpp"
 #include <application/Application.hpp>
+#include <camera/EditorCamera.hpp>
+#include <camera/FreeflyCamera.hpp>
 #include <events/MouseEvent.hpp>
 #include <events/WindowEvent.hpp>
 #include <window/Window.hpp>
+
+#include <memory>
 
 namespace Zeus
 {
@@ -25,7 +27,7 @@ private:
 
 private:
     inline static std::unique_ptr<EditorCamera> camera =
-        createFreeflyEditorCamera(1440.f / 1080.f);
+        std::make_unique<FreeflyCamera>(FreeflyCamera(1440.f / 1080.f));
 
     inline static struct MousePosition
     {

@@ -42,8 +42,6 @@ add_library(Engine
     assets/utility.cpp
     assets/utility.hpp
 
-    camera/camera_utils.cpp
-    camera/camera_utils.hpp
     camera/ArcballCamera.cpp
     camera/ArcballCamera.hpp
     camera/EditorCamera.hpp

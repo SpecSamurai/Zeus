@@ -3,6 +3,7 @@
 #include <application/Application.hpp>
 #include <application/entry_point.hpp>
 #include <assets/AssetsManager.hpp>
+#include <components/Renderable.hpp>
 #include <core/Engine.hpp>
 #include <events/Event.hpp>
 #include <events/MouseEvent.hpp>
@@ -10,7 +11,15 @@
 #include <input/Input.hpp>
 #include <input/KeyCode.hpp>
 #include <logging/logger.hpp>
+#include <math/definitions.hpp>
+#include <math/transformations.hpp>
 #include <profiling/Profiler.hpp>
+#include <rendering/Renderer_definitions.hpp>
+
+#include <vulkan/vulkan_core.h>
+
+#include <memory>
+#include <vector>
 
 namespace Zeus
 {
@@ -42,40 +51,28 @@ void EditorApp::Initialize()
         [this](const MouseMovedEvent& event) -> bool {
             return OnMouseMoved(event);
         });
-
-    Engine::Renderer().DrawTriangle(
-        Math::Vector3f(0.0f, -0.5f, 0.0f),
-        Math::Vector3f(0.5, 0.5, 0),
-        Math::Vector3f(-0.5, 0.5, 0),
-        Math::Colors::GREEN);
-
-    Engine::Renderer().DrawRectangle(
-        Math::Vector3f(0.0f, 0.0f, 0.0f),
-        Math::Vector3f(0.5, 0.0, 0),
-        Math::Vector3f(0.5, 0.5, 0),
-        Math::Vector3f(0, 0.5, 0),
-        Math::Colors::BLUE);
-
-    Engine::Renderer().DrawLine(
-        Math::Vector3f(0.0f, 0.0f, 0.0f),
-        Math::Vector3f(0.5f, -0.3f, 0.3f),
-        Math::Colors::MAGENTA,
-        Math::Colors::CYAN);
-
-    Engine::Renderer().m_linesVertexBuffer.Update(
-        Engine::Renderer().m_lines.data(),
-        Engine::Renderer().m_lines.size() * sizeof(Vertex_PositionColor));
-
-    auto asset =
-        AssetsManager::GetObjLoader()->Load("../../models/viking_room.obj");
-
-    Engine::Renderer().m_meshVertexBuffer.Update(
-        asset->mesh->m_vertices.data(),
-        asset->mesh->m_vertices.size() * sizeof(Vertex));
 }
 
 void EditorApp::Run()
 {
+    auto asset = AssetsManager::GetObjLoader()->Load(
+        "D:/Code/Zeus/models/viking_room.obj");
+
+    auto asset2 = AssetsManager::GetObjLoader()->Load(
+        "D:/Code/Zeus/models/FinalBaseMesh.obj");
+
+    std::vector<Renderable> vec;
+    vec.emplace_back(Renderable{
+        .m_mesh = asset->mesh,
+        .localMatrix = Math::scale<float>(0.3f),
+    });
+
+    vec.emplace_back(Renderable{
+        .m_mesh = asset2->mesh,
+        .localMatrix = Math::scale<float>(0.01f) *
+                       Math::translation(Math::Vector3f(50, 0, 0)),
+    });
+
     while (IsRunning())
     {
         Profiler::Begin();
@@ -87,6 +84,25 @@ void EditorApp::Run()
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
+
+        Engine::Renderer().DrawTriangle(
+            Math::Vector3f(0.0f, -0.5f, 0.0f),
+            Math::Vector3f(0.5, 0.5, 0),
+            Math::Vector3f(-0.5, 0.5, 0),
+            Math::Colors::GREEN);
+
+        Engine::Renderer().DrawRectangle(
+            Math::Vector3f(0.0f, 0.0f, 0.0f),
+            Math::Vector3f(0.5, 0.0, 0),
+            Math::Vector3f(0.5, 0.5, 0),
+            Math::Vector3f(0, 0.5, 0),
+            Math::Colors::BLUE);
+
+        Engine::Renderer().DrawLine(
+            Math::Vector3f(0.0f, 0.0f, 0.0f),
+            Math::Vector3f(0.5f, -0.3f, 0.3f),
+            Math::Colors::MAGENTA,
+            Math::Colors::CYAN);
 
         // https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/staying_within_budget.html
         // Make sure to call vmaSetCurrentFrameIndex() every frame.
@@ -101,6 +117,7 @@ void EditorApp::Run()
 
         /*Engine::GetRenderer().SetCamera(camera->GetViewProjection());*/
         Engine::Renderer().SetCameraProjection(camera->GetViewProjection());
+        Engine::Renderer().SetRenderables(RendererEntity::MESH, vec);
         Engine::Update();
 
         Profiler::End();
