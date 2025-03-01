@@ -7,9 +7,14 @@ namespace Zeus
 class Object
 {
 public:
-    Object(std::string_view name = "");
+    constexpr Object(std::string_view name = "") : m_name{ name }
+    {
+    }
 
-    constexpr std::string_view GetName() const noexcept;
+    constexpr std::string_view GetName() const noexcept
+    {
+        return m_name;
+    }
 
 protected:
     std::string_view m_name{};

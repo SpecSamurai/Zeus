@@ -61,7 +61,6 @@ add_library(Engine
     core/Engine.cpp
     core/Engine.hpp
     core/FileSystem.hpp
-    core/Object.cpp
     core/Object.hpp
     core/World.cpp
     core/World.hpp
