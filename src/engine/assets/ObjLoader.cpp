@@ -6,6 +6,8 @@
 #include "rendering/Mesh.hpp"
 #include "rhi/Vertex.hpp"
 
+#include <format>
+#include <memory>
 #include <tiny_obj_loader.h>
 
 #include <optional>
@@ -36,7 +38,7 @@ namespace Zeus
             objReader.Warning());
     }
 
-    Mesh* mesh{ new Mesh };
+    std::shared_ptr<Mesh> mesh{ std::make_shared<Mesh>() };
     const auto& attributes{ objReader.GetAttrib() };
 
     for (const auto& shape : objReader.GetShapes())
@@ -88,6 +90,31 @@ namespace Zeus
         }
     }
 
-    return ObjModel{ .mesh = mesh };
+    mesh->m_vertexBuffer = Buffer(
+        std::format("Buffer_Vertex_{}", mesh->name),
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        mesh->m_vertices.size() * sizeof(Vertex),
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        false);
+
+    mesh->m_indexBuffer = Buffer(
+        std::format("Buffer_Index_{}", mesh->name),
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        mesh->m_indices.size() * sizeof(std::uint32_t),
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        false);
+
+    mesh->m_vertexBuffer.Update(
+        mesh->m_vertices.data(),
+        mesh->m_vertices.size() * sizeof(Vertex));
+
+    mesh->m_indexBuffer.Update(
+        mesh->m_indices.data(),
+        mesh->m_indices.size() * sizeof(std::uint32_t));
+
+    return ObjModel{
+        .filePath = filePath,
+        .mesh = std::move(mesh),
+    };
 }
 }
