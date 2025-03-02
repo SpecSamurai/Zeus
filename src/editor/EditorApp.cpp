@@ -14,7 +14,6 @@
 #include <math/definitions.hpp>
 #include <math/transformations.hpp>
 #include <profiling/Profiler.hpp>
-#include <rendering/Renderer_definitions.hpp>
 
 #include <vulkan/vulkan_core.h>
 

@@ -118,12 +118,8 @@ add_library(Engine
 
     rendering/Renderer.cpp
     rendering/Renderer.hpp
-    rendering/Renderer2.cpp
-    rendering/Renderer2.hpp
-    rendering/Renderer_definitions.hpp
     rendering/Renderer_resources.cpp
     rendering/Renderer_resources.hpp
-    rendering/Renderer_types.cpp
     rendering/Renderer_types.hpp
 
     rhi/BlendState.cpp
