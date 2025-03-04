@@ -4,21 +4,24 @@
 
 #include <vulkan/vulkan_core.h>
 
+#include <cstdint>
+
 namespace Zeus
 {
-enum class RendererEntity
+enum class RendererEntity : std::uint8_t
 {
-    MESH,
+    MESH_OPAQUE,
+    MESH_TRANSPARENT,
 };
 
-enum class RenderTargets
+enum class RenderTargets : std::uint8_t
 {
     RENDER_OUTPUT_COLOR,
     RENDER_OUTPUT_DEPTH,
     COUNT
 };
 
-enum class ShaderModuleTypes
+enum class ShaderModuleTypes : std::uint8_t
 {
     LINE_VERT,
     FLAT_COLOR_FRAG,
@@ -27,11 +30,30 @@ enum class ShaderModuleTypes
     COUNT
 };
 
-enum class PipelineTypes
+enum class PipelineTypes : std::uint8_t
 {
     LINES,
     MESH_OPAQUE,
     MESH_TRANSPARENT,
+    COUNT
+};
+
+enum class TextureTypes : std::uint8_t
+{
+    COLOR,
+    ROUGHNESS,
+    METALNESS,
+    AMBIENT_OCCLUSION,
+    NORMAL,
+    EMISSION,
+    HEIGHT,
+    COUNT
+};
+
+enum class MaterialProperties : std::uint8_t
+{
+    ROUGHNESS,
+    METALNESS,
     COUNT
 };
 
@@ -58,7 +80,7 @@ struct FrameData
 
 struct MeshPushConstants
 {
-    Math::Matrix4x4f modelMatrix;
+    Math::Matrix4x4f model;
     VkDeviceAddress vertexBufferAddress;
 };
 }
