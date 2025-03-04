@@ -116,6 +116,8 @@ add_library(Engine
     profiling/Stopwatch.cpp
     profiling/Stopwatch.hpp
 
+    rendering/Material.cpp
+    rendering/Material.hpp
     rendering/Renderer.cpp
     rendering/Renderer.hpp
     rendering/Renderer_resources.cpp
