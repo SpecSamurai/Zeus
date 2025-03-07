@@ -1,104 +1,120 @@
 #pragma once
 
-#include "Renderer_definitions.hpp"
-#include "renderer_types.hpp"
-#include "vulkan/DescriptorPool.hpp"
-#include "vulkan/DescriptorSet.hpp"
-#include "vulkan/DescriptorSetLayout.hpp"
-#include "vulkan/Image.hpp"
-#include "vulkan/Pipeline.hpp"
-#include "vulkan/Swapchain.hpp"
+#include "Renderer_types.hpp"
+#include "components/Renderable.hpp"
+#include "math/definitions.hpp"
+#include "rhi/Buffer.hpp"
+#include "rhi/CommandBuffer.hpp"
+#include "rhi/CommandPool.hpp"
+#include "rhi/DescriptorSet.hpp"
+#include "rhi/Swapchain.hpp"
+#include "rhi/Vertex.hpp"
 #include "window/Window.hpp"
 
+#include <memory>
+#include <unordered_map>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
+#include <array>
 #include <cstdint>
-#include <memory>
-#include <span>
 
 namespace Zeus
 {
 class Renderer
 {
 public:
-    Renderer(Window& window);
+    Renderer(const Window& window);
 
-    void Init();
+    void Initialize();
     void Destroy();
+    void Update();
 
-    void BeginFrame();
-    void EndFrame();
+    void DrawLine(
+        const Math::Vector3f& from,
+        const Math::Vector3f& to,
+        const Math::Color& fromColor,
+        const Math::Color& toColor);
 
-    MeshBuffers UploadMesh(
-        std::span<Vertex> vertices,
-        std::span<std::uint32_t> indices);
+    void DrawTriangle(
+        const Math::Vector3f& vertex1,
+        const Math::Vector3f& vertex2,
+        const Math::Vector3f& vertex3,
+        const Math::Color& color);
 
-    void Draw();
+    void DrawRectangle(
+        const Math::Vector3f& topLeft,
+        const Math::Vector3f& topRight,
+        const Math::Vector3f& bottomRight,
+        const Math::Vector3f& bottomLeft,
+        const Math::Color& color);
+
+    const Image& GetRenderTarget(RenderTargets type) const;
+    const Shader& GetShader(ShaderModuleTypes type) const;
+    const Pipeline* GetPipeline(PipelineTypes type) const;
+
+    void SetEntities(
+        RendererEntity type,
+        const std::vector<Renderable>& renderables);
+
+    void SetCameraProjection(const Math::Matrix4x4f& viewProjection);
 
 private:
-    void InitCommands();
-    void InitDrawObjects(std::uint32_t width, std::uint32_t height);
-    void ResizeDrawObjects();
-    void InitDescriptors();
-
-    void InitCompute();
-    void DrawCompute();
-
-    void InitMesh();
-    void DrawTriangle();
-
-    inline constexpr FrameData& CurrentFrame()
+    struct Frame
     {
-        return m_frames[m_swapchain->GetFrameIndex()];
-    }
+        CommandPool graphicsCommandPool;
+        CommandBuffer graphicsCommandBuffer;
 
-private:
-    Window& m_window;
-    std::unique_ptr<Swapchain> m_swapchain;
-
-    std::vector<FrameData> m_frames;
-
-    // DrawContext m_drawContext{};
-    // SceneData m_sceneData{};
-
-    DescriptorSetLayout sceneDataDescriptorSetLayout;
-
-    float m_renderScale{ 1.f };
-
-    VkExtent2D drawExtent;
-    Image drawImage;
-    Image depthImage;
-
-    // COMPUTE ******************
-    DescriptorPool computeDescriptorAllocator;
-    DescriptorSet _drawImageDescriptors;
-    DescriptorSetLayout drawImageDescriptorLayout;
-
-    struct ComputePushConstants
-    {
-        Vector4f data1;
-        Vector4f data2;
-        Vector4f data3;
-        Vector4f data4;
+        // Per Frame allocation
+        // DescriptorAllocator descriptorAllocator;
+        // TODO: conisider adding draw resources per frame
+        // Image Backbuffer;
     };
 
-    struct ComputeEffect
+    inline constexpr Frame& CurrentFrame()
     {
-        const char* name;
-        std::unique_ptr<Pipeline> pipeline;
-        ComputePushConstants data;
-    } computeEffect;
-    // COMPUTE ******************
+        return m_frames[m_swapchain.GetFrameIndex()];
+    }
 
-    // TRAINGLE/MESH
-    MeshBuffers rectangle;
-    std::unique_ptr<Pipeline> _meshPipeline;
+    void ResizeSwapchain();
 
-    std::vector<std::shared_ptr<MeshAsset>> testMeshes;
-    // TRAINGLE/MESH
+    void InitializeRenderTargets();
+    void InitializeDescriptors();
+    void InitializeShaders();
+    void InitializePipelines();
+    void InitializeBuffers();
 
-    float renderScale{ 1.f };
+    void DrawEntities(const CommandBuffer& cmd, const Image& renderTarget);
+    void LinesPass(const CommandBuffer& cmd, const Image& renderTarget);
 
-    // bool stopRendering{ false };
+public:
+    static constexpr std::int32_t FRAMES_IN_FLIGHT{ 2 };
+    static constexpr std::uint32_t LINES_BUFFER_BASE_SIZE{ 32768 };
+
+public:
+    const Window& m_window;
+    Swapchain m_swapchain;
+    std::array<Frame, FRAMES_IN_FLIGHT> m_frames;
+
+    DescriptorPool m_descriptorPool;
+
+    // turn it into per frame resoruce
+    std::array<Image, static_cast<std::uint32_t>(RenderTargets::COUNT)>
+        m_renderTargets;
+    std::array<Shader, static_cast<std::uint32_t>(ShaderModuleTypes::COUNT)>
+        m_shaders;
+    std::array<Pipeline*, static_cast<std::uint32_t>(PipelineTypes::COUNT)>
+        m_pipelines;
+
+    std::shared_ptr<Buffer> m_linesVertexBuffer;
+    std::uint64_t m_linesIndex{ 0 };
+    std::vector<Vertex_PositionColor> m_lines;
+
+    std::unordered_map<RendererEntity, std::vector<Renderable>> m_renderables;
+
+    FrameData m_frameData;
+    DescriptorSetLayout m_frameDataSetLayout;
+    DescriptorSet m_frameDataSet;
+    Buffer m_frameDataBuffer;
 };
 }

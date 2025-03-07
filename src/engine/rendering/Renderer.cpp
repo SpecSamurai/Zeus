@@ -1,187 +1,140 @@
 #include "Renderer.hpp"
 
-#include "gltf/GltfLoader.hpp"
+#include "Renderer_resources.hpp"
+#include "Renderer_types.hpp"
+#include "components/Renderable.hpp"
 #include "logging/logger.hpp"
-#include "math/transformations.hpp"
-#include "rendering/renderer_types.hpp"
-#include "vulkan/BlendState.hpp"
-#include "vulkan/Buffer.hpp"
-#include "vulkan/CommandBuffer.hpp"
-#include "vulkan/Definitions.hpp"
-#include "vulkan/Descriptor.hpp"
-#include "vulkan/DescriptorSet.hpp"
-#include "vulkan/DescriptorSetLayout.hpp"
-#include "vulkan/Pipeline.hpp"
-#include "vulkan/PipelineState.hpp"
-#include "vulkan/RasterizationState.hpp"
-#include "vulkan/Shader.hpp"
-#include "vulkan/Swapchain.hpp"
-#include "vulkan/VkContext.hpp"
-#include "vulkan/rhi/vulkan_dynamic_rendering.hpp"
+#include "math/definitions.hpp"
+#include "rhi/Buffer.hpp"
+#include "rhi/CommandBuffer.hpp"
+#include "rhi/CommandPool.hpp"
+#include "rhi/Definitions.hpp"
+#include "rhi/Descriptor.hpp"
+#include "rhi/DescriptorSet.hpp"
+#include "rhi/PushConstants.hpp"
+#include "rhi/Swapchain.hpp"
+#include "rhi/Vertex.hpp"
+#include "rhi/VkContext.hpp"
+#include "rhi/vulkan/vulkan_dynamic_rendering.hpp"
 #include "window/Window.hpp"
 
 #include <vulkan/vulkan_core.h>
 
 #include <array>
-#include <cstddef>
 #include <cstdint>
-#include <cstdio>
+#include <format>
 #include <memory>
-#include <span>
+#include <vector>
 
 namespace Zeus
 {
-Renderer::Renderer(Window& window) : m_window{ window }
+Renderer::Renderer(const Window& window) : m_window{ window }
 {
+    m_lines.reserve(LINES_BUFFER_BASE_SIZE);
 }
 
-void Renderer::Init()
+void Renderer::Initialize()
 {
-    m_swapchain = std::make_unique<Swapchain>(Swapchain(
+    LOG_DEBUG("Initializing Renderer");
+
+    m_swapchain = Swapchain(
         VkContext::GetSurface(),
         m_window.GetWidth(),
         m_window.GetHeight(),
         VK_PRESENT_MODE_MAILBOX_KHR,
-        2));
+        FRAMES_IN_FLIGHT);
 
-    m_frames.resize(m_swapchain->GetFramesCount());
+    for (std::uint32_t i{ 0 }; i < m_swapchain.GetFramesCount(); ++i)
+    {
+        m_frames[i].graphicsCommandPool = CommandPool(
+            VkContext::GetQueueFamily(QueueType::Graphics),
+            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+            std::format("CommandPool_Frame_{}", i));
 
-    InitCommands();
-    InitDrawObjects(m_window.GetWidth(), m_window.GetHeight());
-    InitDescriptors();
+        m_frames[i].graphicsCommandBuffer = CommandBuffer(
+            m_frames[i].graphicsCommandPool,
+            std::format("CommandBuffer_Frame_{}", i));
+    }
 
-    InitCompute();
-    InitMesh();
+    InitializeRenderTargets();
+    InitializeDescriptors();
+    InitializeShaders();
+    InitializePipelines();
+    InitializeBuffers();
+
+    InitializeDefaultResources();
 }
 
 void Renderer::Destroy()
 {
     LOG_DEBUG("Destroying Renderer");
-    drawImage.Destroy();
-    depthImage.Destroy();
 
-    for (std::size_t i{ 0 }; i < m_swapchain->GetFramesCount(); ++i)
+    VkContext::GetDevice().Wait();
+
+    DestroyDefaultResources();
+
+    m_frameDataBuffer.Destroy();
+    m_linesVertexBuffer->Destroy();
+
+    for (std::uint32_t i{ 0 }; i < m_pipelines.size(); ++i)
     {
-        m_frames[i].commandPool.Destroy();
+        m_pipelines[i]->Destroy();
     }
 
-    computeDescriptorAllocator.Destroy();
-    sceneDataDescriptorSetLayout.Destroy();
-    drawImageDescriptorLayout.Destroy();
-
-    m_swapchain->Destroy();
-
-    // _meshPipeline->Destroy();
-    // computeEffect.pipeline->Destroy();
-
-    rectangle.vertexBuffer->Destroy();
-    rectangle.indexBuffer->Destroy();
-
-    for (auto& test : testMeshes)
+    for (std::uint32_t i{ 0 }; i < m_shaders.size(); ++i)
     {
-        test->meshBuffers.vertexBuffer->Destroy();
-        test->meshBuffers.indexBuffer->Destroy();
-    }
-}
-
-void Renderer::BeginFrame()
-{
-    m_swapchain->AcquireNextImage();
-
-    drawExtent = {
-        .width = static_cast<std::uint32_t>(
-            static_cast<float>(drawImage.GetWidth()) * m_renderScale),
-        .height = static_cast<std::uint32_t>(
-            static_cast<float>(drawImage.GetHeight()) * m_renderScale),
-    };
-
-    CurrentFrame().mainCommandBuffer.Reset();
-    CurrentFrame().mainCommandBuffer.Begin(
-        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-}
-
-void Renderer::EndFrame()
-{
-    CurrentFrame().mainCommandBuffer.End();
-
-    m_swapchain->Present(CurrentFrame().mainCommandBuffer.GetHandle());
-}
-
-MeshBuffers Renderer::UploadMesh(
-    std::span<Vertex> vertices,
-    std::span<std::uint32_t> indices)
-{
-    const VkDeviceSize vertexBufferSize{ vertices.size() * sizeof(Vertex) };
-    const VkDeviceSize indexBufferSize{ indices.size() *
-                                        sizeof(std::uint32_t) };
-
-    MeshBuffers meshBuffers{
-        .indexBuffer = std::make_unique<Buffer>(Buffer(
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-            indexBufferSize,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)),
-        .vertexBuffer = std::make_unique<Buffer>(Buffer(
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
-                VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
-            vertexBufferSize,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)),
-    };
-
-    Buffer staging(
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        vertexBufferSize + indexBufferSize,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        true);
-
-    // memcpy(data, vertices.data(), vertexBufferSize);
-    // memcpy(
-    //     reinterpret_cast<char*>(data) + vertexBufferSize,
-    //     indices.data(),
-    //     indexBufferSize);
-
-    staging.Update(vertices.data(), vertexBufferSize);
-    staging.Update(indices.data(), indexBufferSize, vertexBufferSize);
-
-    VkContext::GetDevice().CmdImmediateSubmit(
-        [&](const CommandBuffer& commandBuffer) {
-            commandBuffer.CopyBuffer(
-                staging.GetHandle(),
-                meshBuffers.vertexBuffer->GetHandle(),
-                vertexBufferSize);
-
-            commandBuffer.CopyBuffer(
-                staging.GetHandle(),
-                meshBuffers.indexBuffer->GetHandle(),
-                indexBufferSize,
-                vertexBufferSize);
-        });
-
-    staging.Destroy();
-
-    return meshBuffers;
-}
-
-void Renderer::Draw()
-{
-    if (m_swapchain->IsResizeRequired())
-    {
-        ResizeDrawObjects();
+        m_shaders[i].Destroy();
     }
 
-    BeginFrame();
-    auto& cmd{ CurrentFrame().mainCommandBuffer };
+    for (std::uint32_t i{ 0 }; i < m_renderTargets.size(); ++i)
+    {
+        m_renderTargets[i].Destroy();
+    }
+
+    for (std::uint32_t i{ 0 }; i < m_frames.size(); ++i)
+    {
+        m_frames[i].graphicsCommandPool.Destroy();
+    }
+
+    m_frameDataSetLayout.Destroy();
+    m_descriptorPool.Destroy();
+    m_swapchain.Destroy();
+}
+
+void Renderer::Update()
+{
+    if (m_swapchain.IsResizeRequired())
+    {
+        ResizeSwapchain();
+    }
+
+    m_swapchain.AcquireNextImage();
+
+    // drawExtent = {
+    //     .width = static_cast<std::uint32_t>(
+    //         static_cast<float>(drawImage.GetWidth()) * m_renderScale),
+    //     .height = static_cast<std::uint32_t>(
+    //         static_cast<float>(drawImage.GetHeight()) * m_renderScale),
+    // };
+
+    auto& renderOutputColor{ GetRenderTarget(
+        RenderTargets::RENDER_OUTPUT_COLOR) };
+    auto& renderOutputDepth{ GetRenderTarget(
+        RenderTargets::RENDER_OUTPUT_DEPTH) };
+
+    auto& cmd{ CurrentFrame().graphicsCommandBuffer };
+    cmd.Reset();
+    cmd.Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
     cmd.TransitionImageLayout(
-        drawImage.GetHandle(),
-        drawImage.GetFormat(),
+        renderOutputColor.GetHandle(),
+        renderOutputColor.GetFormat(),
         VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_GENERAL);
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     cmd.TransitionImageLayout(
-        depthImage.GetHandle(),
-        depthImage.GetFormat(),
+        renderOutputDepth.GetHandle(),
+        renderOutputDepth.GetFormat(),
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
@@ -191,19 +144,41 @@ void Renderer::Draw()
     //     Vector4f(0.f, 0.f, 0.5f, 1.f),
     //     VK_IMAGE_LAYOUT_GENERAL);
 
-    DrawCompute();
+    // DrawCompute();
 
-    DrawTriangle();
+    VkRenderingAttachmentInfo colorAttachmentInfo = createColorAttachmentInfo(
+        renderOutputColor.GetView(),
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    VkRenderingAttachmentInfo depthAttachmentInfo = createDepthAttachmentInfo(
+        renderOutputDepth.GetView(),
+        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+
+    cmd.BeginRendering(
+        { renderOutputColor.GetExtent().width,
+          renderOutputColor.GetExtent().height },
+        1,
+        &colorAttachmentInfo,
+        &depthAttachmentInfo);
+
+    DrawEntities(cmd, renderOutputColor);
+    LinesPass(cmd, renderOutputColor);
+
+    // DrawCompute();
+    // DrawTriangle();
+
+    cmd.EndRendering();
 
     cmd.TransitionImageLayout(
-        drawImage.GetHandle(),
-        drawImage.GetFormat(),
-        VK_IMAGE_LAYOUT_GENERAL,
+        renderOutputColor.GetHandle(),
+        renderOutputColor.GetFormat(),
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
-    m_swapchain->SetLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    m_swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-    cmd.BlitImage(drawImage, *m_swapchain);
+    cmd.BlitImage(renderOutputColor, m_swapchain);
+
     //  drawExtent,
     //  m_swapchain->GetExtent());
 
@@ -227,277 +202,371 @@ void Renderer::Draw()
     //     colorAttachment,
     //     VkContext.GetSwapchain().extent);
 
-    m_swapchain->SetLayout(cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    m_swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    cmd.End();
 
-    EndFrame();
+    m_swapchain.Present(cmd.GetHandle());
 }
 
-void Renderer::InitCommands()
+void Renderer::DrawLine(
+    const Math::Vector3f& from,
+    const Math::Vector3f& to,
+    const Math::Color& fromColor,
+    const Math::Color& toColor)
 {
-    for (std::size_t i{ 0 }; i < m_swapchain->GetFramesCount(); ++i)
+    m_lines.emplace_back(Vertex_PositionColor{
+        .position = from,
+        .color = fromColor,
+    });
+
+    m_lines.emplace_back(Vertex_PositionColor{
+        .position = to,
+        .color = toColor,
+    });
+}
+
+void Renderer::DrawTriangle(
+    const Math::Vector3f& vertex1,
+    const Math::Vector3f& vertex2,
+    const Math::Vector3f& vertex3,
+    const Math::Color& color)
+{
+    DrawLine(vertex1, vertex2, color, color);
+    DrawLine(vertex2, vertex3, color, color);
+    DrawLine(vertex3, vertex1, color, color);
+}
+
+void Renderer::DrawRectangle(
+    const Math::Vector3f& topLeft,
+    const Math::Vector3f& topRight,
+    const Math::Vector3f& bottomRight,
+    const Math::Vector3f& bottomLeft,
+    const Math::Color& color)
+{
+    DrawLine(topLeft, topRight, color, color);
+    DrawLine(topRight, bottomRight, color, color);
+    DrawLine(bottomRight, bottomLeft, color, color);
+    DrawLine(bottomLeft, topLeft, color, color);
+}
+
+const Image& Renderer::GetRenderTarget(RenderTargets type) const
+{
+    return m_renderTargets[static_cast<std::uint32_t>(type)];
+}
+
+const Shader& Renderer::GetShader(ShaderModuleTypes type) const
+{
+    return m_shaders[static_cast<std::uint32_t>(type)];
+}
+
+const Pipeline* Renderer::GetPipeline(PipelineTypes type) const
+{
+    return m_pipelines[static_cast<std::uint32_t>(type)];
+}
+
+void Renderer::SetEntities(
+    RendererEntity type,
+    const std::vector<Renderable>& renderables)
+{
+    // mutex lock
+    m_renderables[type].clear();
+
+    for (const auto& entity : renderables)
     {
-        std::string commandPoolName{ "CommandPool Frame " + std::to_string(i) };
-        m_frames[i].commandPool = CommandPool(
-            VkContext::GetQueueFamily(QueueType::Graphics),
-            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-            commandPoolName.c_str());
-
-        std::string commandBufferName{ "CommandBuffer Frame " +
-                                       std::to_string(i) };
-        m_frames[i].mainCommandBuffer =
-            CommandBuffer(m_frames[i].commandPool, commandBufferName.c_str());
+        // isActive
+        m_renderables[type].emplace_back(entity);
     }
+
+    if (type == RendererEntity::MESH_TRANSPARENT)
+    {
+        /*std::sort(*/
+        /*    m_renderables[type].begin(),*/
+        /*    m_renderables[type].end(),*/
+        /*    [&](const auto& a, const auto& b) { return true; });*/
+    }
+
+    // mutex lock
 }
 
-void Renderer::InitDrawObjects(std::uint32_t width, std::uint32_t height)
+void Renderer::SetCameraProjection(const Math::Matrix4x4f& viewProjection)
 {
-    VkExtent3D drawImageExtent{
-        .width = width,
-        .height = height,
-        .depth = 1,
-    };
-
-    drawImage = Image(
-        ImageType::Texture2D,
-        drawImageExtent,
-        VK_FORMAT_R16G16B16A16_SFLOAT,
-        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT |
-            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        "Image Color Draw");
-
-    depthImage = Image(
-        ImageType::Texture2D,
-        drawImageExtent,
-        VK_FORMAT_D32_SFLOAT,
-        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        "Image Depth Draw");
+    m_frameDataBuffer.Update(&viewProjection, sizeof(Math::Matrix4x4f));
 }
 
-void Renderer::ResizeDrawObjects()
+void Renderer::ResizeSwapchain()
 {
     VkContext::GetDevice().Wait();
-    m_swapchain->Resize(m_window.GetWidth(), m_window.GetHeight());
+    m_swapchain.Resize(m_window.GetWidth(), m_window.GetHeight());
+
     // drawImage.Destroy();
     // depthImage.Destroy();
     //
     // InitDrawObjects({ m_window.GetWidth(), m_window.GetHeight() });
 }
 
-void Renderer::InitDescriptors()
+void Renderer::InitializeRenderTargets()
 {
-    sceneDataDescriptorSetLayout = DescriptorSetLayout(
-        { Descriptor(
-            nullptr,
-            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-            0) },
-        "DesciptorSetLayout Scene");
-}
+#define renderTarget(type) m_renderTargets[static_cast<std::uint32_t>(type)]
 
-void Renderer::DrawCompute()
-{
-    auto& cmd{ CurrentFrame().mainCommandBuffer };
-
-    cmd.BindPipeline(*computeEffect.pipeline);
-
-    cmd.BindDescriptorSets(
-        _drawImageDescriptors.GetHandle(),
-        *computeEffect.pipeline);
-
-    cmd.PushConstants(
-        computeEffect.pipeline->GetLayout(),
-        VK_SHADER_STAGE_COMPUTE_BIT,
-        0,
-        computeEffect.data);
-
-    // 16x16 workgroup size so we need to divide by it
-    cmd.Dispatch(
-        static_cast<std::uint32_t>(std::ceil(drawExtent.width / 16.0)),
-        static_cast<std::uint32_t>(std::ceil(drawExtent.height / 16.0)),
-        1);
-}
-
-void Renderer::InitCompute()
-{
-    const std::vector<VkDescriptorPoolSize> poolSizes{
-        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10 }
+    VkExtent3D renderOutputExtent{
+        .width = m_window.GetWidth(),
+        .height = m_window.GetHeight(),
+        .depth = 1,
     };
 
-    computeDescriptorAllocator = DescriptorPool(10, poolSizes);
-    drawImageDescriptorLayout = DescriptorSetLayout(
-        {
-            Descriptor(
-                &drawImage,
-                VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                VK_SHADER_STAGE_COMPUTE_BIT,
-                0),
-        },
-        "DesciptorSetLayout Compute");
+    renderTarget(RenderTargets::RENDER_OUTPUT_COLOR) = Image(
+        ImageType::Texture2D,
+        renderOutputExtent,
+        VK_FORMAT_R16G16B16A16_SFLOAT,
+        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+            VK_IMAGE_USAGE_STORAGE_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        "Image_Render_Output_Color_Frame_");
 
-    _drawImageDescriptors = DescriptorSet(
-        {},
-        drawImageDescriptorLayout,
-        computeDescriptorAllocator);
+    renderTarget(RenderTargets::RENDER_OUTPUT_DEPTH) = Image(
+        ImageType::Texture2D,
+        renderOutputExtent,
+        VK_FORMAT_D32_SFLOAT,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        "Image_Render_Output_Depth_Frame_");
+}
 
-    _drawImageDescriptors.Update({
+void Renderer::InitializeDescriptors()
+{
+    std::vector<VkDescriptorPoolSize> poolSizes{
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
+    };
+
+    m_descriptorPool = DescriptorPool(1, poolSizes);
+
+    m_frameDataSetLayout = DescriptorSetLayout({
         Descriptor(
-            &drawImage,
-            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            VK_SHADER_STAGE_COMPUTE_BIT,
-            0,
-            VK_IMAGE_LAYOUT_GENERAL),
-    });
-
-    std::vector<Shader> shaders{};
-
-    shaders.emplace_back(Shader(
-        "../engine/shaders/gradient_color.comp.spv",
-        VK_SHADER_STAGE_COMPUTE_BIT));
-
-    computeEffect.data = {};
-    computeEffect.data.data1 = Vector4f(1, 0, 0, 1);
-    computeEffect.data.data2 = Vector4f(0, 0, 1, 1);
-
-    PipelineState state(
-        std::move(shaders),
-        RasterizationState::Default,
-        DepthStencilState::Enabled,
-        BlendState::AlphaBlending,
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-
-    std::vector<DescriptorSetLayout> layout;
-
-    computeEffect.pipeline = std::make_unique<Pipeline>(Pipeline(
-        state,
-        { &drawImageDescriptorLayout },
-        {
-            PushConstants(
-                VK_SHADER_STAGE_COMPUTE_BIT,
-                0,
-                sizeof(ComputePushConstants)),
-        },
-        "Pipeline Compute"));
-}
-
-void Renderer::InitMesh()
-{
-    testMeshes =
-        loadGltfMeshes(this, "D:\\Code\\Zeus\\assets\\basicmesh.glb").value();
-
-    std::vector<Shader> shaders{};
-    shaders.emplace_back(
-        Shader("../engine/shaders/basic.vert.spv", VK_SHADER_STAGE_VERTEX_BIT));
-    shaders.emplace_back(Shader(
-        "../engine/shaders/basic.frag.spv",
-        VK_SHADER_STAGE_FRAGMENT_BIT));
-
-    PipelineState state(
-        std::move(shaders), //{ vertShader, fragShader },
-        RasterizationState::Default,
-        DepthStencilState::Enabled,
-        BlendState::AlphaBlending,
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-        { drawImage.GetFormat() },
-        depthImage.GetFormat());
-
-    _meshPipeline = std::make_unique<Pipeline>(Pipeline(
-        state,
-        {},
-        { PushConstants(
+            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             VK_SHADER_STAGE_VERTEX_BIT,
-            0,
-            sizeof(MeshPushConstants)) },
-        "Pipeline Mesh"));
-
-    std::array<Vertex, 4> rect_vertices;
-
-    rect_vertices[0].position = { 0.5, -0.5, 0 };
-    rect_vertices[1].position = { 0.5, 0.5, 0 };
-    rect_vertices[2].position = { -0.5, -0.5, 0 };
-    rect_vertices[3].position = { -0.5, 0.5, 0 };
-
-    rect_vertices[0].color = { 0, 0, 0, 1 };
-    rect_vertices[1].color = { 0.5, 0.5, 0.5, 1 };
-    rect_vertices[2].color = { 1, 0, 0, 1 };
-    rect_vertices[3].color = { 0, 1, 0, 1 };
-
-    std::array<uint32_t, 6> rect_indices;
-
-    rect_indices[0] = 0;
-    rect_indices[1] = 1;
-    rect_indices[2] = 2;
-
-    rect_indices[3] = 2;
-    rect_indices[4] = 1;
-    rect_indices[5] = 3;
-
-    rectangle = UploadMesh(rect_vertices, rect_indices);
+            0),
+    });
 }
 
-void Renderer::DrawTriangle()
+void Renderer::InitializeShaders()
 {
-    auto& cmd{ CurrentFrame().mainCommandBuffer };
-    // InputManager::handleKeyboard();
-    // InputManager::camera->Update();
-    // transitionImageLayout(
-    //     m_renderer.CurrentFrame().mainCommandBuffer,
-    //     m_renderer.drawImage.image,
-    //     m_renderer.drawImage.imageFormat,
-    //     VK_IMAGE_LAYOUT_GENERAL,
-    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+#define shader(type) m_shaders[static_cast<std::uint32_t>(type)]
 
-    VkRenderingAttachmentInfo colorAttachmentInfo =
-        createColorAttachmentInfo(drawImage.GetView(), VK_IMAGE_LAYOUT_GENERAL);
+    shader(ShaderModuleTypes::FLAT_COLOR_FRAG) = Shader(
+        "Shader_Fragment_flat_color",
+        std::format("{}/flat_color.frag.spv", ShadersFolderPath).data(),
+        VK_SHADER_STAGE_FRAGMENT_BIT,
+        "main");
 
-    VkRenderingAttachmentInfo depthAttachmentInfo = createDepthAttachmentInfo(
-        depthImage.GetView(),
-        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+    shader(ShaderModuleTypes::LINE_VERT) = Shader(
+        "Shader_Vertex_line",
+        std::format("{}/line.vert.spv", ShadersFolderPath).data(),
+        VK_SHADER_STAGE_VERTEX_BIT,
+        "main",
+        {
+            VertexInput(
+                0,
+                sizeof(Vertex_PositionColor),
+                VK_VERTEX_INPUT_RATE_VERTEX,
+                {
+                    VertexInputAttribute(
+                        0,
+                        0,
+                        offsetof(Vertex_PositionColor, position),
+                        VK_FORMAT_R32G32B32_SFLOAT),
+                    VertexInputAttribute(
+                        1,
+                        0,
+                        offsetof(Vertex_PositionColor, color),
+                        VK_FORMAT_R32G32B32A32_SFLOAT),
+                }),
+        });
 
-    cmd.BeginRendering(
-        drawExtent,
-        1,
-        &colorAttachmentInfo,
-        &depthAttachmentInfo);
+    shader(ShaderModuleTypes::MESH) = Shader(
+        "Shader_Vertex_Mesh",
+        std::format("{}/testMesh.vert.spv", ShadersFolderPath).data(),
+        VK_SHADER_STAGE_VERTEX_BIT,
+        "main");
 
-    cmd.BindPipeline(*_meshPipeline);
+    shader(ShaderModuleTypes::FRAG_MESH) = Shader(
+        "Shader_Fragment_Mesh",
+        std::format("{}/testMesh.frag.spv", ShadersFolderPath).data(),
+        VK_SHADER_STAGE_FRAGMENT_BIT,
+        "main");
+}
+
+void Renderer::InitializePipelines()
+{
+#define pipeline(type) m_pipelines[static_cast<std::uint32_t>(type)]
+
+    pipeline(PipelineTypes::LINES) = new Pipeline(
+        "Pipeline_Lines",
+        Rasterization::Default,
+        DepthStencil::DefaultDisabled,
+        Blending::Disabled,
+        VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+        {
+            &GetShader(ShaderModuleTypes::LINE_VERT),
+            &GetShader(ShaderModuleTypes::FLAT_COLOR_FRAG),
+        },
+        { &m_frameDataSetLayout },
+        {},
+        { VK_FORMAT_R16G16B16A16_SFLOAT },
+        VK_FORMAT_D32_SFLOAT);
+
+    PushConstants meshPushConstant(
+        VK_SHADER_STAGE_VERTEX_BIT,
+        0,
+        sizeof(MeshPushConstants));
+
+    pipeline(PipelineTypes::MESH_OPAQUE) = new Pipeline(
+        "Pipeline_Mesh_Opaque",
+        Rasterization::Default,
+        DepthStencil::DefaultEnabled,
+        Blending::Disabled,
+        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+        {
+            &GetShader(ShaderModuleTypes::MESH),
+            &GetShader(ShaderModuleTypes::FRAG_MESH),
+        },
+        { &m_frameDataSetLayout },
+        { meshPushConstant },
+        { VK_FORMAT_R16G16B16A16_SFLOAT },
+        VK_FORMAT_D32_SFLOAT);
+}
+
+void Renderer::InitializeBuffers()
+{
+    m_linesVertexBuffer = std::make_shared<Buffer>(Buffer(
+        "Buffer_vertex_lines",
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        m_lines.capacity() * sizeof(Vertex_PositionColor),
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        false));
+
+    m_frameDataBuffer = Buffer(
+        "Buffer_frame_data",
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        sizeof(FrameData),
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        true);
+
+    m_frameDataSet = DescriptorSet(m_frameDataSetLayout, m_descriptorPool);
+    m_frameDataSet.Update(
+        {
+            DescriptorBuffer(
+                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                VK_SHADER_STAGE_VERTEX_BIT,
+                0,
+                m_frameDataBuffer.GetHandle(),
+                sizeof(FrameData)),
+        },
+        {});
+}
+
+void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
+{
+    const auto meshes{ m_renderables[RendererEntity::MESH_OPAQUE] };
+    if (meshes.empty())
+        return;
+
+    vkCmdBindPipeline(
+        cmd.GetHandle(),
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        GetPipeline(PipelineTypes::MESH_OPAQUE)->GetHandle());
 
     cmd.SetViewport({
         .x = 0.f,
         .y = 0.f,
-        .width = static_cast<float>(drawExtent.width),
-        .height = static_cast<float>(drawExtent.height),
+        .width = static_cast<float>(renderTarget.GetExtent().width),
+        .height = static_cast<float>(renderTarget.GetExtent().height),
         .minDepth = 0.f,
         .maxDepth = 1.f,
     });
 
     cmd.SetScissor({
         .offset = { .x = 0, .y = 0 },
-        .extent = drawExtent,
+        .extent = { .width = renderTarget.GetExtent().width,
+                    .height = renderTarget.GetExtent().height },
     });
 
-    MeshPushConstants push_constants;
-    push_constants.modelMatrix = identity<float>();
-    // InputManager::camera->GetViewProjection();
-    // push_constants.vertexBufferAddress =
-    //     testMeshes[2]->meshBuffers.vertexBufferAddress;
+    cmd.BindDescriptorSets(
+        m_frameDataSet.GetHandle(),
+        *GetPipeline(PipelineTypes::MESH_OPAQUE));
 
-    push_constants.vertexBufferAddress =
-        testMeshes[2]->meshBuffers.vertexBuffer->GetDeviceAddress();
+    for (const auto& entity : meshes)
+    {
+        MeshPushConstants pushConstants{
+            .model = entity.localMatrix,
+            .vertexBufferAddress =
+                entity.m_mesh->GetVertexBuffer()->GetDeviceAddress(),
+        };
 
-    cmd.PushConstants(
-        _meshPipeline->GetLayout(),
-        VK_SHADER_STAGE_VERTEX_BIT,
-        0,
-        push_constants);
+        cmd.PushConstants(
+            GetPipeline(PipelineTypes::MESH_OPAQUE)->GetLayout(),
+            VK_SHADER_STAGE_VERTEX_BIT,
+            0,
+            pushConstants);
 
-    cmd.BindIndexBuffer(*testMeshes[2]->meshBuffers.indexBuffer);
+        /*cmd.BindVertexBuffers(mesh.m_mesh->m_vertexBuffer);*/
+        cmd.BindIndexBuffer(*entity.m_mesh->GetIndexBuffer());
 
-    cmd.DrawIndexed(
-        testMeshes[2]->surfaces[0].count,
-        testMeshes[2]->surfaces[0].startIndex);
+        /*cmd.Draw((std::uint32_t)mesh.m_mesh->m_vertexBuffer.GetSize(), 0);*/
+        /*cmd.DrawIndexed(static_cast<std::uint32_t>(entity.m_mesh->m_indices.size()));*/
+        cmd.DrawIndexed(entity.m_mesh->GetIndexCount());
+    }
+}
 
-    cmd.EndRendering();
+void Renderer::LinesPass(const CommandBuffer& cmd, const Image& renderTarget)
+{
+    if (!m_lines.empty())
+    {
+        if (m_lines.size() * sizeof(Vertex_PositionColor) >
+            m_linesVertexBuffer->GetSize())
+        {
+            m_linesVertexBuffer = std::make_shared<Buffer>(Buffer(
+                "Buffer_vertex_lines",
+                VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+                    VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                m_lines.capacity() * sizeof(Vertex_PositionColor),
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                false));
+        }
+
+        m_linesVertexBuffer->Update(
+            m_lines.data(),
+            m_lines.size() * sizeof(Vertex_PositionColor));
+
+        vkCmdBindPipeline(
+            cmd.GetHandle(),
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            GetPipeline(PipelineTypes::LINES)->GetHandle());
+
+        cmd.BindDescriptorSets(
+            m_frameDataSet.GetHandle(),
+            *GetPipeline(PipelineTypes::LINES));
+
+        cmd.BindVertexBuffers(*m_linesVertexBuffer);
+
+        cmd.SetViewport({
+            .x = 0.f,
+            .y = 0.f,
+            .width = static_cast<float>(renderTarget.GetExtent().width),
+            .height = static_cast<float>(renderTarget.GetExtent().height),
+            .minDepth = 0.f,
+            .maxDepth = 1.f,
+        });
+
+        cmd.SetScissor({
+            .offset = { .x = 0, .y = 0 },
+            .extent = { .width = renderTarget.GetExtent().width,
+                        .height = renderTarget.GetExtent().height },
+        });
+
+        cmd.Draw(static_cast<std::uint32_t>(m_lines.size()), 0);
+
+        m_lines.clear();
+    }
 }
 }
