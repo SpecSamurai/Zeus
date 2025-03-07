@@ -118,6 +118,8 @@ add_library(Engine
 
     rendering/Material.cpp
     rendering/Material.hpp
+    rendering/Mesh.cpp
+    rendering/Mesh.hpp
     rendering/Renderer.cpp
     rendering/Renderer.hpp
     rendering/Renderer_resources.cpp
