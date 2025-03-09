@@ -6,6 +6,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <cstdint>
+#include <mutex>
 #include <string_view>
 #include <vector>
 
@@ -18,12 +19,12 @@ public:
     ~Mesh();
 
     void GetGeometry(
-        uint32_t indexOffset,
-        uint32_t indexCount,
-        uint32_t vertexOffset,
-        uint32_t vertexCount,
-        std::vector<uint32_t>* indices,
-        std::vector<Vertex>* vertices);
+        std::uint32_t vertexOffset,
+        std::uint32_t vertexCount,
+        std::uint32_t indexOffset,
+        std::uint32_t indexCount,
+        std::vector<Vertex>* outVertices,
+        std::vector<std::uint32_t>* outIndices);
 
     void AddGeometry(
         const std::vector<Vertex>& vertices,
@@ -53,16 +54,8 @@ private:
     Buffer* m_vertexBuffer;
     Buffer* m_indexBuffer;
 
-    // Here or to Renderable
-    // std::uint64_t m_vertexOffset;
-    // std::uint64_t m_vertextCount;
-    // std::uint64_t m_indexOffset;
-    // std::uint64_t m_indexCount;
-
-    // BoundingBox aabb;
-    // ??? Parent weak_ptr
-    // Mutex
-
     std::string_view m_name;
+
+    std::mutex m_mutex;
 };
 }

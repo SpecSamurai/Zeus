@@ -1,10 +1,13 @@
 #include "Mesh.hpp"
 
 #include "rhi/Buffer.hpp"
+#include "rhi/Vertex.hpp"
 
 #include <cassert>
 #include <cstdint>
 #include <format>
+#include <mutex>
+#include <vector>
 
 namespace Zeus
 {
@@ -35,20 +38,40 @@ Mesh::~Mesh()
 }
 
 void Mesh::GetGeometry(
-    std::uint32_t indexOffset,
-    std::uint32_t indexCount,
     std::uint32_t vertexOffset,
     std::uint32_t vertexCount,
-    std::vector<std::uint32_t>* indices,
-    std::vector<Vertex>* vertices)
+    std::uint32_t indexOffset,
+    std::uint32_t indexCount,
+    std::vector<Vertex>* outVertices,
+    std::vector<std::uint32_t>* outIndices)
 {
+    assert(outVertices || outIndices && "Both pointers cannot be null.");
+
+    if (outVertices)
+    {
+        assert(vertexCount && "Vertex count cannot be 0.");
+
+        const auto begin{ m_vertices.begin() + vertexOffset };
+        const auto end{ m_vertices.begin() + vertexOffset + vertexCount };
+        *outVertices = std::vector<Vertex>(begin, end);
+    }
+
+    if (outIndices)
+    {
+        assert(indexCount && "Index count cannot be 0.");
+
+        const auto begin{ m_indices.begin() + indexOffset };
+        const auto end{ m_indices.begin() + indexOffset + indexCount };
+        *outIndices = std::vector<std::uint32_t>(begin, end);
+    }
 }
 
 void Mesh::AddGeometry(
     const std::vector<Vertex>& vertices,
     const std::vector<std::uint32_t>& indices)
 {
-    // mutex
+    std::lock_guard lock(m_mutex);
+
     m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
     m_indices.insert(m_indices.end(), indices.begin(), indices.end());
 }
