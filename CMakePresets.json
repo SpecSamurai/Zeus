@@ -8,6 +8,8 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_FLAGS": "-fcolor-diagnostics -fansi-escape-codes",
+                "CMAKE_CXX_FLAGS": "-fcolor-diagnostics -fansi-escape-codes",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "CXX_DEBUG_COMPILE_FLAGS": "-Wall;-Wextra;-Wconversion;-pedantic;-pedantic-errors",
                 "CXX_RELEASE_COMPILE_FLAGS": "-Werror;-Wall;-Wextra;-Wconversion;-pedantic;-pedantic-errors"
