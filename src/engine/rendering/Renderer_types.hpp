@@ -12,16 +12,17 @@ enum class RendererEntity : std::uint8_t
 {
     MESH_OPAQUE,
     MESH_TRANSPARENT,
+    COUNT
 };
 
-enum class RenderTargets : std::uint8_t
+enum class RenderTarget : std::uint8_t
 {
     RENDER_OUTPUT_COLOR,
     RENDER_OUTPUT_DEPTH,
     COUNT
 };
 
-enum class ShaderModuleTypes : std::uint8_t
+enum class ShaderType : std::uint8_t
 {
     LINE_VERT,
     FLAT_COLOR_FRAG,
@@ -30,7 +31,7 @@ enum class ShaderModuleTypes : std::uint8_t
     COUNT
 };
 
-enum class PipelineTypes : std::uint8_t
+enum class PipelineType : std::uint8_t
 {
     LINES,
     MESH_OPAQUE,
@@ -38,7 +39,14 @@ enum class PipelineTypes : std::uint8_t
     COUNT
 };
 
-enum class TextureTypes : std::uint8_t
+enum class SamplerType : std::uint8_t
+{
+    NEAREST_CLAMP_EDGE,
+    LINEAR_CLAMP_EDGE,
+    COUNT
+};
+
+enum class TextureType : std::uint8_t
 {
     COLOR,
     ROUGHNESS,
@@ -50,7 +58,7 @@ enum class TextureTypes : std::uint8_t
     COUNT
 };
 
-enum class MaterialProperties : std::uint8_t
+enum class MaterialProperty : std::uint8_t
 {
     ROUGHNESS,
     METALNESS,
