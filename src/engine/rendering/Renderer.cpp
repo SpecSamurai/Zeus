@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <format>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 namespace Zeus
@@ -60,6 +61,7 @@ void Renderer::Initialize()
     InitializeDescriptors();
     InitializeShaders();
     InitializePipelines();
+    InitializeSamplers();
     InitializeBuffers();
 
     InitializeDefaultResources();
@@ -76,9 +78,14 @@ void Renderer::Destroy()
     m_frameDataBuffer.Destroy();
     m_linesVertexBuffer->Destroy();
 
+    for (std::uint32_t i{ 0 }; i < m_samplers.size(); ++i)
+    {
+        m_samplers[i].Destroy();
+    }
+
     for (std::uint32_t i{ 0 }; i < m_pipelines.size(); ++i)
     {
-        m_pipelines[i]->Destroy();
+        m_pipelines[i].Destroy();
     }
 
     for (std::uint32_t i{ 0 }; i < m_shaders.size(); ++i)
@@ -118,9 +125,9 @@ void Renderer::Update()
     // };
 
     auto& renderOutputColor{ GetRenderTarget(
-        RenderTargets::RENDER_OUTPUT_COLOR) };
+        RenderTarget::RENDER_OUTPUT_COLOR) };
     auto& renderOutputDepth{ GetRenderTarget(
-        RenderTargets::RENDER_OUTPUT_DEPTH) };
+        RenderTarget::RENDER_OUTPUT_DEPTH) };
 
     auto& cmd{ CurrentFrame().graphicsCommandBuffer };
     cmd.Reset();
@@ -249,19 +256,24 @@ void Renderer::DrawRectangle(
     DrawLine(bottomLeft, topLeft, color, color);
 }
 
-const Image& Renderer::GetRenderTarget(RenderTargets type) const
+const Image& Renderer::GetRenderTarget(RenderTarget type) const
 {
     return m_renderTargets[static_cast<std::uint32_t>(type)];
 }
 
-const Shader& Renderer::GetShader(ShaderModuleTypes type) const
+const Shader& Renderer::GetShader(ShaderType type) const
 {
     return m_shaders[static_cast<std::uint32_t>(type)];
 }
 
-const Pipeline* Renderer::GetPipeline(PipelineTypes type) const
+const Pipeline& Renderer::GetPipeline(PipelineType type) const
 {
     return m_pipelines[static_cast<std::uint32_t>(type)];
+}
+
+const Sampler& Renderer::GetSampler(SamplerType type) const
+{
+    return m_samplers[static_cast<std::uint32_t>(type)];
 }
 
 void Renderer::SetEntities(
@@ -269,12 +281,12 @@ void Renderer::SetEntities(
     const std::vector<Renderable>& renderables)
 {
     // mutex lock
-    m_renderables[type].clear();
+    GetEntities(type).clear();
 
     for (const auto& entity : renderables)
     {
         // isActive
-        m_renderables[type].emplace_back(entity);
+        GetEntities(type).emplace_back(entity);
     }
 
     if (type == RendererEntity::MESH_TRANSPARENT)
@@ -314,7 +326,7 @@ void Renderer::InitializeRenderTargets()
         .depth = 1,
     };
 
-    renderTarget(RenderTargets::RENDER_OUTPUT_COLOR) = Image(
+    renderTarget(RenderTarget::RENDER_OUTPUT_COLOR) = Image(
         ImageType::Texture2D,
         renderOutputExtent,
         VK_FORMAT_R16G16B16A16_SFLOAT,
@@ -323,7 +335,7 @@ void Renderer::InitializeRenderTargets()
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         "Image_Render_Output_Color_Frame_");
 
-    renderTarget(RenderTargets::RENDER_OUTPUT_DEPTH) = Image(
+    renderTarget(RenderTarget::RENDER_OUTPUT_DEPTH) = Image(
         ImageType::Texture2D,
         renderOutputExtent,
         VK_FORMAT_D32_SFLOAT,
@@ -350,17 +362,19 @@ void Renderer::InitializeDescriptors()
 
 void Renderer::InitializeShaders()
 {
+    constexpr std::string_view SHADERS_FOLDER_PATH{ "../engine/shaders" };
+
 #define shader(type) m_shaders[static_cast<std::uint32_t>(type)]
 
-    shader(ShaderModuleTypes::FLAT_COLOR_FRAG) = Shader(
+    shader(ShaderType::FLAT_COLOR_FRAG) = Shader(
         "Shader_Fragment_flat_color",
-        std::format("{}/flat_color.frag.spv", ShadersFolderPath).data(),
+        std::format("{}/flat_color.frag.spv", SHADERS_FOLDER_PATH).data(),
         VK_SHADER_STAGE_FRAGMENT_BIT,
         "main");
 
-    shader(ShaderModuleTypes::LINE_VERT) = Shader(
+    shader(ShaderType::LINE_VERT) = Shader(
         "Shader_Vertex_line",
-        std::format("{}/line.vert.spv", ShadersFolderPath).data(),
+        std::format("{}/line.vert.spv", SHADERS_FOLDER_PATH).data(),
         VK_SHADER_STAGE_VERTEX_BIT,
         "main",
         {
@@ -382,15 +396,15 @@ void Renderer::InitializeShaders()
                 }),
         });
 
-    shader(ShaderModuleTypes::MESH) = Shader(
+    shader(ShaderType::MESH) = Shader(
         "Shader_Vertex_Mesh",
-        std::format("{}/testMesh.vert.spv", ShadersFolderPath).data(),
+        std::format("{}/mesh.vert.spv", SHADERS_FOLDER_PATH).data(),
         VK_SHADER_STAGE_VERTEX_BIT,
         "main");
 
-    shader(ShaderModuleTypes::FRAG_MESH) = Shader(
+    shader(ShaderType::FRAG_MESH) = Shader(
         "Shader_Fragment_Mesh",
-        std::format("{}/testMesh.frag.spv", ShadersFolderPath).data(),
+        std::format("{}/mesh.frag.spv", SHADERS_FOLDER_PATH).data(),
         VK_SHADER_STAGE_FRAGMENT_BIT,
         "main");
 }
@@ -399,15 +413,15 @@ void Renderer::InitializePipelines()
 {
 #define pipeline(type) m_pipelines[static_cast<std::uint32_t>(type)]
 
-    pipeline(PipelineTypes::LINES) = new Pipeline(
+    pipeline(PipelineType::LINES) = Pipeline(
         "Pipeline_Lines",
         Rasterization::Default,
         DepthStencil::DefaultDisabled,
         Blending::Disabled,
         VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
         {
-            &GetShader(ShaderModuleTypes::LINE_VERT),
-            &GetShader(ShaderModuleTypes::FLAT_COLOR_FRAG),
+            &GetShader(ShaderType::LINE_VERT),
+            &GetShader(ShaderType::FLAT_COLOR_FRAG),
         },
         { &m_frameDataSetLayout },
         {},
@@ -419,20 +433,37 @@ void Renderer::InitializePipelines()
         0,
         sizeof(MeshPushConstants));
 
-    pipeline(PipelineTypes::MESH_OPAQUE) = new Pipeline(
+    pipeline(PipelineType::MESH_OPAQUE) = Pipeline(
         "Pipeline_Mesh_Opaque",
         Rasterization::Default,
         DepthStencil::DefaultEnabled,
         Blending::Disabled,
         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
         {
-            &GetShader(ShaderModuleTypes::MESH),
-            &GetShader(ShaderModuleTypes::FRAG_MESH),
+            &GetShader(ShaderType::MESH),
+            &GetShader(ShaderType::FRAG_MESH),
         },
         { &m_frameDataSetLayout },
         { meshPushConstant },
         { VK_FORMAT_R16G16B16A16_SFLOAT },
         VK_FORMAT_D32_SFLOAT);
+}
+
+void Renderer::InitializeSamplers()
+{
+#define sampler(type) m_samplers[static_cast<std::uint32_t>(type)]
+
+    sampler(SamplerType::NEAREST_CLAMP_EDGE) = Sampler(
+        VK_FILTER_NEAREST,
+        VK_FILTER_NEAREST,
+        VK_SAMPLER_MIPMAP_MODE_NEAREST,
+        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+
+    sampler(SamplerType::LINEAR_CLAMP_EDGE) = Sampler(
+        VK_FILTER_LINEAR,
+        VK_FILTER_LINEAR,
+        VK_SAMPLER_MIPMAP_MODE_NEAREST,
+        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
 }
 
 void Renderer::InitializeBuffers()
@@ -467,14 +498,14 @@ void Renderer::InitializeBuffers()
 
 void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
 {
-    const auto meshes{ m_renderables[RendererEntity::MESH_OPAQUE] };
+    const auto meshes{ GetEntities(RendererEntity::MESH_OPAQUE) };
     if (meshes.empty())
         return;
 
     vkCmdBindPipeline(
         cmd.GetHandle(),
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        GetPipeline(PipelineTypes::MESH_OPAQUE)->GetHandle());
+        GetPipeline(PipelineType::MESH_OPAQUE).GetHandle());
 
     cmd.SetViewport({
         .x = 0.f,
@@ -493,7 +524,7 @@ void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
 
     cmd.BindDescriptorSets(
         m_frameDataSet.GetHandle(),
-        *GetPipeline(PipelineTypes::MESH_OPAQUE));
+        GetPipeline(PipelineType::MESH_OPAQUE));
 
     for (const auto& entity : meshes)
     {
@@ -504,7 +535,7 @@ void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
         };
 
         cmd.PushConstants(
-            GetPipeline(PipelineTypes::MESH_OPAQUE)->GetLayout(),
+            GetPipeline(PipelineType::MESH_OPAQUE).GetLayout(),
             VK_SHADER_STAGE_VERTEX_BIT,
             0,
             pushConstants);
@@ -541,11 +572,11 @@ void Renderer::LinesPass(const CommandBuffer& cmd, const Image& renderTarget)
         vkCmdBindPipeline(
             cmd.GetHandle(),
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            GetPipeline(PipelineTypes::LINES)->GetHandle());
+            GetPipeline(PipelineType::LINES).GetHandle());
 
         cmd.BindDescriptorSets(
             m_frameDataSet.GetHandle(),
-            *GetPipeline(PipelineTypes::LINES));
+            GetPipeline(PipelineType::LINES));
 
         cmd.BindVertexBuffers(*m_linesVertexBuffer);
 
@@ -568,5 +599,10 @@ void Renderer::LinesPass(const CommandBuffer& cmd, const Image& renderTarget)
 
         m_lines.clear();
     }
+}
+
+std::vector<Renderable>& Renderer::GetEntities(RendererEntity entity)
+{
+    return m_renderables[static_cast<std::uint32_t>(entity)];
 }
 }

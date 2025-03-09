@@ -15,7 +15,6 @@ namespace Zeus
 void InitializeDefaultResources()
 {
     Textures::InitializeTextures();
-    Samplers::InitializeSamplers();
 }
 
 void DestroyDefaultResources()
@@ -23,9 +22,6 @@ void DestroyDefaultResources()
     Textures::Black.Destroy();
     Textures::White.Destroy();
     Textures::DebugCheckerboard.Destroy();
-
-    Samplers::DefaultNearest.Destroy();
-    Samplers::DefaultLinear.Destroy();
 }
 
 void Textures::InitializeTextures()
@@ -68,11 +64,5 @@ void Textures::InitializeTextures()
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         "Image Debug Checkerboard");
     DebugCheckerboard.Update(pixels.data(), sizeof(pixels), 0);
-}
-
-void Samplers::InitializeSamplers()
-{
-    DefaultNearest = Sampler(VK_FILTER_NEAREST, VK_FILTER_NEAREST);
-    DefaultLinear = Sampler(VK_FILTER_LINEAR, VK_FILTER_LINEAR);
 }
 }

@@ -4,12 +4,9 @@
 #include "rhi/DepthStencilState.hpp"
 #include "rhi/Image.hpp"
 #include "rhi/RasterizationState.hpp"
-#include "rhi/Sampler.hpp"
 
 namespace Zeus
 {
-inline const std::string ShadersFolderPath{ "../engine/shaders" };
-
 void InitializeDefaultResources();
 void DestroyDefaultResources();
 
@@ -20,14 +17,6 @@ void InitializeTextures();
 inline Image Black;
 inline Image White;
 inline Image DebugCheckerboard;
-}
-
-namespace Samplers
-{
-void InitializeSamplers();
-
-inline Sampler DefaultLinear;
-inline Sampler DefaultNearest;
 }
 
 namespace Rasterization

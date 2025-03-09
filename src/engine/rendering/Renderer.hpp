@@ -7,17 +7,17 @@
 #include "rhi/CommandBuffer.hpp"
 #include "rhi/CommandPool.hpp"
 #include "rhi/DescriptorSet.hpp"
+#include "rhi/Sampler.hpp"
 #include "rhi/Swapchain.hpp"
 #include "rhi/Vertex.hpp"
 #include "window/Window.hpp"
 
-#include <memory>
-#include <unordered_map>
-#include <vector>
 #include <vulkan/vulkan_core.h>
 
 #include <array>
 #include <cstdint>
+#include <memory>
+#include <vector>
 
 namespace Zeus
 {
@@ -49,9 +49,10 @@ public:
         const Math::Vector3f& bottomLeft,
         const Math::Color& color);
 
-    const Image& GetRenderTarget(RenderTargets type) const;
-    const Shader& GetShader(ShaderModuleTypes type) const;
-    const Pipeline* GetPipeline(PipelineTypes type) const;
+    const Image& GetRenderTarget(RenderTarget type) const;
+    const Shader& GetShader(ShaderType type) const;
+    const Pipeline& GetPipeline(PipelineType type) const;
+    const Sampler& GetSampler(SamplerType type) const;
 
     void SetEntities(
         RendererEntity type,
@@ -82,13 +83,16 @@ private:
     void InitializeDescriptors();
     void InitializeShaders();
     void InitializePipelines();
+    void InitializeSamplers();
     void InitializeBuffers();
 
     void DrawEntities(const CommandBuffer& cmd, const Image& renderTarget);
     void LinesPass(const CommandBuffer& cmd, const Image& renderTarget);
 
+    std::vector<Renderable>& GetEntities(RendererEntity entity);
+
 public:
-    static constexpr std::int32_t FRAMES_IN_FLIGHT{ 2 };
+    static constexpr std::uint32_t FRAMES_IN_FLIGHT{ 2 };
     static constexpr std::uint32_t LINES_BUFFER_BASE_SIZE{ 32768 };
 
 public:
@@ -99,18 +103,23 @@ public:
     DescriptorPool m_descriptorPool;
 
     // turn it into per frame resoruce
-    std::array<Image, static_cast<std::uint32_t>(RenderTargets::COUNT)>
+    std::array<Image, static_cast<std::uint32_t>(RenderTarget::COUNT)>
         m_renderTargets;
-    std::array<Shader, static_cast<std::uint32_t>(ShaderModuleTypes::COUNT)>
-        m_shaders;
-    std::array<Pipeline*, static_cast<std::uint32_t>(PipelineTypes::COUNT)>
+
+    std::array<Shader, static_cast<std::uint32_t>(ShaderType::COUNT)> m_shaders;
+    std::array<Pipeline, static_cast<std::uint32_t>(PipelineType::COUNT)>
         m_pipelines;
+    std::array<Sampler, static_cast<std::uint32_t>(SamplerType::COUNT)>
+        m_samplers;
 
     std::shared_ptr<Buffer> m_linesVertexBuffer;
     std::uint64_t m_linesIndex{ 0 };
     std::vector<Vertex_PositionColor> m_lines;
 
-    std::unordered_map<RendererEntity, std::vector<Renderable>> m_renderables;
+    std::array<
+        std::vector<Renderable>,
+        static_cast<std::uint32_t>(RendererEntity::COUNT)>
+        m_renderables;
 
     FrameData m_frameData;
     DescriptorSetLayout m_frameDataSetLayout;
