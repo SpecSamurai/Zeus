@@ -14,21 +14,21 @@ public:
     Material();
 
     void SetTexture(
-        const TextureTypes type,
+        const TextureType type,
         Image* texture,
         const std::uint8_t slot = 0);
-    Image* GetTexture(const TextureTypes type, const std::uint8_t slot = 0);
-    bool HasTexture(const TextureTypes type);
+    Image* GetTexture(const TextureType type, const std::uint8_t slot = 0);
+    bool HasTexture(const TextureType type);
 
-    void SetProperty(const MaterialProperties property, const float value);
-    float GetProperty(const MaterialProperties property);
+    void SetProperty(const MaterialProperty property, const float value);
+    float GetProperty(const MaterialProperty property);
 
     void SetIndex(const std::uint32_t index);
     std::uint32_t GetIndex() const;
 
 private:
     std::uint32_t GetTextureIndex(
-        const TextureTypes type,
+        const TextureType type,
         const std::uint8_t slot) const;
 
 private:
@@ -36,11 +36,10 @@ private:
 
     std::array<
         Image*,
-        static_cast<std::uint32_t>(TextureTypes::COUNT) *
-            SLOTS_PER_TEXTURE_TYPE>
+        static_cast<std::uint32_t>(TextureType::COUNT) * SLOTS_PER_TEXTURE_TYPE>
         m_textures;
 
-    std::array<float, static_cast<std::uint32_t>(MaterialProperties::COUNT)>
+    std::array<float, static_cast<std::uint32_t>(MaterialProperty::COUNT)>
         m_properties;
 
     // BINDLESS

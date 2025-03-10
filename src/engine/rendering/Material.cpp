@@ -10,7 +10,7 @@ Material::Material() : m_textures{ nullptr }, m_properties{ 0.f }, m_index{ 0 }
 }
 
 void Material::SetTexture(
-    const TextureTypes type,
+    const TextureType type,
     Image* texture,
     const std::uint8_t slot)
 {
@@ -19,14 +19,14 @@ void Material::SetTexture(
     m_textures[index] = texture;
 }
 
-Image* Material::GetTexture(const TextureTypes type, const std::uint8_t slot)
+Image* Material::GetTexture(const TextureType type, const std::uint8_t slot)
 {
     std::uint32_t index{ GetTextureIndex(type, slot) };
 
     return m_textures[index];
 }
 
-bool Material::HasTexture(const TextureTypes type)
+bool Material::HasTexture(const TextureType type)
 {
     for (std::uint8_t slot{ 0 }; slot < SLOTS_PER_TEXTURE_TYPE; ++slot)
     {
@@ -37,12 +37,12 @@ bool Material::HasTexture(const TextureTypes type)
     return false;
 }
 
-void Material::SetProperty(const MaterialProperties property, const float value)
+void Material::SetProperty(const MaterialProperty property, const float value)
 {
     m_properties[static_cast<std::uint8_t>(property)] = value;
 }
 
-float Material::GetProperty(const MaterialProperties property)
+float Material::GetProperty(const MaterialProperty property)
 {
     return m_properties[static_cast<std::uint8_t>(property)];
 }
@@ -58,7 +58,7 @@ std::uint32_t Material::GetIndex() const
 }
 
 std::uint32_t Material::GetTextureIndex(
-    const TextureTypes type,
+    const TextureType type,
     const std::uint8_t slot) const
 {
     assert(slot < SLOTS_PER_TEXTURE_TYPE && "Invalid slot");
