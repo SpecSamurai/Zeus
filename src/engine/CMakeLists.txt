@@ -25,7 +25,7 @@ FetchContent_MakeAvailable(fastgltf)
 
 set_target_properties(fastgltf PROPERTIES FOLDER "Libraries")
 
-add_library(Engine
+add_library(Engine STATIC
     application/Application.cpp
     application/Application.hpp
     application/CommandLineArgs.cpp
