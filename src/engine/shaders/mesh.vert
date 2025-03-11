@@ -7,6 +7,7 @@
 layout(location = 0) out vec3 outPosition;
 layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec4 outColor;
+layout(location = 3) out vec2 outUV;
 
 struct Vertex {
     vec3 position;
@@ -31,14 +32,11 @@ void main()
     Vertex vertex = pushConstants.vertexBuffer.vertices[gl_VertexIndex];
 
     vec4 worldPosition = pushConstants.model * vec4(vertex.position, 1.0);
+
     outPosition = worldPosition.xyz;
-
-    outNormal = normalize(mat3(transpose(inverse(pushConstants.model))) * vertex.normal);
-
-    float lightValue = max(dot(outNormal, vec3(-1, 0, 0)), 0.1f);
-    vec3 ambient = vertex.color.xyz *  vec3(0.1, 0, 0);
-
-    outColor = vec4(vertex.color.xyz * lightValue * 0.6 + ambient, 1.0f);
+    outNormal = vertex.normal; //normalize(mat3(transpose(inverse(pushConstants.model))) * vertex.normal);
+    outColor = vertex.color / 2;
+    outUV = vec2(vertex.uv_x, vertex.uv_y);
 
     gl_Position = frameData.view_projection * worldPosition;
 }
