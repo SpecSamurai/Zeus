@@ -1,24 +1,26 @@
 #pragma once
 
-#include "rhi/vulkan_memory.hpp"
+#include "core/Object.hpp"
+#include "vulkan/vulkan_memory.hpp"
 
 #include <vulkan/vulkan_core.h>
 
+#include <cassert>
 #include <cstddef>
 #include <string_view>
 
 namespace Zeus
 {
-class Buffer
+class Buffer : public Object
 {
 public:
     Buffer() = default;
     Buffer(
+        std::string_view name,
         VkBufferUsageFlags usage,
         VkDeviceSize size,
         VkMemoryPropertyFlags memoryPropertyFlags,
-        bool mapped = false,
-        std::string_view name = "");
+        bool mapped = false);
 
     Buffer(const Buffer&) = delete;
     Buffer& operator=(const Buffer&) = delete;
@@ -30,9 +32,17 @@ public:
 
     void Destroy();
 
-    void Update(void* data, std::size_t size, std::size_t srcOffset = 0);
+    void Update(const void* data, std::size_t size, std::size_t srcOffset = 0);
 
     void* GetData() const;
+
+    template <typename T>
+    inline T* GetData() const
+    {
+        assert(m_mapped);
+        return reinterpret_cast<T*>(m_info.pMappedData);
+    }
+
     VkBuffer GetHandle() const;
     VmaAllocation GetAllocation() const;
     const VmaAllocationInfo& GetInfo() const;

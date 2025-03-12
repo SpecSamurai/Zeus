@@ -2,7 +2,8 @@
 
 #include "Definitions.hpp"
 #include "VkContext.hpp"
-#include "rhi/vulkan_debug.hpp"
+#include "core/Object.hpp"
+#include "vulkan/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -13,12 +14,13 @@
 namespace Zeus
 {
 Buffer::Buffer(
+    std::string_view name,
     VkBufferUsageFlags usage,
     VkDeviceSize size,
     VkMemoryPropertyFlags memoryPropertyFlags,
-    bool mapped,
-    std::string_view name)
-    : m_usage{ usage },
+    bool mapped)
+    : Object(name),
+      m_usage{ usage },
       m_mapped{ mapped }
 {
     VkBufferCreateInfo createInfo{};
@@ -37,6 +39,7 @@ Buffer::Buffer(
     switch (memoryPropertyFlags)
     {
     case VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT:
+        assert(!m_mapped && "Cannot map VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT");
         allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
         break;
 
@@ -83,7 +86,8 @@ Buffer::Buffer(
 }
 
 Buffer::Buffer(Buffer&& other) noexcept
-    : m_handle{ other.m_handle },
+    : Object(other.m_name),
+      m_handle{ other.m_handle },
       m_allocation{ other.m_allocation },
       m_info{ other.m_info },
       m_deviceAddress{ other.m_deviceAddress },
@@ -105,6 +109,7 @@ Buffer& Buffer::operator=(Buffer&& other)
             Destroy();
         }
 
+        m_name = other.m_name;
         m_handle = other.m_handle;
         m_allocation = other.m_allocation;
         m_info = other.m_info;
@@ -139,7 +144,10 @@ void Buffer::Destroy()
     m_deviceAddress = {};
 }
 
-void Buffer::Update(void* data, std::size_t dataSize, std::size_t dstOffset)
+void Buffer::Update(
+    const void* data,
+    std::size_t dataSize,
+    std::size_t dstOffset)
 {
     assert(m_handle != VK_NULL_HANDLE);
     assert(data != nullptr && "Invalid data");
@@ -157,6 +165,7 @@ void Buffer::Update(void* data, std::size_t dataSize, std::size_t dstOffset)
     else
     {
         Buffer staging(
+            "Buffer_update_staging",
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             dataSize,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
