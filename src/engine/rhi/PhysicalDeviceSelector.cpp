@@ -93,8 +93,8 @@ bool PhysicalDeviceSelector::Validate(const PhysicalDeviceSelectorInfo& info)
              info.extensions.end(),
              VK_KHR_SWAPCHAIN_EXTENSION_NAME) == info.extensions.end()))
     {
-        LOG_ERROR("Present is required but extension is not set. "
-                  "VK_KHR_SWAPCHAIN_EXTENSION_NAME");
+        LOG_ERROR("Present is required but extension is not set. {}",
+                  VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         isValid = false;
     }
 
