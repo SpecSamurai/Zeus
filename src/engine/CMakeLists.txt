@@ -67,10 +67,11 @@ add_library(Engine STATIC
     ecs/ComponentSparseSetIterator.hpp
     ecs/Entity.hpp
     ecs/FamilyId.hpp
+    ecs/Query.hpp
+    ecs/Registry.hpp
     ecs/SparseSet.cpp
     ecs/SparseSet.hpp
     ecs/SparseSetIterator.hpp
-    ecs/Registry.hpp
 
     events/Event.hpp
     events/EventDispatcher.hpp
