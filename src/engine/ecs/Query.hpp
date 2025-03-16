@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ecs/ComponentSparseSet.hpp"
 #include "ecs/Entity.hpp"
 #include "ecs/SparseSet.hpp"
 
@@ -8,6 +9,7 @@
 #include <cstdint>
 #include <functional>
 #include <type_traits>
+#include <utility>
 
 namespace Zeus::ECS
 {
@@ -17,6 +19,13 @@ class Query
 public:
     Query(std::array<SparseSet*, sizeof...(Components)> pools)
         : m_pools{ pools },
+          minIndex{ sizeof...(Components) }
+    {
+        Refresh();
+    }
+
+    Query(ComponentSparseSet<Components>*... pool)
+        : m_pools{ pool... },
           minIndex{ sizeof...(Components) }
     {
         Refresh();
@@ -37,18 +46,26 @@ public:
 
     void Each(std::function<void(Components...)>&& function)
     {
-        auto i = m_pools[minIndex]->SparseSet::begin();
-
-        auto e = *i;
-
         for (auto entity : *m_pools[minIndex])
         {
             if (AllOf(entity))
             {
                 /*auto tuple = ;*/
-                function(m_pools[0], 0);
+                Get(function, entity, std::index_sequence_for<Components...>{});
             }
         }
+    }
+
+    template <std::size_t... Index>
+    [[nodiscard]] void Get(
+        std::function<void(Components...)>& function,
+        const Entity entt,
+        std::index_sequence<Index...>) const noexcept
+    {
+        // return std::tuple_cat(storage<Index>()->get_as_tuple(entt)...);
+        /*reinterpret_cast<ComponentSparseSet<Component>>(m_pools[Index])->Get(entt);*/
+
+        function(reinterpret_cast<ComponentSparseSet<Components>*>(m_pools[Index])->Get(entt)...);
     }
 
 private:
