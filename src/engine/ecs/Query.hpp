@@ -6,9 +6,7 @@
 
 #include <array>
 #include <cstddef>
-#include <cstdint>
 #include <functional>
-#include <type_traits>
 #include <utility>
 
 namespace Zeus::ECS
@@ -72,7 +70,7 @@ private:
     }
 
     template <std::size_t... Index>
-    [[nodiscard]] void Each(
+    void Each(
         std::function<void(Components&...)>&& function,
         const Entity entity,
         std::index_sequence<Index...>) const noexcept

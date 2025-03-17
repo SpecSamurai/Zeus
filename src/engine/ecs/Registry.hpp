@@ -6,7 +6,6 @@
 #include "Query.hpp"
 #include "SparseSet.hpp"
 
-#include <array>
 #include <cstdint>
 #include <tuple>
 #include <unordered_map>
