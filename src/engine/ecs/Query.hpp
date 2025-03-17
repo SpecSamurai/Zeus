@@ -44,28 +44,19 @@ public:
         }
     }
 
-    void Each(std::function<void(Components...)>&& function)
+    void Each(std::function<void(Components&...)>&& function)
     {
         for (auto entity : *m_pools[minIndex])
         {
             if (AllOf(entity))
             {
-                /*auto tuple = ;*/
-                Get(function, entity, std::index_sequence_for<Components...>{});
+                Each(
+                    std::forward<std::function<void(Components & ...)>>(
+                        function),
+                    entity,
+                    std::index_sequence_for<Components...>{});
             }
         }
-    }
-
-    template <std::size_t... Index>
-    [[nodiscard]] void Get(
-        std::function<void(Components...)>& function,
-        const Entity entt,
-        std::index_sequence<Index...>) const noexcept
-    {
-        // return std::tuple_cat(storage<Index>()->get_as_tuple(entt)...);
-        /*reinterpret_cast<ComponentSparseSet<Component>>(m_pools[Index])->Get(entt);*/
-
-        function(reinterpret_cast<ComponentSparseSet<Components>*>(m_pools[Index])->Get(entt)...);
     }
 
 private:
@@ -78,6 +69,17 @@ private:
         }
 
         return true;
+    }
+
+    template <std::size_t... Index>
+    [[nodiscard]] void Each(
+        std::function<void(Components&...)>&& function,
+        const Entity entity,
+        std::index_sequence<Index...>) const noexcept
+    {
+        function(
+            reinterpret_cast<ComponentSparseSet<Components>*>(m_pools[Index])
+                ->Get(entity)...);
     }
 
 private:

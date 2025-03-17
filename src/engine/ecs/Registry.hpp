@@ -3,8 +3,10 @@
 #include "ComponentSparseSet.hpp"
 #include "Entity.hpp"
 #include "FamilyId.hpp"
+#include "Query.hpp"
 #include "SparseSet.hpp"
 
+#include <array>
 #include <cstdint>
 #include <tuple>
 #include <unordered_map>
@@ -109,17 +111,10 @@ public:
     }
 
     template <typename... Components>
-    decltype(auto) Query()
+    decltype(auto) GetQuery()
     {
         static_assert(sizeof...(Components) > 0);
-        if constexpr (sizeof...(Components) == 1u)
-        {
-            return (TryGetPool<Components>()->begin(), ...);
-        }
-        else
-        {
-            return std::make_tuple(TryGetPool<Components>()->begin()...);
-        }
+        return Query<Components...>(TryGetPool<Components>()...);
     }
 
     template <typename... Components>
