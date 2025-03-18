@@ -68,6 +68,7 @@ add_library(Engine STATIC
     ecs/Entity.hpp
     ecs/FamilyId.hpp
     ecs/Query.hpp
+    ecs/QueryIterator.hpp
     ecs/Registry.hpp
     ecs/SparseSet.cpp
     ecs/SparseSet.hpp
