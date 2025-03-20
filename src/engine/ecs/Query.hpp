@@ -15,36 +15,38 @@ template <typename... Components>
 class Query
 {
 public:
+    using iterator = Query<Components...>;
+
     Query(std::array<SparseSet*, sizeof...(Components)> pools)
         : m_pools{ pools },
-          minIndex{ sizeof...(Components) }
+          m_minIndex{ sizeof...(Components) }
     {
         Refresh();
     }
 
     Query(ComponentSparseSet<Components>*... pool)
         : m_pools{ pool... },
-          minIndex{ sizeof...(Components) }
+          m_minIndex{ sizeof...(Components) }
     {
         Refresh();
     }
 
     void Refresh()
     {
-        minIndex = 0;
+        m_minIndex = 0;
 
         for (std::size_t i{ 1 }; i < m_pools.size(); ++i)
         {
-            if (m_pools[i]->Size() < m_pools[minIndex]->Size())
+            if (m_pools[i]->Size() < m_pools[m_minIndex]->Size())
             {
-                minIndex = i;
+                m_minIndex = i;
             }
         }
     }
 
     void Each(std::function<void(Components&...)>&& function)
     {
-        for (auto entity : *m_pools[minIndex])
+        for (auto entity : *m_pools[m_minIndex])
         {
             if (AllOf(entity))
             {
@@ -55,6 +57,16 @@ public:
                     std::index_sequence_for<Components...>{});
             }
         }
+    }
+
+    [[nodiscard]] iterator begin() const noexcept
+    {
+        return iterator(*m_pools[m_minIndex]->begin(), m_pools, m_minIndex);
+    }
+
+    [[nodiscard]] iterator end() const noexcept
+    {
+        return iterator(*(m_pools[m_minIndex]->end() - 1), m_pools, m_minIndex);
     }
 
 private:
@@ -82,6 +94,6 @@ private:
 
 private:
     std::array<SparseSet*, sizeof...(Components)> m_pools;
-    std::size_t minIndex;
+    std::size_t m_minIndex;
 };
 }
