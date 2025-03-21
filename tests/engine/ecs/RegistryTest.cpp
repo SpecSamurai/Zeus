@@ -326,14 +326,17 @@ TEST(RegistryTest, Query_SingleComponent)
     sut.Emplace<AComponent>(entity1, 42);
     sut.Emplace<BComponent>(entity1, 1, "Test");
 
-    auto actual1 = sut.Query<AComponent>();
-    auto actual2 = sut.Query<BComponent>();
+    auto a_query = sut.GetQuery<AComponent>();
+    auto b_query = sut.GetQuery<BComponent>();
 
-    EXPECT_EQ(actual1[0].number, 1);
-    EXPECT_EQ(actual1[1].number, 42);
+    a_query.Each([](AComponent& value) {
+        EXPECT_TRUE(value.number == 1 || value.number == 42);
+    });
 
-    EXPECT_EQ(actual2[0].number, 1);
-    EXPECT_STREQ(actual2[0].string, "Test");
+    b_query.Each([](BComponent& value) {
+        EXPECT_EQ(value.number, 1);
+        EXPECT_STREQ(value.string, "Test");
+    });
 }
 
 TEST(RegistryTest, Query_MultipleComponent)
@@ -346,13 +349,14 @@ TEST(RegistryTest, Query_MultipleComponent)
     sut.Emplace<AComponent>(entity1, 42);
     sut.Emplace<BComponent>(entity1, 1, "Test");
 
-    auto [actual1, actual2] = sut.Query<AComponent, BComponent>();
+    auto actual = sut.GetQuery<AComponent, BComponent>();
 
-    EXPECT_EQ(actual1[0].number, 1);
-    EXPECT_EQ(actual1[1].number, 42);
+    actual.Each([](AComponent& valueA, BComponent& valueB) {
+        EXPECT_EQ(valueA.number, 42);
 
-    EXPECT_EQ(actual2[0].number, 1);
-    EXPECT_STREQ(actual2[0].string, "Test");
+        EXPECT_EQ(valueB.number, 1);
+        EXPECT_STREQ(valueB.string, "Test");
+    });
 }
 
 TEST(RegistryTest, IsValid)

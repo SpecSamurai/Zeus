@@ -24,9 +24,10 @@ add_executable(Tests
     engine/ecs/ComponentSparseSetIteratorTest.cpp
     engine/ecs/ComponentSparseSetTest.cpp
     engine/ecs/FamilyIdTest.cpp
+    engine/ecs/QueryTest.cpp
+    engine/ecs/RegistryTest.cpp
     engine/ecs/SparseSetIteratorTest.cpp
     engine/ecs/SparseSetTest.cpp
-    engine/ecs/RegistryTest.cpp
 
     engine/events/EventDispatcherTest.cpp
     engine/events/EventQueueTest.cpp
