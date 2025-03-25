@@ -110,7 +110,7 @@ public:
     }
 
     template <typename... Components>
-    decltype(auto) GetQuery()
+    decltype(auto) QueryAll()
     {
         static_assert(sizeof...(Components) > 0);
         return Query<Components...>(TryGetPool<Components>()...);

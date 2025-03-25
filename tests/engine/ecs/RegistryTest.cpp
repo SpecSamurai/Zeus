@@ -316,7 +316,7 @@ TEST(RegistryTest, Erase_MultipleComponents)
     EXPECT_FALSE(actual1);
 }
 
-TEST(RegistryTest, Query_SingleComponent)
+TEST(RegistryTest, QueryAll_SingleComponent)
 {
     ECS::Registry sut;
     ECS::Entity entity0{ 0 };
@@ -326,8 +326,8 @@ TEST(RegistryTest, Query_SingleComponent)
     sut.Emplace<AComponent>(entity1, 42);
     sut.Emplace<BComponent>(entity1, 1, "Test");
 
-    auto a_query = sut.GetQuery<AComponent>();
-    auto b_query = sut.GetQuery<BComponent>();
+    auto a_query = sut.QueryAll<AComponent>();
+    auto b_query = sut.QueryAll<BComponent>();
 
     a_query.Each([](AComponent& value) {
         EXPECT_TRUE(value.number == 1 || value.number == 42);
@@ -339,7 +339,7 @@ TEST(RegistryTest, Query_SingleComponent)
     });
 }
 
-TEST(RegistryTest, Query_MultipleComponent)
+TEST(RegistryTest, QueryAll_MultipleComponent)
 {
     ECS::Registry sut;
     ECS::Entity entity0{ 0 };
@@ -349,7 +349,7 @@ TEST(RegistryTest, Query_MultipleComponent)
     sut.Emplace<AComponent>(entity1, 42);
     sut.Emplace<BComponent>(entity1, 1, "Test");
 
-    auto actual = sut.GetQuery<AComponent, BComponent>();
+    auto actual = sut.QueryAll<AComponent, BComponent>();
 
     actual.Each([](AComponent& valueA, BComponent& valueB) {
         EXPECT_EQ(valueA.number, 42);
