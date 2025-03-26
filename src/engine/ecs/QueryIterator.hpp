@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ecs/ComponentSparseSet.hpp"
-#include "ecs/Entity.hpp"
 #include "ecs/SparseSet.hpp"
 
 #include <array>
@@ -14,8 +13,8 @@ template <typename... Components>
 class QueryIterator
 {
 public:
-    QueryIterator(
-        std::array<SparseSet*, sizeof...(Components)> pools,
+    constexpr QueryIterator(
+        const std::array<SparseSet*, sizeof...(Components)>& pools,
         std::size_t minIndex,
         SparseSet::iterator current)
         : m_pools{ pools },
@@ -26,22 +25,18 @@ public:
 
     constexpr QueryIterator& operator++() noexcept
     {
-        ++m_current;
-        return SeekNext(), *this;
+        return ++m_current, SeekNext(), *this;
     }
 
     constexpr QueryIterator operator++(int) noexcept
     {
-        const QueryIterator orig{ *this };
-        return ++(*this), orig;
+        const QueryIterator copy{ *this };
+        return operator++(), copy;
     }
 
-    [[nodiscard]] std::tuple<Components...> operator*() const noexcept
+    [[nodiscard]] constexpr decltype(auto) operator*() const noexcept
     {
-        return std::make_tuple(
-            reinterpret_cast<ComponentSparseSet<Components>*>(
-                m_pools[m_minIndex])
-                ->Get(*m_current)...);
+        return Get(std::index_sequence_for<Components...>{});
     }
 
     constexpr bool operator==(const QueryIterator& other) const noexcept
@@ -50,18 +45,37 @@ public:
     }
 
 private:
+    template <std::size_t... Index>
+    constexpr decltype(auto) Get(std::index_sequence<Index...>) const noexcept
+    {
+        static_assert(sizeof...(Index) > 0);
+
+        if constexpr (sizeof...(Index) == 1)
+            return (
+                reinterpret_cast<ComponentSparseSet<Components>*>(
+                    m_pools[Index])
+                    ->Get(*m_current),
+                ...);
+        else
+            return std::forward_as_tuple(
+                reinterpret_cast<ComponentSparseSet<Components>*>(
+                    m_pools[Index])
+                    ->Get(*m_current)...);
+    }
+
     constexpr void SeekNext() noexcept
     {
-        for (SparseSet::iterator end{}; m_current != end && AllOf(*m_current);
+        for (SparseSet::iterator end{ m_pools[m_minIndex]->end() };
+             m_current != end && !IsValid();
              ++m_current)
             ;
     }
 
-    bool AllOf(Entity entity)
+    constexpr bool IsValid()
     {
         for (std::size_t i{ 0 }; i < m_pools.size(); ++i)
         {
-            if (!m_pools[i]->Contains(entity))
+            if (!m_pools[i]->Contains(*m_current))
                 return false;
         }
 
@@ -69,7 +83,7 @@ private:
     }
 
 private:
-    std::array<SparseSet*, sizeof...(Components)> m_pools;
+    const std::array<SparseSet*, sizeof...(Components)>& m_pools;
     std::size_t m_minIndex;
     SparseSet::iterator m_current;
 };

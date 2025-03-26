@@ -2,6 +2,7 @@
 
 #include "ecs/ComponentSparseSet.hpp"
 #include "ecs/Entity.hpp"
+#include "ecs/QueryIterator.hpp"
 #include "ecs/SparseSet.hpp"
 
 #include <array>
@@ -15,23 +16,16 @@ template <typename... Components>
 class Query
 {
 public:
-    using iterator = Query<Components...>;
+    using iterator = QueryIterator<Components...>;
 
-    Query(std::array<SparseSet*, sizeof...(Components)> pools)
-        : m_pools{ pools },
-          m_minIndex{ sizeof...(Components) }
-    {
-        Refresh();
-    }
-
-    Query(ComponentSparseSet<Components>*... pool)
+    constexpr Query(ComponentSparseSet<Components>*... pool)
         : m_pools{ pool... },
           m_minIndex{ sizeof...(Components) }
     {
         Refresh();
     }
 
-    void Refresh()
+    constexpr void Refresh()
     {
         m_minIndex = 0;
 
@@ -44,7 +38,7 @@ public:
         }
     }
 
-    void Each(std::function<void(Components&...)>&& function)
+    constexpr void Each(std::function<void(Components&...)>&& function)
     {
         for (auto entity : *m_pools[m_minIndex])
         {
@@ -61,16 +55,16 @@ public:
 
     [[nodiscard]] iterator begin() const noexcept
     {
-        return iterator(*m_pools[m_minIndex]->begin(), m_pools, m_minIndex);
+        return iterator(m_pools, m_minIndex, m_pools[m_minIndex]->begin());
     }
 
     [[nodiscard]] iterator end() const noexcept
     {
-        return iterator(*(m_pools[m_minIndex]->end() - 1), m_pools, m_minIndex);
+        return iterator(m_pools, m_minIndex, m_pools[m_minIndex]->end());
     }
 
 private:
-    bool AllOf(Entity entity)
+    constexpr bool AllOf(Entity entity)
     {
         for (std::size_t i{ 0 }; i < m_pools.size(); ++i)
         {
@@ -82,7 +76,7 @@ private:
     }
 
     template <std::size_t... Index>
-    void Each(
+    constexpr void Each(
         std::function<void(Components&...)>&& function,
         const Entity entity,
         std::index_sequence<Index...>) const noexcept
@@ -93,7 +87,7 @@ private:
     }
 
 private:
-    std::array<SparseSet*, sizeof...(Components)> m_pools;
+    const std::array<SparseSet*, sizeof...(Components)> m_pools;
     std::size_t m_minIndex;
 };
 }
