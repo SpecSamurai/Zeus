@@ -1,8 +1,7 @@
 #pragma once
 
-#include "ecs/Registry.hpp"
+#include "core/World.hpp"
 #include "rendering/Renderer.hpp"
-#include "rendering/Renderer2.hpp"
 #include "window/Window.hpp"
 
 namespace Zeus
@@ -14,13 +13,11 @@ public:
     static void Shutdown();
     static void Update();
 
-    static Renderer& GetRenderer();
-    static Renderer2& Renderer();
-    static ECS::Registry& World();
+    static Renderer& Renderer();
+    static World& World();
 
 private:
-    static class Renderer2* s_renderer;
-    static class Renderer* s_rendererOld;
-    static ECS::Registry* s_world;
+    static class Renderer* s_renderer;
+    static class World* s_world;
 };
 }
