@@ -48,9 +48,16 @@ enum class SamplerType : std::uint8_t
 
 enum class TextureType : std::uint8_t
 {
-    COLOR,
+    // Metalness-Roughness
+    BASE_COLOR,
     ROUGHNESS,
     METALNESS,
+
+    // Specular-Glossiness
+    DIFFUSE_COLOR, // Albedo
+    SPECULAR,
+    GLOSSINESS,
+
     AMBIENT_OCCLUSION,
     NORMAL,
     EMISSION,
