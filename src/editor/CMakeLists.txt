@@ -1,6 +1,9 @@
 add_executable(Editor
     EditorApp.cpp
     EditorApp.hpp
+
+    widgets/Demo.hpp
+    widgets/Widget.hpp
 )
 
 target_include_directories(Editor
