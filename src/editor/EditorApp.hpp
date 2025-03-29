@@ -1,13 +1,17 @@
 #pragma once
 
+#include "widgets/Widget.hpp"
+
 #include <application/Application.hpp>
 #include <camera/EditorCamera.hpp>
 #include <camera/FreeflyCamera.hpp>
 #include <events/MouseEvent.hpp>
 #include <events/WindowEvent.hpp>
+#include <rhi/DescriptorPool.hpp>
 #include <window/Window.hpp>
 
 #include <memory>
+#include <vector>
 
 namespace Zeus
 {
@@ -25,7 +29,12 @@ private:
 
     void HandleKeyboard();
 
+    void InitImGui();
+
 private:
+    std::vector<std::shared_ptr<Widget>> m_widgets{};
+    DescriptorPool m_ImGuiDescriptorPool;
+
     inline static std::unique_ptr<EditorCamera> camera =
         std::make_unique<FreeflyCamera>(FreeflyCamera(1440.f / 1080.f));
 
