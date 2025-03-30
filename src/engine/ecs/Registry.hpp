@@ -23,8 +23,17 @@ public:
 
     Entity Create()
     {
-        Entity newEntity{ lastEntity++ };
+        Entity newEntity{ m_lastEntity++ };
         m_entities.Push(newEntity);
+        return newEntity;
+    }
+
+    template <typename Component, typename... Args>
+    Entity Create(Args&&... args)
+    {
+        Entity newEntity{ Create() };
+        Emplace<Component>(newEntity, std::forward<Args>(args)...);
+
         return newEntity;
     }
 
@@ -61,10 +70,9 @@ public:
             m_pools[family] = new ComponentSparseSet<Component>();
         }
 
-        auto pool{ static_cast<ComponentSparseSet<Component>*>(
-            m_pools[family]) };
-
-        return pool->Emplace(entity, std::forward<Args>(args)...);
+        return GetPool<Component>()->Emplace(
+            entity,
+            std::forward<Args>(args)...);
     }
 
     template <typename Component>
@@ -83,9 +91,7 @@ public:
         static_assert(sizeof...(Components) > 0);
         if constexpr (sizeof...(Components) == 1u)
         {
-            auto* pool{ GetPool<Components...>() };
-            if (pool)
-                pool->Pop(entity);
+            GetPool<Components...>()->Pop(entity);
         }
         else
         {
@@ -126,8 +132,7 @@ public:
         static_assert(sizeof...(Components) > 0);
         if constexpr (sizeof...(Components) == 1u)
         {
-            auto* pool{ TryGetPool<Components...>() };
-            return pool && pool->Contains(entity);
+            return GetPool<Components...>()->Contains(entity);
         }
         else
         {
@@ -142,27 +147,20 @@ public:
 
 private:
     template <typename Component>
-    ComponentSparseSet<Component>* TryGetPool()
-    {
-        Family family{ FamilyId::Type<Component>() };
-        return m_pools.contains(family)
-                   ? static_cast<ComponentSparseSet<Component>*>(
-                         m_pools[family])
-                   : nullptr;
-    }
-
-    template <typename Component>
     ComponentSparseSet<Component>* GetPool()
     {
         Family family{ FamilyId::Type<Component>() };
 
-        assert(m_pools.contains(family) && "Component is not registered.");
+        if (!m_pools.contains(family))
+        {
+            m_pools[family] = new ComponentSparseSet<Component>();
+        }
 
         return static_cast<ComponentSparseSet<Component>*>(m_pools[family]);
     }
 
 private:
-    Entity lastEntity{};
+    Entity m_lastEntity{};
 
     std::unordered_map<std::uint32_t, SparseSet*> m_pools;
     SparseSet m_entities;

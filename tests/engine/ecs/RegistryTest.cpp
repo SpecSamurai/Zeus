@@ -32,6 +32,22 @@ TEST(RegistryTest, Create_EmptyEntity_IsValid)
     EXPECT_FALSE(contains2);
 }
 
+TEST(RegistryTest, Create_NewEntity_WithComponent)
+{
+    ECS::Registry sut;
+    ECS::Entity entity0 = sut.Create();
+
+    ECS::Entity actual = sut.Create<AComponent>(42);
+
+    auto contains0 = sut.IsValid(entity0);
+    auto contains1 = sut.IsValid(actual);
+    auto& component = sut.Get<AComponent>(actual);
+
+    EXPECT_TRUE(contains0);
+    EXPECT_TRUE(contains1);
+    EXPECT_EQ(component.number, 42);
+}
+
 TEST(RegistryTest, Destroy_EmptyEntity_IsValid)
 {
     ECS::Registry sut;
