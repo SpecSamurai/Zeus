@@ -108,7 +108,7 @@ void UserInterface::Update()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.f, 2.f));
 
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
-
+    ImGui::ShowDemoWindow();
     for (auto& widget : m_widgets)
     {
         if (widget->IsVisible())

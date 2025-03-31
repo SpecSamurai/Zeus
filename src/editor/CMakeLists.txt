@@ -1,8 +1,16 @@
 add_executable(Editor
     EditorApp.cpp
     EditorApp.hpp
+    UserInterface.cpp
+    UserInterface.hpp
 
     widgets/Demo.hpp
+    widgets/MenuBar.cpp
+    widgets/MenuBar.hpp
+    widgets/Profiler.cpp
+    widgets/Profiler.hpp
+    widgets/Viewport.cpp
+    widgets/Viewport.hpp
     widgets/Widget.hpp
 )
 

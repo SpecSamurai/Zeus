@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/Widget.hpp"
+#include "UserInterface.hpp"
 
 #include <application/Application.hpp>
 #include <camera/EditorCamera.hpp>
@@ -11,7 +11,6 @@
 #include <window/Window.hpp>
 
 #include <memory>
-#include <vector>
 
 namespace Zeus
 {
@@ -32,8 +31,7 @@ private:
     void InitImGui();
 
 private:
-    std::vector<std::shared_ptr<Widget>> m_widgets{};
-    DescriptorPool m_ImGuiDescriptorPool;
+    UserInterface m_userInterface;
 
     inline static std::unique_ptr<EditorCamera> camera =
         std::make_unique<FreeflyCamera>(FreeflyCamera(1440.f / 1080.f));

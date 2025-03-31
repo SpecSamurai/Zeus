@@ -1,15 +1,16 @@
 #include "EditorApp.hpp"
 
-#include "widgets/Demo.hpp"
-
 #include <application/Application.hpp>
 #include <application/entry_point.hpp>
 #include <assets/AssetsManager.hpp>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_vulkan.h>
 #include <components/Renderable.hpp>
 #include <core/Engine.hpp>
 #include <events/Event.hpp>
 #include <events/MouseEvent.hpp>
 #include <events/WindowEvent.hpp>
+#include <imgui.h>
 #include <input/Input.hpp>
 #include <input/KeyCode.hpp>
 #include <logging/logger.hpp>
@@ -19,14 +20,9 @@
 #include <rendering/Renderer_types.hpp>
 #include <rhi/VkContext.hpp>
 #include <rhi/vulkan/vulkan_dynamic_rendering.hpp>
-
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_vulkan.h>
-#include <imgui.h>
 #include <vulkan/vulkan_core.h>
 
 #include <memory>
-#include <vector>
 
 namespace Zeus
 {
@@ -43,8 +39,7 @@ Application* CreateApplication(CommandLineArgs args)
 }
 
 EditorApp::EditorApp(const ApplicationSpecification& specification)
-    : Application(specification),
-      m_widgets{ std::make_shared<Demo>() }
+    : Application(specification)
 {
 }
 
@@ -60,7 +55,7 @@ void EditorApp::Initialize()
             return OnMouseMoved(event);
         });
 
-    InitImGui();
+    m_userInterface.Initialize(Window());
 }
 
 void EditorApp::Run()
@@ -83,40 +78,12 @@ void EditorApp::Run()
         Engine::Renderer().SetCameraProjection(camera->GetViewProjection());
         Engine::Update();
 
-        ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        for (auto& widget : m_widgets)
-        {
-            widget->Update();
-        }
-
-        ImGui::Render();
+        m_userInterface.Update();
 
         auto& cmd{ Engine::Renderer().CurrentFrame().graphicsCommandBuffer };
 
-        Engine::Renderer().m_swapchain.SetLayout(
-            cmd,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        m_userInterface.Render(cmd);
 
-        VkRenderingAttachmentInfo colorAttachmentInfo2 =
-            createColorAttachmentInfo(
-                Engine::Renderer().m_swapchain.GetImageView(),
-                Engine::Renderer().m_swapchain.GetLayout());
-
-        cmd.BeginRendering(
-            Engine::Renderer().m_swapchain.GetExtent(),
-            1,
-            &colorAttachmentInfo2);
-
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd.GetHandle());
-
-        cmd.EndRendering();
-
-        Engine::Renderer().m_swapchain.SetLayout(
-            cmd,
-            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         cmd.End();
 
         Engine::Renderer().m_swapchain.Present(cmd.GetHandle());
@@ -131,11 +98,7 @@ void EditorApp::Shutdown()
 
     VkContext::GetDevice().Wait();
 
-    ImGui_ImplVulkan_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
-    m_ImGuiDescriptorPool.Destroy();
+    m_userInterface.Destroy();
 
     Engine::Shutdown();
 }
@@ -214,71 +177,5 @@ bool EditorApp::OnMouseMoved(const MouseMovedEvent& event)
     camera->OnMouse(xOffset, yOffset);
 
     return true;
-}
-
-void EditorApp::InitImGui()
-{
-    std::vector<VkDescriptorPoolSize> poolSizes{
-        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-    };
-
-    m_ImGuiDescriptorPool = DescriptorPool(
-        1000,
-        poolSizes,
-        VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
-        "DescriptorPool_ImGui");
-
-    ImGui::CreateContext();
-    ImGuiIO& io{ ImGui::GetIO() };
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.DisplaySize = ImVec2(1400, 1020);
-    // io.DeltaTime
-
-    ImGui::StyleColorsDark();
-
-    // todo refactor gethandle to return type template
-    ImGui_ImplGlfw_InitForVulkan(
-        reinterpret_cast<GLFWwindow*>(Window().GetHandle()),
-        true);
-
-    ImGui_ImplVulkan_InitInfo initInfo{};
-    initInfo.Instance = VkContext::GetInstance();
-    initInfo.PhysicalDevice = VkContext::GetDevice().GetPhysicalDevice();
-    initInfo.Device = VkContext::GetLogicalDevice();
-    initInfo.QueueFamily = VkContext::GetQueueFamily(QueueType::Graphics);
-    initInfo.Queue = VkContext::GetQueue(QueueType::Graphics);
-    // init_info.PipelineCache = YOUR_PIPELINE_CACHE;
-    initInfo.DescriptorPool = m_ImGuiDescriptorPool.GetHandle();
-    // init_info.Subpass = 0;
-    initInfo.MinImageCount = 3; // VkContext.GetSwapchain().imageCount;
-    initInfo.ImageCount = 3;    // VkContext.GetSwapchain().imageCount;
-    initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-    initInfo.UseDynamicRendering = true;
-
-    initInfo.PipelineRenderingCreateInfo.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-    initInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
-    initInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats =
-        &Engine::Renderer().m_swapchain.GetFormat();
-    // &vkContext.GetSwapchain().imageFormat;
-
-    initInfo.Allocator = allocationCallbacks.get();
-
-    ImGui_ImplVulkan_Init(&initInfo);
-    ImGui_ImplVulkan_CreateFontsTexture();
-
-    // ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 }
