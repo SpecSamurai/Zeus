@@ -5,7 +5,16 @@ namespace Zeus
 class Widget
 {
 public:
+    inline virtual void Initialize()
+    {
+    }
+
     virtual void Update() = 0;
+
+    inline constexpr void ToggleVisible()
+    {
+        m_visible ^= 1;
+    }
 
     inline constexpr bool IsVisible() const
     {
