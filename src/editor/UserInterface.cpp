@@ -41,19 +41,15 @@ void UserInterface::Initialize(const Window& window)
 
     ImGui::CreateContext();
     ImGuiIO& io{ ImGui::GetIO() };
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.DisplaySize = ImVec2(1400, 1020);
-    // io.DeltaTime
 
     ImGui::StyleColorsDark();
 
-    // todo refactor gethandle to return type template
     ImGui_ImplGlfw_InitForVulkan(
         reinterpret_cast<GLFWwindow*>(window.GetHandle()),
         true);
 
+    auto& swapchain{ Engine::Renderer().GetSwapchain() };
     ImGui_ImplVulkan_InitInfo initInfo{};
     initInfo.Instance = VkContext::GetInstance();
     initInfo.PhysicalDevice = VkContext::GetDevice().GetPhysicalDevice();
@@ -63,8 +59,8 @@ void UserInterface::Initialize(const Window& window)
     // init_info.PipelineCache = YOUR_PIPELINE_CACHE;
     initInfo.DescriptorPool = m_ImGuiDescriptorPool.GetHandle();
     // init_info.Subpass = 0;
-    initInfo.MinImageCount = 3; // VkContext.GetSwapchain().imageCount;
-    initInfo.ImageCount = 3;    // VkContext.GetSwapchain().imageCount;
+    initInfo.MinImageCount = swapchain.GetImageCount();
+    initInfo.ImageCount = swapchain.GetImageCount();
     initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     initInfo.UseDynamicRendering = true;
 
@@ -72,8 +68,7 @@ void UserInterface::Initialize(const Window& window)
         VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
     initInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
     initInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats =
-        &Engine::Renderer().GetSwapchain().GetFormat();
-    // &vkContext.GetSwapchain().imageFormat;
+        &swapchain.GetFormat();
 
     initInfo.Allocator = allocationCallbacks.get();
 
