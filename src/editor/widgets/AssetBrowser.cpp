@@ -1,17 +1,15 @@
-#pragma once
+#include "AssetBrowser.hpp"
 
-#include "assets/AssetsManager.hpp"
-#include "core/Engine.hpp"
-#include "widgets/Widget.hpp"
-
+#include <assets/AssetsManager.hpp>
+#include <core/Engine.hpp>
 #include <imgui.h>
+#include <rhi/Image.hpp>
 
 namespace Zeus
 {
-class Demo : public Widget
+void AssetBrowser::Update()
 {
-public:
-    void Update() override
+    if (ImGui::Begin("Asset Browser"))
     {
         // >>>>>>>>>>
         /*auto asset = ModelLoader::GetObjLoader()->Load(*/
@@ -114,9 +112,6 @@ public:
         /*    });*/
 
         // >>>>>>>>>>
-
-        ImGui::ShowDemoWindow();
-
         if (ImGui::Button("S", ImVec2(25, 25)))
         {
             auto asset = ModelLoader::GetObjLoader()->Load(
@@ -205,5 +200,6 @@ public:
             }
         }
     }
-};
+    ImGui::End();
+}
 }
