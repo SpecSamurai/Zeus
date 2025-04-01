@@ -40,5 +40,6 @@ private:
     static VkSurfaceKHR s_surface;
     static Device s_device;
     static VmaAllocator s_allocator;
+    static DeletionQueue s_deletionQueue;
 };
 }

@@ -23,6 +23,7 @@ VkDebugUtilsMessengerEXT VkContext::s_debugUtilsMessenger{ VK_NULL_HANDLE };
 VkSurfaceKHR VkContext::s_surface{ VK_NULL_HANDLE };
 Device VkContext::s_device{};
 VmaAllocator VkContext::s_allocator{ VK_NULL_HANDLE };
+DeletionQueue VkContext::s_deletionQueue{};
 
 void VkContext::Initialize(const Window& window)
 {
@@ -51,11 +52,15 @@ void VkContext::Initialize(const Window& window)
     createInfo.pAllocationCallbacks = allocationCallbacks.get();
 
     vmaCreateAllocator(&createInfo, &s_allocator);
+
+    s_deletionQueue.Initialize(s_device.GetLogicalDevice(), s_allocator);
 }
 
 void VkContext::Destroy()
 {
     LOG_DEBUG("Destroying VkContext");
+
+    s_deletionQueue.Clear();
 
     vmaDestroyAllocator(s_allocator);
     s_allocator = VK_NULL_HANDLE;
@@ -95,7 +100,7 @@ VkDevice VkContext::GetLogicalDevice()
 
 DeletionQueue& VkContext::GetDeletionQueue()
 {
-    return s_device.GetDeletionQueue();
+    return s_deletionQueue;
 }
 
 VkSurfaceKHR VkContext::GetSurface()

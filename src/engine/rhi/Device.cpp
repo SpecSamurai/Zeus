@@ -136,9 +136,7 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
             &m_logicalDevice),
         "Failed to create logical device.");
 
-    // Initialization below relies on an initialized logical device
-    m_deletionQueue.Initialize(m_logicalDevice);
-
+    // Initialization below relies on the initialized logical device
     m_graphicsQueue =
         Queue(QueueType::Graphics, graphicsFamily, "Queue_Graphics");
     m_presentQueue = Queue(QueueType::Present, presentFamily, "Queue_Present");
@@ -160,8 +158,6 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
 
 void Device::Destroy()
 {
-    m_deletionQueue.Clear();
-
     m_ImmediateSubmitCommandPool.Destroy();
     m_ImmediateSubmitFence.Destroy();
 
@@ -265,11 +261,6 @@ VkDevice Device::GetLogicalDevice() const
 VkPhysicalDevice Device::GetPhysicalDevice() const
 {
     return m_physicalDevice;
-}
-
-DeletionQueue& Device::GetDeletionQueue()
-{
-    return m_deletionQueue;
 }
 
 std::uint32_t Device::GetMaxImageDimension2D() const

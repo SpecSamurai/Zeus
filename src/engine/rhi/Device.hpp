@@ -3,7 +3,6 @@
 #include "CommandBuffer.hpp"
 #include "CommandPool.hpp"
 #include "Definitions.hpp"
-#include "DeletionQueue.hpp"
 #include "Fence.hpp"
 #include "Queue.hpp"
 
@@ -38,7 +37,6 @@ public:
 
     VkDevice GetLogicalDevice() const;
     VkPhysicalDevice GetPhysicalDevice() const;
-    DeletionQueue& GetDeletionQueue();
 
     std::uint32_t GetMaxImageDimension2D() const;
     std::uint32_t GetMaxPushConstantsSize() const;
@@ -46,7 +44,6 @@ public:
 private:
     VkDevice m_logicalDevice{ VK_NULL_HANDLE };
     VkPhysicalDevice m_physicalDevice{ VK_NULL_HANDLE };
-    DeletionQueue m_deletionQueue;
 
     Fence m_ImmediateSubmitFence;
     CommandPool m_ImmediateSubmitCommandPool;
