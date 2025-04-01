@@ -79,14 +79,7 @@ void EditorApp::Run()
         Engine::Update();
 
         m_userInterface.Update();
-
-        auto& cmd{ Engine::Renderer().CurrentFrame().graphicsCommandBuffer };
-
-        m_userInterface.Render(cmd);
-
-        cmd.End();
-
-        Engine::Renderer().m_swapchain.Present(cmd.GetHandle());
+        m_userInterface.Render();
 
         Profiler::End();
     }

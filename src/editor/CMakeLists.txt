@@ -4,14 +4,25 @@ add_executable(Editor
     UserInterface.cpp
     UserInterface.hpp
 
-    widgets/Demo.hpp
+    widgets/AssetBrowser.cpp
+    widgets/AssetBrowser.hpp
+    widgets/LogViewer.cpp
+    widgets/LogViewer.hpp
     widgets/MenuBar.cpp
     widgets/MenuBar.hpp
     widgets/Profiler.cpp
     widgets/Profiler.hpp
+    widgets/Properties.cpp
+    widgets/Properties.hpp
+    widgets/Settings.cpp
+    widgets/Settings.hpp
+    widgets/ShaderEditor.cpp
+    widgets/ShaderEditor.hpp
     widgets/Viewport.cpp
     widgets/Viewport.hpp
     widgets/Widget.hpp
+    widgets/WorldViewer.cpp
+    widgets/WorldViewer.hpp
 )
 
 target_include_directories(Editor

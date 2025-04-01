@@ -1,13 +1,17 @@
 #include "UserInterface.hpp"
 
-#include "imgui.h"
-#include "imgui_internal.h"
-#include "widgets/Demo.hpp"
+#include "widgets/AssetBrowser.hpp"
+#include "widgets/LogViewer.hpp"
 #include "widgets/MenuBar.hpp"
 #include "widgets/Profiler.hpp"
+#include "widgets/Properties.hpp"
+#include "widgets/Settings.hpp"
+#include "widgets/ShaderEditor.hpp"
 #include "widgets/Viewport.hpp"
+#include "widgets/WorldViewer.hpp"
 
 #include <core/Engine.hpp>
+#include <imgui.h>
 #include <rhi/VkContext.hpp>
 
 namespace Zeus
@@ -68,7 +72,7 @@ void UserInterface::Initialize(const Window& window)
         VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
     initInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
     initInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats =
-        &Engine::Renderer().m_swapchain.GetFormat();
+        &Engine::Renderer().GetSwapchain().GetFormat();
     // &vkContext.GetSwapchain().imageFormat;
 
     initInfo.Allocator = allocationCallbacks.get();
@@ -81,7 +85,12 @@ void UserInterface::Initialize(const Window& window)
     m_widgets.emplace_back(std::make_shared<MenuBar>());
     m_widgets.emplace_back(std::make_shared<Viewport>());
     m_widgets.emplace_back(std::make_shared<Profiler>());
-    m_widgets.emplace_back(std::make_shared<Demo>());
+    m_widgets.emplace_back(std::make_shared<WorldViewer>());
+    m_widgets.emplace_back(std::make_shared<AssetBrowser>());
+    m_widgets.emplace_back(std::make_shared<LogViewer>());
+    m_widgets.emplace_back(std::make_shared<Properties>());
+    m_widgets.emplace_back(std::make_shared<Settings>());
+    m_widgets.emplace_back(std::make_shared<ShaderEditor>());
 
     for (auto& widget : m_widgets)
     {
@@ -108,7 +117,9 @@ void UserInterface::Update()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.f, 2.f));
 
     ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
     ImGui::ShowDemoWindow();
+
     for (auto& widget : m_widgets)
     {
         if (widget->IsVisible())
@@ -120,27 +131,27 @@ void UserInterface::Update()
     ImGui::Render();
 }
 
-void UserInterface::Render(CommandBuffer& cmd)
+void UserInterface::Render()
 {
-    Engine::Renderer().m_swapchain.SetLayout(
-        cmd,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    auto& cmd{ Engine::Renderer().GetCommandBuffer() };
+    auto& swapchain{ Engine::Renderer().GetSwapchain() };
+
+    swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     VkRenderingAttachmentInfo colorAttachmentInfo2 = createColorAttachmentInfo(
-        Engine::Renderer().m_swapchain.GetImageView(),
-        Engine::Renderer().m_swapchain.GetLayout());
+        swapchain.GetImageView(),
+        swapchain.GetLayout());
 
-    cmd.BeginRendering(
-        Engine::Renderer().m_swapchain.GetExtent(),
-        1,
-        &colorAttachmentInfo2);
+    cmd.BeginRendering(swapchain.GetExtent(), 1, &colorAttachmentInfo2);
 
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd.GetHandle());
 
     cmd.EndRendering();
 
-    Engine::Renderer().m_swapchain.SetLayout(
-        cmd,
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+    cmd.End();
+
+    swapchain.Present(cmd.GetHandle());
 }
 }

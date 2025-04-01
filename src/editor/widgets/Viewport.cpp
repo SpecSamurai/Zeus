@@ -2,6 +2,7 @@
 
 #include <backends/imgui_impl_vulkan.h>
 #include <core/Engine.hpp>
+#include <imgui.h>
 
 namespace Zeus
 {
@@ -20,10 +21,10 @@ void Viewport::Initialize()
 
 void Viewport::Update()
 {
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.f, 2.f));
+    ImGuiWindowFlags windowFlags{ ImGuiWindowFlags_HorizontalScrollbar };
 
-    if (ImGui::Begin("Viewport"))
+    bool open{ true };
+    if (ImGui::Begin("Viewport", &open, windowFlags))
     {
         float width{ static_cast<float>(m_image->GetWidth()) };
         float height{ static_cast<float>(m_image->GetHeight()) };
@@ -33,11 +34,9 @@ void Viewport::Update()
             ImVec2(width, height),
             ImVec2(0, 0),
             ImVec2(1, 1),
-            ImVec4(1, 1, 1, 1), // tint
-            ImColor(0, 0, 0, 0) // border
-        );
+            ImVec4(1, 1, 1, 1),
+            ImColor(0, 0, 0, 0));
     }
     ImGui::End();
-    ImGui::PopStyleVar(2);
 }
 }
