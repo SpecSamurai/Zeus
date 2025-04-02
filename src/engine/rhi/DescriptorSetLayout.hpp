@@ -15,8 +15,8 @@ public:
     DescriptorSetLayout() = default;
 
     DescriptorSetLayout(
-        const std::vector<Descriptor>& descriptors,
-        std::string_view name = "");
+        std::string_view name,
+        const std::vector<Descriptor>& descriptors);
 
     DescriptorSetLayout(const DescriptorSetLayout&) = delete;
     DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
@@ -31,8 +31,15 @@ public:
     VkDescriptorSetLayout GetHandle() const;
     const std::vector<Descriptor>& GetDescriptors() const;
 
+    inline constexpr std::string_view GetName() const
+    {
+        return m_name;
+    }
+
 private:
     VkDescriptorSetLayout m_handle{ VK_NULL_HANDLE };
     std::vector<Descriptor> m_descriptors;
+
+    std::string_view m_name;
 };
 }

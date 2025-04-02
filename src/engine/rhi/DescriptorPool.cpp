@@ -12,10 +12,11 @@
 namespace Zeus
 {
 DescriptorPool::DescriptorPool(
+    std::string_view name,
     std::uint32_t maxSets,
     const std::vector<VkDescriptorPoolSize>& poolSizes,
-    VkDescriptorPoolCreateFlags flags,
-    std::string_view name)
+    VkDescriptorPoolCreateFlags flags)
+    : m_name{ name }
 {
     VkDescriptorPoolCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -32,7 +33,7 @@ DescriptorPool::DescriptorPool(
             &m_handle),
         "Failed to create descriptor pool.");
 
-    VkContext::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, m_handle, name);
+    VkContext::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, m_handle, m_name);
 }
 
 DescriptorPool::~DescriptorPool()
@@ -45,7 +46,8 @@ DescriptorPool::~DescriptorPool()
 }
 
 DescriptorPool::DescriptorPool(DescriptorPool&& other) noexcept
-    : m_handle{ other.m_handle }
+    : m_handle{ other.m_handle },
+      m_name{ other.m_name }
 {
     other.m_handle = VK_NULL_HANDLE;
 }
@@ -60,6 +62,8 @@ DescriptorPool& DescriptorPool::operator=(DescriptorPool&& other)
         }
 
         m_handle = other.m_handle;
+        m_name = other.m_name;
+
         other.m_handle = VK_NULL_HANDLE;
     }
 

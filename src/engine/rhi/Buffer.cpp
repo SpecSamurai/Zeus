@@ -1,8 +1,6 @@
 #include "Buffer.hpp"
 
-#include "Definitions.hpp"
 #include "VkContext.hpp"
-#include "core/Object.hpp"
 #include "vulkan/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -19,8 +17,8 @@ Buffer::Buffer(
     VkDeviceSize size,
     VkMemoryPropertyFlags memoryPropertyFlags,
     bool mapped)
-    : Object(name),
-      m_usage{ usage },
+    : m_usage{ usage },
+      m_name{ name },
       m_mapped{ mapped }
 {
     VkBufferCreateInfo createInfo{};
@@ -82,16 +80,16 @@ Buffer::Buffer(
             &deviceAddressInfo);
     }
 
-    VkContext::SetDebugName(VK_OBJECT_TYPE_BUFFER, m_handle, name);
+    VkContext::SetDebugName(VK_OBJECT_TYPE_BUFFER, m_handle, m_name);
 }
 
 Buffer::Buffer(Buffer&& other) noexcept
-    : Object(other.m_name),
-      m_handle{ other.m_handle },
+    : m_handle{ other.m_handle },
       m_allocation{ other.m_allocation },
       m_info{ other.m_info },
       m_deviceAddress{ other.m_deviceAddress },
       m_usage{ other.m_usage },
+      m_name{ other.m_name },
       m_mapped{ other.m_mapped }
 {
     other.m_handle = VK_NULL_HANDLE;
@@ -109,13 +107,13 @@ Buffer& Buffer::operator=(Buffer&& other)
             Destroy();
         }
 
-        m_name = other.m_name;
         m_handle = other.m_handle;
         m_allocation = other.m_allocation;
         m_info = other.m_info;
         m_deviceAddress = other.m_deviceAddress;
         m_usage = other.m_usage;
         m_mapped = other.m_mapped;
+        m_name = other.m_name;
 
         other.m_handle = VK_NULL_HANDLE;
         other.m_allocation = VK_NULL_HANDLE;
@@ -131,7 +129,7 @@ Buffer::~Buffer()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDeletionQueue().Add(ResourceType::Buffer, this);
+    VkContext::GetDeletionQueue().AddBuffer(m_handle, m_allocation);
 }
 
 void Buffer::Destroy()

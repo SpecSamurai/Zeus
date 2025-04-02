@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/Object.hpp"
 #include "vulkan/vulkan_memory.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -11,7 +10,7 @@
 
 namespace Zeus
 {
-class Buffer : public Object
+class Buffer
 {
 public:
     Buffer() = default;
@@ -51,6 +50,11 @@ public:
 
     VkBufferUsageFlags GetUsage() const;
 
+    inline constexpr std::string_view GetName() const
+    {
+        return m_name;
+    }
+
 private:
     VkBuffer m_handle{ VK_NULL_HANDLE };
     VmaAllocation m_allocation{ VK_NULL_HANDLE };
@@ -58,6 +62,8 @@ private:
     VkDeviceAddress m_deviceAddress{};
 
     VkBufferUsageFlags m_usage{};
+
+    std::string_view m_name;
 
     bool m_mapped;
 };

@@ -13,9 +13,9 @@ class CommandPool
 public:
     CommandPool() = default;
     CommandPool(
+        std::string_view name,
         std::uint32_t queueFamilyIndex,
-        VkCommandPoolCreateFlagBits createFlags = {},
-        std::string_view name = "");
+        VkCommandPoolCreateFlagBits createFlags = {});
 
     CommandPool(const CommandPool&) = delete;
     CommandPool& operator=(const CommandPool&) = delete;
@@ -38,7 +38,13 @@ public:
 
     VkCommandPool GetHandle() const;
 
+    inline constexpr std::string_view GetName() const
+    {
+        return m_name;
+    }
+
 private:
     VkCommandPool m_handle{ VK_NULL_HANDLE };
+    std::string_view m_name;
 };
 }

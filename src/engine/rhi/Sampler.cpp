@@ -11,6 +11,7 @@
 namespace Zeus
 {
 Sampler::Sampler(
+    std::string_view name,
     VkFilter magFilter,
     VkFilter minFilter,
     VkSamplerMipmapMode mipmapMode,
@@ -18,8 +19,8 @@ Sampler::Sampler(
     float mipLodBias,
     float maxAnisotropy,
     VkBool32 compareEnable,
-    VkCompareOp compareOp,
-    std::string_view name)
+    VkCompareOp compareOp)
+    : m_name{ name }
 {
     VkSamplerCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -50,11 +51,12 @@ Sampler::Sampler(
             &m_handle),
         "Failed to create sampler.");
 
-    VkContext::SetDebugName(VK_OBJECT_TYPE_SAMPLER, m_handle, name);
+    VkContext::SetDebugName(VK_OBJECT_TYPE_SAMPLER, m_handle, m_name);
 }
 
 Sampler::Sampler(Sampler&& other) noexcept
     : m_handle{ other.m_handle },
+      m_name{ other.m_name },
       m_magFilter{ other.m_magFilter },
       m_minFilter{ other.m_minFilter },
       m_mipmapMode{ other.m_mipmapMode },
@@ -77,6 +79,7 @@ Sampler& Sampler::operator=(Sampler&& other)
         }
 
         m_handle = other.m_handle;
+        m_name = other.m_name;
         m_magFilter = other.m_magFilter;
         m_minFilter = other.m_minFilter;
         m_mipmapMode = other.m_mipmapMode;

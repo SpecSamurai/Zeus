@@ -12,7 +12,7 @@ class Semaphore
 {
 public:
     Semaphore() = default;
-    Semaphore(bool isTimeline, std::string_view name = "");
+    Semaphore(std::string_view name, bool isTimeline);
 
     Semaphore(const Semaphore&) = delete;
     Semaphore& operator=(const Semaphore&) = delete;
@@ -34,8 +34,14 @@ public:
     std::uint64_t GetValue() const;
     VkSemaphore GetHandle() const;
 
+    inline constexpr std::string_view GetName() const
+    {
+        return m_name;
+    }
+
 private:
     VkSemaphore m_handle{ VK_NULL_HANDLE };
+    std::string_view m_name;
     bool m_isTimeline{ false };
 };
 }

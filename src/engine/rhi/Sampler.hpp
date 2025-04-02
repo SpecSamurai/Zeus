@@ -12,6 +12,7 @@ public:
     Sampler() = default;
 
     Sampler(
+        std::string_view name,
         VkFilter magFilter,
         VkFilter minFilter,
         VkSamplerMipmapMode mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST,
@@ -19,8 +20,7 @@ public:
         float mipLodBias = 0.f,
         float maxAnisotropy = 0.f,
         VkBool32 compareEnable = VK_FALSE,
-        VkCompareOp compareOp = VK_COMPARE_OP_NEVER,
-        std::string_view name = "");
+        VkCompareOp compareOp = VK_COMPARE_OP_NEVER);
 
     Sampler(const Sampler&) = delete;
     Sampler& operator=(const Sampler&) = delete;
@@ -43,8 +43,14 @@ public:
 
     VkCompareOp GetCompareOp() const;
 
+    inline constexpr std::string_view GetName() const
+    {
+        return m_name;
+    }
+
 private:
     VkSampler m_handle{ VK_NULL_HANDLE };
+    std::string_view m_name;
 
     VkFilter m_magFilter;
     VkFilter m_minFilter;

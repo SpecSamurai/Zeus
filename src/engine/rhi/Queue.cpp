@@ -12,19 +12,21 @@
 
 namespace Zeus
 {
-Queue::Queue(const QueueType type, std::uint32_t family, std::string_view name)
-    : m_type{ type },
-      m_family{ family }
+Queue::Queue(std::string_view name, const QueueType type, std::uint32_t family)
+    : m_name{ name },
+      m_family{ family },
+      m_type{ type }
 {
     vkGetDeviceQueue(VkContext::GetLogicalDevice(), family, 0, &m_handle);
 
-    VkContext::SetDebugName(VK_OBJECT_TYPE_QUEUE, m_handle, name);
+    VkContext::SetDebugName(VK_OBJECT_TYPE_QUEUE, m_handle, m_name);
 }
 
 Queue::Queue(Queue&& other) noexcept
     : m_handle{ other.m_handle },
-      m_type{ other.m_type },
-      m_family{ other.m_family }
+      m_name{ other.m_name },
+      m_family{ other.m_family },
+      m_type{ other.m_type }
 {
     other.m_handle = VK_NULL_HANDLE;
 }
@@ -34,6 +36,7 @@ Queue& Queue::operator=(Queue&& other)
     if (this != &other)
     {
         m_handle = other.m_handle;
+        m_name = other.m_name;
         m_type = other.m_type;
         m_family = other.m_family;
 

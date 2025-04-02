@@ -2,7 +2,6 @@
 
 #include "Definitions.hpp"
 #include "VertexInput.hpp"
-#include "core/Object.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -11,7 +10,7 @@
 
 namespace Zeus
 {
-class Shader : public Object
+class Shader
 {
 public:
     Shader() = default;
@@ -43,6 +42,11 @@ public:
     const char* GetEntryPoint() const;
     const char* GetFilePath() const;
 
+    constexpr std::string_view GetName() const noexcept
+    {
+        return m_name;
+    }
+
 private:
     VkResult loadShader();
 
@@ -55,5 +59,7 @@ private:
 
     VkShaderStageFlagBits m_shaderStage;
     ShaderCompilationState m_compilationState{ ShaderCompilationState::Idle };
+
+    std::string_view m_name;
 };
 }

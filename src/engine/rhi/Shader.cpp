@@ -21,11 +21,11 @@ Shader::Shader(
     VkShaderStageFlagBits shaderStage,
     const char* entryPoint,
     const std::vector<VertexInput>&& vertexInputs)
-    : Object(name),
-      m_vertexInputs{ std::move(vertexInputs) },
+    : m_vertexInputs{ std::move(vertexInputs) },
       m_entryPoint(entryPoint),
       m_filePath(filePath),
-      m_shaderStage{ shaderStage }
+      m_shaderStage{ shaderStage },
+      m_name{ name }
 {
     VkResult result{ loadShader() };
 
@@ -36,13 +36,13 @@ Shader::Shader(
 }
 
 Shader::Shader(Shader&& other) noexcept
-    : Object(other.m_name),
-      m_handle{ other.m_handle },
+    : m_handle{ other.m_handle },
       m_vertexInputs{ std::move(other.m_vertexInputs) },
       m_entryPoint{ other.m_entryPoint },
       m_filePath{ other.m_filePath },
       m_shaderStage{ other.m_shaderStage },
-      m_compilationState{ other.m_compilationState }
+      m_compilationState{ other.m_compilationState },
+      m_name{ other.m_name }
 {
     other.m_handle = VK_NULL_HANDLE;
 }
@@ -56,13 +56,13 @@ Shader& Shader::operator=(Shader&& other)
             Destroy();
         }
 
-        m_name = std::move(other.m_name);
         m_handle = other.m_handle;
         m_vertexInputs = other.m_vertexInputs;
         m_filePath = other.m_filePath;
         m_entryPoint = other.m_entryPoint;
         m_shaderStage = other.m_shaderStage;
         m_compilationState = other.m_compilationState;
+        m_name = other.m_name;
 
         other.m_handle = VK_NULL_HANDLE;
     }

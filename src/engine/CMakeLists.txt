@@ -34,8 +34,6 @@ add_library(Engine STATIC
     application/entry_point.hpp
 
     assets/AssetsManager.hpp
-    assets/GltfLoader.cpp
-    assets/GltfLoader.hpp
     assets/ObjLoader.cpp
     assets/ObjLoader.hpp
     assets/ObjModel.hpp
@@ -59,7 +57,6 @@ add_library(Engine STATIC
     core/Engine.cpp
     core/Engine.hpp
     core/FileSystem.hpp
-    core/Object.hpp
     core/World.cpp
     core/World.hpp
 

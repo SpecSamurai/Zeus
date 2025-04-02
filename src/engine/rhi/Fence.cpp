@@ -10,7 +10,7 @@
 
 namespace Zeus
 {
-Fence::Fence(bool signaled, std::string_view name)
+Fence::Fence(std::string_view name, bool signaled) : m_name{ name }
 {
     VkFenceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -28,10 +28,12 @@ Fence::Fence(bool signaled, std::string_view name)
             &m_handle),
         "Failed to create Fence.");
 
-    VkContext::SetDebugName(VK_OBJECT_TYPE_FENCE, m_handle, name);
+    VkContext::SetDebugName(VK_OBJECT_TYPE_FENCE, m_handle, m_name);
 }
 
-Fence::Fence(Fence&& other) noexcept : m_handle{ other.m_handle }
+Fence::Fence(Fence&& other) noexcept
+    : m_handle{ other.m_handle },
+      m_name{ other.m_name }
 {
     other.m_handle = VK_NULL_HANDLE;
 }
@@ -46,6 +48,8 @@ Fence& Fence::operator=(Fence&& other)
         }
 
         m_handle = other.m_handle;
+        m_name = other.m_name;
+
         other.m_handle = VK_NULL_HANDLE;
     }
 

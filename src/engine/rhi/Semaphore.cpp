@@ -11,8 +11,9 @@
 
 namespace Zeus
 {
-Semaphore::Semaphore(bool isTimeline, std::string_view name)
-    : m_isTimeline{ isTimeline }
+Semaphore::Semaphore(std::string_view name, bool isTimeline)
+    : m_name{ name },
+      m_isTimeline{ isTimeline }
 {
     VkSemaphoreTypeCreateInfo typeCreateInfo{};
     typeCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
@@ -33,11 +34,12 @@ Semaphore::Semaphore(bool isTimeline, std::string_view name)
             &m_handle),
         "Failed to create Semaphore.");
 
-    VkContext::SetDebugName(VK_OBJECT_TYPE_SEMAPHORE, m_handle, name);
+    VkContext::SetDebugName(VK_OBJECT_TYPE_SEMAPHORE, m_handle, m_name);
 }
 
 Semaphore::Semaphore(Semaphore&& other) noexcept
     : m_handle{ other.m_handle },
+      m_name{ other.m_name },
       m_isTimeline{ other.m_isTimeline }
 {
     other.m_handle = VK_NULL_HANDLE;
@@ -53,6 +55,7 @@ Semaphore& Semaphore::operator=(Semaphore&& other)
         }
 
         m_handle = other.m_handle;
+        m_name = other.m_name;
         m_isTimeline = other.m_isTimeline;
 
         other.m_handle = VK_NULL_HANDLE;

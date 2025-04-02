@@ -12,7 +12,7 @@ class Fence
 {
 public:
     Fence() = default;
-    Fence(bool signaled, std::string_view name = "");
+    Fence(std::string_view name, bool signaled);
 
     Fence(const Fence&) = delete;
     Fence& operator=(const Fence&) = delete;
@@ -33,7 +33,14 @@ public:
 
     VkFence GetHandle() const;
 
+    inline constexpr std::string_view GetName() const
+    {
+        return m_name;
+    }
+
 private:
     VkFence m_handle{ VK_NULL_HANDLE };
+
+    std::string_view m_name;
 };
 }

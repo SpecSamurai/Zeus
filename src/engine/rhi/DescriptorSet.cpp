@@ -15,18 +15,20 @@
 namespace Zeus
 {
 DescriptorSet::DescriptorSet(
+    std::string_view name,
     DescriptorSetLayout& descriptorSetLayout,
-    DescriptorPool& descriptorPool,
-    std::string_view name)
+    DescriptorPool& descriptorPool)
+    : m_name{ name }
 {
     m_handle = descriptorPool.Allocate(descriptorSetLayout.GetHandle());
 
-    VkContext::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET, m_handle, name);
+    VkContext::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET, m_handle, m_name);
 }
 
 DescriptorSet::DescriptorSet(DescriptorSet&& other) noexcept
     : m_handle{ other.m_handle },
-      m_binding{ other.m_binding }
+      m_binding{ other.m_binding },
+      m_name{ other.m_name }
 {
     other.m_handle = VK_NULL_HANDLE;
 }
@@ -42,6 +44,7 @@ DescriptorSet& DescriptorSet::operator=(DescriptorSet&& other)
 
         m_handle = other.m_handle;
         m_binding = other.m_binding;
+        m_name = other.m_name;
 
         other.m_handle = VK_NULL_HANDLE;
     }

@@ -13,10 +13,10 @@ class DescriptorPool
 public:
     DescriptorPool() = default;
     DescriptorPool(
+        std::string_view name,
         std::uint32_t maxSets,
         const std::vector<VkDescriptorPoolSize>& poolSizes,
-        VkDescriptorPoolCreateFlags flags = {},
-        std::string_view name = "");
+        VkDescriptorPoolCreateFlags flags = {});
 
     ~DescriptorPool();
 
@@ -33,7 +33,13 @@ public:
 
     VkDescriptorPool GetHandle() const;
 
+    inline constexpr std::string_view GetName() const
+    {
+        return m_name;
+    }
+
 private:
     VkDescriptorPool m_handle{ VK_NULL_HANDLE };
+    std::string_view m_name;
 };
 }

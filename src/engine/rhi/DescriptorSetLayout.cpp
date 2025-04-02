@@ -13,9 +13,10 @@
 namespace Zeus
 {
 DescriptorSetLayout::DescriptorSetLayout(
-    const std::vector<Descriptor>& descriptors,
-    std::string_view name)
-    : m_descriptors{ descriptors }
+    std::string_view name,
+    const std::vector<Descriptor>& descriptors)
+    : m_descriptors{ descriptors },
+      m_name{ name }
 {
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings{};
     layoutBindings.reserve(m_descriptors.size());
@@ -48,12 +49,13 @@ DescriptorSetLayout::DescriptorSetLayout(
     VkContext::SetDebugName(
         VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT,
         m_handle,
-        name);
+        m_name);
 }
 
 DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept
     : m_handle{ other.m_handle },
-      m_descriptors{ other.m_descriptors }
+      m_descriptors{ other.m_descriptors },
+      m_name{ other.m_name }
 {
     other.m_handle = VK_NULL_HANDLE;
     other.m_descriptors.clear();
@@ -70,6 +72,7 @@ DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other)
 
         m_handle = other.m_handle;
         m_descriptors = std::move(other.m_descriptors);
+        m_name = other.m_name;
 
         other.m_handle = VK_NULL_HANDLE;
         other.m_descriptors.clear();

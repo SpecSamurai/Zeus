@@ -12,9 +12,10 @@
 namespace Zeus
 {
 CommandPool::CommandPool(
+    std::string_view name,
     std::uint32_t queueFamilyIndex,
-    VkCommandPoolCreateFlagBits createFlags,
-    std::string_view name)
+    VkCommandPoolCreateFlagBits createFlags)
+    : m_name{ name }
 {
     VkCommandPoolCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -29,11 +30,12 @@ CommandPool::CommandPool(
             &m_handle),
         "Failed to create command pool.");
 
-    VkContext::SetDebugName(VK_OBJECT_TYPE_COMMAND_POOL, m_handle, name);
+    VkContext::SetDebugName(VK_OBJECT_TYPE_COMMAND_POOL, m_handle, m_name);
 }
 
 CommandPool::CommandPool(CommandPool&& other) noexcept
-    : m_handle{ other.m_handle }
+    : m_handle{ other.m_handle },
+      m_name{ other.m_name }
 {
     other.m_handle = VK_NULL_HANDLE;
 }
@@ -48,6 +50,7 @@ CommandPool& CommandPool::operator=(CommandPool&& other)
         }
 
         m_handle = other.m_handle;
+        m_name = other.m_name;
 
         other.m_handle = VK_NULL_HANDLE;
     }

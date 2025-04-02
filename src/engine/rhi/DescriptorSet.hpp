@@ -16,9 +16,9 @@ class DescriptorSet
 public:
     DescriptorSet() = default;
     DescriptorSet(
+        std::string_view name,
         DescriptorSetLayout& descriptorSetLayout,
-        DescriptorPool& descriptorPool,
-        std::string_view name = "");
+        DescriptorPool& descriptorPool);
 
     DescriptorSet(const DescriptorSet&) = delete;
     DescriptorSet& operator=(const DescriptorSet&) = delete;
@@ -32,8 +32,15 @@ public:
 
     VkDescriptorSet GetHandle() const;
 
+    inline constexpr std::string_view GetName() const
+    {
+        return m_name;
+    }
+
 private:
     VkDescriptorSet m_handle{ VK_NULL_HANDLE };
     std::uint32_t m_binding;
+
+    std::string_view m_name;
 };
 }
