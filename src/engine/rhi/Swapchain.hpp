@@ -14,7 +14,7 @@ namespace Zeus
 {
 class Swapchain
 {
-    struct FrameData
+    struct FrameSyncData
     {
         Fence renderFence;
 
@@ -62,7 +62,7 @@ public:
     std::uint32_t GetImageCount() const;
     std::uint32_t GetImageIndex() const;
 
-    VkFormat GetFormat() const;
+    const VkFormat& GetFormat() const;
 
     VkImageLayout GetLayout() const;
     void SetLayout(const CommandBuffer& commandBuffer, VkImageLayout layout);
@@ -70,7 +70,7 @@ public:
     bool IsResizeRequired() const;
 
 private:
-    constexpr FrameData& CurrentFrame();
+    constexpr FrameSyncData& CurrentFrame();
 
     void DestroyResources();
 
@@ -94,7 +94,7 @@ private:
     std::vector<VkImageView> m_imageViews;
     std::vector<VkImageLayout> m_layouts;
 
-    std::vector<FrameData> m_frames;
+    std::vector<FrameSyncData> m_frameSyncData;
 
     std::uint32_t m_imageIndex{ std::numeric_limits<std::uint32_t>::max() };
     std::uint32_t m_imageCount;

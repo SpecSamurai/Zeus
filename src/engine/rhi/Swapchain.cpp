@@ -3,9 +3,9 @@
 #include "Definitions.hpp"
 #include "VkContext.hpp"
 #include "logging/logger.hpp"
-#include "rhi/vulkan_command.hpp"
-#include "rhi/vulkan_debug.hpp"
-#include "rhi/vulkan_device.hpp"
+#include "vulkan/vulkan_command.hpp"
+#include "vulkan/vulkan_debug.hpp"
+#include "vulkan/vulkan_device.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -34,7 +34,6 @@ Swapchain::Swapchain(
     assert(
         width <= VkContext::GetDevice().GetMaxImageDimension2D() &&
         height <= VkContext::GetDevice().GetMaxImageDimension2D());
-    assert(frameCount >= 2 && "frameCount cannot be less than 2");
 
     Create();
 }
@@ -45,7 +44,7 @@ Swapchain::Swapchain(Swapchain&& other) noexcept
       m_images{ std::move(other.m_images) },
       m_imageViews{ std::move(other.m_imageViews) },
       m_layouts{ std::move(other.m_layouts) },
-      m_frames{ std::move(other.m_frames) },
+      m_frameSyncData{ std::move(other.m_frameSyncData) },
       m_imageIndex{ other.m_imageIndex },
       m_imageCount{ other.m_imageCount },
       m_frameIndex{ other.m_frameIndex },
@@ -73,7 +72,7 @@ Swapchain& Swapchain::operator=(Swapchain&& other)
         m_images = std::move(other.m_images);
         m_imageViews = std::move(other.m_imageViews);
         m_layouts = std::move(other.m_layouts);
-        m_frames = std::move(other.m_frames);
+        m_frameSyncData = std::move(other.m_frameSyncData);
         m_imageIndex = other.m_imageIndex;
         m_imageCount = other.m_imageCount;
         m_frameIndex = other.m_frameIndex;
@@ -260,26 +259,24 @@ void Swapchain::Create()
             std::format("Image View Swapchain {}", i));
     }
 
-    m_frames.reserve(m_framesCount);
+    m_frameSyncData.reserve(m_framesCount);
     for (std::size_t i{ 0 }; i < m_framesCount; ++i)
     {
-        std::string renderFenceName{ "Fence Frame " + std::to_string(i) };
-        std::string imageSemaphoreName{ "Semaphore Frame Image " +
-                                        std::to_string(i) };
-        std::string renderSemaphoreName{ "Semaphore Frame Render " +
-                                         std::to_string(i) };
-
-        m_frames.emplace_back(FrameData{
-            .renderFence = Fence(true, renderFenceName.c_str()),
-            .imageAcquiredSemaphore =
-                Semaphore(false, imageSemaphoreName.c_str()),
-            .renderCompleteSemaphore =
-                Semaphore(false, renderSemaphoreName.c_str()),
+        m_frameSyncData.emplace_back(FrameSyncData{
+            .renderFence = Fence(std::format("Fence_render_frame_{}", i), true),
+            .imageAcquiredSemaphore = Semaphore(
+                std::format("Semaphore_image_acquired_frame_{}", i),
+                false),
+            .renderCompleteSemaphore = Semaphore(
+                std::format("Semaphore_render_complete_frame_{}", i),
+                false),
         });
     }
 
-    LOG_DEBUG("Swapchain: Frames count {}", m_framesCount);
-    LOG_DEBUG("Swapchain: Images count {}", m_imageCount);
+    assert(m_framesCount < m_imageCount);
+    LOG_DEBUG("Swapchain | Extent {}x{}", m_extent.width, m_extent.height);
+    LOG_DEBUG("Swapchain | Frames count {}", m_framesCount);
+    LOG_DEBUG("Swapchain | Images count {}", m_imageCount);
 }
 
 void Swapchain::Destroy()
@@ -319,7 +316,7 @@ void Swapchain::Present(VkCommandBuffer commandBuffer)
             1,
             &signalSemaphoreInfo);
 
-    VkSemaphore waitSemaphores[] = {
+    VkSemaphore waitSemaphores[]{
         CurrentFrame().renderCompleteSemaphore.GetHandle()
     };
 
@@ -410,13 +407,12 @@ void Swapchain::Resize(std::uint32_t width, std::uint32_t height)
     oldSwapchain = VK_NULL_HANDLE;
 
     m_resizeRequired = false;
-
-    LOG_DEBUG("Swapchain resized: {}x{}", m_extent.width, m_extent.height);
 }
 
 void Swapchain::SetVsync(const bool enable)
 {
-    if ((m_presentMode != VK_PRESENT_MODE_IMMEDIATE_KHR) != enable)
+    // VK_PRESENT_MODE_IMMEDIATE_KHR
+    if ((m_presentMode != VK_PRESENT_MODE_MAILBOX_KHR) != enable)
     {
         if (enable)
         {
@@ -426,14 +422,14 @@ void Swapchain::SetVsync(const bool enable)
 
             m_presentMode = selectPresentMode(
                 surfaceDetails.presentModes,
-                VK_PRESENT_MODE_MAILBOX_KHR);
+                VK_PRESENT_MODE_FIFO_KHR);
         }
         else
         {
-            m_presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            m_presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
         }
 
-        Resize(m_extent.width, m_extent.height);
+        m_resizeRequired = true;
 
         LOG_INFO("VSync has been {}", enable ? "enabled" : "disabled");
     }
@@ -441,7 +437,8 @@ void Swapchain::SetVsync(const bool enable)
 
 bool Swapchain::IsVSync() const
 {
-    return m_presentMode != VK_PRESENT_MODE_IMMEDIATE_KHR;
+    // VK_PRESENT_MODE_IMMEDIATE_KHR
+    return m_presentMode == VK_PRESENT_MODE_FIFO_KHR;
 }
 
 const VkSwapchainKHR& Swapchain::GetHandle() const
@@ -494,7 +491,7 @@ std::uint32_t Swapchain::GetImageIndex() const
     return m_imageIndex;
 }
 
-VkFormat Swapchain::GetFormat() const
+const VkFormat& Swapchain::GetFormat() const
 {
     return m_imageFormat;
 }
@@ -533,21 +530,21 @@ bool Swapchain::IsResizeRequired() const
     return m_resizeRequired;
 }
 
-constexpr Swapchain::FrameData& Swapchain::CurrentFrame()
+constexpr Swapchain::FrameSyncData& Swapchain::CurrentFrame()
 {
-    return m_frames[m_frameIndex];
+    return m_frameSyncData[m_frameIndex];
 }
 
 void Swapchain::DestroyResources()
 {
     for (std::size_t i{ 0 }; i < m_framesCount; ++i)
     {
-        m_frames[i].renderFence.Destroy();
-        m_frames[i].imageAcquiredSemaphore.Destroy();
-        m_frames[i].renderCompleteSemaphore.Destroy();
+        m_frameSyncData[i].renderFence.Destroy();
+        m_frameSyncData[i].imageAcquiredSemaphore.Destroy();
+        m_frameSyncData[i].renderCompleteSemaphore.Destroy();
     }
 
-    m_frames.clear();
+    m_frameSyncData.clear();
 
     for (auto& imageView : m_imageViews)
     {
