@@ -6,6 +6,7 @@ namespace Zeus
 {
 class Properties : public Widget
 {
+public:
     void Update() override;
 };
 }
