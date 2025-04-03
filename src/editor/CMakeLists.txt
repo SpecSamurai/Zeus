@@ -10,8 +10,6 @@ add_executable(Editor
     widgets/LogViewer.hpp
     widgets/MenuBar.cpp
     widgets/MenuBar.hpp
-    widgets/Profiler.cpp
-    widgets/Profiler.hpp
     widgets/Properties.cpp
     widgets/Properties.hpp
     widgets/Settings.cpp
