@@ -30,7 +30,7 @@ void Viewport::Initialize()
 
 void Viewport::Update()
 {
-    ImGuiWindowFlags windowFlags{ ImGuiWindowFlags_HorizontalScrollbar };
+    ImGuiWindowFlags windowFlags{ ImGuiWindowFlags_NoScrollbar };
 
     bool open{ true };
     if (ImGui::Begin("Viewport", &open, windowFlags))
