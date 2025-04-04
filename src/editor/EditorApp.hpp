@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UserInterface.hpp"
+#include "events/KeyEvent.hpp"
 
 #include <application/Application.hpp>
 #include <camera/EditorCamera.hpp>
@@ -25,6 +26,7 @@ public:
 
 private:
     bool OnMouseMoved(const MouseMovedEvent& event);
+    bool OnKeyPressed(const KeyPressedEvent& event);
 
     void HandleKeyboard();
 

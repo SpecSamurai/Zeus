@@ -22,8 +22,19 @@ public:
     void Update();
     void Render();
 
+    bool IsVisible() const;
+    void SetVisible(bool value);
+
+    struct Options
+    {
+        bool toolbar{ true };
+        bool statistics{ true };
+    } options;
+
 private:
     std::vector<std::shared_ptr<Widget>> m_widgets{};
     DescriptorPool m_ImGuiDescriptorPool;
+
+    bool m_isVisible{ true };
 };
 }

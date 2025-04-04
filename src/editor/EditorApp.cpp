@@ -8,6 +8,7 @@
 #include <components/Renderable.hpp>
 #include <core/Engine.hpp>
 #include <events/Event.hpp>
+#include <events/KeyEvent.hpp>
 #include <events/MouseEvent.hpp>
 #include <events/WindowEvent.hpp>
 #include <imgui.h>
@@ -55,6 +56,12 @@ void EditorApp::Initialize()
             return OnMouseMoved(event);
         });
 
+    Event::Dispatcher.Register<KeyPressedEvent>(
+        "Application::KeyPressedEvent",
+        [this](const KeyPressedEvent& event) -> bool {
+            return OnKeyPressed(event);
+        });
+
     m_userInterface.Initialize(Window());
 }
 
@@ -78,8 +85,18 @@ void EditorApp::Run()
         Engine::Renderer().SetCameraProjection(camera->GetViewProjection());
         Engine::Update();
 
-        m_userInterface.Update();
-        m_userInterface.Render();
+        if (m_userInterface.IsVisible())
+            m_userInterface.Update();
+
+        Engine::Renderer().BeginFrame();
+        Engine::Renderer().Draw();
+
+        if (m_userInterface.IsVisible())
+            m_userInterface.Render();
+        else
+            Engine::Renderer().BlitToSwapchain();
+
+        Engine::Renderer().Present();
 
         Profiler::End();
     }
@@ -98,39 +115,24 @@ void EditorApp::Shutdown()
 
 void EditorApp::HandleKeyboard()
 {
-    auto speedd = 0.0001f;
+    float speed = 0.001f * (float)Profiler::s_frametimeDelta;
     if (Input::IsKeyDown(KeyCode::E))
-        camera->Move(CameraMovement::UP, speedd);
+        camera->Move(CameraMovement::UP, speed);
 
     if (Input::IsKeyDown(KeyCode::Q))
-        camera->Move(CameraMovement::DOWN, speedd);
+        camera->Move(CameraMovement::DOWN, speed);
 
     if (Input::IsKeyDown(KeyCode::W))
-        camera->Move(CameraMovement::FORWARD, speedd);
+        camera->Move(CameraMovement::FORWARD, speed);
 
     if (Input::IsKeyDown(KeyCode::S))
-        camera->Move(CameraMovement::BACK, speedd);
+        camera->Move(CameraMovement::BACK, speed);
 
     if (Input::IsKeyDown(KeyCode::A))
-        camera->Move(CameraMovement::LEFT, speedd);
+        camera->Move(CameraMovement::LEFT, speed);
 
     if (Input::IsKeyDown(KeyCode::D))
-        camera->Move(CameraMovement::RIGHT, speedd);
-
-    if (Input::IsKeyDown(KeyCode::C))
-        glfwSetInputMode(
-            reinterpret_cast<GLFWwindow*>(Window().GetHandle()),
-            GLFW_CURSOR,
-            GLFW_CURSOR_DISABLED);
-
-    if (Input::IsKeyDown(KeyCode::V))
-        glfwSetInputMode(
-            reinterpret_cast<GLFWwindow*>(Window().GetHandle()),
-            GLFW_CURSOR,
-            GLFW_CURSOR_NORMAL);
-
-    // if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    //     glfwSetWindowShouldClose(window, GLFW_TRUE);
+        camera->Move(CameraMovement::RIGHT, speed);
 }
 
 bool EditorApp::OnMouseMoved(const MouseMovedEvent& event)
@@ -168,6 +170,32 @@ bool EditorApp::OnMouseMoved(const MouseMovedEvent& event)
     m_lastMousePosition.y = yPosition;
 
     camera->OnMouse(xOffset, yOffset);
+
+    return true;
+}
+
+bool EditorApp::OnKeyPressed(const KeyPressedEvent& event)
+{
+    switch (event.keyCode)
+    {
+    case Zeus::KeyCode::Escape:
+        glfwSetInputMode(
+            reinterpret_cast<GLFWwindow*>(Window().GetHandle()),
+            GLFW_CURSOR,
+            GLFW_CURSOR_NORMAL);
+        break;
+    case Zeus::KeyCode::F11:
+        if (!event.isRepeated)
+            m_userInterface.SetVisible(true);
+        break;
+    case KeyCode::C:
+        glfwSetInputMode(
+            reinterpret_cast<GLFWwindow*>(Window().GetHandle()),
+            GLFW_CURSOR,
+            GLFW_CURSOR_DISABLED);
+    default:
+        break;
+    }
 
     return true;
 }

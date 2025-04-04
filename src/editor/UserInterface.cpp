@@ -3,7 +3,6 @@
 #include "widgets/AssetBrowser.hpp"
 #include "widgets/LogViewer.hpp"
 #include "widgets/MenuBar.hpp"
-#include "widgets/Profiler.hpp"
 #include "widgets/Properties.hpp"
 #include "widgets/Settings.hpp"
 #include "widgets/ShaderEditor.hpp"
@@ -34,10 +33,10 @@ void UserInterface::Initialize(const Window& window)
     };
 
     m_ImGuiDescriptorPool = DescriptorPool(
+        "DescriptorPool_ImGui",
         2, /*1000,*/
         poolSizes,
-        VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
-        "DescriptorPool_ImGui");
+        VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
 
     ImGui::CreateContext();
     ImGuiIO& io{ ImGui::GetIO() };
@@ -78,13 +77,12 @@ void UserInterface::Initialize(const Window& window)
     // ImGui_ImplVulkan_DestroyFontUploadObjects();
 
     m_widgets.emplace_back(std::make_shared<MenuBar>());
-    m_widgets.emplace_back(std::make_shared<Viewport>());
-    m_widgets.emplace_back(std::make_shared<Profiler>());
+    m_widgets.emplace_back(std::make_shared<Viewport>(this));
     m_widgets.emplace_back(std::make_shared<WorldViewer>());
     m_widgets.emplace_back(std::make_shared<AssetBrowser>());
     m_widgets.emplace_back(std::make_shared<LogViewer>());
     m_widgets.emplace_back(std::make_shared<Properties>());
-    m_widgets.emplace_back(std::make_shared<Settings>());
+    m_widgets.emplace_back(std::make_shared<Settings>(this));
     m_widgets.emplace_back(std::make_shared<ShaderEditor>());
 
     for (auto& widget : m_widgets)
@@ -130,6 +128,15 @@ void UserInterface::Render()
 {
     auto& cmd{ Engine::Renderer().GetCommandBuffer() };
     auto& swapchain{ Engine::Renderer().GetSwapchain() };
+    auto& renderOutputColor{
+        Engine::Renderer().GetRenderTarget(RenderTarget::RENDER_OUTPUT_COLOR),
+    };
+
+    cmd.TransitionImageLayout(
+        renderOutputColor.GetHandle(),
+        renderOutputColor.GetFormat(),
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
@@ -142,11 +149,15 @@ void UserInterface::Render()
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd.GetHandle());
 
     cmd.EndRendering();
+}
 
-    swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+bool UserInterface::IsVisible() const
+{
+    return m_isVisible;
+}
 
-    cmd.End();
-
-    swapchain.Present(cmd.GetHandle());
+void UserInterface::SetVisible(bool value)
+{
+    m_isVisible = value;
 }
 }
