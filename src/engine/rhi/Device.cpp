@@ -43,10 +43,10 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
 
     std::vector<const char*> extensions{
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        // VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-        // VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-        // VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-        // VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
+        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+        VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+        VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
     };
 
     PhysicalDeviceSelectorInfo info{
@@ -138,22 +138,22 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
 
     // Initialization below relies on the initialized logical device
     m_graphicsQueue =
-        Queue(QueueType::Graphics, graphicsFamily, "Queue_Graphics");
-    m_presentQueue = Queue(QueueType::Present, presentFamily, "Queue_Present");
+        Queue("Queue_Graphics", QueueType::Graphics, graphicsFamily);
+    m_presentQueue = Queue("Queue_Present", QueueType::Present, presentFamily);
     m_transferQueue =
-        Queue(QueueType::Transfer, transferFamily, "Queue_Transfer");
-    m_computeQueue = Queue(QueueType::Compute, computeFamily, "Queue_Compute");
+        Queue("Queue_Transfer", QueueType::Transfer, transferFamily);
+    m_computeQueue = Queue("Queue_Compute", QueueType::Compute, computeFamily);
 
     m_ImmediateSubmitCommandPool = CommandPool(
+        "CommandPool_ImmediateSubmit",
         transferFamily,
-        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        "CommandPool_ImmediateSubmit");
+        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
     m_ImmediateSubmitCommandBuffer = CommandBuffer(
         m_ImmediateSubmitCommandPool,
         "CommandBuffer_ImmediateSubmit");
 
-    m_ImmediateSubmitFence = Fence(true, "Fence_ImmediateSubmit");
+    m_ImmediateSubmitFence = Fence("Fence_ImmediateSubmit", true);
 }
 
 void Device::Destroy()
