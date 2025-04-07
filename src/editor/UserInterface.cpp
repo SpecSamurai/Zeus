@@ -93,6 +93,11 @@ void UserInterface::Initialize(const Window& window)
 
 void UserInterface::Destroy()
 {
+    for (auto& widget : m_widgets)
+    {
+        widget->Destroy();
+    }
+
     ImGui_ImplVulkan_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
