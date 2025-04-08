@@ -9,6 +9,10 @@ public:
     {
     }
 
+    inline virtual void Destroy()
+    {
+    }
+
     virtual void Update() = 0;
 
     inline constexpr void ToggleVisible()
