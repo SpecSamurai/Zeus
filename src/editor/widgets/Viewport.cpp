@@ -28,6 +28,11 @@ void Viewport::Initialize()
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
+void Viewport::Destroy()
+{
+    ImGui_ImplVulkan_RemoveTexture(m_descriptorSet);
+}
+
 void Viewport::Update()
 {
     ImGuiWindowFlags windowFlags{ ImGuiWindowFlags_NoScrollbar };

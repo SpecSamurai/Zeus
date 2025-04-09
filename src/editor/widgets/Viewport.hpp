@@ -14,6 +14,7 @@ public:
     Viewport(UserInterface* root);
 
     void Initialize() override;
+    void Destroy() override;
     void Update() override;
 
 private:
