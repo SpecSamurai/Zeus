@@ -3,6 +3,7 @@
 #include "Renderer_resources.hpp"
 #include "Renderer_types.hpp"
 #include "components/Renderable.hpp"
+#include "ecs/Query.hpp"
 #include "logging/logger.hpp"
 #include "math/definitions.hpp"
 #include "rhi/Buffer.hpp"
@@ -18,6 +19,7 @@
 #include "rhi/vulkan/vulkan_dynamic_rendering.hpp"
 #include "window/Window.hpp"
 
+#include <cassert>
 #include <vulkan/vulkan_core.h>
 
 #include <array>
@@ -47,10 +49,11 @@ void Renderer::Initialize()
 
     for (std::uint32_t i{ 0 }; i < m_swapchain.GetFramesCount(); ++i)
     {
+        // rethink if you need this reset or just one time
         m_frames[i].graphicsCommandPool = CommandPool(
+            std::format("CommandPool_Frame_{}", i),
             VkContext::GetQueueFamily(QueueType::Graphics),
-            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-            std::format("CommandPool_Frame_{}", i));
+            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
         m_frames[i].graphicsCommandBuffer = CommandBuffer(
             m_frames[i].graphicsCommandPool,
@@ -71,7 +74,10 @@ void Renderer::Destroy()
 {
     LOG_DEBUG("Destroying Renderer");
 
-    VkContext::GetDevice().Wait();
+    for (std::uint32_t i{ 0 }; i < m_renderables.size(); ++i)
+    {
+        m_renderables[i].clear();
+    }
 
     DestroyDefaultResources();
 
@@ -110,6 +116,10 @@ void Renderer::Destroy()
 
 void Renderer::Update()
 {
+}
+
+void Renderer::BeginFrame()
+{
     if (m_swapchain.IsResizeRequired())
     {
         ResizeSwapchain();
@@ -117,6 +127,17 @@ void Renderer::Update()
 
     m_swapchain.AcquireNextImage();
 
+    // https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/staying_within_budget.html
+    // Make sure to call vmaSetCurrentFrameIndex() every frame.
+    // Budget is queried from Vulkan inside of it to avoid overhead of querying
+    // it with every allocation.
+    vmaSetCurrentFrameIndex(
+        VkContext::GetAllocator(),
+        static_cast<uint32_t>(m_swapchain.GetFrameIndex()));
+}
+
+void Renderer::Draw()
+{
     // drawExtent = {
     //     .width = static_cast<std::uint32_t>(
     //         static_cast<float>(drawImage.GetWidth()) * m_renderScale),
@@ -145,21 +166,18 @@ void Renderer::Update()
         VK_IMAGE_LAYOUT_UNDEFINED,
         VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
-    // cmdClearColorImage(
-    //     m_renderer.CurrentFrame().mainCommandBuffer,
-    //     m_renderer.drawImage.image,
-    //     Vector4f(0.f, 0.f, 0.5f, 1.f),
-    //     VK_IMAGE_LAYOUT_GENERAL);
+    VkRenderingAttachmentInfo colorAttachmentInfo{
+        createColorAttachmentInfo(
+            renderOutputColor.GetView(),
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            &CLEAR_VALUES),
+    };
 
-    // DrawCompute();
-
-    VkRenderingAttachmentInfo colorAttachmentInfo = createColorAttachmentInfo(
-        renderOutputColor.GetView(),
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-    VkRenderingAttachmentInfo depthAttachmentInfo = createDepthAttachmentInfo(
-        renderOutputDepth.GetView(),
-        VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+    VkRenderingAttachmentInfo depthAttachmentInfo{
+        createDepthAttachmentInfo(
+            renderOutputDepth.GetView(),
+            VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL),
+    };
 
     cmd.BeginRendering(
         { renderOutputColor.GetExtent().width,
@@ -171,10 +189,15 @@ void Renderer::Update()
     DrawEntities(cmd, renderOutputColor);
     LinesPass(cmd, renderOutputColor);
 
-    // DrawCompute();
-    // DrawTriangle();
-
     cmd.EndRendering();
+}
+
+void Renderer::BlitToSwapchain()
+{
+    auto& cmd{ CurrentFrame().graphicsCommandBuffer };
+
+    auto& renderOutputColor{ GetRenderTarget(
+        RenderTarget::RENDER_OUTPUT_COLOR) };
 
     cmd.TransitionImageLayout(
         renderOutputColor.GetHandle(),
@@ -185,29 +208,11 @@ void Renderer::Update()
     m_swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
     cmd.BlitImage(renderOutputColor, m_swapchain);
+}
 
-    //  drawExtent,
-    //  m_swapchain->GetExtent());
-
-    // transitionImageLayout(
-    //     m_renderer.CurrentFrame().mainCommandBuffer,
-    //     VkContext.GetSwapchain()
-    //         .images[m_renderer.CurrentSwapchainImageIndex()],
-    //     VkContext.GetSwapchain().imageFormat,
-    //     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-    //     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    //
-    // VkRenderingAttachmentInfo colorAttachment{
-    //     createColorAttachmentInfo(
-    //         VkContext.GetSwapchain()
-    //             .imageViews[m_renderer.CurrentSwapchainImageIndex()],
-    //         VK_IMAGE_LAYOUT_GENERAL),
-    // };
-
-    // uiManager.Draw(
-    //     m_renderer.CurrentFrame().mainCommandBuffer,
-    //     colorAttachment,
-    //     VkContext.GetSwapchain().extent);
+void Renderer::Present()
+{
+    auto& cmd{ CurrentFrame().graphicsCommandBuffer };
 
     m_swapchain.SetLayout(cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     cmd.End();
@@ -276,17 +281,18 @@ const Sampler& Renderer::GetSampler(SamplerType type) const
     return m_samplers[static_cast<std::uint32_t>(type)];
 }
 
-void Renderer::SetEntities(
-    RendererEntity type,
-    const std::vector<Renderable>& renderables)
+void Renderer::SetEntities(RendererEntity type, ECS::Query<Renderable>& query)
 {
     // mutex lock
     GetEntities(type).clear();
 
-    for (const auto& entity : renderables)
+    for (auto& entity : query)
     {
+        if (!entity.isActive)
+            continue;
+
         // isActive
-        GetEntities(type).emplace_back(entity);
+        GetEntities(type).emplace_back(&entity);
     }
 
     if (type == RendererEntity::MESH_TRANSPARENT)
@@ -331,7 +337,7 @@ void Renderer::InitializeRenderTargets()
         renderOutputExtent,
         VK_FORMAT_R16G16B16A16_SFLOAT,
         VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-            VK_IMAGE_USAGE_STORAGE_BIT,
+            VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         "Image_Render_Output_Color_Frame_");
 
@@ -348,16 +354,40 @@ void Renderer::InitializeDescriptors()
 {
     std::vector<VkDescriptorPoolSize> poolSizes{
         { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4 },
     };
 
-    m_descriptorPool = DescriptorPool(1, poolSizes);
+    m_descriptorPool = DescriptorPool("DescriptorPool_Renderer", 2, poolSizes);
 
-    m_frameDataSetLayout = DescriptorSetLayout({
-        Descriptor(
-            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            VK_SHADER_STAGE_VERTEX_BIT,
-            0),
-    });
+    m_frameDataSetLayout = DescriptorSetLayout(
+        "frameDataSetLayout",
+        {
+            Descriptor(
+                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                VK_SHADER_STAGE_VERTEX_BIT,
+                0),
+        });
+
+    m_materialSetLayout = DescriptorSetLayout(
+        "materialSetLayout",
+        {
+            Descriptor(
+                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                VK_SHADER_STAGE_FRAGMENT_BIT,
+                0),
+            Descriptor(
+                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                VK_SHADER_STAGE_FRAGMENT_BIT,
+                1),
+            Descriptor(
+                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                VK_SHADER_STAGE_FRAGMENT_BIT,
+                2),
+            Descriptor(
+                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                VK_SHADER_STAGE_FRAGMENT_BIT,
+                3),
+        });
 }
 
 void Renderer::InitializeShaders()
@@ -443,7 +473,7 @@ void Renderer::InitializePipelines()
             &GetShader(ShaderType::MESH),
             &GetShader(ShaderType::FRAG_MESH),
         },
-        { &m_frameDataSetLayout },
+        { &m_frameDataSetLayout, &m_materialSetLayout },
         { meshPushConstant },
         { VK_FORMAT_R16G16B16A16_SFLOAT },
         VK_FORMAT_D32_SFLOAT);
@@ -454,12 +484,14 @@ void Renderer::InitializeSamplers()
 #define sampler(type) m_samplers[static_cast<std::uint32_t>(type)]
 
     sampler(SamplerType::NEAREST_CLAMP_EDGE) = Sampler(
+        "Sampler_nearest_clamp_edge",
         VK_FILTER_NEAREST,
         VK_FILTER_NEAREST,
         VK_SAMPLER_MIPMAP_MODE_NEAREST,
         VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
 
     sampler(SamplerType::LINEAR_CLAMP_EDGE) = Sampler(
+        "Sampler_linear_clamp_edge",
         VK_FILTER_LINEAR,
         VK_FILTER_LINEAR,
         VK_SAMPLER_MIPMAP_MODE_NEAREST,
@@ -483,7 +515,15 @@ void Renderer::InitializeBuffers()
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         true);
 
-    m_frameDataSet = DescriptorSet(m_frameDataSetLayout, m_descriptorPool);
+    // We use uniform buffer here instead of SSBO because this is a small
+    // buffer. We arent using it through buffer device adress because we have a
+    // single descriptor set for all objects so there isnt any overhead of
+    // managing it.
+
+    m_frameDataSet = DescriptorSet(
+        "DescriptorSet_Frame",
+        m_frameDataSetLayout,
+        m_descriptorPool);
     m_frameDataSet.Update(
         {
             DescriptorBuffer(
@@ -494,6 +534,19 @@ void Renderer::InitializeBuffers()
                 sizeof(FrameData)),
         },
         {});
+
+    m_materialSet = DescriptorSet(
+        "DescriptorSet_MaterialSet",
+        m_materialSetLayout,
+        m_descriptorPool);
+    /*m_materialSet.Update(*/
+    /*    {},*/
+    /*    {*/
+    /*        DescriptorImage(*/
+    /*            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,*/
+    /*            VK_SHADER_STAGE_FRAGMENT_BIT,*/
+    /*            0),*/
+    /*    });*/
 }
 
 void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
@@ -524,14 +577,20 @@ void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
 
     cmd.BindDescriptorSets(
         m_frameDataSet.GetHandle(),
-        GetPipeline(PipelineType::MESH_OPAQUE));
+        GetPipeline(PipelineType::MESH_OPAQUE),
+        0);
 
-    for (const auto& entity : meshes)
+    cmd.BindDescriptorSets(
+        m_materialSet.GetHandle(),
+        GetPipeline(PipelineType::MESH_OPAQUE),
+        1);
+
+    for (const auto entity : meshes)
     {
         MeshPushConstants pushConstants{
-            .model = entity.localMatrix,
+            .model = entity->localMatrix,
             .vertexBufferAddress =
-                entity.m_mesh->GetVertexBuffer()->GetDeviceAddress(),
+                entity->m_mesh->GetVertexBuffer()->GetDeviceAddress(),
         };
 
         cmd.PushConstants(
@@ -541,11 +600,11 @@ void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
             pushConstants);
 
         /*cmd.BindVertexBuffers(mesh.m_mesh->m_vertexBuffer);*/
-        cmd.BindIndexBuffer(*entity.m_mesh->GetIndexBuffer());
+        cmd.BindIndexBuffer(*entity->m_mesh->GetIndexBuffer());
 
         /*cmd.Draw((std::uint32_t)mesh.m_mesh->m_vertexBuffer.GetSize(), 0);*/
         /*cmd.DrawIndexed(static_cast<std::uint32_t>(entity.m_mesh->m_indices.size()));*/
-        cmd.DrawIndexed(entity.m_mesh->GetIndexCount());
+        cmd.DrawIndexed(entity->m_mesh->GetIndexCount());
     }
 }
 
@@ -601,7 +660,7 @@ void Renderer::LinesPass(const CommandBuffer& cmd, const Image& renderTarget)
     }
 }
 
-std::vector<Renderable>& Renderer::GetEntities(RendererEntity entity)
+std::vector<Renderable*>& Renderer::GetEntities(RendererEntity entity)
 {
     return m_renderables[static_cast<std::uint32_t>(entity)];
 }

@@ -2,6 +2,7 @@
 
 #include "Renderer_types.hpp"
 #include "components/Renderable.hpp"
+#include "ecs/Query.hpp"
 #include "math/definitions.hpp"
 #include "rhi/Buffer.hpp"
 #include "rhi/CommandBuffer.hpp"
@@ -30,6 +31,11 @@ public:
     void Destroy();
     void Update();
 
+    void BeginFrame();
+    void Draw();
+    void BlitToSwapchain();
+    void Present();
+
     void DrawLine(
         const Math::Vector3f& from,
         const Math::Vector3f& to,
@@ -54,9 +60,17 @@ public:
     const Pipeline& GetPipeline(PipelineType type) const;
     const Sampler& GetSampler(SamplerType type) const;
 
-    void SetEntities(
-        RendererEntity type,
-        const std::vector<Renderable>& renderables);
+    inline constexpr Swapchain& GetSwapchain()
+    {
+        return m_swapchain;
+    }
+
+    inline constexpr CommandBuffer& GetCommandBuffer()
+    {
+        return CurrentFrame().graphicsCommandBuffer;
+    }
+
+    void SetEntities(RendererEntity type, ECS::Query<Renderable>& query);
 
     void SetCameraProjection(const Math::Matrix4x4f& viewProjection);
 
@@ -89,16 +103,29 @@ private:
     void DrawEntities(const CommandBuffer& cmd, const Image& renderTarget);
     void LinesPass(const CommandBuffer& cmd, const Image& renderTarget);
 
-    std::vector<Renderable>& GetEntities(RendererEntity entity);
+    std::vector<Renderable*>& GetEntities(RendererEntity entity);
 
-public:
-    static constexpr std::uint32_t FRAMES_IN_FLIGHT{ 2 };
+private:
+    static constexpr std::uint32_t FRAMES_IN_FLIGHT{ 3 };
     static constexpr std::uint32_t LINES_BUFFER_BASE_SIZE{ 32768 };
 
-public:
+    static constexpr VkClearValue CLEAR_VALUES{};
+
     const Window& m_window;
-    Swapchain m_swapchain;
+    class Swapchain m_swapchain;
     std::array<Frame, FRAMES_IN_FLIGHT> m_frames;
+
+    /*float m_renderScale{ 1.f };*/
+    /*    inline void SetCamera(const Math::Matrix4x4f& viewProjection)*/
+    /*{*/
+    /*    m_cameraData.m_viewProjection = viewProjection;*/
+    /*}*/
+
+    // might need to set camera instead of updating scene buffer
+    /*struct CameraData*/
+    /*{*/
+    /*    Math::Matrix4x4f m_viewProjection{ Math::identity<float>() };*/
+    /*} m_cameraData;*/
 
     DescriptorPool m_descriptorPool;
 
@@ -117,13 +144,19 @@ public:
     std::vector<Vertex_PositionColor> m_lines;
 
     std::array<
-        std::vector<Renderable>,
+        std::vector<Renderable*>,
         static_cast<std::uint32_t>(RendererEntity::COUNT)>
         m_renderables;
 
+    // Ensure resource synchronization (e.g., per-frame uniform buffers) to
+    // prevent data races
     FrameData m_frameData;
     DescriptorSetLayout m_frameDataSetLayout;
     DescriptorSet m_frameDataSet;
     Buffer m_frameDataBuffer;
+
+public:
+    DescriptorSetLayout m_materialSetLayout;
+    DescriptorSet m_materialSet;
 };
 }
