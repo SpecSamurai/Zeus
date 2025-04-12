@@ -603,7 +603,6 @@ void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
         cmd.BindIndexBuffer(*entity->m_mesh->GetIndexBuffer());
 
         /*cmd.Draw((std::uint32_t)mesh.m_mesh->m_vertexBuffer.GetSize(), 0);*/
-        /*cmd.DrawIndexed(static_cast<std::uint32_t>(entity.m_mesh->m_indices.size()));*/
         cmd.DrawIndexed(entity->m_mesh->GetIndexCount());
     }
 }
