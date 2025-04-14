@@ -35,7 +35,10 @@ void VkContext::Initialize(const Window& window)
     instanceBuilder.SetApplicationVersion(VK_MAKE_VERSION(0, 0, 1));
     instanceBuilder.SetExtensions(getRequiredGlobalExtensions());
 
-    Instance instance{ instanceBuilder.Build() };
+    struct Instance instance
+    {
+        instanceBuilder.Build()
+    };
 
     s_instance = instance.handle;
     s_debugUtilsMessenger = instance.debugUtilsMessenger;
@@ -83,32 +86,32 @@ void VkContext::Destroy()
     s_instance = VK_NULL_HANDLE;
 }
 
-VkInstance VkContext::GetInstance()
+VkInstance VkContext::Instance()
 {
     return s_instance;
 }
 
-Device& VkContext::GetDevice()
+Device& VkContext::Device()
 {
     return s_device;
 }
 
-VkDevice VkContext::GetLogicalDevice()
+VkDevice VkContext::LogicalDevice()
 {
     return s_device.GetLogicalDevice();
 }
 
-DeletionQueue& VkContext::GetDeletionQueue()
+DeletionQueue& VkContext::DeletionQueue()
 {
     return s_deletionQueue;
 }
 
-VkSurfaceKHR VkContext::GetSurface()
+VkSurfaceKHR VkContext::Surface()
 {
     return s_surface;
 }
 
-VmaAllocator VkContext::GetAllocator()
+VmaAllocator VkContext::Allocator()
 {
     return s_allocator;
 }

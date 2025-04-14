@@ -19,12 +19,12 @@ public:
     static void Initialize(const Window& window);
     static void Destroy();
 
-    static VkInstance GetInstance();
-    static Device& GetDevice();
-    static VkDevice GetLogicalDevice();
-    static DeletionQueue& GetDeletionQueue();
-    static VkSurfaceKHR GetSurface();
-    static VmaAllocator GetAllocator();
+    static VkInstance Instance();
+    static Device& Device();
+    static VkDevice LogicalDevice();
+    static DeletionQueue& DeletionQueue();
+    static VkSurfaceKHR Surface();
+    static VmaAllocator Allocator();
 
     static VkQueue GetQueue(QueueType type);
     static std::uint32_t GetQueueFamily(QueueType type);
@@ -38,8 +38,8 @@ private:
     static VkInstance s_instance;
     static VkDebugUtilsMessengerEXT s_debugUtilsMessenger;
     static VkSurfaceKHR s_surface;
-    static Device s_device;
+    static class Device s_device;
     static VmaAllocator s_allocator;
-    static DeletionQueue s_deletionQueue;
+    static class DeletionQueue s_deletionQueue;
 };
 }
