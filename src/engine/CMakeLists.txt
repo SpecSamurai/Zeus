@@ -3,7 +3,8 @@ find_package(Vulkan REQUIRED)
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt
-    GIT_TAG 11.0.2)
+    GIT_TAG 11.0.2
+)
 FetchContent_MakeAvailable(fmt)
 
 set_target_properties(fmt PROPERTIES FOLDER "Libraries")
@@ -13,7 +14,6 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/glfw/glfw.git
     GIT_TAG 3.4
 )
-
 FetchContent_MakeAvailable(glfw)
 
 FetchContent_Declare(
@@ -24,6 +24,19 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(fastgltf)
 
 set_target_properties(fastgltf PROPERTIES FOLDER "Libraries")
+
+FetchContent_Declare(
+    xxhash
+    GIT_REPOSITORY https://github.com/Cyan4973/xxHash.git
+    GIT_TAG v0.8.3
+    SOURCE_SUBDIR cmake_unofficial
+)
+FetchContent_MakeAvailable(xxhash)
+
+set_target_properties(
+    xxhash
+    xxhsum
+    PROPERTIES FOLDER "Libraries")
 
 add_library(Engine STATIC
     application/Application.cpp
@@ -57,6 +70,7 @@ add_library(Engine STATIC
     core/Engine.cpp
     core/Engine.hpp
     core/FileSystem.hpp
+    core/Hasher.hpp
     core/World.cpp
     core/World.hpp
 
@@ -216,6 +230,7 @@ target_link_libraries(Engine
         stb
         fastgltf
         tinyobjloader
+        xxhash
 )
 
 target_compile_options(Engine PRIVATE

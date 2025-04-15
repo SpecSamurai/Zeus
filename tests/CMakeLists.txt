@@ -21,6 +21,8 @@ enable_testing()
 add_executable(Tests
     engine/commands/CommandStackTest.cpp
 
+    engine/core/HasherTest.cpp
+
     engine/ecs/ComponentSparseSetIteratorTest.cpp
     engine/ecs/ComponentSparseSetTest.cpp
     engine/ecs/FamilyIdTest.cpp

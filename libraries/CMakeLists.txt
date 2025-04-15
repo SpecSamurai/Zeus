@@ -59,4 +59,6 @@ add_library(tinyobjloader STATIC
     tinyobjloader/tiny_obj_loader.h
 )
 
+set_target_properties(tinyobjloader PROPERTIES FOLDER "Libraries")
+
 target_include_directories(tinyobjloader INTERFACE tinyobjloader)
