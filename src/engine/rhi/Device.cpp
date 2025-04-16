@@ -77,6 +77,8 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
     const auto& limits{ physicalDevice.properties.limits };
     m_maxImageDimension2D = limits.maxImageDimension2D;
     m_maxPushConstantsSize = limits.maxPushConstantsSize;
+    m_minUniformBufferOffsetAlignment = limits.minUniformBufferOffsetAlignment;
+    m_minStorageBufferOffsetAlignment = limits.minStorageBufferOffsetAlignment;
 
     m_physicalDevice = physicalDevice.handle;
     std::uint32_t graphicsFamily =
@@ -235,7 +237,7 @@ DeviceMemoryBudget Device::GetMemoryBudget() const
         &memory_properties);
 
     VmaBudget budgets[VK_MAX_MEMORY_HEAPS];
-    vmaGetHeapBudgets(VkContext::GetAllocator(), budgets);
+    vmaGetHeapBudgets(VkContext::Allocator(), budgets);
 
     for (std::uint32_t i{ 0 }; i < VK_MAX_MEMORY_HEAPS; ++i)
     {
@@ -271,5 +273,15 @@ std::uint32_t Device::GetMaxImageDimension2D() const
 std::uint32_t Device::GetMaxPushConstantsSize() const
 {
     return m_maxPushConstantsSize;
+}
+
+VkDeviceSize Device::GetMinUniformBufferOffsetAlignment() const
+{
+    return m_minUniformBufferOffsetAlignment;
+}
+
+VkDeviceSize Device::GetMinStorageBufferOffsetAlignment() const
+{
+    return m_minStorageBufferOffsetAlignment;
 }
 }

@@ -40,6 +40,8 @@ public:
 
     std::uint32_t GetMaxImageDimension2D() const;
     std::uint32_t GetMaxPushConstantsSize() const;
+    VkDeviceSize GetMinUniformBufferOffsetAlignment() const;
+    VkDeviceSize GetMinStorageBufferOffsetAlignment() const;
 
 private:
     VkDevice m_logicalDevice{ VK_NULL_HANDLE };
@@ -56,5 +58,7 @@ private:
 
     std::uint32_t m_maxImageDimension2D;
     std::uint32_t m_maxPushConstantsSize;
+    VkDeviceSize m_minUniformBufferOffsetAlignment;
+    VkDeviceSize m_minStorageBufferOffsetAlignment;
 };
 }
