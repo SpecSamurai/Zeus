@@ -50,9 +50,9 @@ void UserInterface::Initialize(const Window& window)
 
     auto& swapchain{ Engine::Renderer().GetSwapchain() };
     ImGui_ImplVulkan_InitInfo initInfo{};
-    initInfo.Instance = VkContext::GetInstance();
-    initInfo.PhysicalDevice = VkContext::GetDevice().GetPhysicalDevice();
-    initInfo.Device = VkContext::GetLogicalDevice();
+    initInfo.Instance = VkContext::Instance();
+    initInfo.PhysicalDevice = VkContext::Device().GetPhysicalDevice();
+    initInfo.Device = VkContext::LogicalDevice();
     initInfo.QueueFamily = VkContext::GetQueueFamily(QueueType::Graphics);
     initInfo.Queue = VkContext::GetQueue(QueueType::Graphics);
     // init_info.PipelineCache = YOUR_PIPELINE_CACHE;

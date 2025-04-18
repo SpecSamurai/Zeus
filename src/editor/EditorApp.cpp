@@ -106,7 +106,7 @@ void EditorApp::Shutdown()
 {
     LOG_DEBUG("Shutting down Editor Application");
 
-    VkContext::GetDevice().Wait();
+    VkContext::Device().Wait();
 
     m_userInterface.Destroy();
 

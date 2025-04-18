@@ -26,7 +26,7 @@ void Engine::Shutdown()
 {
     LOG_DEBUG("Shutting down the engine.");
 
-    VkContext::GetDevice().Wait();
+    VkContext::Device().Wait();
 
     s_renderer->Destroy();
 
