@@ -24,7 +24,7 @@ CommandPool::CommandPool(
 
     VKCHECK(
         vkCreateCommandPool(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &createInfo,
             allocationCallbacks.get(),
             &m_handle),
@@ -63,14 +63,14 @@ CommandPool::~CommandPool()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDeletionQueue().Add(ResourceType::CommandPool, m_handle);
+    VkContext::DeletionQueue().Add(ResourceType::CommandPool, m_handle);
     m_handle = VK_NULL_HANDLE;
 }
 
 void CommandPool::Destroy()
 {
     vkDestroyCommandPool(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
@@ -87,7 +87,7 @@ VkCommandBuffer CommandPool::AllocateBuffer(VkCommandBufferLevel level) const
     VkCommandBuffer commandBuffer;
     VKCHECK(
         vkAllocateCommandBuffers(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &allocateInfo,
             &commandBuffer),
         "Failed to allocate command buffers.");
@@ -108,7 +108,7 @@ void CommandPool::AllocateBuffers(
 
     VKCHECK(
         vkAllocateCommandBuffers(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &allocateInfo,
             commandBuffers.data()),
         "Failed to allocate command buffers.");
@@ -117,7 +117,7 @@ void CommandPool::AllocateBuffers(
 void CommandPool::Reset(VkCommandPoolResetFlags flags) const
 {
     VKCHECK(
-        vkResetCommandPool(VkContext::GetLogicalDevice(), m_handle, flags),
+        vkResetCommandPool(VkContext::LogicalDevice(), m_handle, flags),
         "Failed to reset command pool.");
 }
 

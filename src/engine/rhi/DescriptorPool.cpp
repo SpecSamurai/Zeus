@@ -27,7 +27,7 @@ DescriptorPool::DescriptorPool(
 
     VKCHECK(
         vkCreateDescriptorPool(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &createInfo,
             allocationCallbacks.get(),
             &m_handle),
@@ -41,7 +41,7 @@ DescriptorPool::~DescriptorPool()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDeletionQueue().Add(ResourceType::DescriptorPool, m_handle);
+    VkContext::DeletionQueue().Add(ResourceType::DescriptorPool, m_handle);
     m_handle = VK_NULL_HANDLE;
 }
 
@@ -73,7 +73,7 @@ DescriptorPool& DescriptorPool::operator=(DescriptorPool&& other)
 void DescriptorPool::Destroy()
 {
     vkDestroyDescriptorPool(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
@@ -92,7 +92,7 @@ VkDescriptorSet DescriptorPool::Allocate(
 
     VKCHECK(
         vkAllocateDescriptorSets(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &allocateInfo,
             &descriptorSet),
         "Failed to allocate descriptor set.");
@@ -103,7 +103,7 @@ VkDescriptorSet DescriptorPool::Allocate(
 void DescriptorPool::Reset() const
 {
     VKCHECK(
-        vkResetDescriptorPool(VkContext::GetLogicalDevice(), m_handle, 0),
+        vkResetDescriptorPool(VkContext::LogicalDevice(), m_handle, 0),
         "Failed to reset descriptor pool.");
 }
 
