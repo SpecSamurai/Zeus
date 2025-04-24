@@ -75,14 +75,14 @@ Shader::~Shader()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDeletionQueue().Add(ResourceType::Shader, m_handle);
+    VkContext::DeletionQueue().Add(ResourceType::Shader, m_handle);
     m_handle = VK_NULL_HANDLE;
 }
 
 void Shader::Destroy()
 {
     vkDestroyShaderModule(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
@@ -157,7 +157,7 @@ VkResult Shader::loadShader()
 
     VkResult result{
         vkCreateShaderModule(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &createInfo,
             allocationCallbacks.get(),
             &m_handle),

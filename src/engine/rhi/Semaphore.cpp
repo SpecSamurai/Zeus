@@ -28,7 +28,7 @@ Semaphore::Semaphore(std::string_view name, bool isTimeline)
 
     VKCHECK(
         vkCreateSemaphore(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &createInfo,
             allocationCallbacks.get(),
             &m_handle),
@@ -69,14 +69,14 @@ Semaphore::~Semaphore()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDeletionQueue().Add(ResourceType::Semaphore, m_handle);
+    VkContext::DeletionQueue().Add(ResourceType::Semaphore, m_handle);
     m_handle = VK_NULL_HANDLE;
 }
 
 void Semaphore::Destroy()
 {
     vkDestroySemaphore(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
@@ -96,7 +96,7 @@ void Semaphore::Wait(const std::uint64_t value, const std::uint64_t timeout_ns)
     waitInfo.pValues = &value;
 
     VKCHECK(
-        vkWaitSemaphores(VkContext::GetLogicalDevice(), &waitInfo, timeout_ns),
+        vkWaitSemaphores(VkContext::LogicalDevice(), &waitInfo, timeout_ns),
         "Failed to wait for Semaphore.");
 }
 
@@ -111,7 +111,7 @@ void Semaphore::Signal(const std::uint64_t value) const
     signalInfo.value = value;
 
     VKCHECK(
-        vkSignalSemaphore(VkContext::GetLogicalDevice(), &signalInfo),
+        vkSignalSemaphore(VkContext::LogicalDevice(), &signalInfo),
         "Failed to signal Semaphore.");
 }
 
@@ -123,7 +123,7 @@ std::uint64_t Semaphore::GetValue() const
 
     VKCHECK(
         vkGetSemaphoreCounterValue(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             m_handle,
             &value),
         "Failed to get Semaphore counter value");

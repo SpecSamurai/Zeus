@@ -17,7 +17,7 @@ Queue::Queue(std::string_view name, const QueueType type, std::uint32_t family)
       m_family{ family },
       m_type{ type }
 {
-    vkGetDeviceQueue(VkContext::GetLogicalDevice(), family, 0, &m_handle);
+    vkGetDeviceQueue(VkContext::LogicalDevice(), family, 0, &m_handle);
 
     VkContext::SetDebugName(VK_OBJECT_TYPE_QUEUE, m_handle, m_name);
 }

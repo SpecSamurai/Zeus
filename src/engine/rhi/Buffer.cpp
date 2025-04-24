@@ -60,7 +60,7 @@ Buffer::Buffer(
 
     VKCHECK(
         vmaCreateBuffer(
-            VkContext::GetAllocator(),
+            VkContext::Allocator(),
             &createInfo,
             &allocationCreateInfo,
             &m_handle,
@@ -76,7 +76,7 @@ Buffer::Buffer(
         deviceAddressInfo.buffer = m_handle;
 
         m_deviceAddress = vkGetBufferDeviceAddress(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &deviceAddressInfo);
     }
 
@@ -129,12 +129,12 @@ Buffer::~Buffer()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDeletionQueue().AddBuffer(m_handle, m_allocation);
+    VkContext::DeletionQueue().AddBuffer(m_handle, m_allocation);
 }
 
 void Buffer::Destroy()
 {
-    vmaDestroyBuffer(VkContext::GetAllocator(), m_handle, m_allocation);
+    vmaDestroyBuffer(VkContext::Allocator(), m_handle, m_allocation);
 
     m_handle = VK_NULL_HANDLE;
     m_allocation = VK_NULL_HANDLE;
@@ -172,7 +172,7 @@ void Buffer::Update(
 
         staging.Update(data, dataSize);
 
-        VkContext::GetDevice().CmdImmediateSubmit(
+        VkContext::Device().CmdImmediateSubmit(
             [&](const CommandBuffer& commandBuffer) {
                 commandBuffer.CopyBuffer(
                     staging.GetHandle(),

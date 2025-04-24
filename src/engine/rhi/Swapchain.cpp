@@ -32,8 +32,8 @@ Swapchain::Swapchain(
 {
     assert(width > 0 && height > 0);
     assert(
-        width <= VkContext::GetDevice().GetMaxImageDimension2D() &&
-        height <= VkContext::GetDevice().GetMaxImageDimension2D());
+        width <= VkContext::Device().GetMaxImageDimension2D() &&
+        height <= VkContext::Device().GetMaxImageDimension2D());
 
     Create();
 }
@@ -100,7 +100,7 @@ Swapchain::~Swapchain()
 void Swapchain::Create()
 {
     SurfaceDetails surfaceDetails{
-        getSurfaceDetails(VkContext::GetDevice().GetPhysicalDevice(), m_surface)
+        getSurfaceDetails(VkContext::Device().GetPhysicalDevice(), m_surface)
     };
 
     std::vector<VkSurfaceFormatKHR> desiredSurfaceFormats{
@@ -192,7 +192,7 @@ void Swapchain::Create()
 
     VKCHECK(
         vkCreateSwapchainKHR(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &createInfo,
             allocationCallbacks.get(),
             &m_handle),
@@ -201,7 +201,7 @@ void Swapchain::Create()
     m_imageFormat = surfaceFormat.format;
 
     vkGetSwapchainImagesKHR(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         &m_imageCount,
         nullptr);
@@ -210,7 +210,7 @@ void Swapchain::Create()
     m_layouts.resize(m_imageCount);
 
     vkGetSwapchainImagesKHR(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         &m_imageCount,
         m_images.data());
@@ -242,7 +242,7 @@ void Swapchain::Create()
 
         VKCHECK(
             vkCreateImageView(
-                VkContext::GetLogicalDevice(),
+                VkContext::LogicalDevice(),
                 &createInfo,
                 allocationCallbacks.get(),
                 &m_imageViews[i]),
@@ -284,7 +284,7 @@ void Swapchain::Destroy()
     DestroyResources();
 
     vkDestroySwapchainKHR(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
@@ -305,7 +305,7 @@ void Swapchain::Present(VkCommandBuffer commandBuffer)
         CurrentFrame().renderCompleteSemaphore.GetHandle(),
         VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT) };
 
-    VkContext::GetDevice()
+    VkContext::Device()
         .GetQueue(QueueType::Graphics)
         .Submit(
             CurrentFrame().renderFence.GetHandle(),
@@ -362,7 +362,7 @@ void Swapchain::AcquireNextImage()
     CurrentFrame().renderFence.Wait();
 
     VkResult result{ vkAcquireNextImageKHR(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         UINT64_MAX,
         CurrentFrame().imageAcquiredSemaphore.GetHandle(),
@@ -387,8 +387,8 @@ void Swapchain::Resize(std::uint32_t width, std::uint32_t height)
 {
     assert(width > 0 && height > 0);
     assert(
-        width <= VkContext::GetDevice().GetMaxImageDimension2D() &&
-        height <= VkContext::GetDevice().GetMaxImageDimension2D());
+        width <= VkContext::Device().GetMaxImageDimension2D() &&
+        height <= VkContext::Device().GetMaxImageDimension2D());
 
     m_extent = VkExtent2D{ .width = width, .height = height };
 
@@ -401,7 +401,7 @@ void Swapchain::Resize(std::uint32_t width, std::uint32_t height)
     Create();
 
     vkDestroySwapchainKHR(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         oldSwapchain,
         allocationCallbacks.get());
     oldSwapchain = VK_NULL_HANDLE;
@@ -417,7 +417,7 @@ void Swapchain::SetVsync(const bool enable)
         if (enable)
         {
             SurfaceDetails surfaceDetails{ getSurfaceDetails(
-                VkContext::GetDevice().GetPhysicalDevice(),
+                VkContext::Device().GetPhysicalDevice(),
                 m_surface) };
 
             m_presentMode = selectPresentMode(
@@ -549,7 +549,7 @@ void Swapchain::DestroyResources()
     for (auto& imageView : m_imageViews)
     {
         vkDestroyImageView(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             imageView,
             allocationCallbacks.get());
     }

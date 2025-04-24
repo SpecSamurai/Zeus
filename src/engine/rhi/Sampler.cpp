@@ -45,7 +45,7 @@ Sampler::Sampler(
 
     VKCHECK(
         vkCreateSampler(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &createInfo,
             allocationCallbacks.get(),
             &m_handle),
@@ -100,14 +100,14 @@ Sampler::~Sampler()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDeletionQueue().Add(ResourceType::Sampler, m_handle);
+    VkContext::DeletionQueue().Add(ResourceType::Sampler, m_handle);
     m_handle = VK_NULL_HANDLE;
 }
 
 void Sampler::Destroy()
 {
     vkDestroySampler(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;

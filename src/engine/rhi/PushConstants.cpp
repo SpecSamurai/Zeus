@@ -12,7 +12,7 @@ PushConstants::PushConstants(
       m_offset{ offset },
       m_size{ size }
 {
-    assert(m_size <= VkContext::GetDevice().GetMaxPushConstantsSize());
+    assert(m_size <= VkContext::Device().GetMaxPushConstantsSize());
 }
 
 VkShaderStageFlags PushConstants::GetStageFlags() const

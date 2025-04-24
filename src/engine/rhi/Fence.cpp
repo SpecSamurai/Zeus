@@ -22,7 +22,7 @@ Fence::Fence(std::string_view name, bool signaled) : m_name{ name }
 
     VKCHECK(
         vkCreateFence(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &createInfo,
             allocationCallbacks.get(),
             &m_handle),
@@ -61,14 +61,14 @@ Fence::~Fence()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDeletionQueue().Add(ResourceType::Fence, m_handle);
+    VkContext::DeletionQueue().Add(ResourceType::Fence, m_handle);
     m_handle = VK_NULL_HANDLE;
 }
 
 void Fence::Destroy()
 {
     vkDestroyFence(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
@@ -77,7 +77,7 @@ void Fence::Destroy()
 bool Fence::Wait(std::uint64_t timeout_ns) const
 {
     return vkWaitForFences(
-               VkContext::GetLogicalDevice(),
+               VkContext::LogicalDevice(),
                1,
                &m_handle,
                VK_TRUE,
@@ -87,13 +87,13 @@ bool Fence::Wait(std::uint64_t timeout_ns) const
 void Fence::Reset() const
 {
     VKCHECK(
-        vkResetFences(VkContext::GetLogicalDevice(), 1, &m_handle),
+        vkResetFences(VkContext::LogicalDevice(), 1, &m_handle),
         "Failed to reset fence");
 }
 
 bool Fence::Signaled() const
 {
-    return vkGetFenceStatus(VkContext::GetLogicalDevice(), m_handle) ==
+    return vkGetFenceStatus(VkContext::LogicalDevice(), m_handle) ==
            VK_SUCCESS;
 }
 
