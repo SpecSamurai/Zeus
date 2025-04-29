@@ -22,8 +22,14 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
     requestedFeatures.samplerAnisotropy = VK_TRUE;
     requestedFeatures.fillModeNonSolid = VK_TRUE;
 
+    VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParametersFeatures{};
+    shaderDrawParametersFeatures.sType =
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES;
+    shaderDrawParametersFeatures.shaderDrawParameters = VK_TRUE;
+
     VkPhysicalDeviceVulkan13Features features1_3{};
     features1_3.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+    features1_3.pNext = &shaderDrawParametersFeatures;
     features1_3.dynamicRendering = VK_TRUE;
     features1_3.synchronization2 = VK_TRUE;
 
