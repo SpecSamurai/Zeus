@@ -38,9 +38,24 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
     features1_2.pNext = &features1_3;
     features1_2.bufferDeviceAddress = VK_TRUE;
     features1_2.descriptorIndexing = VK_TRUE;
+
     features1_2.descriptorBindingPartiallyBound = VK_TRUE;
     features1_2.descriptorBindingVariableDescriptorCount = VK_TRUE;
+
+    /*VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};*/
     features1_2.runtimeDescriptorArray = VK_TRUE;
+
+    features1_2.shaderStorageBufferArrayNonUniformIndexing = VK_TRUE;
+    features1_2.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+    features1_2.shaderStorageImageArrayNonUniformIndexing = VK_TRUE;
+    features1_2.shaderUniformBufferArrayNonUniformIndexing = VK_TRUE;
+
+    features1_2.descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE;
+    features1_2.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
+    features1_2.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE;
+
+    // GPU doesn't support
+    // features1_2.descriptorBindingUniformBufferUpdateAfterBind = VK_TRUE;
 
     VkPhysicalDeviceFeatures2 features2{};
     features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
@@ -53,6 +68,7 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
         VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
         VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
         VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
+        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
     };
 
     PhysicalDeviceSelectorInfo info{

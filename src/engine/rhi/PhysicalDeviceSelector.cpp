@@ -93,8 +93,9 @@ bool PhysicalDeviceSelector::Validate(const PhysicalDeviceSelectorInfo& info)
              info.extensions.end(),
              VK_KHR_SWAPCHAIN_EXTENSION_NAME) == info.extensions.end()))
     {
-        LOG_ERROR("Present is required but extension is not set. {}",
-                  VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        LOG_ERROR(
+            "Present is required but extension is not set. {}",
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         isValid = false;
     }
 
@@ -288,6 +289,86 @@ bool PhysicalDeviceSelector::CheckPhysicalDeviceFeatures(
     {
         LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
                   "descriptorIndexing.");
+        isValid = false;
+    }
+
+    if (info.features1_2.descriptorBindingPartiallyBound &&
+        !features1_2.descriptorBindingPartiallyBound)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "descriptorBindingPartiallyBound.");
+        isValid = false;
+    }
+
+    if (info.features1_2.descriptorBindingVariableDescriptorCount &&
+        !features1_2.descriptorBindingVariableDescriptorCount)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "descriptorBindingVariableDescriptorCount.");
+        isValid = false;
+    }
+
+    if (info.features1_2.runtimeDescriptorArray &&
+        !features1_2.runtimeDescriptorArray)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "runtimeDescriptorArray.");
+        isValid = false;
+    }
+
+    if (info.features1_2.shaderStorageBufferArrayNonUniformIndexing &&
+        !features1_2.shaderStorageBufferArrayNonUniformIndexing)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "shaderStorageBufferArrayNonUniformIndexing.");
+        isValid = false;
+    }
+
+    if (info.features1_2.shaderSampledImageArrayNonUniformIndexing &&
+        !features1_2.shaderSampledImageArrayNonUniformIndexing)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "shaderSampledImageArrayNonUniformIndexing.");
+        isValid = false;
+    }
+
+    if (info.features1_2.shaderStorageImageArrayNonUniformIndexing &&
+        !features1_2.shaderStorageImageArrayNonUniformIndexing)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "shaderStorageImageArrayNonUniformIndexing.");
+        isValid = false;
+    }
+
+    if (info.features1_2.shaderUniformBufferArrayNonUniformIndexing &&
+        !features1_2.shaderUniformBufferArrayNonUniformIndexing)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "shaderUniformBufferArrayNonUniformIndexing.");
+        isValid = false;
+    }
+
+    if (info.features1_2.descriptorBindingStorageBufferUpdateAfterBind &&
+        !features1_2.descriptorBindingStorageBufferUpdateAfterBind)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "descriptorBindingStorageBufferUpdateAfterBind.");
+        isValid = false;
+    }
+
+    if (info.features1_2.descriptorBindingSampledImageUpdateAfterBind &&
+        !features1_2.descriptorBindingSampledImageUpdateAfterBind)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "descriptorBindingSampledImageUpdateAfterBind.");
+        isValid = false;
+    }
+
+    if (info.features1_2.descriptorBindingStorageImageUpdateAfterBind &&
+        !features1_2.descriptorBindingStorageImageUpdateAfterBind)
+    {
+        LOG_ERROR("Device doesn't support VkPhysicalDeviceVulkan12Features "
+                  "descriptorBindingStorageImageUpdateAfterBind.");
         isValid = false;
     }
 
