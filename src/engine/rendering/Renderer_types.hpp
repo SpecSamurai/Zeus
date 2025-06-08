@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/definitions.hpp"
+#include "math/transformations.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -8,6 +9,20 @@
 
 namespace Zeus
 {
+namespace Materials
+{
+using Index = std::uint32_t;
+
+static constexpr Index InvalidIndex{ std::numeric_limits<Index>().max() };
+}
+
+namespace Textures
+{
+using Index = std::uint32_t;
+
+static constexpr Index InvalidIndex{ std::numeric_limits<Index>().max() };
+}
+
 enum class RendererEntity : std::uint8_t
 {
     MESH_OPAQUE,
@@ -73,10 +88,25 @@ enum class MaterialProperty : std::uint8_t
 };
 
 // descriptor set 0 for engine-global resources bound once pe frame
-struct FrameData
+struct BindlessMaterial
+{
+};
+
+// descriptor set 1 for engine-global resources bound once pe frame
+struct UniformBufferFrame
 {
     alignas(16) Math::Matrix4x4f view_projection;
 };
+
+// 128 bytes/Resource per draw
+struct PassPushConstants
+{
+    Math::Matrix4x4f model{ Math::identity<Math::Matrix4x4f>() };
+    alignas(8) VkDeviceAddress vertexBufferAddress;
+    alignas(4) Materials::Index materialIndex{ Materials::InvalidIndex };
+};
+
+static_assert(sizeof(PassPushConstants) <= 128, "Push constants size limit.");
 
 // descriptor set 1 for per-pass resources, and bound once per pass
 // struct Pass
@@ -93,9 +123,12 @@ struct FrameData
 // {
 // };
 
-struct MeshPushConstants
+struct GPUSceneData
 {
-    Math::Matrix4x4f model;
-    VkDeviceAddress vertexBufferAddress;
+    Math::Vector4f fogColor;     // w is for exponent
+    Math::Vector4f fogDistances; // x for min, y for max, zw unused.
+    Math::Vector4f ambientColor;
+    Math::Vector4f sunlightDirection; // w for sun power
+    Math::Vector4f sunlightColor;
 };
 }
