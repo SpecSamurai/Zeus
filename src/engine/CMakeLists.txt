@@ -153,8 +153,6 @@ add_library(Engine STATIC
     rhi/DeletionQueue.hpp
     rhi/DepthStencilState.cpp
     rhi/DepthStencilState.hpp
-    rhi/Descriptor.cpp
-    rhi/Descriptor.hpp
     rhi/DescriptorPool.cpp
     rhi/DescriptorPool.hpp
     rhi/DescriptorSet.cpp

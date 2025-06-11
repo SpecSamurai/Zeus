@@ -22,6 +22,7 @@ struct Vertex_PositionTexture
 };
 
 // UV parameters are interleaved is due to alignement limitations
+// Tangent
 struct Vertex
 {
     Math::Vector3f position;
