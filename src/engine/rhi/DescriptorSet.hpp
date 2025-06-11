@@ -17,7 +17,7 @@ public:
     DescriptorSet() = default;
     DescriptorSet(
         std::string_view name,
-        DescriptorSetLayout& descriptorSetLayout,
+        const DescriptorSetLayout& descriptorSetLayout,
         DescriptorPool& descriptorPool);
 
     DescriptorSet(const DescriptorSet&) = delete;
@@ -27,8 +27,17 @@ public:
     DescriptorSet& operator=(DescriptorSet&& other);
 
     void Update(
-        const std::vector<DescriptorBuffer>& bufferDescriptors,
-        const std::vector<DescriptorImage>& imageDescriptors);
+        const std::vector<VkDescriptorBufferInfo>& imageInfos,
+        std::uint32_t dstBinding,
+        VkDescriptorType descriptorType,
+        std::uint32_t dstArrayElement = 0);
+
+    void Update(
+        const std::vector<VkDescriptorImageInfo>& imageInfos,
+        std::uint32_t dstBinding,
+        VkDescriptorType descriptorType =
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        std::uint32_t dstArrayElement = 0);
 
     VkDescriptorSet GetHandle() const;
 
@@ -39,7 +48,6 @@ public:
 
 private:
     VkDescriptorSet m_handle{ VK_NULL_HANDLE };
-    std::uint32_t m_binding;
 
     std::string_view m_name;
 };
