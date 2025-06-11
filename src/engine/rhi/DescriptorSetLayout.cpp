@@ -1,7 +1,6 @@
 #include "DescriptorSetLayout.hpp"
 
 #include "Definitions.hpp"
-#include "Descriptor.hpp"
 #include "VkContext.hpp"
 #include "vulkan/vulkan_debug.hpp"
 
@@ -14,33 +13,33 @@ namespace Zeus
 {
 DescriptorSetLayout::DescriptorSetLayout(
     std::string_view name,
-    const std::vector<Descriptor>& descriptors)
-    : m_descriptors{ descriptors },
-      m_name{ name }
+    const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
+    VkDescriptorSetLayoutCreateFlags flags,
+    const std::vector<VkDescriptorBindingFlags>& bindingFlags)
+    : m_name{ name }
 {
-    std::vector<VkDescriptorSetLayoutBinding> layoutBindings{};
-    layoutBindings.reserve(m_descriptors.size());
-
-    for (const Descriptor& descriptor : m_descriptors)
-    {
-        VkDescriptorSetLayoutBinding layoutBinding{};
-        layoutBinding.binding = descriptor.GetBinding();
-        layoutBinding.descriptorType = descriptor.GetType();
-        layoutBinding.descriptorCount = 1;
-        layoutBinding.stageFlags = descriptor.GetStageFlags();
-        layoutBinding.pImmutableSamplers = nullptr;
-        layoutBindings.emplace_back(layoutBinding);
-    }
-
     VkDescriptorSetLayoutCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    createInfo.flags = 0;
+    createInfo.flags = flags;
     createInfo.bindingCount = static_cast<std::uint32_t>(layoutBindings.size());
     createInfo.pBindings = layoutBindings.data();
+    createInfo.pNext = nullptr;
+
+    VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsCreateInfo{};
+    if (!bindingFlags.empty())
+    {
+        bindingFlagsCreateInfo.sType =
+            VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+        bindingFlagsCreateInfo.bindingCount =
+            static_cast<std::uint32_t>(bindingFlags.size());
+        bindingFlagsCreateInfo.pBindingFlags = bindingFlags.data();
+
+        createInfo.pNext = &bindingFlagsCreateInfo;
+    }
 
     VKCHECK(
         vkCreateDescriptorSetLayout(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &createInfo,
             allocationCallbacks.get(),
             &m_handle),
@@ -54,11 +53,9 @@ DescriptorSetLayout::DescriptorSetLayout(
 
 DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept
     : m_handle{ other.m_handle },
-      m_descriptors{ other.m_descriptors },
       m_name{ other.m_name }
 {
     other.m_handle = VK_NULL_HANDLE;
-    other.m_descriptors.clear();
 }
 
 DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other)
@@ -71,11 +68,9 @@ DescriptorSetLayout& DescriptorSetLayout::operator=(DescriptorSetLayout&& other)
         }
 
         m_handle = other.m_handle;
-        m_descriptors = std::move(other.m_descriptors);
         m_name = other.m_name;
 
         other.m_handle = VK_NULL_HANDLE;
-        other.m_descriptors.clear();
     }
 
     return *this;
@@ -86,29 +81,22 @@ DescriptorSetLayout::~DescriptorSetLayout()
     if (m_handle == VK_NULL_HANDLE)
         return;
 
-    VkContext::GetDeletionQueue().Add(
-        ResourceType::DescriptorSetLayout,
-        m_handle);
+    VkContext::DeletionQueue().Add(ResourceType::DescriptorSetLayout, m_handle);
     m_handle = VK_NULL_HANDLE;
-    m_descriptors.clear();
 }
 
 void DescriptorSetLayout::Destroy()
 {
     vkDestroyDescriptorSetLayout(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         allocationCallbacks.get());
+
     m_handle = VK_NULL_HANDLE;
 }
 
 VkDescriptorSetLayout DescriptorSetLayout::GetHandle() const
 {
     return m_handle;
-}
-
-const std::vector<Descriptor>& DescriptorSetLayout::GetDescriptors() const
-{
-    return m_descriptors;
 }
 }

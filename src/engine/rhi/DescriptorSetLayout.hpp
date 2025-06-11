@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Descriptor.hpp"
-
 #include <vulkan/vulkan_core.h>
 
 #include <string_view>
@@ -16,7 +14,9 @@ public:
 
     DescriptorSetLayout(
         std::string_view name,
-        const std::vector<Descriptor>& descriptors);
+        const std::vector<VkDescriptorSetLayoutBinding>& layoutBindings,
+        VkDescriptorSetLayoutCreateFlags flags = 0,
+        const std::vector<VkDescriptorBindingFlags>& bindingFlags = {});
 
     DescriptorSetLayout(const DescriptorSetLayout&) = delete;
     DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
@@ -29,7 +29,6 @@ public:
     void Destroy();
 
     VkDescriptorSetLayout GetHandle() const;
-    const std::vector<Descriptor>& GetDescriptors() const;
 
     inline constexpr std::string_view GetName() const
     {
@@ -38,7 +37,6 @@ public:
 
 private:
     VkDescriptorSetLayout m_handle{ VK_NULL_HANDLE };
-    std::vector<Descriptor> m_descriptors;
 
     std::string_view m_name;
 };
