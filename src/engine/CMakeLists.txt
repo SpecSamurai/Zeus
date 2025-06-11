@@ -138,6 +138,7 @@ add_library(Engine STATIC
     rendering/Renderer_resources.cpp
     rendering/Renderer_resources.hpp
     rendering/Renderer_types.hpp
+    rendering/Vertex.hpp
 
     rhi/BlendState.cpp
     rhi/BlendState.hpp
@@ -186,7 +187,6 @@ add_library(Engine STATIC
     rhi/Shader.hpp
     rhi/Swapchain.cpp
     rhi/Swapchain.hpp
-    rhi/Vertex.hpp
     rhi/VertexInput.cpp
     rhi/VertexInput.hpp
     rhi/VkContext.cpp
