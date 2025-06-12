@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Definitions.hpp"
-#include "Descriptor.hpp"
 #include "VertexInput.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -40,7 +39,6 @@ public:
     VkShaderStageFlagBits GetShaderStage() const;
     ShaderCompilationState GetCompilationState() const;
     const std::vector<VertexInput>& GetVertexInputs() const;
-    const std::vector<Descriptor>& GetDescriptors() const;
     const char* GetEntryPoint() const;
     const char* GetFilePath() const;
 
@@ -55,7 +53,6 @@ private:
 private:
     VkShaderModule m_handle{ VK_NULL_HANDLE };
     std::vector<VertexInput> m_vertexInputs;
-    std::vector<Descriptor> m_descriptors;
 
     const char* m_entryPoint;
     const char* m_filePath;
