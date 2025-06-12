@@ -171,8 +171,6 @@ add_library(Engine STATIC
     rhi/PhysicalDeviceSelector.hpp
     rhi/Pipeline.cpp
     rhi/Pipeline.hpp
-    rhi/PushConstants.cpp
-    rhi/PushConstants.hpp
     rhi/Queue.cpp
     rhi/Queue.hpp
     rhi/RasterizationState.cpp
