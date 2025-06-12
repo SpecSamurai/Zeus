@@ -39,10 +39,12 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
     features1_2.bufferDeviceAddress = VK_TRUE;
     features1_2.descriptorIndexing = VK_TRUE;
 
+    // Enable non bound descriptors slots
     features1_2.descriptorBindingPartiallyBound = VK_TRUE;
     features1_2.descriptorBindingVariableDescriptorCount = VK_TRUE;
 
     /*VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};*/
+    // Enable non sized arrays
     features1_2.runtimeDescriptorArray = VK_TRUE;
 
     features1_2.shaderStorageBufferArrayNonUniformIndexing = VK_TRUE;
@@ -68,7 +70,6 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
         VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
         VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
         VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
-        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
     };
 
     PhysicalDeviceSelectorInfo info{
@@ -95,12 +96,7 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
     }
 
     PhysicalDevice physicalDevice{ selectedDevice.value() };
-
-    const auto& limits{ physicalDevice.properties.limits };
-    m_maxImageDimension2D = limits.maxImageDimension2D;
-    m_maxPushConstantsSize = limits.maxPushConstantsSize;
-    m_minUniformBufferOffsetAlignment = limits.minUniformBufferOffsetAlignment;
-    m_minStorageBufferOffsetAlignment = limits.minStorageBufferOffsetAlignment;
+    m_limits = physicalDevice.properties.limits;
 
     m_physicalDevice = physicalDevice.handle;
     std::uint32_t graphicsFamily =
@@ -287,23 +283,8 @@ VkPhysicalDevice Device::GetPhysicalDevice() const
     return m_physicalDevice;
 }
 
-std::uint32_t Device::GetMaxImageDimension2D() const
+const VkPhysicalDeviceLimits& Device::GetLimits() const
 {
-    return m_maxImageDimension2D;
-}
-
-std::uint32_t Device::GetMaxPushConstantsSize() const
-{
-    return m_maxPushConstantsSize;
-}
-
-VkDeviceSize Device::GetMinUniformBufferOffsetAlignment() const
-{
-    return m_minUniformBufferOffsetAlignment;
-}
-
-VkDeviceSize Device::GetMinStorageBufferOffsetAlignment() const
-{
-    return m_minStorageBufferOffsetAlignment;
+    return m_limits;
 }
 }

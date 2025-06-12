@@ -8,7 +8,6 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <cstdint>
 #include <functional>
 
 namespace Zeus
@@ -38,10 +37,7 @@ public:
     VkDevice GetLogicalDevice() const;
     VkPhysicalDevice GetPhysicalDevice() const;
 
-    std::uint32_t GetMaxImageDimension2D() const;
-    std::uint32_t GetMaxPushConstantsSize() const;
-    VkDeviceSize GetMinUniformBufferOffsetAlignment() const;
-    VkDeviceSize GetMinStorageBufferOffsetAlignment() const;
+    const VkPhysicalDeviceLimits& GetLimits() const;
 
 private:
     VkDevice m_logicalDevice{ VK_NULL_HANDLE };
@@ -56,9 +52,6 @@ private:
     Queue m_transferQueue;
     Queue m_computeQueue;
 
-    std::uint32_t m_maxImageDimension2D;
-    std::uint32_t m_maxPushConstantsSize;
-    VkDeviceSize m_minUniformBufferOffsetAlignment;
-    VkDeviceSize m_minStorageBufferOffsetAlignment;
+    VkPhysicalDeviceLimits m_limits;
 };
 }
