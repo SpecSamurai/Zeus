@@ -32,8 +32,8 @@ Swapchain::Swapchain(
 {
     assert(width > 0 && height > 0);
     assert(
-        width <= VkContext::Device().GetMaxImageDimension2D() &&
-        height <= VkContext::Device().GetMaxImageDimension2D());
+        width <= VkContext::Device().GetLimits().maxImageDimension2D &&
+        height <= VkContext::Device().GetLimits().maxImageDimension2D);
 
     Create();
 }
@@ -387,8 +387,8 @@ void Swapchain::Resize(std::uint32_t width, std::uint32_t height)
 {
     assert(width > 0 && height > 0);
     assert(
-        width <= VkContext::Device().GetMaxImageDimension2D() &&
-        height <= VkContext::Device().GetMaxImageDimension2D());
+        width <= VkContext::Device().GetLimits().maxImageDimension2D &&
+        height <= VkContext::Device().GetLimits().maxImageDimension2D);
 
     m_extent = VkExtent2D{ .width = width, .height = height };
 
