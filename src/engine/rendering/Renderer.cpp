@@ -2,6 +2,7 @@
 
 #include "Renderer_resources.hpp"
 #include "Renderer_types.hpp"
+#include "Vertex.hpp"
 #include "components/Renderable.hpp"
 #include "ecs/Query.hpp"
 #include "logging/logger.hpp"
@@ -10,11 +11,9 @@
 #include "rhi/CommandBuffer.hpp"
 #include "rhi/CommandPool.hpp"
 #include "rhi/Definitions.hpp"
-#include "rhi/Descriptor.hpp"
 #include "rhi/DescriptorSet.hpp"
-#include "rhi/PushConstants.hpp"
+#include "rhi/DescriptorSetLayout.hpp"
 #include "rhi/Swapchain.hpp"
-#include "rhi/Vertex.hpp"
 #include "rhi/VkContext.hpp"
 #include "rhi/vulkan/vulkan_dynamic_rendering.hpp"
 #include "window/Window.hpp"
@@ -41,7 +40,7 @@ void Renderer::Initialize()
     LOG_DEBUG("Initializing Renderer");
 
     m_swapchain = Swapchain(
-        VkContext::GetSurface(),
+        VkContext::Surface(),
         m_window.GetWidth(),
         m_window.GetHeight(),
         VK_PRESENT_MODE_MAILBOX_KHR,
@@ -61,11 +60,11 @@ void Renderer::Initialize()
     }
 
     InitializeRenderTargets();
+    InitializeBuffers();
     InitializeDescriptors();
     InitializeShaders();
     InitializePipelines();
     InitializeSamplers();
-    InitializeBuffers();
 
     InitializeDefaultResources();
 }
@@ -110,12 +109,17 @@ void Renderer::Destroy()
     }
 
     m_frameDataSetLayout.Destroy();
-    m_descriptorPool.Destroy();
+
+    m_bindless.descriptorSetLayout.Destroy();
+    m_bindless.descriptorPool.Destroy();
+
+    m_frameDataDescriptorPool.Destroy();
     m_swapchain.Destroy();
 }
 
 void Renderer::Update()
 {
+    UpdateFrameDataBuffer();
 }
 
 void Renderer::BeginFrame()
@@ -132,7 +136,7 @@ void Renderer::BeginFrame()
     // Budget is queried from Vulkan inside of it to avoid overhead of querying
     // it with every allocation.
     vmaSetCurrentFrameIndex(
-        VkContext::GetAllocator(),
+        VkContext::Allocator(),
         static_cast<uint32_t>(m_swapchain.GetFrameIndex()));
 }
 
@@ -271,14 +275,14 @@ const Shader& Renderer::GetShader(ShaderType type) const
     return m_shaders[static_cast<std::uint32_t>(type)];
 }
 
-const Pipeline& Renderer::GetPipeline(PipelineType type) const
-{
-    return m_pipelines[static_cast<std::uint32_t>(type)];
-}
-
 const Sampler& Renderer::GetSampler(SamplerType type) const
 {
     return m_samplers[static_cast<std::uint32_t>(type)];
+}
+
+const Pipeline& Renderer::GetPipeline(PipelineType type) const
+{
+    return m_pipelines[static_cast<std::uint32_t>(type)];
 }
 
 void Renderer::SetEntities(RendererEntity type, ECS::Query<Renderable>& query)
@@ -306,14 +310,14 @@ void Renderer::SetEntities(RendererEntity type, ECS::Query<Renderable>& query)
     // mutex lock
 }
 
-void Renderer::SetCameraProjection(const Math::Matrix4x4f& viewProjection)
+void Renderer::SetCameraProjection(const Math::Matrix4x4f& view_projection)
 {
-    m_frameDataBuffer.Update(&viewProjection, sizeof(Math::Matrix4x4f));
+    m_frameData.view_projection = view_projection;
 }
 
 void Renderer::ResizeSwapchain()
 {
-    VkContext::GetDevice().Wait();
+    VkContext::Device().Wait();
     m_swapchain.Resize(m_window.GetWidth(), m_window.GetHeight());
 
     // drawImage.Destroy();
@@ -350,44 +354,164 @@ void Renderer::InitializeRenderTargets()
         "Image_Render_Output_Depth_Frame_");
 }
 
+void Renderer::InitializeBuffers()
+{
+    {
+        m_bindless.materialParametersBuffer = Buffer(
+            "Buffer_Bindless_Material_Parameters",
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+                VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            sizeof(MaterialParameters) * m_bindless.materialParameters.size(),
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            false);
+
+        m_bindless.materialParametersBuffer.Update(
+            m_bindless.materialParameters.data(),
+            sizeof(MaterialParameters) * m_bindless.materialParameters.size());
+    }
+
+    m_linesVertexBuffer = std::make_shared<Buffer>(Buffer(
+        "Buffer_vertex_lines",
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        m_lines.capacity() * sizeof(Vertex_PositionColor),
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        false));
+
+    m_frameDataBuffer = Buffer(
+        "Buffer_frame_data",
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        sizeof(FrameData),
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        true);
+}
+
+void Renderer::InitializeSamplers()
+{
+#define sampler(type) m_samplers[static_cast<std::uint32_t>(type)]
+
+    sampler(SamplerType::NEAREST_CLAMP_EDGE) = Sampler(
+        "Sampler_nearest_clamp_edge",
+        VK_FILTER_NEAREST,
+        VK_FILTER_NEAREST,
+        VK_SAMPLER_MIPMAP_MODE_NEAREST,
+        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+
+    sampler(SamplerType::LINEAR_CLAMP_EDGE) = Sampler(
+        "Sampler_linear_clamp_edge",
+        VK_FILTER_LINEAR,
+        VK_FILTER_LINEAR,
+        VK_SAMPLER_MIPMAP_MODE_NEAREST,
+        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+}
+
 void Renderer::InitializeDescriptors()
 {
-    std::vector<VkDescriptorPoolSize> poolSizes{
-        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 },
-        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4 },
-    };
+    {
+        assert(
+            Bindless::COMBINED_IMAGE_SAMPLER_COUNT > 0 &&
+            Bindless::COMBINED_IMAGE_SAMPLER_COUNT <=
+                VkContext::Device().GetLimits().maxDescriptorSetSampledImages &&
+            "Invalid COMBINED_IMAGE_SAMPLER_COUNT");
 
-    m_descriptorPool = DescriptorPool("DescriptorPool_Renderer", 2, poolSizes);
+        assert(
+            Bindless::STORAGE_BUFFER_COUNT > 0 &&
+            Bindless::STORAGE_BUFFER_COUNT <=
+                VkContext::Device()
+                    .GetLimits()
+                    .maxDescriptorSetStorageBuffers &&
+            "Invalid STORAGE_BUFFER_COUNT");
 
-    m_frameDataSetLayout = DescriptorSetLayout(
-        "frameDataSetLayout",
-        {
-            Descriptor(
-                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                VK_SHADER_STAGE_VERTEX_BIT,
-                0),
-        });
+        m_bindless.descriptorPool = DescriptorPool(
+            "DescriptorPool_Bindless",
+            1,
+            {
+                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                  Bindless::COMBINED_IMAGE_SAMPLER_COUNT },
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                  Bindless::STORAGE_BUFFER_COUNT },
+            },
+            VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT);
 
-    m_materialSetLayout = DescriptorSetLayout(
-        "materialSetLayout",
-        {
-            Descriptor(
-                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                VK_SHADER_STAGE_FRAGMENT_BIT,
-                0),
-            Descriptor(
-                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                VK_SHADER_STAGE_FRAGMENT_BIT,
-                1),
-            Descriptor(
-                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                VK_SHADER_STAGE_FRAGMENT_BIT,
-                2),
-            Descriptor(
-                VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                VK_SHADER_STAGE_FRAGMENT_BIT,
-                3),
-        });
+        m_bindless.descriptorSetLayout = DescriptorSetLayout(
+            "DescriptorSetLayout_Bindless",
+            {
+                VkDescriptorSetLayoutBinding{
+                    .binding = Bindless::COMBINED_IMAGE_SAMPLER_BINDING,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                    .descriptorCount = Bindless::COMBINED_IMAGE_SAMPLER_COUNT,
+                    .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+                    .pImmutableSamplers = nullptr,
+                },
+                VkDescriptorSetLayoutBinding{
+                    .binding = Bindless::STORAGE_BUFFER_BINDING,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                    .descriptorCount = 1,
+                    .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+                    .pImmutableSamplers = nullptr,
+                },
+            },
+            VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT,
+            {
+                VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
+                    VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT,
+                VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
+                    VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT,
+            });
+
+        m_bindless.descriptorSet = DescriptorSet(
+            "DescriptorSet_Bindless",
+            m_bindless.descriptorSetLayout,
+            m_bindless.descriptorPool);
+
+        m_bindless.descriptorSet.Update(
+            {
+                VkDescriptorBufferInfo{
+                    .buffer = m_bindless.materialParametersBuffer.GetHandle(),
+                    .offset = 0,
+                    .range = m_bindless.materialParametersBuffer.GetSize(),
+                },
+            },
+            Bindless::STORAGE_BUFFER_BINDING,
+            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+    }
+
+    {
+        m_frameDataDescriptorPool = DescriptorPool(
+            "DescriptorPool_Global",
+            1,
+            {
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10 },
+            });
+
+        m_frameDataSetLayout = DescriptorSetLayout(
+            "DescriptorSetLayout_FrameData",
+            {
+                VkDescriptorSetLayoutBinding{
+                    .binding = 0,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                    .descriptorCount = 1,
+                    .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                    .pImmutableSamplers = nullptr,
+                },
+            });
+
+        m_frameDataSet = DescriptorSet(
+            "DescriptorSet_Frame",
+            m_frameDataSetLayout,
+            m_frameDataDescriptorPool);
+
+        m_frameDataSet.Update(
+            {
+                VkDescriptorBufferInfo{
+                    .buffer = m_frameDataBuffer.GetHandle(),
+                    .offset = 0,
+                    .range = sizeof(FrameData),
+                },
+            },
+            0,
+            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    }
 }
 
 void Renderer::InitializeShaders()
@@ -426,15 +550,15 @@ void Renderer::InitializeShaders()
                 }),
         });
 
-    shader(ShaderType::MESH) = Shader(
-        "Shader_Vertex_Mesh",
-        std::format("{}/mesh.vert.spv", SHADERS_FOLDER_PATH).data(),
+    shader(ShaderType::PBR_PASS_VERT) = Shader(
+        "Shader_Vertex_PbrPass",
+        std::format("{}/pbrPass.vert.spv", SHADERS_FOLDER_PATH).data(),
         VK_SHADER_STAGE_VERTEX_BIT,
         "main");
 
-    shader(ShaderType::FRAG_MESH) = Shader(
-        "Shader_Fragment_Mesh",
-        std::format("{}/mesh.frag.spv", SHADERS_FOLDER_PATH).data(),
+    shader(ShaderType::PBR_PASS_FRAG) = Shader(
+        "Shader_Fragment_PbrPass",
+        std::format("{}/pbrPass.frag.spv", SHADERS_FOLDER_PATH).data(),
         VK_SHADER_STAGE_FRAGMENT_BIT,
         "main");
 }
@@ -458,11 +582,6 @@ void Renderer::InitializePipelines()
         { VK_FORMAT_R16G16B16A16_SFLOAT },
         VK_FORMAT_D32_SFLOAT);
 
-    PushConstants meshPushConstant(
-        VK_SHADER_STAGE_VERTEX_BIT,
-        0,
-        sizeof(MeshPushConstants));
-
     pipeline(PipelineType::MESH_OPAQUE) = Pipeline(
         "Pipeline_Mesh_Opaque",
         Rasterization::Default,
@@ -470,83 +589,28 @@ void Renderer::InitializePipelines()
         Blending::Disabled,
         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
         {
-            &GetShader(ShaderType::MESH),
-            &GetShader(ShaderType::FRAG_MESH),
+            &GetShader(ShaderType::PBR_PASS_VERT),
+            &GetShader(ShaderType::PBR_PASS_FRAG),
         },
-        { &m_frameDataSetLayout, &m_materialSetLayout },
-        { meshPushConstant },
+        {
+            &m_bindless.descriptorSetLayout,
+            &m_frameDataSetLayout,
+        },
+        {
+            VkPushConstantRange{
+                .stageFlags =
+                    VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                .offset = 0,
+                .size = sizeof(PassPushConstants),
+            },
+        },
         { VK_FORMAT_R16G16B16A16_SFLOAT },
         VK_FORMAT_D32_SFLOAT);
 }
 
-void Renderer::InitializeSamplers()
+void Renderer::UpdateFrameDataBuffer()
 {
-#define sampler(type) m_samplers[static_cast<std::uint32_t>(type)]
-
-    sampler(SamplerType::NEAREST_CLAMP_EDGE) = Sampler(
-        "Sampler_nearest_clamp_edge",
-        VK_FILTER_NEAREST,
-        VK_FILTER_NEAREST,
-        VK_SAMPLER_MIPMAP_MODE_NEAREST,
-        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
-
-    sampler(SamplerType::LINEAR_CLAMP_EDGE) = Sampler(
-        "Sampler_linear_clamp_edge",
-        VK_FILTER_LINEAR,
-        VK_FILTER_LINEAR,
-        VK_SAMPLER_MIPMAP_MODE_NEAREST,
-        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
-}
-
-void Renderer::InitializeBuffers()
-{
-    m_linesVertexBuffer = std::make_shared<Buffer>(Buffer(
-        "Buffer_vertex_lines",
-        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-        m_lines.capacity() * sizeof(Vertex_PositionColor),
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        false));
-
-    m_frameDataBuffer = Buffer(
-        "Buffer_frame_data",
-        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-        sizeof(FrameData),
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        true);
-
-    // We use uniform buffer here instead of SSBO because this is a small
-    // buffer. We arent using it through buffer device adress because we have a
-    // single descriptor set for all objects so there isnt any overhead of
-    // managing it.
-
-    m_frameDataSet = DescriptorSet(
-        "DescriptorSet_Frame",
-        m_frameDataSetLayout,
-        m_descriptorPool);
-    m_frameDataSet.Update(
-        {
-            DescriptorBuffer(
-                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                VK_SHADER_STAGE_VERTEX_BIT,
-                0,
-                m_frameDataBuffer.GetHandle(),
-                sizeof(FrameData)),
-        },
-        {});
-
-    m_materialSet = DescriptorSet(
-        "DescriptorSet_MaterialSet",
-        m_materialSetLayout,
-        m_descriptorPool);
-    /*m_materialSet.Update(*/
-    /*    {},*/
-    /*    {*/
-    /*        DescriptorImage(*/
-    /*            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,*/
-    /*            VK_SHADER_STAGE_FRAGMENT_BIT,*/
-    /*            0),*/
-    /*    });*/
+    m_frameDataBuffer.Update(&m_frameData, sizeof(FrameData));
 }
 
 void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
@@ -576,18 +640,18 @@ void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
     });
 
     cmd.BindDescriptorSets(
-        m_frameDataSet.GetHandle(),
+        m_bindless.descriptorSet.GetHandle(),
         GetPipeline(PipelineType::MESH_OPAQUE),
-        0);
+        Bindless::SET_INDEX);
 
     cmd.BindDescriptorSets(
-        m_materialSet.GetHandle(),
+        m_frameDataSet.GetHandle(),
         GetPipeline(PipelineType::MESH_OPAQUE),
         1);
 
     for (const auto entity : meshes)
     {
-        MeshPushConstants pushConstants{
+        PassPushConstants pushConstants{
             .model = entity->localMatrix,
             .vertexBufferAddress =
                 entity->m_mesh->GetVertexBuffer()->GetDeviceAddress(),
@@ -595,14 +659,11 @@ void Renderer::DrawEntities(const CommandBuffer& cmd, const Image& renderTarget)
 
         cmd.PushConstants(
             GetPipeline(PipelineType::MESH_OPAQUE).GetLayout(),
-            VK_SHADER_STAGE_VERTEX_BIT,
+            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             0,
             pushConstants);
 
-        /*cmd.BindVertexBuffers(mesh.m_mesh->m_vertexBuffer);*/
         cmd.BindIndexBuffer(*entity->m_mesh->GetIndexBuffer());
-
-        /*cmd.Draw((std::uint32_t)mesh.m_mesh->m_vertexBuffer.GetSize(), 0);*/
         cmd.DrawIndexed(entity->m_mesh->GetIndexCount());
     }
 }
@@ -659,7 +720,7 @@ void Renderer::LinesPass(const CommandBuffer& cmd, const Image& renderTarget)
     }
 }
 
-std::vector<Renderable*>& Renderer::GetEntities(RendererEntity entity)
+std::vector<const Renderable*>& Renderer::GetEntities(RendererEntity entity)
 {
     return m_renderables[static_cast<std::uint32_t>(entity)];
 }

@@ -1,16 +1,19 @@
 #pragma once
 
 #include "Renderer_types.hpp"
+#include "Vertex.hpp"
 #include "components/Renderable.hpp"
 #include "ecs/Query.hpp"
 #include "math/definitions.hpp"
+#include "rendering/Material.hpp"
 #include "rhi/Buffer.hpp"
 #include "rhi/CommandBuffer.hpp"
 #include "rhi/CommandPool.hpp"
 #include "rhi/DescriptorSet.hpp"
+#include "rhi/DescriptorSetLayout.hpp"
+#include "rhi/Image.hpp"
 #include "rhi/Sampler.hpp"
 #include "rhi/Swapchain.hpp"
-#include "rhi/Vertex.hpp"
 #include "window/Window.hpp"
 
 #include <vulkan/vulkan_core.h>
@@ -27,6 +30,7 @@ class Renderer
 public:
     Renderer(const Window& window);
 
+    // Core
     void Initialize();
     void Destroy();
     void Update();
@@ -36,6 +40,7 @@ public:
     void BlitToSwapchain();
     void Present();
 
+    // Primitives
     void DrawLine(
         const Math::Vector3f& from,
         const Math::Vector3f& to,
@@ -55,27 +60,55 @@ public:
         const Math::Vector3f& bottomLeft,
         const Math::Color& color);
 
+    // Getters/Setters
     const Image& GetRenderTarget(RenderTarget type) const;
     const Shader& GetShader(ShaderType type) const;
-    const Pipeline& GetPipeline(PipelineType type) const;
     const Sampler& GetSampler(SamplerType type) const;
+    const Pipeline& GetPipeline(PipelineType type) const;
+    void SetEntities(RendererEntity type, ECS::Query<Renderable>& query);
+    void SetCameraProjection(const Math::Matrix4x4f& viewProjection);
 
-    inline constexpr Swapchain& GetSwapchain()
+    // Bindless
+
+    // Swapchain/Frames
+    constexpr Swapchain& GetSwapchain()
     {
         return m_swapchain;
     }
 
-    inline constexpr CommandBuffer& GetCommandBuffer()
+    constexpr CommandBuffer& GetCommandBuffer()
     {
         return CurrentFrame().graphicsCommandBuffer;
     }
 
-    void SetEntities(RendererEntity type, ECS::Query<Renderable>& query);
+public:
+    // Swapchain/Frames
+    void ResizeSwapchain();
 
-    void SetCameraProjection(const Math::Matrix4x4f& viewProjection);
+    struct RendererFrame;
+    inline constexpr RendererFrame& CurrentFrame()
+    {
+        return m_frames[m_swapchain.GetFrameIndex()];
+    }
 
-private:
-    struct Frame
+    // Core
+    void InitializeRenderTargets();
+    void InitializeBuffers();
+    void InitializeSamplers();
+    void InitializeDescriptors();
+    void InitializeShaders();
+    void InitializePipelines();
+
+    void UpdateFrameDataBuffer();
+
+    // Passes
+    void DrawEntities(const CommandBuffer& cmd, const Image& renderTarget);
+    void PbrPass();
+    void LinesPass(const CommandBuffer& cmd, const Image& renderTarget);
+
+    std::vector<const Renderable*>& GetEntities(RendererEntity entity);
+
+    struct RendererFrame
     {
         CommandPool graphicsCommandPool;
         CommandBuffer graphicsCommandBuffer;
@@ -84,26 +117,29 @@ private:
         // DescriptorAllocator descriptorAllocator;
         // TODO: conisider adding draw resources per frame
         // Image Backbuffer;
+        DescriptorSet m_frameDataSet;
+        Buffer m_frameDataBuffer;
     };
 
-    inline constexpr Frame& CurrentFrame()
+    struct Bindless
     {
-        return m_frames[m_swapchain.GetFrameIndex()];
-    }
+        static constexpr std::uint32_t SET_INDEX{ 0 };
 
-    void ResizeSwapchain();
+        static constexpr std::uint32_t COMBINED_IMAGE_SAMPLER_BINDING{ 0 };
+        static constexpr std::uint32_t STORAGE_BUFFER_BINDING{ 1 };
 
-    void InitializeRenderTargets();
-    void InitializeDescriptors();
-    void InitializeShaders();
-    void InitializePipelines();
-    void InitializeSamplers();
-    void InitializeBuffers();
+        static constexpr std::uint32_t COMBINED_IMAGE_SAMPLER_COUNT{ 16384 };
+        static constexpr std::uint32_t STORAGE_BUFFER_COUNT{ 16384 };
 
-    void DrawEntities(const CommandBuffer& cmd, const Image& renderTarget);
-    void LinesPass(const CommandBuffer& cmd, const Image& renderTarget);
+        DescriptorPool descriptorPool;
+        DescriptorSetLayout descriptorSetLayout;
+        DescriptorSet descriptorSet;
 
-    std::vector<Renderable*>& GetEntities(RendererEntity entity);
+        std::array<Material*, COMBINED_IMAGE_SAMPLER_COUNT> materials;
+        std::array<MaterialParameters, STORAGE_BUFFER_COUNT> materialParameters;
+
+        Buffer materialParametersBuffer;
+    } m_bindless;
 
 private:
     static constexpr std::uint32_t FRAMES_IN_FLIGHT{ 3 };
@@ -111,52 +147,37 @@ private:
 
     static constexpr VkClearValue CLEAR_VALUES{};
 
+    // Core
     const Window& m_window;
     class Swapchain m_swapchain;
-    std::array<Frame, FRAMES_IN_FLIGHT> m_frames;
 
-    /*float m_renderScale{ 1.f };*/
-    /*    inline void SetCamera(const Math::Matrix4x4f& viewProjection)*/
-    /*{*/
-    /*    m_cameraData.m_viewProjection = viewProjection;*/
-    /*}*/
+#define array(type, count) std::array<type, static_cast<std::uint32_t>(count)>
 
-    // might need to set camera instead of updating scene buffer
-    /*struct CameraData*/
-    /*{*/
-    /*    Math::Matrix4x4f m_viewProjection{ Math::identity<float>() };*/
-    /*} m_cameraData;*/
-
-    DescriptorPool m_descriptorPool;
+    array(RendererFrame, FRAMES_IN_FLIGHT) m_frames;
+    array(Sampler, SamplerType::COUNT) m_samplers;
+    array(Shader, ShaderType::COUNT) m_shaders;
+    array(Pipeline, PipelineType::COUNT) m_pipelines;
 
     // turn it into per frame resoruce
-    std::array<Image, static_cast<std::uint32_t>(RenderTarget::COUNT)>
-        m_renderTargets;
+    array(Image, RenderTarget::COUNT) m_renderTargets;
+    array(std::vector<const Renderable*>, RendererEntity::COUNT) m_renderables;
 
-    std::array<Shader, static_cast<std::uint32_t>(ShaderType::COUNT)> m_shaders;
-    std::array<Pipeline, static_cast<std::uint32_t>(PipelineType::COUNT)>
-        m_pipelines;
-    std::array<Sampler, static_cast<std::uint32_t>(SamplerType::COUNT)>
-        m_samplers;
+    // We use uniform buffer here instead of SSBO because this is a small
+    // buffer. We arent using it through buffer device adress because we have a
+    // single descriptor set for all objects so there isnt any overhead of
+    // managing it.
 
+    // Primitives
     std::shared_ptr<Buffer> m_linesVertexBuffer;
     std::uint64_t m_linesIndex{ 0 };
     std::vector<Vertex_PositionColor> m_lines;
 
-    std::array<
-        std::vector<Renderable*>,
-        static_cast<std::uint32_t>(RendererEntity::COUNT)>
-        m_renderables;
-
     // Ensure resource synchronization (e.g., per-frame uniform buffers) to
     // prevent data races
     FrameData m_frameData;
+    DescriptorPool m_frameDataDescriptorPool;
     DescriptorSetLayout m_frameDataSetLayout;
     DescriptorSet m_frameDataSet;
     Buffer m_frameDataBuffer;
-
-public:
-    DescriptorSetLayout m_materialSetLayout;
-    DescriptorSet m_materialSet;
 };
 }
