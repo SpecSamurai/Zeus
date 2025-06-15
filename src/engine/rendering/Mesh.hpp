@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Vertex.hpp"
 #include "rhi/Buffer.hpp"
-#include "rhi/Vertex.hpp"
 
 #include <vulkan/vulkan_core.h>
 

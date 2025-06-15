@@ -1,7 +1,7 @@
 #include "Mesh.hpp"
 
+#include "Vertex.hpp"
 #include "rhi/Buffer.hpp"
-#include "rhi/Vertex.hpp"
 
 #include <cassert>
 #include <cstdint>
