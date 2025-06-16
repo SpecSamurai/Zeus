@@ -142,35 +142,30 @@ void Buffer::Destroy()
     m_deviceAddress = {};
 }
 
-void Buffer::Update(
-    const void* data,
-    std::size_t dataSize,
-    std::size_t dstOffset)
+void Buffer::Update(const void* data, std::size_t size, std::size_t srcOffset)
 {
     assert(m_handle != VK_NULL_HANDLE);
     assert(data != nullptr && "Invalid data");
-    assert(
-        dataSize > 0 && (dataSize + dstOffset) <= m_info.size &&
-        "Invalid size");
+    assert(size > 0 && (size + srcOffset) <= m_info.size && "Invalid size");
 
     if (m_mapped)
     {
         memcpy(
-            reinterpret_cast<std::byte*>(m_info.pMappedData) + dstOffset,
+            reinterpret_cast<std::byte*>(m_info.pMappedData) + srcOffset,
             data,
-            dataSize);
+            size);
     }
     else
     {
         Buffer staging(
             "Buffer_update_staging",
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            dataSize,
+            size,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             true);
 
-        staging.Update(data, dataSize);
+        staging.Update(data, size);
 
         VkContext::Device().CmdImmediateSubmit(
             [&](const CommandBuffer& commandBuffer) {
@@ -179,7 +174,7 @@ void Buffer::Update(
                     m_handle,
                     staging.GetSize(),
                     0,
-                    dstOffset);
+                    srcOffset);
             });
 
         staging.Destroy();
