@@ -11,6 +11,7 @@
 
 struct MaterialParameters {
     uint flags;
+    uint pad[3];
 };
 
 struct FrameData {
