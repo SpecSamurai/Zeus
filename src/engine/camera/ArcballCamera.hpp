@@ -27,6 +27,7 @@ public:
     virtual void OnScroll(float yOffset) override;
 
     virtual Math::Vector3f& GetPosition() override;
+    virtual Math::Vector3f& GetDirection() override;
     virtual const Math::Matrix4x4f& GetViewProjection() const override;
 
 private:

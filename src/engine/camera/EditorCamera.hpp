@@ -44,6 +44,7 @@ public:
     virtual void OnScroll(float yOffset) = 0;
 
     virtual Math::Vector3f& GetPosition() = 0;
+    virtual Math::Vector3f& GetDirection() = 0;
     virtual const Math::Matrix4x4f& GetViewProjection() const = 0;
 
     inline constexpr bool IsType(CameraType cameraType) const

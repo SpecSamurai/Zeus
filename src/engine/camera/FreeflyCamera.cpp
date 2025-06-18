@@ -118,6 +118,11 @@ Math::Vector3f& FreeflyCamera::GetPosition()
     return m_position;
 }
 
+Math::Vector3f& FreeflyCamera::GetDirection()
+{
+    return m_direction;
+}
+
 const Math::Matrix4x4f& FreeflyCamera::GetViewProjection() const
 {
     return m_viewProjection;

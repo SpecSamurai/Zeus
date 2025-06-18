@@ -120,6 +120,11 @@ Math::Vector3f& ArcballCamera::GetPosition()
     return m_position;
 }
 
+Math::Vector3f& ArcballCamera::GetDirection()
+{
+    return m_direction;
+}
+
 const Math::Matrix4x4f& ArcballCamera::GetViewProjection() const
 {
     return m_viewProjection;
