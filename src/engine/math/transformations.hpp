@@ -162,17 +162,15 @@ constexpr Matrix4x4<T> rotation(const T angle, Vector3<T> axis)
 
 template <typename T>
 constexpr Matrix4x4<T> lookAt(
-    const Vector3<T>& eye,
+    const Vector3<T>& position,
     const Vector3<T>& target,
-    const Vector3<T>& upDir)
+    const Vector3<T>& worldUp)
 {
     static_assert(std::is_floating_point_v<T>);
-    // the scene is actually rotated, not the camera
-    Vector3<T> dir{ eye - target };
 
-    Vector3<T> forward(normalize(dir));
-    Vector3<T> right(normalize(cross(upDir, forward))); // left
-    Vector3<T> up(cross(forward, right));
+    Vector3<T> direction(normalize(target - position)); // from camera to target
+    Vector3<T> right(normalize(cross(direction, worldUp)));
+    Vector3<T> up(cross(right, direction));
 
     Matrix4x4<T> result(1.f);
 
@@ -184,13 +182,13 @@ constexpr Matrix4x4<T> lookAt(
     result[1][1] = up.y;
     result[2][1] = up.z;
 
-    result[0][2] = forward.x;
-    result[1][2] = forward.y;
-    result[2][2] = forward.z;
+    result[0][2] = -direction.x;
+    result[1][2] = -direction.y;
+    result[2][2] = -direction.z;
 
-    result[3][0] = -dot(right, eye);
-    result[3][1] = -dot(up, eye);
-    result[3][2] = -dot(forward, eye);
+    result[3][0] = -dot(right, position);
+    result[3][1] = -dot(up, position);
+    result[3][2] = dot(direction, position);
 
     return result;
 }
