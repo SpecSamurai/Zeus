@@ -43,8 +43,8 @@ public:
         bool constrainPitch = true) = 0;
     virtual void OnScroll(float yOffset) = 0;
 
-    virtual Math::Vector3f& GetPosition() = 0;
-    virtual Math::Vector3f& GetDirection() = 0;
+    virtual const Math::Vector3f& GetPosition() const = 0;
+    virtual const Math::Vector3f& GetDirection() const = 0;
     virtual const Math::Matrix4x4f& GetViewProjection() const = 0;
 
     inline constexpr bool IsType(CameraType cameraType) const
@@ -53,6 +53,7 @@ public:
     }
 
     inline static constexpr float DEFAULT_MOVEMENT_SPEED{ 1.f };
+    inline static constexpr float DEFAULT_SCROLL_SPEED{ 0.1f };
     inline static constexpr float DEFAULT_MOUSE_SENSITIVITY{ 0.05f };
     inline static constexpr float DEFAULT_NEAR_PLANE_DISTANCE{ 10000.f };
     inline static constexpr float DEFAULT_FAR_PLANE_DISTANCE{ 0.1f };

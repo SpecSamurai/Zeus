@@ -11,10 +11,10 @@ namespace Zeus
 FreeflyCamera::FreeflyCamera(
     float aspectRatio,
     Math::Vector3f position,
-    Math::Vector3f up)
+    Math::Vector3f target)
     : EditorCamera(CameraType::FREEFLY),
       m_position{ position },
-      m_up{ up },
+      m_target{ target },
       m_aspectRatio{ aspectRatio }
 {
     m_projection = Math::perspective<float>(
@@ -22,6 +22,10 @@ FreeflyCamera::FreeflyCamera(
         m_aspectRatio,
         m_near,
         m_far);
+
+    auto direction(Math::normalize(target - position));
+    m_yaw = Math::degrees(std::atan2(direction.x, -direction.z));
+    m_pitch = Math::degrees(std::asin(direction.y));
 }
 
 void FreeflyCamera::Reset()
@@ -99,9 +103,9 @@ void FreeflyCamera::OnScroll(float yOffset)
 void FreeflyCamera::Update()
 {
     Math::Vector3f direction(
-        std::cos(Math::radians(m_yaw)) * std::cos(Math::radians(m_pitch)),
+        std::sin(Math::radians(m_yaw)) * std::cos(Math::radians(m_pitch)),
         std::sin(Math::radians(m_pitch)),
-        std::sin(Math::radians(m_yaw)) * std::cos(Math::radians(m_pitch)));
+        -std::cos(Math::radians(m_yaw)) * std::cos(Math::radians(m_pitch)));
 
     m_direction = normalize(direction);
     m_right = normalize(cross(m_direction, WORLD_UP));
@@ -113,12 +117,12 @@ void FreeflyCamera::Update()
     m_viewProjection = m_projection * m_view;
 }
 
-Math::Vector3f& FreeflyCamera::GetPosition()
+const Math::Vector3f& FreeflyCamera::GetPosition() const
 {
     return m_position;
 }
 
-Math::Vector3f& FreeflyCamera::GetDirection()
+const Math::Vector3f& FreeflyCamera::GetDirection() const
 {
     return m_direction;
 }

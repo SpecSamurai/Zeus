@@ -10,8 +10,8 @@ class FreeflyCamera : public EditorCamera
 public:
     FreeflyCamera(
         float aspectRatio,
-        Math::Vector3f position = Math::Vector3f(),
-        Math::Vector3f up = WORLD_UP);
+        Math::Vector3f position,
+        Math::Vector3f target);
 
     virtual void Reset() override;
     virtual void Move(CameraMovement cameraMovement, float deltaTime) override;
@@ -23,8 +23,8 @@ public:
         bool constrainPitch = true) override;
     virtual void OnScroll(float yOffset) override;
 
-    virtual Math::Vector3f& GetPosition() override;
-    virtual Math::Vector3f& GetDirection() override;
+    virtual const Math::Vector3f& GetPosition() const override;
+    virtual const Math::Vector3f& GetDirection() const override;
     virtual const Math::Matrix4x4f& GetViewProjection() const override;
 
 private:
