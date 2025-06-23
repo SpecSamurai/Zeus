@@ -57,6 +57,8 @@ Local -> World -> View spaces use right-handed system with Y pointing upwards.
 - Console Logging
 - Custom memory allocators
 - 3D Math
+    - Assumes only uniform transformations.
+    - Normal matrix required to support non-uniform transformations(transpose_inverse)
 
 ## Git Submodules
 While cloning the repo you need to pull all the submodules:
