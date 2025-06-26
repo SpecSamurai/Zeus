@@ -3,6 +3,9 @@
 
 #include "common.glsl"
 
+#define FRAME_DATA_SET 1
+#include "frameData.glsl"
+
 layout(location = 0) out vec3 outPosition;
 layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec4 outColor;
@@ -12,10 +15,10 @@ void main()
 {
     Vertex vertex = passPushConstants.vertexBuffer.vertices[gl_VertexIndex];
 
-    vec4 worldPosition = passPushConstants.model * vec4(vertex.position, 1.0);
+    vec4 worldPosition = passPushConstants.transform * vec4(vertex.position, 1.0);
 
     outPosition = worldPosition.xyz;
-    outNormal = normalize(mat3(transpose(inverse(passPushConstants.model))) * vertex.normal);
+    outNormal = normalize(mat3(passPushConstants.transform) * vertex.normal);
     outColor = vertex.color;
     outUV = vec2(vertex.uv_x, vertex.uv_y);
 
