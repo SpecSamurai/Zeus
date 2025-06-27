@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Renderer_types.hpp"
 #include "rhi/Image.hpp"
 
 #include <array>
@@ -8,9 +7,37 @@
 
 namespace Zeus
 {
+enum class TextureType : std::uint8_t
+{
+    // Metalness-Roughness
+    BASE_COLOR,
+    ROUGHNESS,
+    METALNESS,
+
+    // Specular-Glossiness
+    DIFFUSE_COLOR, // Albedo
+    SPECULAR,
+    GLOSSINESS,
+
+    AMBIENT_OCCLUSION,
+    NORMAL,
+    EMISSION,
+    HEIGHT,
+    COUNT
+};
+
+enum class MaterialProperty : std::uint8_t
+{
+    ROUGHNESS,
+    METALNESS,
+    COUNT
+};
+
 class Material
 {
 public:
+    using TextureIndex = std::uint32_t;
+    using MaterialIndex = std::uint32_t;
     using Slot = std::uint8_t;
 
     Material();
@@ -18,31 +45,39 @@ public:
     void SetTexture(
         const TextureType type,
         Image* texture,
-        const std::uint8_t slot = 0);
+        const Slot slot = 0);
     Image* GetTexture(const TextureType type, const Slot slot = 0);
     bool HasTexture(const TextureType type);
 
     void SetProperty(const MaterialProperty property, const float value);
     float GetProperty(const MaterialProperty property);
 
-    void SetIndex(const Materials::Index index);
-    Materials::Index GetIndex() const;
+    void SetIndex(const MaterialIndex index);
+    MaterialIndex GetIndex() const;
 
 private:
-    Textures::Index GetTextureIndex(const TextureType type, const Slot slot)
-        const;
+    TextureIndex GetTextureIndex(const TextureType type, const Slot slot) const;
 
-private:
+public:
     static constexpr Slot SLOTS_PER_TEXTURE_TYPE{ 4 };
 
+    static constexpr MaterialIndex INVALID_MATERIAL_INDEX{
+        std::numeric_limits<MaterialIndex>().max()
+    };
+
+    static constexpr TextureIndex INVALID_TEXTURE_INDEX{
+        std::numeric_limits<TextureIndex>().max()
+    };
+
+private:
     std::array<
         Image*,
-        static_cast<std::uint32_t>(TextureType::COUNT) * SLOTS_PER_TEXTURE_TYPE>
+        static_cast<std::uint8_t>(TextureType::COUNT) * SLOTS_PER_TEXTURE_TYPE>
         m_textures;
 
-    std::array<float, static_cast<std::uint32_t>(MaterialProperty::COUNT)>
+    std::array<float, static_cast<std::uint8_t>(MaterialProperty::COUNT)>
         m_properties;
 
-    Materials::Index m_index;
+    MaterialIndex m_index;
 };
 }
