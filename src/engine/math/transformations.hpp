@@ -114,7 +114,7 @@ constexpr Matrix4x4<T> scale(const Vector3<T>& v)
 }
 
 template <typename T>
-constexpr Matrix4x4<T> scale(const T scale)
+constexpr Matrix4x4<T> uniformScale(const T scale)
 {
     Matrix4x4<T> result(1.f);
 
