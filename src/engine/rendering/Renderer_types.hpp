@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Material.hpp"
 #include "math/definitions.hpp"
 #include "math/transformations.hpp"
 
@@ -9,20 +10,6 @@
 
 namespace Zeus
 {
-namespace Materials
-{
-using Index = std::uint32_t;
-
-static constexpr Index InvalidIndex{ std::numeric_limits<Index>().max() };
-}
-
-namespace Textures
-{
-using Index = std::uint32_t;
-
-static constexpr Index InvalidIndex{ std::numeric_limits<Index>().max() };
-}
-
 enum class RendererEntity : std::uint8_t
 {
     MESH_OPAQUE,
@@ -41,8 +28,8 @@ enum class ShaderType : std::uint8_t
 {
     LINE_VERT,
     FLAT_COLOR_FRAG,
-    MESH,
-    FRAG_MESH,
+    PBR_PASS_VERT,
+    PBR_PASS_FRAG,
     COUNT
 };
 
@@ -61,74 +48,46 @@ enum class SamplerType : std::uint8_t
     COUNT
 };
 
-enum class TextureType : std::uint8_t
+// Bindless engine-global resources bound once per frame
+struct MaterialParameters
 {
-    // Metalness-Roughness
-    BASE_COLOR,
-    ROUGHNESS,
-    METALNESS,
-
-    // Specular-Glossiness
-    DIFFUSE_COLOR, // Albedo
-    SPECULAR,
-    GLOSSINESS,
-
-    AMBIENT_OCCLUSION,
-    NORMAL,
-    EMISSION,
-    HEIGHT,
-    COUNT
+    std::uint32_t flags = 0;
 };
 
-enum class MaterialProperty : std::uint8_t
+struct LightParameters
 {
-    ROUGHNESS,
-    METALNESS,
-    COUNT
+    Math::Vector3f position;
+    float intensity;
+
+    Math::Vector3f direction;
+    float range;
 };
 
-// descriptor set 0 for engine-global resources bound once pe frame
-struct BindlessMaterial
-{
-};
-
-// descriptor set 1 for engine-global resources bound once pe frame
-struct UniformBufferFrame
+// Constant engine-global resources bound once per frame
+struct FrameData
 {
     alignas(16) Math::Matrix4x4f view_projection;
+    alignas(16) Math::Vector3f viewPosition;
+    float specularIntensity;
+    alignas(16) Math::Vector4f ambientLight;
+    alignas(16) Math::Vector4f directionalLight;
+    alignas(16) Math::Vector3f directionalLightPosition;
 };
 
-// 128 bytes/Resource per draw
+struct PbrPassParameters
+{
+};
+
+// 128 bytes/resources bound once per draw
 struct PassPushConstants
 {
-    Math::Matrix4x4f model{ Math::identity<Math::Matrix4x4f>() };
-    alignas(8) VkDeviceAddress vertexBufferAddress;
-    alignas(4) Materials::Index materialIndex{ Materials::InvalidIndex };
+    Math::Matrix4x4f transform{ Math::identity<Math::Matrix4x4f>() };
+    VkDeviceAddress vertexBufferAddress;
+    Material::MaterialIndex materialIndex{ Material::INVALID_MATERIAL_INDEX };
 };
 
+static_assert(offsetof(PassPushConstants, transform) == 0);
+static_assert(offsetof(PassPushConstants, vertexBufferAddress) == 64);
+static_assert(offsetof(PassPushConstants, materialIndex) == 72);
 static_assert(sizeof(PassPushConstants) <= 128, "Push constants size limit.");
-
-// descriptor set 1 for per-pass resources, and bound once per pass
-// struct Pass
-// {
-// };
-
-// descriptor set 2 will be used for material resources
-// struct Material
-// {
-// };
-
-// 3 will be used for per-object resources
-// struct Object
-// {
-// };
-
-struct GPUSceneData
-{
-    Math::Vector4f fogColor;     // w is for exponent
-    Math::Vector4f fogDistances; // x for min, y for max, zw unused.
-    Math::Vector4f ambientColor;
-    Math::Vector4f sunlightDirection; // w for sun power
-    Math::Vector4f sunlightColor;
-};
 }
