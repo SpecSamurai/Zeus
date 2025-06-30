@@ -209,7 +209,8 @@ TEST(TransformationsTest, ReflectionY_Matrix4x4)
 
 TEST(TransformationsTest, Translation_Matrix4x4)
 {
-    auto translation = Zeus::Math::translation(Zeus::Math::Vector3<float>(1.f, 2.f, 3.f));
+    auto translation =
+        Zeus::Math::translation(Zeus::Math::Vector3<float>(1.f, 2.f, 3.f));
 
     auto sut = Zeus::Math::Matrix4x4(
         // clang-format off
@@ -238,7 +239,7 @@ TEST(TransformationsTest, Translation_Matrix4x4)
 
 TEST(TransformationsTest, Scale_Matrix4x4_Scalar)
 {
-    auto scale = Zeus::Math::scale(2.f);
+    auto scale = Zeus::Math::uniformScale(2.f);
 
     auto sut = Zeus::Math::Matrix4x4(
         // clang-format off
