@@ -1,20 +1,22 @@
 #include "CommandBuffer.hpp"
 
 #include "Buffer.hpp"
-#include "Swapchain.hpp"
 #include "VkContext.hpp"
 #include "math/definitions.hpp"
-#include "rhi/vulkan_debug.hpp"
+#include "vulkan/vulkan_debug.hpp"
+
+#include <vulkan/vulkan_core.h>
 
 #include <cassert>
 #include <cstdint>
-#include <vulkan/vulkan_core.h>
+#include <span>
+#include <string_view>
 
 namespace Zeus
 {
 CommandBuffer::CommandBuffer(
+    std::string_view name,
     const CommandPool& commandPool,
-    const char* name,
     VkCommandBufferLevel level)
     : m_commandPool{ &commandPool }
 {
@@ -37,7 +39,7 @@ CommandBuffer& CommandBuffer::operator=(CommandBuffer&& other)
         if (m_handle != VK_NULL_HANDLE)
         {
             vkFreeCommandBuffers(
-                VkContext::GetLogicalDevice(),
+                VkContext::LogicalDevice(),
                 m_commandPool->GetHandle(),
                 1,
                 &m_handle);
@@ -77,7 +79,6 @@ void CommandBuffer::Reset()
         "Failed to reset command buffer");
 }
 
-// push pipeline state
 void CommandBuffer::BindPipeline(const Pipeline& pipeline)
 {
     vkCmdBindPipeline(m_handle, pipeline.GetBindPoint(), pipeline.GetHandle());
@@ -105,7 +106,7 @@ void CommandBuffer::BeginRenderPass(
     vkCmdBeginRenderPass(m_handle, &renderPassInfo, contents);
 }
 
-void CommandBuffer::EndRenderPass()
+void CommandBuffer::EndRenderPass() const
 {
     vkCmdEndRenderPass(m_handle);
 }
@@ -118,7 +119,7 @@ void CommandBuffer::BeginRendering(
     const VkRenderingAttachmentInfo* pStencilAttachment,
     VkRenderingFlags flags,
     std::uint32_t layerCount,
-    std::uint32_t viewMask)
+    std::uint32_t viewMask) const
 {
     VkRenderingInfo renderingInfo{};
     renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
@@ -134,13 +135,12 @@ void CommandBuffer::BeginRendering(
     vkCmdBeginRendering(m_handle, &renderingInfo);
 }
 
-void CommandBuffer::EndRendering()
+void CommandBuffer::EndRendering() const
 {
     vkCmdEndRendering(m_handle);
 }
 
-// todo: combine clear methods to handle both types
-void CommandBuffer::ClearColorImage(VkImage image, const Color& color)
+void CommandBuffer::ClearColorImage(VkImage image, const Math::Color& color)
 {
     VkClearColorValue clearValue{ { color.r, color.g, color.b, color.a } };
 
@@ -213,171 +213,90 @@ void CommandBuffer::Dispatch(
     vkCmdDispatch(m_handle, groupCountX, groupCountY, groupCountZ);
 }
 
-//     const bool blit_mips);
 void CommandBuffer::CopyBuffer(
     VkBuffer srcBuffer,
     VkBuffer dstBuffer,
-    VkDeviceSize size,
-    VkDeviceSize srcOffset,
-    VkDeviceSize dstOffset) const
+    std::span<VkBufferCopy2> regions) const
 {
-    VkBufferCopy2 bufferCopy{};
-    bufferCopy.sType = VK_STRUCTURE_TYPE_BUFFER_COPY_2;
-    bufferCopy.srcOffset = srcOffset;
-    bufferCopy.dstOffset = dstOffset;
-    bufferCopy.size = size;
-
     VkCopyBufferInfo2 copyBufferInfo{};
     copyBufferInfo.sType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2;
     copyBufferInfo.pNext = nullptr;
     copyBufferInfo.srcBuffer = srcBuffer;
     copyBufferInfo.dstBuffer = dstBuffer;
-    copyBufferInfo.regionCount = 1;
-    copyBufferInfo.pRegions = &bufferCopy;
+    copyBufferInfo.regionCount = static_cast<std::uint32_t>(regions.size());
+    copyBufferInfo.pRegions = regions.data();
 
     vkCmdCopyBuffer2(m_handle, &copyBufferInfo);
 }
 
-void CommandBuffer::CopyImage(const Image& srcImage, const Image& dstImage)
-    const
+void CommandBuffer::CopyBufferToImage(
+    VkBuffer srcBuffer,
+    VkImage dstImage,
+    std::span<VkBufferImageCopy2> regions) const
 {
-    VkImageCopy2 region{};
-    region.sType = VK_STRUCTURE_TYPE_IMAGE_COPY_2;
-    region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    region.srcSubresource.mipLevel = 0;
-    region.srcSubresource.baseArrayLayer = 0;
-    region.srcSubresource.layerCount = 1;
-    region.srcOffset = {};
-    region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    region.dstSubresource.mipLevel = 0;
-    region.dstSubresource.baseArrayLayer = 0;
-    region.dstSubresource.layerCount = 1;
-    region.dstOffset = {};
-    region.extent = srcImage.GetExtent();
+    VkCopyBufferToImageInfo2 info{};
+    info.sType = VK_STRUCTURE_TYPE_COPY_BUFFER_TO_IMAGE_INFO_2;
+    info.pNext = nullptr;
+    info.srcBuffer = srcBuffer;
+    info.dstImage = dstImage;
+    info.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    info.regionCount = static_cast<std::uint32_t>(regions.size());
+    info.pRegions = regions.data();
 
-    VkCopyImageInfo2 copyImageInfo{};
-    copyImageInfo.sType = VK_STRUCTURE_TYPE_COPY_IMAGE_INFO_2;
-    copyImageInfo.srcImage = srcImage.GetHandle();
-    copyImageInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-    copyImageInfo.dstImage = dstImage.GetHandle();
-    copyImageInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    copyImageInfo.regionCount = 1;
-    copyImageInfo.pRegions = &region;
-
-    vkCmdCopyImage2(m_handle, &copyImageInfo);
+    vkCmdCopyBufferToImage2(m_handle, &info);
 }
 
-//     const bool blitMips,
-//     const float sourceScaling = 1.0f);
-void CommandBuffer::BlitImage(const Image& srcImage, const Image& dstImage)
-    const
+void CommandBuffer::CopyImage(
+    VkImage srcImage,
+    VkImage dstImage,
+    std::span<VkImageCopy2> regions) const
 {
-    assert(srcImage.GetLayout() == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-    assert(dstImage.GetLayout() == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    assert(
-        srcImage.GetWidth() <= dstImage.GetWidth() &&
-        srcImage.GetHeight() <= dstImage.GetHeight());
+    VkCopyImageInfo2 info{};
+    info.sType = VK_STRUCTURE_TYPE_COPY_IMAGE_INFO_2;
+    info.srcImage = srcImage;
+    info.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    info.dstImage = dstImage;
+    info.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    info.regionCount = static_cast<std::uint32_t>(regions.size());
+    info.pRegions = regions.data();
 
-    VkImageBlit2 blitRegion{};
-    blitRegion.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
-
-    blitRegion.srcSubresource.aspectMask = srcImage.GetAspectMask();
-    blitRegion.srcSubresource.mipLevel = 0;
-    blitRegion.srcSubresource.baseArrayLayer = 0;
-    blitRegion.srcSubresource.layerCount = 1;
-
-    blitRegion.srcOffsets[1].x = static_cast<std::int32_t>(srcImage.GetWidth());
-    blitRegion.srcOffsets[1].y =
-        static_cast<std::int32_t>(srcImage.GetHeight());
-    blitRegion.srcOffsets[1].z = static_cast<std::int32_t>(srcImage.GetDepth());
-
-    blitRegion.dstSubresource.aspectMask = dstImage.GetAspectMask();
-    blitRegion.dstSubresource.mipLevel = 0;
-    blitRegion.dstSubresource.baseArrayLayer = 0;
-    blitRegion.dstSubresource.layerCount = 1;
-
-    blitRegion.dstOffsets[1].x = static_cast<std::int32_t>(dstImage.GetWidth());
-    blitRegion.dstOffsets[1].y =
-        static_cast<std::int32_t>(dstImage.GetHeight());
-    blitRegion.dstOffsets[1].z = static_cast<std::int32_t>(dstImage.GetDepth());
-
-    VkBlitImageInfo2 blitImageInfo{};
-    blitImageInfo.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
-    blitImageInfo.srcImage = srcImage.GetHandle();
-    blitImageInfo.srcImageLayout = srcImage.GetLayout();
-    blitImageInfo.dstImage = dstImage.GetHandle();
-    blitImageInfo.dstImageLayout = dstImage.GetLayout();
-
-    blitImageInfo.regionCount = 1;
-    blitImageInfo.pRegions = &blitRegion;
-
-    // bool width_equal = source->GetWidth() == destination->GetWidth();
-    // bool height_equal = source->GetHeight() == destination->GetHeight();
-    // Filter filter = widthEqual && heightEqual ? Nearest : Linear;
-    blitImageInfo.filter = VK_FILTER_LINEAR;
-
-    vkCmdBlitImage2(m_handle, &blitImageInfo);
+    vkCmdCopyImage2(m_handle, &info);
 }
 
-void CommandBuffer::BlitImage(const Image& srcImage, const Swapchain& swapchain)
-    const
+void CommandBuffer::BlitImage(
+    VkImage srcImage,
+    VkImage dstImage,
+    std::span<VkImageBlit2> regions,
+    VkFilter filter) const
 {
-    // assert(srcImage.GetLayout() == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-    assert(swapchain.GetLayout() == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    VkBlitImageInfo2 info{};
+    info.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
+    info.srcImage = srcImage;
+    info.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    info.dstImage = dstImage;
+    info.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    info.regionCount = static_cast<std::uint32_t>(regions.size());
+    info.pRegions = regions.data();
+    info.filter = filter;
 
-    VkImageBlit2 blitRegion{};
-    blitRegion.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
-
-    blitRegion.srcSubresource.aspectMask = srcImage.GetAspectMask();
-    blitRegion.srcSubresource.mipLevel = 0;
-    blitRegion.srcSubresource.baseArrayLayer = 0;
-    blitRegion.srcSubresource.layerCount = 1;
-
-    blitRegion.srcOffsets[1].x = static_cast<std::int32_t>(srcImage.GetWidth());
-    blitRegion.srcOffsets[1].y =
-        static_cast<std::int32_t>(srcImage.GetHeight());
-    blitRegion.srcOffsets[1].z = static_cast<std::int32_t>(srcImage.GetDepth());
-
-    blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    blitRegion.dstSubresource.mipLevel = 0;
-    blitRegion.dstSubresource.baseArrayLayer = 0;
-    blitRegion.dstSubresource.layerCount = 1;
-
-    blitRegion.dstOffsets[1].x =
-        static_cast<std::int32_t>(swapchain.GetWidth());
-    blitRegion.dstOffsets[1].y =
-        static_cast<std::int32_t>(swapchain.GetHeight());
-    blitRegion.dstOffsets[1].z = 1;
-
-    VkBlitImageInfo2 blitImageInfo{};
-    blitImageInfo.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
-    blitImageInfo.srcImage = srcImage.GetHandle();
-    blitImageInfo.srcImageLayout =
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL; // srcImage.GetLayout();
-    blitImageInfo.dstImage = swapchain.GetImage();
-    blitImageInfo.dstImageLayout =
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL; // swapchain.GetLayout();
-
-    blitImageInfo.regionCount = 1;
-    blitImageInfo.pRegions = &blitRegion;
-    blitImageInfo.filter = VK_FILTER_LINEAR;
-
-    vkCmdBlitImage2(m_handle, &blitImageInfo);
+    vkCmdBlitImage2(m_handle, &info);
 }
 
 void CommandBuffer::BindDescriptorSets(
     VkDescriptorSet descriptorSet,
-    const Pipeline& pipeline) const
+    const Pipeline& pipeline,
+    std::uint32_t firstSet,
+    std::span<std::uint32_t> dynamicOffsets) const
 {
     vkCmdBindDescriptorSets(
         m_handle,
         pipeline.GetBindPoint(),
         pipeline.GetLayout(),
-        0,
+        firstSet,
         1,
         &descriptorSet,
-        0,
-        nullptr);
+        static_cast<std::uint32_t>(dynamicOffsets.size()),
+        dynamicOffsets.data());
 }
 
 void CommandBuffer::BindVertexBuffers(const Buffer& buffer) const
@@ -500,6 +419,65 @@ void CommandBuffer::TransitionImageLayout(
     vkCmdPipelineBarrier2(m_handle, &dependencyInfo);
 }
 
+void CommandBuffer::TransitionImageLayout(
+    VkImage image,
+    VkFormat format,
+    VkPipelineStageFlags2 srcStageMask,
+    VkAccessFlags2 srcAccessMask,
+    VkPipelineStageFlags2 dstStageMask,
+    VkAccessFlags2 dstAccessMask,
+    VkImageLayout currentLayout,
+    VkImageLayout newLayout) const
+{
+    VkImageMemoryBarrier2 imageMemoryBarrier{};
+    imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+    imageMemoryBarrier.pNext = nullptr;
+
+    imageMemoryBarrier.srcStageMask = srcStageMask;
+    imageMemoryBarrier.srcAccessMask = srcAccessMask;
+    imageMemoryBarrier.dstStageMask = dstStageMask;
+    imageMemoryBarrier.dstAccessMask = dstAccessMask;
+
+    imageMemoryBarrier.oldLayout = currentLayout;
+    imageMemoryBarrier.newLayout = newLayout;
+
+    imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+    imageMemoryBarrier.image = image;
+
+    VkImageAspectFlags aspectMask;
+    if (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL ||
+        newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+    {
+        aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+        if (vkuFormatIsDepthAndStencil(format))
+        {
+            aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+        }
+    }
+    else
+    {
+        aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    }
+
+    imageMemoryBarrier.subresourceRange.aspectMask = aspectMask;
+    imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
+    imageMemoryBarrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+    imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
+    imageMemoryBarrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+    VkDependencyInfo dependencyInfo{};
+    dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+    dependencyInfo.pNext = nullptr;
+
+    dependencyInfo.imageMemoryBarrierCount = 1;
+    dependencyInfo.pImageMemoryBarriers = &imageMemoryBarrier;
+
+    vkCmdPipelineBarrier2(m_handle, &dependencyInfo);
+}
+
 void CommandBuffer::SetViewport(const VkViewport& viewport) const
 {
     assert(viewport.width != 0);
@@ -521,14 +499,16 @@ void CommandBuffer::SetCullMode(VkCullModeFlags cullMode) const
     vkCmdSetCullMode(m_handle, cullMode);
 }
 
-void CommandBuffer::BeginDebugLabel(const char* pLabelName, const Color& color)
-    const
+void CommandBuffer::BeginDebugLabel(
+    const char* pLabelName,
+    const Math::Color& color) const
 {
     cmdBeginDebugUtilsLabelEXT(m_handle, pLabelName, color);
 }
 
-void CommandBuffer::InsertDebugLabel(const char* pLabelName, const Color& color)
-    const
+void CommandBuffer::InsertDebugLabel(
+    const char* pLabelName,
+    const Math::Color& color) const
 {
     cmdInsertDebugUtilsLabelEXT(m_handle, pLabelName, color);
 }
