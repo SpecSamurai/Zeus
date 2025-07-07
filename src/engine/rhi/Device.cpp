@@ -170,8 +170,8 @@ void Device::Initialize(VkInstance instance, VkSurfaceKHR surface)
         VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
     m_ImmediateSubmitCommandBuffer = CommandBuffer(
-        m_ImmediateSubmitCommandPool,
-        "CommandBuffer_ImmediateSubmit");
+        "CommandBuffer_ImmediateSubmit",
+        m_ImmediateSubmitCommandPool);
 
     m_ImmediateSubmitFence = Fence("Fence_ImmediateSubmit", true);
 }
@@ -203,14 +203,24 @@ void Device::WaitAll() const
 void Device::CmdImmediateSubmit(
     std::function<void(const CommandBuffer& cmd)>&& function)
 {
+    BeginImmediateCmdBuffer();
+    function(m_ImmediateSubmitCommandBuffer);
+    SubmitImmediateCmdBuffer();
+}
+
+const CommandBuffer& Device::BeginImmediateCmdBuffer()
+{
     m_ImmediateSubmitFence.Reset();
     m_ImmediateSubmitCommandBuffer.Reset();
 
     m_ImmediateSubmitCommandBuffer.Begin(
         VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-    function(m_ImmediateSubmitCommandBuffer);
+    return m_ImmediateSubmitCommandBuffer;
+}
 
+void Device::SubmitImmediateCmdBuffer()
+{
     m_ImmediateSubmitCommandBuffer.End();
 
     VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(

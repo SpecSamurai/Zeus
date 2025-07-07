@@ -30,6 +30,9 @@ public:
     void CmdImmediateSubmit(
         std::function<void(const CommandBuffer& cmd)>&& function);
 
+    const CommandBuffer& BeginImmediateCmdBuffer();
+    void SubmitImmediateCmdBuffer();
+
     const Queue& GetQueue(QueueType type) const;
 
     DeviceMemoryBudget GetMemoryBudget() const;
