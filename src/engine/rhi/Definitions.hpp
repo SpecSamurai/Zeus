@@ -38,6 +38,7 @@ enum class ImageType : std::uint8_t
 {
     Cube,
     Texture2D,
+    Texture2DArray,
     Texture3D,
 };
 
