@@ -3,6 +3,7 @@
 #include "Definitions.hpp"
 #include "VkContext.hpp"
 #include "logging/logger.hpp"
+#include "rhi/CommandBuffer.hpp"
 #include "vulkan/vulkan_command.hpp"
 #include "vulkan/vulkan_debug.hpp"
 #include "vulkan/vulkan_device.hpp"
@@ -292,7 +293,7 @@ void Swapchain::Destroy()
 
 void Swapchain::Present(VkCommandBuffer commandBuffer)
 {
-    assert(m_layouts[m_imageIndex] == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    assert(GetLayout() == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
     VkCommandBufferSubmitInfo submitInfo{ createVkCommandBufferSubmitInfo(
         commandBuffer) };
@@ -409,6 +410,39 @@ void Swapchain::Resize(std::uint32_t width, std::uint32_t height)
     m_resizeRequired = false;
 }
 
+void Swapchain::BlitToSwapchain(
+    const CommandBuffer& commandBuffer,
+    const Image& image)
+{
+    assert(image.GetLayout() == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+    VkImageBlit2 region{};
+    region.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
+
+    region.srcSubresource.aspectMask = image.GetAspectMask();
+    region.srcSubresource.mipLevel = 0;
+    region.srcSubresource.baseArrayLayer = 0;
+    region.srcSubresource.layerCount = 1;
+
+    region.srcOffsets[1].x = static_cast<std::int32_t>(image.GetWidth());
+    region.srcOffsets[1].y = static_cast<std::int32_t>(image.GetHeight());
+    region.srcOffsets[1].z = static_cast<std::int32_t>(image.GetDepth());
+
+    region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.dstSubresource.mipLevel = 0;
+    region.dstSubresource.baseArrayLayer = 0;
+    region.dstSubresource.layerCount = 1;
+
+    region.dstOffsets[1].x = static_cast<std::int32_t>(GetWidth());
+    region.dstOffsets[1].y = static_cast<std::int32_t>(GetHeight());
+    region.dstOffsets[1].z = 1;
+
+    SetLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+    VkImageBlit2 regions[1]{ region };
+    commandBuffer.BlitImage(image.GetHandle(), GetImage(), regions);
+}
+
 void Swapchain::SetVsync(const bool enable)
 {
     // VK_PRESENT_MODE_IMMEDIATE_KHR
@@ -510,17 +544,6 @@ void Swapchain::SetLayout(
 
     commandBuffer
         .TransitionImageLayout(GetImage(), GetFormat(), GetLayout(), layout);
-
-    // commandBuffer.InsertImageLayoutBarrier(layout);
-    // commandBuffer.InsertBarrierTexture(
-    //     m_rhi_rt[m_image_index],
-    //     VK_IMAGE_ASPECT_COLOR_BIT,
-    //     0,
-    //     1,
-    //     1,
-    //     m_layouts[m_image_index],
-    //     layout,
-    //     false);
 
     m_layouts[m_imageIndex] = layout;
 }

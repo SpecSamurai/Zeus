@@ -3,6 +3,7 @@
 #include "CommandBuffer.hpp"
 #include "Fence.hpp"
 #include "Semaphore.hpp"
+#include "rhi/Image.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -46,6 +47,10 @@ public:
     void AcquireNextImage();
 
     void Resize(std::uint32_t width, std::uint32_t height);
+
+    void BlitToSwapchain(
+        const CommandBuffer& commandBuffer,
+        const Image& image);
 
     void SetVsync(const bool enable);
     bool IsVSync() const;
