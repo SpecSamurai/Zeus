@@ -1,9 +1,7 @@
 #include "Pipeline.hpp"
 
-#include "Definitions.hpp"
-#include "DeletionQueue.hpp"
 #include "VkContext.hpp"
-#include "rhi/vulkan_debug.hpp"
+#include "vulkan/vulkan_debug.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -18,12 +16,26 @@
 namespace Zeus
 {
 Pipeline::Pipeline(
-    const PipelineState& pipelineState,
-    const std::vector<DescriptorSetLayout*>& descriptorSetLayouts,
-    const std::vector<PushConstants>& pushConstants,
-    std::string_view name)
-    : m_state{ pipelineState },
-      m_name{ name }
+    std::string_view name,
+    const RasterizationState& rasterizationState,
+    const DepthStencilState& depthStencilState,
+    const BlendState& blendState,
+    VkPrimitiveTopology primitiveTopology,
+    std::vector<const Shader*> shaders,
+    const std::vector<const DescriptorSetLayout*>& descriptorSetLayouts,
+    const std::vector<VkPushConstantRange>& pushConstants,
+    const std::vector<VkFormat>& colorAttachmentFormats,
+    VkFormat depthAttachmentFormat,
+    VkFormat stencilAttachmentFormat)
+    : m_name{ name },
+      m_shaders{ shaders },
+      m_rasterizationState{ rasterizationState },
+      m_depthStencilState{ depthStencilState },
+      m_blendState{ blendState },
+      m_colorAttachmentFormats{ colorAttachmentFormats },
+      m_depthAttachmentFormat{ depthAttachmentFormat },
+      m_stencilAttachmentFormat{ stencilAttachmentFormat },
+      m_primitiveTopology{ primitiveTopology }
 {
     std::vector<VkDescriptorSetLayout> layouts(descriptorSetLayouts.size());
     for (std::uint32_t i{ 0 }; i < descriptorSetLayouts.size(); ++i)
@@ -31,37 +43,27 @@ Pipeline::Pipeline(
         layouts[i] = descriptorSetLayouts[i]->GetHandle();
     }
 
-    std::vector<VkPushConstantRange> pushConstantRanges(pushConstants.size());
-    for (std::uint32_t i{ 0 }; i < pushConstants.size(); ++i)
-    {
-        pushConstantRanges[i] = VkPushConstantRange{
-            .stageFlags = pushConstants[i].GetStageFlags(),
-            .offset = pushConstants[i].GetOffset(),
-            .size = pushConstants[i].GetSize(),
-        };
-    }
-
     VkPipelineLayoutCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     createInfo.setLayoutCount = static_cast<std::uint32_t>(layouts.size());
     createInfo.pSetLayouts = layouts.data();
     createInfo.pushConstantRangeCount =
-        static_cast<std::uint32_t>(pushConstantRanges.size());
-    createInfo.pPushConstantRanges = pushConstantRanges.data();
+        static_cast<std::uint32_t>(pushConstants.size());
+    createInfo.pPushConstantRanges = pushConstants.data();
 
     VKCHECK(
         vkCreatePipelineLayout(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             &createInfo,
             allocationCallbacks.get(),
             &m_pipelineLayout),
         "Failed to create pipeline layout.");
 
-    if (m_state.IsGraphics())
+    if (IsGraphics())
     {
         CreateGraphicsPipeline();
     }
-    else if (m_state.IsCompute())
+    else if (IsCompute())
     {
         CreateComputePipeline();
     }
@@ -76,9 +78,16 @@ Pipeline::Pipeline(
 Pipeline::Pipeline(Pipeline&& other) noexcept
     : m_handle{ other.m_handle },
       m_pipelineLayout{ other.m_pipelineLayout },
-      m_state{ other.m_state },
-      m_name{ std::move(other.m_name) },
-      m_bindPoint{ other.m_bindPoint }
+      m_shaders{ std::move(other.m_shaders) },
+      m_bindPoint{ other.m_bindPoint },
+      m_rasterizationState{ other.m_rasterizationState },
+      m_depthStencilState{ other.m_depthStencilState },
+      m_blendState{ other.m_blendState },
+      m_colorAttachmentFormats{ std::move(other.m_colorAttachmentFormats) },
+      m_depthAttachmentFormat{ other.m_depthAttachmentFormat },
+      m_stencilAttachmentFormat{ other.m_stencilAttachmentFormat },
+      m_primitiveTopology{ other.m_primitiveTopology },
+      m_instancing{ other.m_instancing }
 {
     other.m_handle = VK_NULL_HANDLE;
     other.m_pipelineLayout = VK_NULL_HANDLE;
@@ -95,9 +104,17 @@ Pipeline& Pipeline::operator=(Pipeline&& other)
 
         m_handle = other.m_handle;
         m_pipelineLayout = other.m_pipelineLayout;
-        // m_state = other.m_state;
-        m_name = std::move(other.m_name);
+        m_shaders = std::move(other.m_shaders);
+        m_name = other.m_name;
         m_bindPoint = other.m_bindPoint;
+        m_rasterizationState = other.m_rasterizationState;
+        m_depthStencilState = other.m_depthStencilState;
+        m_blendState = other.m_blendState;
+        m_colorAttachmentFormats = std::move(other.m_colorAttachmentFormats);
+        m_depthAttachmentFormat = other.m_depthAttachmentFormat;
+        m_stencilAttachmentFormat = other.m_stencilAttachmentFormat;
+        m_primitiveTopology = other.m_primitiveTopology;
+        m_instancing = other.m_instancing;
 
         other.m_handle = VK_NULL_HANDLE;
         other.m_pipelineLayout = VK_NULL_HANDLE;
@@ -110,13 +127,13 @@ Pipeline::~Pipeline()
 {
     if (m_handle != VK_NULL_HANDLE)
     {
-        VkContext::GetDeletionQueue().Add(ResourceType::Pipeline, m_handle);
+        VkContext::DeletionQueue().Add(ResourceType::Pipeline, m_handle);
         m_handle = VK_NULL_HANDLE;
     }
 
     if (m_pipelineLayout != VK_NULL_HANDLE)
     {
-        VkContext::GetDeletionQueue().Add(
+        VkContext::DeletionQueue().Add(
             ResourceType::PipelineLayout,
             m_pipelineLayout);
         m_pipelineLayout = VK_NULL_HANDLE;
@@ -126,13 +143,13 @@ Pipeline::~Pipeline()
 void Pipeline::Destroy()
 {
     vkDestroyPipeline(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_handle,
         allocationCallbacks.get());
     m_handle = VK_NULL_HANDLE;
 
     vkDestroyPipelineLayout(
-        VkContext::GetLogicalDevice(),
+        VkContext::LogicalDevice(),
         m_pipelineLayout,
         allocationCallbacks.get());
     m_pipelineLayout = VK_NULL_HANDLE;
@@ -148,11 +165,6 @@ VkPipelineLayout Pipeline::GetLayout() const
     return m_pipelineLayout;
 }
 
-const PipelineState& Pipeline::GetState() const
-{
-    return m_state;
-}
-
 std::string_view Pipeline::GetName() const
 {
     return m_name;
@@ -163,25 +175,46 @@ VkPipelineBindPoint Pipeline::GetBindPoint() const
     return m_bindPoint;
 }
 
+bool Pipeline::IsGraphics() const
+{
+    return m_shaders.size() >= 2;
+}
+
+bool Pipeline::IsCompute() const
+{
+    return m_shaders.size() == 1 &&
+           m_shaders.front()->GetShaderStage() == VK_SHADER_STAGE_COMPUTE_BIT;
+}
+
+bool Pipeline::HasTessellation() const
+{
+    return false;
+}
+
+const std::vector<const Shader*>& Pipeline::GetShaders() const
+{
+    return m_shaders;
+}
+
 void Pipeline::CreateGraphicsPipeline()
 {
-    assert(m_state.IsGraphics());
+    assert(IsGraphics());
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages{};
     std::vector<VkVertexInputBindingDescription> inputBindings{};
     std::vector<VkVertexInputAttributeDescription> inputAttributes{};
 
-    for (const auto& shader : m_state.GetShaders())
+    for (const auto& shader : m_shaders)
     {
         shaderStages.emplace_back(CreatePipelineShaderStageInfo(
-            shader.GetShaderStage(),
-            shader.GetHandle(),
-            shader.GetEntryPoint()));
+            shader->GetShaderStage(),
+            shader->GetHandle(),
+            shader->GetEntryPoint()));
 
-        if (shader.GetShaderStage() == VK_SHADER_STAGE_VERTEX_BIT)
+        if (shader->GetShaderStage() == VK_SHADER_STAGE_VERTEX_BIT)
         {
-            inputBindings.reserve(shader.GetVertexInputs().size());
-            for (const auto& input : shader.GetVertexInputs())
+            inputBindings.reserve(shader->GetVertexInputs().size());
+            for (const auto& input : shader->GetVertexInputs())
             {
                 inputBindings.emplace_back(VkVertexInputBindingDescription{
                     .binding = input.GetBinding(),
@@ -217,26 +250,27 @@ void Pipeline::CreateGraphicsPipeline()
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState{};
     inputAssemblyState.sType =
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssemblyState.topology = m_state.GetPrimitiveTopology();
+    inputAssemblyState.topology = m_primitiveTopology;
     inputAssemblyState.primitiveRestartEnable = VK_FALSE;
 
-    const auto& rasterState{ m_state.GetRasterizationState() };
     VkPipelineRasterizationStateCreateInfo rasterizationState{};
     rasterizationState.sType =
         VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizationState.depthClampEnable = rasterState.GetDepthClampEnable();
+    rasterizationState.depthClampEnable =
+        m_rasterizationState.GetDepthClampEnable();
     rasterizationState.rasterizerDiscardEnable = VK_FALSE;
-    rasterizationState.polygonMode = rasterState.GetPolygonMode();
-    rasterizationState.cullMode = rasterState.GetCullMode();
-    rasterizationState.frontFace = rasterState.GetFrontFace();
+    rasterizationState.polygonMode = m_rasterizationState.GetPolygonMode();
+    rasterizationState.cullMode = m_rasterizationState.GetCullMode();
+    rasterizationState.frontFace = m_rasterizationState.GetFrontFace();
     rasterizationState.depthBiasEnable =
-        rasterState.GetDepthBiasClamp() != 0.f ? VK_TRUE : VK_FALSE;
+        m_rasterizationState.GetDepthBiasClamp() != 0.f ? VK_TRUE : VK_FALSE;
     rasterizationState.depthBiasConstantFactor =
-        rasterState.GetDepthBiasConstantFactor();
-    rasterizationState.depthBiasClamp = rasterState.GetDepthBiasClamp();
+        m_rasterizationState.GetDepthBiasConstantFactor();
+    rasterizationState.depthBiasClamp =
+        m_rasterizationState.GetDepthBiasClamp();
     rasterizationState.depthBiasSlopeFactor =
-        rasterState.GetDepthBiasSlopeFactor();
-    rasterizationState.lineWidth = rasterState.GetLineWidth();
+        m_rasterizationState.GetDepthBiasSlopeFactor();
+    rasterizationState.lineWidth = m_rasterizationState.GetLineWidth();
 
     std::array<VkDynamicState, 2> dynamicStates{
         VK_DYNAMIC_STATE_SCISSOR,
@@ -273,35 +307,36 @@ void Pipeline::CreateGraphicsPipeline()
     // .alphaToCoverageEnable = VK_FALSE,
     // .alphaToOneEnable = VK_FALSE,
 
-    const auto& depthStencil{ m_state.GetDepthStencilState() };
     VkPipelineDepthStencilStateCreateInfo depthStencilState{};
     depthStencilState.sType =
         VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencilState.depthTestEnable = depthStencil.GetDepthTestEnable();
-    depthStencilState.depthWriteEnable = depthStencil.GetDepthWriteEnable();
-    depthStencilState.depthCompareOp = depthStencil.GetDepthCompareOp();
+    depthStencilState.depthTestEnable =
+        m_depthStencilState.GetDepthTestEnable();
+    depthStencilState.depthWriteEnable =
+        m_depthStencilState.GetDepthWriteEnable();
+    depthStencilState.depthCompareOp = m_depthStencilState.GetDepthCompareOp();
     depthStencilState.depthBoundsTestEnable =
-        depthStencil.GetDepthBoundsTestEnable();
-    depthStencilState.stencilTestEnable = depthStencil.GetStencilTestEnable();
+        m_depthStencilState.GetDepthBoundsTestEnable();
+    depthStencilState.stencilTestEnable =
+        m_depthStencilState.GetStencilTestEnable();
     depthStencilState.front = {};
     depthStencilState.back = {};
     depthStencilState.minDepthBounds = 0.f;
     depthStencilState.maxDepthBounds = 1.f;
 
-    const auto& blendState{ m_state.GetBlendState() };
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.blendEnable = blendState.GetBlendEnable();
+    colorBlendAttachment.blendEnable = m_blendState.GetBlendEnable();
     colorBlendAttachment.srcColorBlendFactor =
-        blendState.GetSrcColorBlendFactor();
+        m_blendState.GetSrcColorBlendFactor();
     colorBlendAttachment.dstColorBlendFactor =
-        blendState.GetDstColorBlendFactor();
-    colorBlendAttachment.colorBlendOp = blendState.GetColorBlendOp();
+        m_blendState.GetDstColorBlendFactor();
+    colorBlendAttachment.colorBlendOp = m_blendState.GetColorBlendOp();
     colorBlendAttachment.srcAlphaBlendFactor =
-        blendState.GetSrcAlphaBlendFactor();
+        m_blendState.GetSrcAlphaBlendFactor();
     colorBlendAttachment.dstAlphaBlendFactor =
-        blendState.GetDstAlphaBlendFactor();
-    colorBlendAttachment.alphaBlendOp = blendState.GetAlphaBlendOp();
-    colorBlendAttachment.colorWriteMask = blendState.GetColorWriteMask();
+        m_blendState.GetDstAlphaBlendFactor();
+    colorBlendAttachment.alphaBlendOp = m_blendState.GetAlphaBlendOp();
+    colorBlendAttachment.colorWriteMask = m_blendState.GetColorWriteMask();
 
     VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo{};
     colorBlendStateCreateInfo.sType =
@@ -315,17 +350,14 @@ void Pipeline::CreateGraphicsPipeline()
     colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
     colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-    const auto& colorAttachmentFormats{ m_state.GetColorAttachmentFormats() };
     VkPipelineRenderingCreateInfo pipelineRendering{};
     pipelineRendering.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
     pipelineRendering.viewMask = 0;
     pipelineRendering.colorAttachmentCount =
-        static_cast<std::uint32_t>(colorAttachmentFormats.size());
-    pipelineRendering.pColorAttachmentFormats = colorAttachmentFormats.data();
-    pipelineRendering.depthAttachmentFormat =
-        m_state.GetDepthAttachmentFormat();
-    pipelineRendering.stencilAttachmentFormat =
-        m_state.GetStencilAttachmentFormat();
+        static_cast<std::uint32_t>(m_colorAttachmentFormats.size());
+    pipelineRendering.pColorAttachmentFormats = m_colorAttachmentFormats.data();
+    pipelineRendering.depthAttachmentFormat = m_depthAttachmentFormat;
+    pipelineRendering.stencilAttachmentFormat = m_stencilAttachmentFormat;
 
     VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
     pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -351,7 +383,7 @@ void Pipeline::CreateGraphicsPipeline()
 
     VKCHECK(
         vkCreateGraphicsPipelines(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             VK_NULL_HANDLE,
             1,
             &pipelineCreateInfo,
@@ -364,15 +396,15 @@ void Pipeline::CreateGraphicsPipeline()
 
 void Pipeline::CreateComputePipeline()
 {
-    assert(m_state.IsCompute());
+    assert(IsCompute());
 
-    const auto& shader{ m_state.GetShaders().front() };
+    const auto& shader{ m_shaders.front() };
 
     VkPipelineShaderStageCreateInfo stageCreateInfo{
         CreatePipelineShaderStageInfo(
-            shader.GetShaderStage(),
-            shader.GetHandle(),
-            shader.GetEntryPoint())
+            shader->GetShaderStage(),
+            shader->GetHandle(),
+            shader->GetEntryPoint())
     };
 
     VkComputePipelineCreateInfo createInfo{};
@@ -385,7 +417,7 @@ void Pipeline::CreateComputePipeline()
 
     VKCHECK(
         vkCreateComputePipelines(
-            VkContext::GetLogicalDevice(),
+            VkContext::LogicalDevice(),
             VK_NULL_HANDLE,
             1,
             &createInfo,
