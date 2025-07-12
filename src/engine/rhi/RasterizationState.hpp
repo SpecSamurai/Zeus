@@ -9,8 +9,8 @@ class RasterizationState
 public:
     RasterizationState(
         VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL,
-        VkCullModeFlags cullMode = VK_CULL_MODE_NONE,
-        VkFrontFace frontFace = VK_FRONT_FACE_CLOCKWISE,
+        VkCullModeFlags cullMode = VK_CULL_MODE_BACK_BIT,
+        VkFrontFace frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
         VkBool32 depthClampEnable = VK_FALSE,
         VkBool32 depthBiasEnable = VK_FALSE,
         float depthBiasConstantFactor = 0.f,
